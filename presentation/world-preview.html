@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bellwood Preview</title>
+<style>
+  :root { --panel: rgba(255, 252, 242, 0.92); --ink: #2a1b22; --line: #d9b884; --accent: #3aa287; }
+  html, body { margin: 0; height: 100%; background: #fff8e6; color: var(--ink); font: 12px/1.35 ui-monospace, Menlo, monospace; }
+  canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; cursor: grab; image-rendering: pixelated; }
+  canvas#view.drag { cursor: grabbing; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 250px; max-height: calc(100vh - 20px); overflow: auto; background: var(--panel);
+    border: 2px solid var(--line); border-radius: 6px; padding: 8px 10px; box-sizing: border-box; }
+  #panel.min > :not(header) { display: none; }
+  header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 4px; }
+  fieldset { border: 0; border-top: 1px solid var(--line); margin: 6px 0 0; padding: 6px 0 0; }
+  legend { padding: 0 4px 0 0; font-weight: 700; }
+  label { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 3px; }
+  button { font: inherit; font-size: 11px; padding: 2px 5px; border: 1px solid var(--line); background: #fffcf2; border-radius: 3px; cursor: pointer; color: var(--ink); }
+  button:hover { background: #fff0d4; }
+  output { min-width: 34px; text-align: right; }
+  #stats { color: #65627f; margin-top: 6px; }
+</style>
+</head>
+<body>
+<canvas id="view" aria-label="Bellwood village preview"></canvas>
+<div id="panel">
+  <header><span>Bellwood</span><button id="min" type="button">hide</button></header>
+  <fieldset><legend>Camera</legend>
+    <div class="row" id="presets"></div>
+    <label>x <input id="camx" type="range" min="0" max="720" value="360"></label>
+    <label>y <input id="camy" type="range" min="0" max="560" value="300"></label>
+    <label><input id="overview" type="checkbox"> whole map</label>
+  </fieldset>
+  <fieldset><legend>State</legend>
+    <label>tod <input id="tod" type="range" min="0" max="2" step="0.01" value="0"><output id="todv">0</output></label>
+    <label>shop <input id="shop" type="range" min="0" max="1" step="0.01" value="1"><output id="shopv">1</output></label>
+    <label>windows <input id="windows" type="range" min="0" max="1" step="0.01" value="0"><output id="winv">0</output></label>
+    <div class="row" id="lanterns"></div>
+    <label><input id="still" type="checkbox"> still</label>
+    <label><input id="actors" type="checkbox" checked> walkers</label>
+    <label><input id="debug" type="checkbox"> show paths</label>
+  </fieldset>
+  <div id="stats"></div>
+</div>
+<script src="px.js"></script>
+<script src="world.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const t0 = performance.now();
+const scene = WORLD.createVillage();
+const buildMs = performance.now() - t0;
+const view = $('view');
+const stage = new PX.Stage(view);
+const state = { tod: 0, shop: 1, windows: 0, still: false, lanterns: [1, 1, 1, 1, 1, 1, 1] };
+const cam = { x: 360, y: 300 };
+let overview = false, showPaths = false, showActors = true, fixedT = null;
+
+// Presets for every anchor.
+for (const [name, [x, y]] of Object.entries(scene.anchors)) {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = name;
+  b.onclick = () => setCam(x, y); $('presets').append(b);
+}
+state.lanterns.forEach((_, i) => {
+  const l = document.createElement('label'); l.innerHTML = `<input type="checkbox" checked data-i="${i}">${i + 1}`;
+  l.querySelector('input').onchange = e => { state.lanterns[i] = e.target.checked ? 1 : 0; };
+  $('lanterns').append(l);
+});
+function setCam(x, y) { cam.x = x; cam.y = y; $('camx').value = x; $('camy').value = y; }
+$('camx').oninput = e => { cam.x = +e.target.value; };
+$('camy').oninput = e => { cam.y = +e.target.value; };
+$('tod').oninput = e => { state.tod = +e.target.value; $('todv').value = state.tod.toFixed(2); };
+$('shop').oninput = e => { state.shop = +e.target.value; $('shopv').value = state.shop.toFixed(2); };
+$('windows').oninput = e => { state.windows = +e.target.value; $('winv').value = state.windows.toFixed(2); };
+$('still').onchange = e => { state.still = e.target.checked; };
+$('actors').onchange = e => { showActors = e.target.checked; };
+$('debug').onchange = e => { showPaths = e.target.checked; };
+$('overview').onchange = e => setOverview(e.target.checked);
+$('min').onclick = () => { $('panel').classList.toggle('min'); $('min').textContent = $('panel').classList.contains('min') ? 'show' : 'hide'; };
+function setOverview(on) { // whole map: the largest integer scale at which all of it fits
+  overview = on; stage.area = 340 * 190; stage.resize();
+  if (on) { const S = Math.max(1, Math.floor(Math.min(view.width / scene.w, view.height / scene.h))); stage.area = (view.width * view.height) / (S * S); stage.resize(); }
+  $('overview').checked = on;
+}
+
+// Drag to pan (in art pixels).
+let drag = null;
+view.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY, cam.x, cam.y]; view.classList.add('drag'); view.setPointerCapture(e.pointerId); });
+view.addEventListener('pointermove', e => {
+  if (!drag) return; const k = stage.dpr / stage.S;
+  setCam(Math.round(drag[2] - (e.clientX - drag[0]) * k), Math.round(drag[3] - (e.clientY - drag[1]) * k));
+});
+view.addEventListener('pointerup', () => { drag = null; view.classList.remove('drag'); });
+addEventListener('resize', () => stage.resize());
+
+// Placeholder walkers: 12x22 capsules with a shadow, ping-ponging along the scene paths at 18 px/s.
+const COLORS = ['#f27a4a', '#6a7fd6', '#4fb34f', '#ff6f8f', '#f7cf6a', '#3aa287'];
+function capsule(ctx, x, y, c) {
+  ctx.fillStyle = PX.PAL.shadow; PX.ellipse(ctx, x, y, 6, 2, PX.PAL.shadow);
+  const l = x - 6, top = y - 22;
+  ctx.fillStyle = PX.PAL.ink; ctx.fillRect(l + 2, top - 1, 8, 1); ctx.fillRect(l + 2, y, 8, 1); ctx.fillRect(l - 1, top + 2, 1, 18); ctx.fillRect(l + 12, top + 2, 1, 18);
+  ctx.fillRect(l, top, 2, 2); ctx.fillRect(l + 10, top, 2, 2); ctx.fillRect(l, y - 2, 2, 2); ctx.fillRect(l + 10, y - 2, 2, 2);
+  ctx.fillStyle = c; ctx.fillRect(l + 2, top, 8, 22); ctx.fillRect(l, top + 2, 12, 18);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(l + 2, top + 2, 2, 8);
+}
+function walkerOn(path, speed, offset) {
+  const seg = []; let len = 0;
+  for (let i = 1; i < path.length; i++) { const l = Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]); seg.push(l); len += l; }
+  return t => {
+    let s = (t * speed + offset * len) % (2 * len); if (s > len) s = 2 * len - s;
+    for (let i = 0; i < seg.length; i++) { if (s <= seg[i]) { const a = path[i], b = path[i + 1], f = s / seg[i]; return [Math.round(a[0] + (b[0] - a[0]) * f), Math.round(a[1] + (b[1] - a[1]) * f)]; } s -= seg[i]; }
+    return path[path.length - 1];
+  };
+}
+const walkers = Object.entries(scene.paths).map(([name, p], i) => ({ name, at: walkerOn(p, 18, i * 0.23), c: COLORS[i % COLORS.length] }));
+walkers.push({ name: 'plaza2', at: walkerOn(scene.paths.plaza, 14, 0.5), c: '#c3a2ff' });
+walkers.push({ name: 'arrival2', at: walkerOn(scene.paths.arrival, 22, 0.6), c: '#ffa94d' });
+
+function drawPaths(ctx) {
+  for (const p of Object.values(scene.paths)) for (let i = 1; i < p.length; i++) PX.line(ctx, p[i - 1][0], p[i - 1][1], p[i][0], p[i][1], '#ff2fa0');
+  for (const [, [x, y]] of Object.entries(scene.anchors)) { ctx.fillStyle = '#ff2fa0'; ctx.fillRect(x - 2, y, 5, 1); ctx.fillRect(x, y - 2, 1, 5); }
+}
+let frames = 0, acc = 0, shown = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const t = fixedT ?? Math.max(0, (now - t0) / 1000);
+  const actors = showActors ? walkers.map(w => { const [x, y] = w.at(state.still ? 3 : t); return { x, y, draw: ctx => capsule(ctx, x, y, w.c) }; }) : [];
+  const a = performance.now();
+  const c = overview ? { x: scene.w / 2, y: scene.h / 2 } : cam;
+  const v = stage.render(scene, c, t, state, actors);
+  if (showPaths) { stage.bx.setTransform(1, 0, 0, 1, -v.x, -v.y); drawPaths(stage.bx); stage.ctx.drawImage(stage.buf, 0, 0, v.w * stage.S, v.h * stage.S); }
+  acc += performance.now() - a; frames++;
+  if (now - shown > 500) { $('stats').textContent = `build ${buildMs.toFixed(0)} ms, draw ${(acc / frames).toFixed(2)} ms, view ${v.w}x${v.h} @${stage.S}x`; acc = 0; frames = 0; shown = now; }
+}
+requestAnimationFrame(frame);
+// Scriptable hooks for screenshots.
+window.preview = {
+  scene, stage, state, cam: setCam, setOverview,
+  set(s) { Object.assign(state, s); $('tod').value = state.tod; $('shop').value = state.shop; $('windows').value = state.windows; $('still').checked = state.still; },
+  freeze(t) { fixedT = t; }, paths(on) { showPaths = on; $('debug').checked = on; }, walkers(on) { showActors = on; $('actors').checked = on; },
+  panel(on) { $('panel').style.display = on ? '' : 'none'; },
+};
+</script>
+</body>
+</html>

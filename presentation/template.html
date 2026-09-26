@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Shop That Opens Once</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABZElEQVR4AdyWMU4DQQxFDdeggpKU1PQUNByBE1AicQAkSk5CQ5E6SptyUiZpcoTUyVrKl1Y/Y9me0TaJ9GWNx2M/jza7vpXG3+Pdw3GsxjTSDNBakM+lAdD1er+5GQt+LuCt0wBewux+GgBdo2NY+CcHyBbw4sM3gE5hOTH8sLxvrcMAVoJevwuAjkr5lbFW/y9S09/PvahwzgN0AbwEvfsmAHcwm33IWE+vc6np7XMrqiiYCRBN0BtnAvD/upTv4RkYtFtKqem8DyA+Dz9bE4ADp1q3A8zfRVSdZO0AnYVxvB9Ab0GFjEnbD5AsyOF5gMNCRIVMz8OzoMI6afMAyQJeeDuAdq3yKjj77QBO4ui2CXD5LfgavgW+UJjPw8/WBODAqdYmAL/LMQvUZgD16QygAiifh5+tCcCBU61dAHSCWaA2A6hPZwBVFtQFyCbMxocBcBNRGwUJA0QTZuOuH8C7kRMAAAD//wU+T2oAAAAGSURBVAMAeDnkQQiaeuwAAAAASUVORK5CYII=">
+<meta name="description" content="Game design presentation for The Shop That Opens Once, a cozy 2D pixel-art mystery about returning keepsakes in the village of Bellwood.">
+<style>
+@font-face{font-family:"Pixelify Sans";src:url(%%FONT_PIXELIFY%%) format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"DM Sans";src:url(%%FONT_DM400%%) format("woff2");font-weight:400;font-display:block}
+@font-face{font-family:"DM Sans";src:url(%%FONT_DM500%%) format("woff2");font-weight:500 700;font-display:block}
+:root{
+  --paper:#fff8ea;--paper-2:#fdf0d8;--cream:#fffaf0;--cream-2:#f5e6c8;--cream-3:#e3cfa6;
+  --ink:#2a1b22;--ink-2:#5a4450;--muted:#8a7480;
+  --leaf:#4fb34f;--leaf-d:#34884a;--leaf-l:#c9f28c;--sky:#c2e6ff;--sky-d:#3db3e0;--sky-l:#e8f6ff;
+  --rust:#d65c48;--rust-d:#a8403e;--amber:#ffb347;--amber-l:#ffd86a;--gold:#f7cf6a;
+  --lilac:#c3a2ff;--rose:#ff9fd0;--dusk:#ffd3a8;--wood:#cf8a4c;--wood-d:#7a452e;
+  --px:"Pixelify Sans",ui-monospace,monospace;--ui:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --gut:clamp(16px,4vw,56px);--max:1200px;--b:3px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased}
+canvas{display:block;image-rendering:pixelated}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sky-d);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--ink);color:var(--cream);padding:10px 14px;font-family:var(--px)}
+.skip:focus{top:12px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gut)}
+
+/* ---------- pixel UI kit ---------- */
+.notch{clip-path:polygon(var(--n,6px) 0,calc(100% - var(--n,6px)) 0,100% var(--n,6px),100% calc(100% - var(--n,6px)),calc(100% - var(--n,6px)) 100%,var(--n,6px) 100%,0 calc(100% - var(--n,6px)),0 var(--n,6px))}
+.box{--n:6px;background:var(--cream);border:var(--b) solid var(--ink);box-shadow:inset 3px 3px 0 #fff,inset -3px -3px 0 var(--cream-2)}
+.lift{filter:drop-shadow(0 5px 0 rgba(42,27,34,.14))}
+.chip{--n:3px;display:inline-flex;align-items:center;gap:6px;font-family:var(--px);font-weight:500;font-size:15px;line-height:1;padding:8px 11px 9px;background:var(--cream);border:2px solid var(--ink);color:var(--ink)}
+.chip.leaf{background:var(--leaf-l)}.chip.sky{background:var(--sky)}.chip.rust{background:var(--rust);color:#fff}.chip.gold{background:var(--amber-l)}.chip.lilac{background:#e6dcff}
+.btn{--n:4px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--px);font-weight:600;font-size:18px;line-height:1;padding:13px 18px 15px;border:var(--b) solid var(--ink);background:var(--amber-l);box-shadow:inset 0 -4px 0 rgba(42,27,34,.18),inset 0 3px 0 rgba(255,255,255,.6);cursor:pointer;text-decoration:none}
+.btn:hover{background:#ffe38c}.btn:active{transform:translateY(2px);box-shadow:inset 0 -2px 0 rgba(42,27,34,.18)}
+.btn.ghost{background:var(--cream)}.btn.ghost:hover{background:#fff}
+.btn.small{font-size:15px;padding:9px 12px 11px}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.icon{width:32px;height:32px;flex:none}
+
+/* ---------- top bar ---------- */
+.topbar{position:fixed;inset:0 0 auto 0;z-index:40;display:flex;align-items:center;gap:18px;padding:10px var(--gut);transition:background .3s,box-shadow .3s}
+.topbar.solid{background:rgba(255,248,234,.94);box-shadow:0 3px 0 rgba(42,27,34,.08);backdrop-filter:blur(6px)}
+.brand{font-family:var(--px);font-weight:700;font-size:18px;text-decoration:none;white-space:nowrap;padding:6px 0}
+.topbar nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.topbar nav a{font-family:var(--px);font-size:16px;text-decoration:none;padding:7px 10px;border-radius:2px}
+.topbar nav a:hover,.topbar nav a[aria-current=true]{background:var(--ink);color:var(--cream)}
+.sound{--n:3px;display:inline-flex;align-items:center;gap:8px;font-family:var(--px);font-size:15px;padding:6px 10px 6px 7px;border:2px solid var(--ink);background:var(--cream);cursor:pointer}
+.sound[aria-pressed=true]{background:var(--leaf-l)}
+.sound canvas{width:24px;height:24px}
+.topbar:not(.solid) .brand{opacity:0;pointer-events:none}
+
+/* ---------- section heads ---------- */
+.sec{position:relative;padding:clamp(80px,11vw,150px) 0}
+.sec.tint-sky{background:var(--sky-l)}.sec.tint-leaf{background:#f1fae3}.sec.tint-dusk{background:#fdeee6}.sec.tint-cream{background:var(--paper-2)}
+.edge{position:absolute;left:0;right:0;top:-15px;height:16px;background-repeat:repeat-x;background-size:auto 16px;image-rendering:pixelated;pointer-events:none}
+.head{display:grid;justify-items:center;text-align:center;gap:14px;margin:0 auto clamp(36px,5vw,64px);max-width:44rem}
+.kicker{display:flex;align-items:center;gap:10px;font-family:var(--px);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+
+h2{margin:0;font-family:var(--px);font-weight:700;font-size:clamp(34px,2rem + 2.6vw,64px);line-height:1.02;letter-spacing:.005em;text-wrap:balance;text-shadow:0 4px 0 rgba(42,27,34,.12)}
+.lede{margin:0;font-size:clamp(17px,1rem + .3vw,20px);color:var(--ink-2);text-wrap:balance;max-width:36rem}
+h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1}
+.note{font-size:14px;color:var(--muted);line-height:1.45}
+
+/* ---------- framed stages ---------- */
+.frame{--n:9px;position:relative;border:var(--b) solid var(--ink);background:var(--ink);box-shadow:0 0 0 3px var(--wood) inset}
+.frame>canvas{width:100%;height:100%}
+.screen{position:relative;aspect-ratio:16/9;width:100%}
+.screen canvas.stage{position:absolute;inset:0;width:100%;height:100%}
+
+/* ---------- hero journey ---------- */
+.journey{position:relative;height:620vh;background:#9fd3fb}
+.journey .pin{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.journey canvas.stage{position:absolute;inset:0;width:100%;height:100%}
+.logo{position:absolute;left:0;top:0;will-change:transform}
+.hero-copy{position:absolute;left:0;right:0;display:grid;justify-items:center;gap:16px;padding:0 var(--gut);text-align:center;will-change:transform,opacity}
+.tagline{--n:6px;margin:0;font-family:var(--px);font-weight:600;font-size:clamp(17px,1rem + .6vw,24px);line-height:1.25;color:var(--ink);background:var(--cream);border:3px solid var(--ink);padding:10px 18px 12px;box-shadow:inset 0 -4px 0 var(--cream-2);text-wrap:balance}
+.chips{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0;padding:0}
+.cue{position:absolute;left:50%;bottom:clamp(18px,4vh,40px);translate:-50% 0;display:grid;justify-items:center;gap:6px;font-family:var(--px);font-size:16px;color:var(--ink);transition:opacity .4s}
+.cue canvas{width:28px;height:28px;animation:bob 1.2s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+.beats{position:absolute;inset:auto auto clamp(20px,6vh,64px) var(--gut);width:min(27rem,calc(100% - 2 * var(--gut)));margin:0;padding:0;list-style:none}
+.beat{position:absolute;left:0;bottom:0;width:100%;opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s;pointer-events:none}
+.beat.on{opacity:1;transform:none}
+.beat .box{padding:18px 20px 20px}
+.beat .chip{margin-bottom:10px}
+.beat p{margin:0;font-family:var(--px);font-size:clamp(19px,1rem + .6vw,24px);line-height:1.3}
+.beat small{display:block;margin-top:8px;font-size:14px;color:var(--ink-2);font-family:var(--ui)}
+
+/* ---------- world labels ---------- */
+.labels{position:absolute;inset:0;pointer-events:none}
+.label{position:absolute;left:0;top:0;display:flex;align-items:center;gap:0;will-change:transform;transition:opacity .3s}
+.label .t{--n:3px;font-family:var(--px);font-weight:600;font-size:15px;line-height:1.15;background:var(--cream);border:2px solid var(--ink);padding:6px 9px 7px;white-space:nowrap}
+.label .t small{display:block;font-weight:400;font-size:13px;color:var(--ink-2)}
+.label i{display:block;width:18px;height:2px;background:var(--ink)}
+.label b{display:block;width:8px;height:8px;background:var(--amber-l);border:2px solid var(--ink);flex:none}
+.label.left{flex-direction:row-reverse}
+
+/* ---------- shop ---------- */
+.marker{--n:3px;position:absolute;left:0;top:0;display:grid;place-items:center;width:30px;height:30px;font-family:var(--px);font-weight:700;font-size:17px;line-height:1;color:var(--ink);background:var(--amber-l);border:3px solid var(--ink);box-shadow:inset 0 -3px 0 rgba(42,27,34,.2);will-change:transform;animation:markerbob 1.6s steps(2) infinite}
+@keyframes markerbob{50%{margin-top:-3px}}
+.legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.legend li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:12px 14px 14px}
+.legend .marker{position:static;animation:none;transform:none}
+.legend b{display:block;font-family:var(--px);font-size:18px;line-height:1.15}
+.legend span{display:block;font-size:14px;color:var(--ink-2);line-height:1.35;margin-top:2px}
+.shop-grid{display:grid;gap:22px;justify-items:center}
+.shop-grid>*{width:min(100%,calc((100vh - 170px) * 1.5))}
+#shop-screen{aspect-ratio:3/2}
+.dialog{--n:6px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding:14px 18px 16px 14px;background:#fffdf6;border:var(--b) solid var(--ink);box-shadow:inset 3px 3px 0 #fff,inset -3px -3px 0 var(--cream-2)}
+.dialog .face{--n:4px;width:108px;height:108px;background:#dff0ff;border:var(--b) solid var(--ink);display:grid;place-items:center}
+.dialog .who{display:inline-block;font-family:var(--px);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--cream);background:var(--leaf-d);padding:4px 8px 5px;margin-bottom:8px}
+.dialog p{margin:0;font-family:var(--px);font-size:clamp(18px,1rem + .4vw,22px);line-height:1.35}
+.dialog .more{display:inline-block;margin-left:6px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.tiny-note{font-size:13px;color:var(--muted);margin-top:6px;font-family:var(--ui)}
+
+/* ---------- pillars ---------- */
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px}
+.pillar{padding:24px 22px 26px;display:grid;gap:12px;align-content:start}
+.pillar .art{--n:4px;position:relative;height:170px;border:var(--b) solid var(--ink);background:var(--sky-l);overflow:hidden}
+.pillar .art canvas{position:absolute;inset:0;width:100%;height:100%}
+.pillar p{margin:0;color:var(--ink-2)}
+
+/* ---------- loop comic ---------- */
+.comic{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.panel{display:grid;gap:10px;align-content:start}
+.panel .screen{aspect-ratio:4/3}
+.panel .cap{display:flex;gap:10px;align-items:baseline}
+.panel .num{--n:3px;flex:none;display:grid;place-items:center;width:30px;height:30px;font-family:var(--px);font-weight:700;background:var(--ink);color:var(--cream)}
+.panel h3{font-size:21px}
+.panel p{margin:2px 0 0;font-size:15px;color:var(--ink-2);line-height:1.4}
+.designer{--n:6px;position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:#243a5e;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:16px 16px;color:#e8f1ff}
+.designer .tag{position:absolute;top:10px;left:10px;font-family:var(--px);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#bcd2ff}
+.clues{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:6px;width:100%}
+.clue{--n:3px;display:grid;justify-items:center;gap:4px;text-align:center;background:#eef5ff;color:#1d2433;border:2px solid #0f1830;padding:8px 4px;font-size:12px;line-height:1.2}
+.clue canvas{width:32px;height:32px}
+.plus{font-family:var(--px);font-size:20px;color:#bcd2ff}
+.answer{grid-column:1/-1;--n:3px;margin-top:8px;text-align:center;font-family:var(--px);font-size:15px;background:var(--amber-l);color:var(--ink);border:2px solid #0f1830;padding:7px}
+
+/* ---------- rules ---------- */
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:clamp(36px,5vw,56px)}
+.rule{padding:18px 18px 20px;display:grid;gap:10px;align-content:start}
+.rule p{margin:0;font-size:15px;color:var(--ink-2);line-height:1.4}
+.winlose{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.winlose .box{display:flex;gap:14px;align-items:center;padding:14px 18px 16px}
+.winlose p{margin:0;font-family:var(--px);font-size:18px;line-height:1.3}
+
+/* ---------- art & sound ---------- */
+.tods{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tods figure{margin:0;display:grid;gap:10px}
+.tods .screen{aspect-ratio:4/3}
+.tods figcaption{display:flex;gap:10px;align-items:center;font-family:var(--px);font-size:18px}
+.look-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:22px}
+.look-grid .box{padding:18px 20px 20px;display:grid;gap:12px;align-content:start}
+.swatches{display:grid;gap:8px}
+.swatch-row{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.swatch-row span{display:flex}
+.swatch-row i{flex:1;height:22px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.swatch-row i:first-child{border-left:2px solid var(--ink)}.swatch-row i:last-child{border-right:2px solid var(--ink)}
+.chiplist{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ---------- try ---------- */
+.try{display:grid;gap:18px}
+.try .screen{aspect-ratio:21/11;margin:0 auto;max-width:100%}
+.side{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.side .span{grid-column:1/-1}
+.try .screen canvas{cursor:default}
+.side{padding:18px 20px 20px;display:grid;gap:16px 22px}
+.side h3{font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.act{--n:3px;display:inline-flex;align-items:center;gap:6px;font-family:var(--px);font-size:16px;padding:8px 11px 9px;background:#fff;border:2px solid var(--ink);cursor:pointer}
+.act canvas{width:16px;height:16px}
+.act:hover{background:var(--sky-l)}
+.act[aria-pressed=true]{background:var(--leaf-l)}
+.act.offer{background:var(--amber-l)}
+.act.offer:hover{background:#ffe38c}
+.act:disabled{opacity:.5;cursor:default}
+.notes{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.notes li{font-size:15px;line-height:1.35;padding:7px 10px;background:#fff;border-left:4px solid var(--leaf)}
+.notes li.empty{border-left-color:var(--cream-3);color:var(--muted)}
+.reply{min-height:4.2em}
+.reply.ok{background:#f3fbe4}
+.try-foot{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.notes{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+
+.pip{--n:6px;position:absolute;right:14px;top:14px;width:min(30%,300px);aspect-ratio:4/3;border:3px solid var(--ink);background:var(--ink);box-shadow:0 0 0 3px var(--cream);animation:pipin .5s steps(4) both}
+.pip canvas.stage{position:absolute;inset:0;width:100%;height:100%}
+.pip span{position:absolute;left:6px;bottom:6px;font-family:var(--px);font-size:13px;background:var(--cream);border:2px solid var(--ink);padding:3px 7px 4px}
+@keyframes pipin{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0)}}
+/* ---------- nights ---------- */
+.lantern-bar{position:sticky;top:64px;z-index:5;display:flex;justify-content:center;margin:0 auto 30px;width:max-content;max-width:100%}
+.lantern-bar .box{display:flex;align-items:center;gap:clamp(6px,1.4vw,14px);padding:10px 16px 12px}
+.lantern-bar canvas{width:32px;height:32px}
+.lantern-bar .time{font-family:var(--px);font-weight:700;font-size:22px;margin-left:8px;min-width:4.2ch}
+.nights{display:grid;gap:clamp(28px,4vw,48px)}
+.night{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:center}
+.night:nth-child(even) .night-art{order:2}
+.night-art{--n:9px;border:var(--b) solid var(--ink);background:var(--ink);box-shadow:0 0 0 3px var(--wood) inset}
+.night-art canvas{width:100%;aspect-ratio:160/96}
+.night-copy{display:grid;gap:10px;align-content:start}
+.night-copy .row{display:flex;flex-wrap:wrap;gap:8px}
+.night-copy h3{font-size:clamp(24px,1.2rem + 1vw,32px)}
+.night-copy .who{font-family:var(--px);font-size:18px;color:var(--ink-2)}
+.night-copy p{margin:0;font-size:17px;color:var(--ink-2)}
+.spoil{--n:4px;padding:10px 12px;background:#2a1b22;color:#fff3dc;font-size:15px}
+.spoil-toggle{justify-self:center;margin-top:8px}
+.scope-note{--n:6px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin-top:36px;padding:16px;text-align:center}
+
+/* ---------- cast ---------- */
+.lineup{--n:9px;border:var(--b) solid var(--ink);background:var(--sky)}
+.lineup{background:#e4f4ff;margin-inline:calc(var(--gut) * -1)}
+.lineup canvas{width:100%}
+.cast{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.person{padding:14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.person .face{--n:4px;width:104px;height:104px;background:var(--sky-l);border:2px solid var(--ink);display:grid;place-items:center}
+.person h3{font-size:20px}
+.person .role{font-family:var(--px);font-size:14px;color:var(--leaf-d);text-transform:uppercase;letter-spacing:.05em}
+.person p{margin:4px 0 0;font-size:15px;line-height:1.35;color:var(--ink-2)}
+.sheet{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:26px}
+.anim{padding:10px;display:grid;gap:8px;justify-items:center}
+.anim canvas{width:120px;height:120px}
+.anim span{font-family:var(--px);font-size:15px}
+
+/* ---------- ui ---------- */
+.ui-demo{position:relative}
+.ui-demo .screen{aspect-ratio:16/9}
+.hud{position:absolute;pointer-events:none}
+.hud.bag{top:4%;right:3%;display:flex;gap:6px;align-items:center}
+.slot{--n:3px;width:44px;height:44px;background:rgba(255,250,240,.95);border:2px solid var(--ink);display:grid;place-items:center}
+.slot.sel{background:var(--amber-l)}
+.slot canvas{width:32px;height:32px}
+.hud.talk{left:4%;right:4%;bottom:5%}
+.hud.inspect{top:6%;left:3%;width:min(34%,230px)}
+.hud.inspect .box{padding:10px;display:grid;gap:6px;justify-items:center}
+.hud.inspect canvas{width:96px;height:96px}
+.hud.inspect b{font-family:var(--px);font-size:15px}
+.callout{position:absolute;font-family:var(--px);font-size:14px;background:var(--ink);color:var(--cream);padding:4px 8px 5px;white-space:nowrap}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:26px}
+.controls .box{padding:18px 20px 20px;display:grid;gap:12px;align-content:start}
+.keys{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.keys li{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:center;font-size:16px}
+.keys .chip{justify-self:start}
+.key{--n:3px;justify-self:start;font-family:var(--px);font-weight:700;font-size:15px;padding:6px 9px 8px;background:#fff;border:2px solid var(--ink);box-shadow:inset 0 -3px 0 var(--cream-3)}
+.later{background:#f4f0ff}
+
+/* ---------- build ---------- */
+.road{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.road::before{content:"";position:absolute;left:8%;right:8%;top:38px;height:8px;background:repeating-linear-gradient(90deg,var(--dirt,#e6c286) 0 16px,#f5dcaa 16px 32px);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)}
+.stop{position:relative;display:grid;justify-items:center;gap:12px;text-align:center}
+.post{--n:3px;display:grid;place-items:center;width:74px;height:74px;font-family:var(--px);font-weight:700;font-size:34px;background:var(--amber-l);border:var(--b) solid var(--ink);box-shadow:inset 0 -5px 0 rgba(42,27,34,.18)}
+.stop.mvp .post{background:var(--leaf-l)}
+.stop .box{padding:16px 16px 18px;width:100%}
+.stop p{margin:6px 0 0;font-size:15px;color:var(--ink-2);line-height:1.4}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:34px}
+.fact{padding:16px 16px 18px;display:grid;gap:8px;align-content:start}
+.fact canvas{width:32px;height:32px}
+.fact b{font-family:var(--px);font-size:22px;line-height:1.1}
+.fact span{font-size:15px;color:var(--ink-2);line-height:1.35}
+.split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;margin-top:22px}
+.meters{padding:20px 22px 22px;display:grid;gap:10px}
+.meter{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;font-size:16px}
+.pips{display:flex;gap:4px}
+.pips i{width:16px;height:16px;background:#fff;border:2px solid var(--ink)}
+.pips i.on{background:var(--rust)}
+.refs{padding:20px 22px 22px;display:grid;gap:12px;align-content:start}
+.ref{display:grid;gap:2px}
+.ref b{font-family:var(--px);font-size:19px}
+.ref span{font-size:15px;color:var(--ink-2)}
+
+/* ---------- end ---------- */
+.finale{position:relative;height:100vh;height:100svh;min-height:620px;overflow:hidden;background:#b893d6}
+.finale canvas.stage{position:absolute;inset:0;width:100%;height:100%}
+.finale-copy{--n:9px;position:absolute;left:50%;bottom:clamp(16px,4vh,40px);translate:-50% 0;width:min(56rem,calc(100% - 2 * var(--gut)));display:grid;justify-items:center;gap:14px;padding:22px clamp(16px,3vw,32px) 24px;text-align:center;background:var(--cream);border:var(--b) solid var(--ink);box-shadow:inset 3px 3px 0 #fff,inset -3px -3px 0 var(--cream-2)}
+.finale-copy .line{margin:0;font-family:var(--px);font-weight:700;font-size:clamp(21px,1rem + 1.2vw,32px);line-height:1.2;color:var(--ink);text-wrap:balance;max-width:30ch}
+.credits{display:grid;gap:4px;text-align:center}
+.credits b{font-family:var(--px);font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.credits span{font-family:var(--px);font-size:clamp(15px,.85rem + .35vw,19px)}
+.finale-logo{position:absolute;left:50%;top:clamp(78px,12vh,120px);translate:-50% 0}
+.btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* ---------- sources ---------- */
+.sources{background:var(--ink);color:#f4e9ef;padding:clamp(56px,8vw,96px) 0}
+.sources h2{color:#fff;font-size:clamp(28px,1.4rem + 1.6vw,40px);text-shadow:none}
+.src-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px;margin-top:26px}
+.sources h3{font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber-l);margin-bottom:10px}
+.sources ul{margin:0;padding-left:1.1em;font-size:15px;line-height:1.5}
+.sources li{margin:5px 0}
+.sources a{color:var(--amber-l)}
+.sources .muted{color:#c8b3bf}
+
+@media (max-width:900px){
+  .comic{grid-template-columns:repeat(2,1fr)}
+  .rules,.cast,.legend,.src-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tods,.look-grid{grid-template-columns:1fr}
+  .side{grid-template-columns:1fr}
+  .night,.split{grid-template-columns:1fr}
+  .night:nth-child(even) .night-art{order:0}
+  .road{grid-template-columns:1fr}
+  .road::before{left:50%;right:auto;top:0;bottom:0;width:8px;height:auto;translate:-50% 0;background:repeating-linear-gradient(180deg,#e6c286 0 16px,#f5dcaa 16px 32px);border:0;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  .rules,.winlose,.cast,.src-grid{grid-template-columns:1fr}
+  .topbar nav{display:none}
+  .comic{grid-template-columns:1fr}
+  .clues{grid-template-columns:1fr;gap:4px}.plus{justify-self:center}
+  .beats{bottom:16px}
+  .hud.inspect{display:none}
+  .keys li{grid-template-columns:100px 1fr}
+  .lantern-bar canvas{width:24px;height:24px}
+  .lantern-bar .time{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  .marker{animation:none}
+  .beat,.label{transition:none}
+  .cue canvas,.dialog .more{animation:none}
+}
+.reduced .journey{height:auto}
+.reduced .journey .pin{position:relative;height:auto;min-height:0}
+.reduced .journey .pin canvas.stage{position:relative;height:auto;aspect-ratio:16/10}
+.reduced .journey .hero-copy{position:relative;padding:30px var(--gut) 10px}
+.reduced .beats{position:relative;inset:auto;width:auto;display:grid;gap:14px;padding:20px var(--gut) 50px;max-width:40rem;margin:0 auto}
+.reduced .beat{position:relative;opacity:1;transform:none}
+.reduced .cue{display:none}
+</style>
+</head>
+<body>
+<a class="skip" href="#shop">Skip to the presentation</a>
+<header class="topbar" id="topbar">
+  <a class="brand" href="#top">The Shop That Opens Once</a>
+  <nav aria-label="Sections">
+    <a href="#shop">Story</a><a href="#loop">Gameplay</a><a href="#nights">Seven nights</a><a href="#cast">Cast</a><a href="#look">Art</a><a href="#build">Scope</a>
+  </nav>
+  <button class="sound notch" id="sound" type="button" aria-pressed="false"><canvas width="16" height="16" aria-hidden="true"></canvas><span>Sound</span></button>
+</header>
+
+<main>
+  <!-- 1 · Journey: sky → village → dusk → the shop appears -->
+  <section class="journey" id="top" aria-label="Bellwood">
+    <div class="pin">
+      <canvas class="stage" id="journey-stage" aria-hidden="true"></canvas>
+      <canvas class="logo" id="journey-logo" aria-hidden="true"></canvas>
+      <div class="hero-copy" id="hero-copy">
+        <h1 class="sr-only">The Shop That Opens Once</h1>
+        <p class="tagline">A cozy pixel mystery about bringing lost things home.</p>
+        <ul class="chips" aria-label="At a glance">
+          <li class="chip notch">2D narrative adventure</li>
+          <li class="chip leaf notch">PC first</li>
+          <li class="chip gold notch">7 nights · 1–3 h (planned)</li>
+        </ul>
+      </div>
+      <div class="cue" id="cue" aria-hidden="true"><canvas width="7" height="7"></canvas>Scroll</div>
+      <ol class="beats" id="beats">
+        <li class="beat" data-from=".20" data-to=".42"><div class="box notch lift"><span class="chip leaf notch">Bellwood</span><p>The courier comes home to pack up Mother's house.</p><small>In the GDD the hero is a young man; the team drew him as this ant courier.</small></div></li>
+        <li class="beat" data-from=".42" data-to=".62"><div class="box notch lift"><span class="chip notch">Too late</span><p>Everyone here knew her. The courier didn't make it back in time.</p></div></li>
+        <li class="beat" data-from=".62" data-to=".80"><div class="box notch lift"><span class="chip gold notch">Dusk</span><p>At the top of the old lane, a shop appears that wasn't there yesterday.</p></div></li>
+        <li class="beat" data-from=".80" data-to="1.01"><div class="box notch lift"><span class="chip rust notch">Seven nights</span><p>Seven lanterns. Seven keepsakes waiting to go home.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 2 · Inside the shop -->
+  <section class="sec tint-cream" id="shop">
+    <div class="edge" data-edge="cream"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="lantern"></canvas>01 · The shop<canvas data-icon="lantern"></canvas></div>
+        <h2>Marlow's shop</h2>
+        <p class="lede">Every night, Marlow hands over one keepsake. The courier's job is to find who it belongs to.</p>
+      </div>
+      <div class="shop-grid">
+        <div class="frame notch screen" id="shop-screen"><canvas class="stage" aria-hidden="true"></canvas><div class="labels" id="shop-labels" aria-hidden="true"></div></div>
+        <ol class="legend" aria-label="What's in the shop">
+          <li class="box notch"><span class="marker notch">1</span><div><b>Seven keepsakes</b><span>One waits on the beam for each night.</span></div></li>
+          <li class="box notch"><span class="marker notch">2</span><div><b>Seven lanterns</b><span>One goes out when a keepsake gets home.</span></div></li>
+          <li class="box notch"><span class="marker notch">3</span><div><b>Stopped at 18:17</b><span>The pendulum swings. The hands don't.</span></div></li>
+          <li class="box notch"><span class="marker notch">4</span><div><b>Marlow</b><span>Keeps the shop for seven nights.</span></div></li>
+        </ol>
+        <div class="dialog notch" role="group" aria-label="Marlow says">
+          <div class="face notch"><canvas data-portrait="marlow" aria-hidden="true"></canvas></div>
+          <div><span class="who">Marlow</span><p>“Everything on these shelves belongs to someone in Bellwood. Take your time. The shop will wait.”<span class="more" aria-hidden="true">▼</span></p><p class="tiny-note">Dialogue in this presentation is illustrative.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · Pillars -->
+  <section class="sec" id="pillars">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="heart"></canvas>02 · Design pillars<canvas data-icon="heart"></canvas></div>
+        <h2>Three rules we play by</h2>
+      </div>
+      <div class="pillars">
+        <article class="pillar box notch lift"><div class="art notch"><canvas id="pillar-0" width="1" height="1" aria-hidden="true"></canvas></div><h3>No quest markers</h3><p>No arrows, no checklist. You find your way by looking and listening.</p></article>
+        <article class="pillar box notch lift"><div class="art notch"><canvas id="pillar-1" width="1" height="1" aria-hidden="true"></canvas></div><h3>Things connect people</h3><p>Every keepsake leads to someone, and to the story they never finished.</p></article>
+        <article class="pillar box notch lift"><div class="art notch"><canvas id="pillar-2" width="1" height="1" aria-hidden="true"></canvas></div><h3>Kindness over winning</h3><p>No combat, no timer, no game over. A wrong guess just gets a reply.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · One night, step by step -->
+  <section class="sec tint-sky" id="loop">
+    <div class="edge" data-edge="sky"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="clock"></canvas>03 · Core loop<canvas data-icon="clock"></canvas></div>
+        <h2>One night, start to finish</h2>
+        <p class="lede">Night 1 from the GDD, the old wristwatch, as a concept walkthrough.</p>
+      </div>
+      <div class="comic">
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="receive"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption class="cap"><span class="num notch">1</span><div><h3>Get the keepsake</h3><p>Marlow hands over tonight's object.</p></div></figcaption></figure>
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="inspect"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption class="cap"><span class="num notch">2</span><div><h3>Inspect it</h3><p>Stopped at 18:17. Engraved “A.T.” on the back.</p></div></figcaption></figure>
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="listen"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption class="cap"><span class="num notch">3</span><div><h3>Explore and listen</h3><p>The clock mender remembers who waits at the station.</p></div></figcaption></figure>
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="connect"><div class="designer notch"><span class="tag">Designer's view · not in the game</span><div class="clues"><div class="clue notch"><canvas data-item="watch" aria-hidden="true"></canvas>Watch: “A.T.”, 18:17</div><span class="plus">+</span><div class="clue notch"><canvas data-icon="note" aria-hidden="true"></canvas>Plaque: Keeper A. Tate</div><span class="plus">+</span><div class="clue notch"><canvas data-icon="talk" aria-hidden="true"></canvas>Helen waits at 18:17</div><div class="answer notch">The watch belongs with Helen.</div></div></div></div><figcaption class="cap"><span class="num notch">4</span><div><h3>Connect the clues</h3><p>The player makes this link. The game never draws it.</p></div></figcaption></figure>
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="return"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption class="cap"><span class="num notch">5</span><div><h3>Return it</h3><p>Helen gets Arthur's watch, twenty years late.</p></div></figcaption></figure>
+        <figure class="panel" style="margin:0"><div class="frame notch screen" data-panel="end"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption class="cap"><span class="num notch">6</span><div><h3>The night ends</h3><p>The clock ticks once. One lantern goes out.</p></div></figcaption></figure>
+      </div>
+      <div class="rules">
+        <div class="rule box notch"><canvas data-icon="hand" aria-hidden="true"></canvas><h3>Walk and look</h3><p>Stroll Bellwood: the park, the bakery, the old station, the lane at dusk, the riverside.</p></div>
+        <div class="rule box notch"><canvas data-icon="look" aria-hidden="true"></canvas><h3>Inspect</h3><p>Turn a keepsake over. Read initials, unroll a film, check a number, listen closely.</p></div>
+        <div class="rule box notch"><canvas data-icon="talk" aria-hidden="true"></canvas><h3>Talk</h3><p>Your questions open up people's memories. No answer can make you lose.</p></div>
+        <div class="rule box notch"><canvas data-icon="clock" aria-hidden="true"></canvas><h3>The 18:17 trigger</h3><p>When a keepsake reaches its owner, the clock moves on and one lantern goes out.</p></div>
+      </div>
+      <div class="winlose">
+        <div class="box notch"><span class="chip leaf notch">Win</span><p>Return all seven keepsakes, then open the music box on the last night.</p></div>
+        <div class="box notch"><span class="chip notch">Fail</span><p>There isn't one. A wrong offer gets a puzzled reply or a new clue.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Playable -->
+  <section class="sec tint-leaf" id="try">
+    <div class="edge" data-edge="leaf"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="look"></canvas>04 · Playable<canvas data-icon="look"></canvas></div>
+        <h2>Try Night 1</h2>
+        <p class="lede">Who should get the watch? Look, listen, then offer it. There's no timer, and a wrong answer just gets a reply.</p>
+      </div>
+      <div class="try">
+        <div class="frame notch screen" id="try-screen"><canvas class="stage" aria-hidden="true"></canvas><div class="pip notch" id="try-pip" hidden><canvas class="stage" aria-hidden="true"></canvas><span>Meanwhile, at the shop</span></div></div>
+        <div class="side box notch" aria-labelledby="try-h">
+          <h3 id="try-h" class="sr-only">Night 1 actions</h3>
+          <div><h3>Inspect</h3><div class="acts"><button class="act notch" data-m="face" type="button">Look at the face</button><button class="act notch" data-m="back" type="button">Turn it over</button></div></div>
+          <div><h3>Look and listen</h3><div class="acts"><button class="act notch" data-m="plaque" type="button">Read the plaque</button><button class="act notch" data-m="timetable" type="button">Check the timetable</button><button class="act notch" data-m="mender" type="button">Talk to the clock mender</button></div></div>
+          <div><h3>Offer the watch to</h3><div class="acts"><button class="act offer notch" data-m="helen" type="button">Helen</button><button class="act offer notch" data-m="traveller" type="button">The traveller (“A.T.” case)</button><button class="act offer notch" data-m="mender-give" type="button">The clock mender</button></div></div>
+          <div class="dialog notch reply span" id="reply" aria-live="polite"><div class="face notch"><canvas id="reply-face" aria-hidden="true"></canvas></div><div><span class="who" id="reply-who">Courier</span><p id="reply-text">Who has been waiting for this?</p></div></div>
+          <div class="span notes-row"><h3>Your notes</h3><ul class="notes" id="notes"><li class="empty">Nothing yet.</li></ul></div>
+          <div class="try-foot span"><button class="btn small ghost notch" id="try-reset" type="button">Start over</button><span class="note">Tip: you can also click people and signs in the scene.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Seven nights -->
+  <section class="sec tint-dusk" id="nights">
+    <div class="edge" data-edge="dusk"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="lantern"></canvas>05 · The full story<canvas data-icon="lantern"></canvas></div>
+        <h2>Seven nights, seven keepsakes</h2>
+        <p class="lede">The whole game as planned in the GDD. The first build covers nights 1 and 2.</p>
+      </div>
+      <div class="lantern-bar lift"><div class="box notch" id="lantern-bar" role="img" aria-label="Seven lanterns"></div></div>
+      <div class="nights" id="nights-list"></div>
+      <button class="btn small ghost notch spoil-toggle" id="spoilers" type="button" aria-pressed="false">Show ending spoilers (nights 6–7)</button>
+    </div>
+  </section>
+
+  <!-- 7 · Cast -->
+  <section class="sec" id="cast">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="talk"></canvas>06 · Characters<canvas data-icon="talk"></canvas></div>
+        <h2>The people of Bellwood</h2>
+        <p class="lede">Everyone is an ant. Everyone is carrying something.</p>
+      </div>
+      <div class="lineup notch"><canvas id="lineup" aria-hidden="true"></canvas></div>
+      <div class="cast" id="cast-list"></div>
+      <div class="sheet" id="sheet" aria-label="Courier animation set"></div>
+    </div>
+  </section>
+
+  <!-- 7b · Art & sound direction -->
+  <section class="sec tint-cream" id="look">
+    <div class="edge" data-edge="cream"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="lantern"></canvas>07 · Art &amp; sound<canvas data-icon="lantern"></canvas></div>
+        <h2>Golden hour, then lanterns</h2>
+        <p class="lede">Expressive pixel characters, a town that glows at dusk, and a soundtrack you barely notice until it's gone.</p>
+      </div>
+      <div class="tods">
+        <figure><div class="frame notch screen" data-tod="0"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption><span class="chip gold notch">Afternoon</span>Exploring</figcaption></figure>
+        <figure><div class="frame notch screen" data-tod="1"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption><span class="chip rust notch">Dusk</span>The shop appears</figcaption></figure>
+        <figure><div class="frame notch screen" data-tod="2"><canvas class="stage" aria-hidden="true"></canvas></div><figcaption><span class="chip lilac notch">Evening</span>A night resolves</figcaption></figure>
+      </div>
+      <div class="look-grid">
+        <div class="box notch"><h3>Palette</h3><div class="swatches" id="swatches"></div></div>
+        <div class="box notch"><h3>Sound</h3><div class="chiplist"><span class="chip notch">Solo piano</span><span class="chip notch">Music box</span><span class="chip notch">Soft guitar</span><span class="chip notch">Evening wind</span><span class="chip notch">Shop bell</span><span class="chip notch">Creaky station floor</span></div><button class="btn small ghost notch" id="sound-2" type="button">Turn on the sound</button></div>
+        <div class="box notch"><h3>Named in the GDD</h3><div class="ref"><b>Bear's Restaurant · Meg's Monster</b><span>Odencat's small, emotional moments.</span></div><div class="ref"><b>A Space for the Unbound</b><span>A lived-in town.</span></div><div class="ref"><b>To the Moon</b><span>Memory as the story.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · UI & controls -->
+  <section class="sec tint-sky" id="ui">
+    <div class="edge" data-edge="sky"></div>
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="bag"></canvas>08 · Player experience<canvas data-icon="bag"></canvas></div>
+        <h2>What you see and do</h2>
+        <p class="lede">A quiet screen: the town, a bag of keepsakes, and people to talk to.</p>
+      </div>
+      <div class="ui-demo">
+        <div class="frame notch screen" id="ui-screen"><canvas class="stage" aria-hidden="true"></canvas>
+          <div class="hud inspect"><div class="box notch"><canvas data-item-lg="doll" aria-hidden="true"></canvas><b>Rabbit doll</b><span class="note">One ear sewn back on, twice.</span></div></div>
+          <div class="hud bag" aria-hidden="true"><div class="slot notch sel"><canvas data-item="doll"></canvas></div><div class="slot notch"><canvas data-item="watch"></canvas></div><div class="slot notch"><canvas data-icon="bag"></canvas></div></div>
+          <div class="hud talk"><div class="dialog notch"><div class="face notch"><canvas data-portrait="nora" aria-hidden="true"></canvas></div><div><span class="who">Nora</span><p>“That ear came loose years ago. I stitched it back myself.”<span class="more" aria-hidden="true">▼</span></p></div></div></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="box notch"><h3>PC controls (planned)</h3><ul class="keys"><li><span class="key notch">Click</span>Walk to a spot</li><li><span class="key notch">Click</span>Talk to someone nearby</li><li><span class="key notch">E</span>Open the bag</li><li><span class="key notch">I</span>Inspect a keepsake</li></ul></div>
+        <div class="box notch later"><h3>Mobile (later)</h3><ul class="keys"><li><span class="key notch">Tap</span>Walk</li><li><span class="key notch">Tap</span>Talk to someone nearby</li><li><span class="key notch">Bag icon</span>Top-right corner</li><li><span class="key notch">Double-tap</span>Inspect</li></ul></div>
+        <div class="box notch"><h3>Look and sound</h3><ul class="keys"><li><span class="chip notch">Warm</span>Golden light, lanterns at dusk</li><li><span class="chip notch">Alive</span>Water, wind, people going about their day</li><li><span class="chip notch">Soft</span>Piano, a music box, a shop bell</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · Scope -->
+  <section class="sec" id="build">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker"><canvas data-icon="hand"></canvas>09 · Scope<canvas data-icon="hand"></canvas></div>
+        <h2>Built one night at a time</h2>
+        <p class="lede">From the team's feasibility report. Start small, prove it works, then grow.</p>
+      </div>
+      <div class="road">
+        <div class="stop"><div class="post notch">1</div><div class="box notch"><h3>Prove one night</h3><p>Walking, talking, the bag, inspecting, one mystery with no markers, and the 18:17 clock.</p></div></div>
+        <div class="stop mvp"><div class="post notch">2</div><div class="box notch"><h3>MVP: two nights</h3><p>Two playable chapters on PC. Playtest the big question: can players find each owner without help?</p></div></div>
+        <div class="stop"><div class="post notch">3</div><div class="box notch"><h3>All seven nights</h3><p>The full story and epilogue, about 1–3 hours. Mobile comes after the PC version is stable.</p></div></div>
+      </div>
+      <div class="facts">
+        <div class="fact box notch"><canvas data-icon="heart"></canvas><b>Players 16–35</b><span>Who love story-rich indie games, cozy worlds and light mysteries.</span></div>
+        <div class="fact box notch"><canvas data-icon="note"></canvas><b>Feels like</b><span>Reflective, warm, bittersweet, gently curious.</span></div>
+        <div class="fact box notch"><canvas data-icon="bag"></canvas><b>PC first</b><span>Mouse and keyboard make exploring and inspecting easy to test.</span></div>
+        <div class="fact box notch"><canvas data-icon="clock"></canvas><b>Unity or Godot 4</b><span>Both are options in the proposal. Not decided yet.</span></div>
+      </div>
+      <div class="split">
+        <div class="meters box notch"><h3>Where it gets hard</h3><p class="note" style="margin:0 0 6px">Team estimates, not industry data.</p><div id="meters"></div><p class="note" style="margin:8px 0 0">Overall 8/10. The challenge is content and clear clues, not complex code.</p></div>
+        <div class="refs box notch"><h3>Games we learn from</h3><div class="ref"><b>Bear's Restaurant</b><span>Short, emotional storytelling.</span></div><div class="ref"><b>A Space for the Unbound</b><span>A town that feels lived in.</span></div><div class="ref"><b>Coffee Talk</b><span>Cozy mood, conversation at the centre.</span></div><p class="note" style="margin:4px 0 0">Named in the team's report as references, not partners.</p></div>
+      </div>
+      <div class="split">
+        <div class="refs box notch"><h3>Release plan (proposed)</h3><div class="ref"><b>PC · Steam and itch.io</b><span>A one-time purchase around $4.99 (Rp 45,000–65,000), with achievements and a soundtrack bundle.</span></div><div class="ref"><b>Mobile · later</b><span>Nights 1–2 free, then a one-time unlock (Rp 29,000) or a reward ad per night.</span></div><p class="note" style="margin:4px 0 0">From the individual GDD. The team's report puts PC first and mobile after the PC version is stable.</p></div>
+        <div class="refs box notch"><h3>Tools in the proposal</h3><div class="ref"><b>Engine</b><span>Unity (C#) or Godot 4 (GDScript), not decided yet.</span></div><div class="ref"><b>Art and UI</b><span>Aseprite for sprites, Figma or Canva for layouts.</span></div><div class="ref"><b>Sound</b><span>Piano and music-box score, foley from sound libraries.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · Finale -->
+  <section class="finale" id="end" aria-label="Ending">
+    <canvas class="stage" id="end-stage" aria-hidden="true"></canvas>
+    <canvas class="finale-logo" id="end-logo" aria-hidden="true"></canvas>
+    <div class="finale-copy notch">
+      <p class="line">Some things take a long time to find their way home.</p>
+      <div class="credits"><b>A game design by SE.3 · Kelompok 1</b><span>Andika Rafa Akbar · Dara Dwi Hidayat · Khairul Insan · Piere Valkyrie · Praffi Ramadhani</span></div>
+      <div class="btns"><a class="btn notch" href="#top">Back to the top</a><a class="btn ghost notch" href="#try">Play Night 1 again</a><a class="btn ghost notch" href="#sources">Sources &amp; credits</a></div>
+    </div>
+  </section>
+</main>
+
+<footer class="sources" id="sources">
+  <div class="wrap">
+    <h2>Sources &amp; credits</h2>
+    <div class="src-grid">
+      <div><h3>Team</h3><ul><li>SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie, Praffi Ramadhani.</li></ul></div>
+      <div><h3>Written sources</h3><ul>
+        <li><b>Game Design Document &amp; Concept Proposal</b>, Andika Rafa Akbar (2410511026), SE.3 (A). <span class="muted">World, premise, mechanics, controls, the seven nights.</span></li>
+        <li><b>Game Concept and Development Feasibility Research Report</b>, SE.3 Kelompok 1. <span class="muted">Core loop, audience, references, difficulty estimates, MVP scope, PC first.</span></li>
+      </ul></div>
+      <div><h3>Art &amp; type</h3><ul>
+        <li>Every image here is new pixel art drawn in code for this presentation. No generated or earlier images are used.</li>
+        <li>Pixelify Sans and DM Sans, both under the SIL Open Font License. Music and sounds are synthesized in the browser.</li>
+      </ul></div>
+      <div><h3>Notes on accuracy</h3><ul>
+        <li>The Night 1 walkthrough and the playable demo are concept illustrations. The clock mender, the traveller and all dialogue were written for this presentation.</li>
+        <li>The GDD's schedule says “10 weeks” but its table covers four, so no dates are shown.</li>
+      </ul></div>
+    </div>
+  </div>
+</footer>
+
+<script>%%PX%%</script>
+<script>%%TITLE%%</script>
+<script>%%WORLD%%</script>
+<script>%%CHARS%%</script>
+<script>%%INTERIORS%%</script>
+<script>%%DIORAMAS%%</script>
+<script>%%STUBS%%</script>
+<script>%%AUDIO%%</script>
+<script>%%MAIN%%</script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interiors preview</title>
+<style>
+  :root { --bg: #f7eedd; --card: #fffaf0; --ink: #3d2a2e; --mute: #8a6f66; --line: #ead9bd; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px 16px 60px; background: var(--bg); color: var(--ink); font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 28px 0 8px; }
+  p.sub { margin: 0 0 12px; color: var(--mute); }
+  .stage-wrap { overflow-x: auto; max-width: 100%; }
+  canvas.stage { display: block; image-rendering: pixelated; border-radius: 6px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 10px 0 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  .controls label { display: inline-flex; gap: 6px; align-items: center; }
+  .controls .grp { display: inline-flex; gap: 4px; align-items: center; }
+  .controls input[type=range].mini { width: 46px; }
+  .mono { font-family: ui-monospace, Menlo, monospace; }
+  .sheet { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cell { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .cell canvas { image-rendering: pixelated; background-color: #f3e4c8; background-image: linear-gradient(45deg, #ecdcbc 25%, transparent 25%, transparent 75%, #ecdcbc 75%), linear-gradient(45deg, #ecdcbc 25%, transparent 25%, transparent 75%, #ecdcbc 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+  .cell .row { display: flex; gap: 10px; align-items: flex-end; }
+  .cell small { color: var(--mute); }
+  #err { color: #b3261e; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>Interiors, props and items</h1>
+<p class="sub">Marlow's shop, the old station, keepsake items and UI icons. Everything is drawn in code at native resolution and shown at an integer scale. The capsules are placeholder actors standing at the scene anchors.</p>
+<div id="err"></div>
+
+<h2>Marlow's shop <span class="mono" id="shopMs"></span></h2>
+<div class="stage-wrap"><canvas class="stage" id="shopCv"></canvas></div>
+<div class="controls" id="shopCtl">
+  <label>zoom <select id="shopZoom"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label>
+  <label>clock <input id="clk" type="range" min="0" max="1439" value="1097"> <span class="mono" id="clkOut">18:17</span></label>
+  <span class="grp">lanterns <span id="lanGrp"></span> <button id="lanAll">all on</button> <button id="lanNone">all off</button></span>
+  <span class="grp">keepsakes <span id="keepGrp"></span></span>
+  <label>highlight <select id="hi"><option value="-1">none</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+  <label><input type="checkbox" id="shopStill"> still</label>
+  <label><input type="checkbox" id="shopActors" checked> actors</label>
+  <label><input type="checkbox" id="shopAnts"> real ants</label>
+  <label><input type="checkbox" id="shopWalk" checked> walker</label>
+  <label><input type="checkbox" id="shopAnch"> anchors</label>
+</div>
+
+<h2>The old station (Night 1) <span class="mono" id="stMs"></span></h2>
+<div class="stage-wrap"><canvas class="stage" id="stCv"></canvas></div>
+<div class="controls">
+  <label>zoom <select id="stZoom"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label>
+  <label>tod <input id="tod" type="range" min="0" max="1" step="0.05" value="0"> <span class="mono" id="todOut">0.00</span></label>
+  <label>lamps <input id="lamps" type="range" min="0" max="1" step="0.05" value="0"> <span class="mono" id="lampsOut">0.00</span></label>
+  <label><input type="checkbox" id="stStill"> still</label>
+  <label><input type="checkbox" id="stActors" checked> actors</label>
+  <label><input type="checkbox" id="stAnts"> real ants</label>
+  <label><input type="checkbox" id="stWalk" checked> walker</label>
+  <label><input type="checkbox" id="stAnch"> anchors</label>
+  <label><input type="checkbox" id="stHot"> hotspots</label>
+</div>
+
+<h2>Keepsake items <small>(xs at 8x, sm at 6x, lg at 4x)</small></h2>
+<div class="sheet" id="items"></div>
+
+<h2>Held in hand <small>(xs items at the courier's give-pose hand, 4x; needs chars.js)</small></h2>
+<div class="sheet" id="held"></div>
+
+<h2>UI icons <small>(16x16 at 4x)</small></h2>
+<div class="sheet" id="icons"></div>
+
+<script src="px.js"></script>
+<script src="chars.js"></script>
+<script src="interiors.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const errBox = $('err');
+const report = e => { errBox.textContent += (e && e.stack || e) + '\n'; console.error(e); };
+const dpr = () => window.devicePixelRatio || 1;
+
+// Placeholder actor: 12x24 capsule with a shadow. sit: anchor is on the seat surface, legs dangle below it.
+function capsule(x, y, color, sit) {
+  return { x, y, draw(g) {
+    const top = sit ? y - 18 : y - 24, bot = sit ? y : y;
+    if (!sit) PX.shadow(g, x, y, 7, 2);
+    PX.ellipse(g, x, top + 6, 7, 7, 'ink'); PX.rect(g, x - 7, top + 6, 15, bot - top - 12, 'ink'); PX.ellipse(g, x, bot - 6, 7, 7, 'ink');
+    PX.ellipse(g, x, top + 6, 6, 6, color); PX.rect(g, x - 6, top + 6, 13, bot - top - 12, color); PX.ellipse(g, x, bot - 6, 6, 6, color);
+    PX.rect(g, x - 3, top + 3, 2, 3, 'white');
+    if (sit) { PX.rect(g, x + 1, y, 3, 7, 'ink'); PX.rect(g, x + 2, y, 1, 6, color); }
+  } };
+}
+function marker(x, y) { return { x, y: 9999, draw(g) { PX.rect(g, x - 3, y, 7, 1, '#ff2d7a'); PX.rect(g, x, y - 3, 1, 7, '#ff2d7a'); } }; }
+function hotRect(r) { return { x: 0, y: 9999, draw(g) { const [x, y, w, h] = r; PX.rect(g, x, y, w, 1, '#2d7aff'); PX.rect(g, x, y + h - 1, w, 1, '#2d7aff'); PX.rect(g, x, y, 1, h, '#2d7aff'); PX.rect(g, x + w - 1, y, 1, h, '#2d7aff'); } }; }
+// Real ant (chars.js) with an optional xs item held at the hand point.
+function ant(id, pose, x, y, dir = 1, hold) {
+  return { x, y, draw(g) {
+    const t = performance.now() / 1000, f = Math.floor(t * CH.fps(pose)) % CH.frames(id, pose);
+    CH.draw(g, id, pose, f, x, y, dir);
+    if (hold) { const [hx, hy] = CH.hand(id, pose, f), im = IT.item(hold, 'xs'); g.drawImage(im, Math.round(x + hx * dir - im.width / 2), Math.round(y + hy - im.height / 2)); }
+  } };
+}
+// Position (and facing) along a ping-pong path at time t.
+function pathAt(path, t, speed) {
+  let total = 0; const seg = [];
+  for (let i = 0; i < path.length - 1; i++) { const [ax, ay] = path[i], [bx, by] = path[i + 1], l = Math.hypot(bx - ax, by - ay); seg.push([ax, ay, bx, by, l]); total += l; }
+  let d = (t * speed) % (2 * total); const back = d > total; if (back) d = 2 * total - d;
+  for (const [ax, ay, bx, by, l] of seg) { if (d <= l) { const k = d / l, dir = (bx - ax) * (back ? -1 : 1) < 0 ? -1 : 1; return [Math.round(ax + (bx - ax) * k), Math.round(ay + (by - ay) * k), dir]; } d -= l; }
+  const p = path[path.length - 1]; return [p[0], p[1], 1];
+}
+function walkerAt(path, t, speed, color, antId) {
+  const [x, y, dir] = pathAt(path, t, speed);
+  return antId && window.CH ? ant(antId, 'walk', x, y, dir) : capsule(x, y, color);
+}
+function timed(scene, slot) { const f = scene.draw; scene.draw = (g, v, a) => { const s = performance.now(); f(g, v, a); slot.ms = slot.ms * 0.9 + (performance.now() - s) * 0.1; }; }
+function sizeStage(cv, scene, z) { cv.style.width = scene.w * z + 'px'; cv.style.height = scene.h * z + 'px'; }
+
+/* ---------------- shop */
+let shop, shopStage; const shopT = { ms: 0 };
+const shopState = { clockMin: 1097, lanterns: [1, 1, 1, 1, 1, 1, 1], keepsakes: [1, 1, 1, 0, 0, 0, 0], highlight: 2, still: false };
+try {
+  shop = INTERIORS.createShop(); timed(shop, shopT);
+  const cv = $('shopCv'); sizeStage(cv, shop, 3); shopStage = new PX.Stage(cv, { scale: 3 });
+  $('shopZoom').onchange = e => { const z = +e.target.value; sizeStage(cv, shop, z); shopStage.fixed = z; shopStage.resize(); };
+  const hhmm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  $('clk').oninput = e => { shopState.clockMin = +e.target.value; $('clkOut').textContent = hhmm(shopState.clockMin); };
+  for (let i = 0; i < 7; i++) {
+    const r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.05; r.value = 1; r.className = 'mini'; r.title = 'lantern ' + i;
+    r.oninput = () => { shopState.lanterns[i] = +r.value; }; $('lanGrp').append(r);
+    const k = document.createElement('input'); k.type = 'checkbox'; k.checked = !!shopState.keepsakes[i]; k.title = 'keepsake ' + i;
+    k.onchange = () => { shopState.keepsakes[i] = k.checked ? 1 : 0; }; $('keepGrp').append(k);
+  }
+  const setAll = v => { shopState.lanterns.fill(v); $('lanGrp').querySelectorAll('input').forEach(r => r.value = v); };
+  $('lanAll').onclick = () => setAll(1); $('lanNone').onclick = () => setAll(0);
+  $('hi').value = String(shopState.highlight); $('hi').onchange = e => { shopState.highlight = +e.target.value; };
+  $('shopStill').onchange = e => { shopState.still = e.target.checked; };
+} catch (e) { report(e); }
+
+/* ---------------- station */
+let station, stStage; const stT = { ms: 0 };
+const stState = { tod: 0, lamps: 0, still: false };
+try {
+  station = INTERIORS.createStation(); timed(station, stT);
+  const cv = $('stCv'); sizeStage(cv, station, 3); stStage = new PX.Stage(cv, { scale: 3 });
+  $('stZoom').onchange = e => { const z = +e.target.value; sizeStage(cv, station, z); stStage.fixed = z; stStage.resize(); };
+  $('tod').oninput = e => { stState.tod = +e.target.value; $('todOut').textContent = stState.tod.toFixed(2); };
+  $('lamps').oninput = e => { stState.lamps = +e.target.value; $('lampsOut').textContent = stState.lamps.toFixed(2); };
+  $('stStill').onchange = e => { stState.still = e.target.checked; };
+} catch (e) { report(e); }
+
+/* ---------------- loop */
+function frame(now) {
+  const t = now / 1000;
+  try {
+    if (shop) {
+      const a = shop.anchors, list = [], ants = $('shopAnts').checked && window.CH;
+      if ($('shopActors').checked) {
+        if (ants) list.push(ant('marlow', 'talk', a.marlow[0], a.marlow[1], -1), ant('courier', 'give', a.customer[0], a.customer[1], 1, 'watch'));
+        else list.push(capsule(a.marlow[0], a.marlow[1], 'roofG1'), capsule(a.customer[0], a.customer[1], 'orange'));
+      }
+      if ($('shopWalk').checked) list.push(walkerAt([a.door, [a.door[0], 200], [96, 186], [70, 190], [104, 160], [262, 160], [262, 190], a.door], t, 22, 'lilac', ants && 'mother'));
+      if ($('shopAnch').checked) for (const k in a) list.push(marker(a[k][0], a[k][1]));
+      shopStage.render(shop, { x: shop.w / 2, y: shop.h / 2 }, t, shopState, list);
+      $('shopMs').textContent = shopT.ms.toFixed(2) + ' ms/frame';
+    }
+    if (station) {
+      const a = station.anchors, list = [], ants = $('stAnts').checked && window.CH;
+      if ($('stActors').checked) {
+        if (ants) list.push(ant('mender', 'idle', a.mender[0], a.mender[1], -1), ant('traveller', 'idle', a.traveller[0], a.traveller[1], -1), ant('helen', 'sit', a.helenSeat[0], a.helenSeat[1], -1));
+        else {
+          for (const [k, c] of [['mender', 'roofB1'], ['menderCustomer', 'orange'], ['traveller', 'lilac'], ['benchCustomer', 'cap1']]) if (a[k]) list.push(capsule(a[k][0], a[k][1], c));
+          if (a.helenSeat) list.push(capsule(a.helenSeat[0], a.helenSeat[1], 'pink', true));
+        }
+      }
+      if ($('stWalk').checked && a.courierStart) list.push(walkerAt([a.courierStart, a.menderCustomer, a.travellerCustomer, a.benchCustomer, a.helenStand], t, 24, 'orange', ants && 'courier'));
+      if ($('stAnch').checked) for (const k in a) list.push(marker(a[k][0], a[k][1]));
+      if ($('stHot').checked) for (const k in (station.hotspots || {})) list.push(hotRect(station.hotspots[k]));
+      stStage.render(station, { x: station.w / 2, y: station.h / 2 }, t, stState, list);
+      $('stMs').textContent = stT.ms.toFixed(2) + ' ms/frame';
+    }
+  } catch (e) { report(e); return; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------------- loupe (dev aid): crop a native-resolution region of a stage buffer at an integer zoom */
+window.loupe = (which, x, y, w, h, z) => {
+  const st = which === 'station' ? stStage : shopStage, v = st.view;
+  let c = document.getElementById('loupe');
+  if (!c) { c = document.createElement('canvas'); c.id = 'loupe'; c.style.cssText = 'position:fixed;left:0;top:0;z-index:9;image-rendering:pixelated;box-shadow:0 0 0 4px #3d2a2e'; document.body.append(c); c.onclick = () => c.remove(); }
+  const S = Math.round(z * dpr()); c.width = w * S; c.height = h * S; c.style.width = (w * S) / dpr() + 'px'; c.style.height = (h * S) / dpr() + 'px';
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(st.buf, x - v.x, y - v.y, w, h, 0, 0, w * S, h * S);
+  return [v.x, v.y, v.w, v.h];
+};
+window.unloupe = () => { const c = document.getElementById('loupe'); if (c) c.remove(); };
+
+/* ---------------- items and icons */
+function crisp(img, scale) {
+  const S = Math.max(1, Math.round(scale * dpr())), c = document.createElement('canvas');
+  c.width = img.width * S; c.height = img.height * S; c.style.width = (img.width * S) / dpr() + 'px'; c.style.height = (img.height * S) / dpr() + 'px';
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(img, 0, 0, c.width, c.height); return c;
+}
+const ITEMS = [['watch', 'front'], ['watch', 'back'], ['watch', 'side'], ['doll'], ['camera'], ['key'], ['shoes'], ['book'], ['letter'], ['musicbox', 'closed'], ['musicbox', 'open'], ['parcel'], ['suitcase']];
+for (const [name, variant] of ITEMS) {
+  const cell = document.createElement('div'); cell.className = 'cell';
+  const row = document.createElement('div'); row.className = 'row'; cell.append(row);
+  const dims = [];
+  for (const [size, sc] of [['xs', 8], ['sm', 6], ['lg', 4]]) {
+    try { const im = IT.item(name, size, variant); row.append(crisp(im, sc)); dims.push(size + ' ' + im.width + 'x' + im.height); }
+    catch (e) { dims.push(size + ' missing'); }
+  }
+  const lab = document.createElement('small'); lab.className = 'mono'; lab.textContent = name + (variant ? ' / ' + variant : '') + ' · ' + dims.join(' · '); cell.append(lab);
+  $('items').append(cell);
+}
+if (window.CH) for (const name of ['watch', 'doll', 'camera', 'key', 'shoes', 'book', 'letter', 'musicbox', 'parcel']) {
+  const [c, x] = PX.canvas(40, 40), [hx, hy] = CH.hand('courier', 'give', 1), im = IT.item(name, 'xs');
+  CH.draw(x, 'courier', 'give', 1, 20, 37, 1, { shadow: false });
+  x.drawImage(im, Math.round(20 + hx - im.width / 2), Math.round(37 + hy - im.height / 2));
+  const cell = document.createElement('div'); cell.className = 'cell'; cell.append(crisp(c, 4));
+  const lab = document.createElement('small'); lab.className = 'mono'; lab.textContent = name + ' xs'; cell.append(lab);
+  $('held').append(cell);
+}
+for (const name of ['bag', 'look', 'talk', 'hand', 'lantern', 'clock', 'heart', 'note', 'sound-on', 'sound-off']) {
+  const cell = document.createElement('div'); cell.className = 'cell';
+  try { cell.append(crisp(IT.icon(name), 4)); } catch (e) { report(e); }
+  const lab = document.createElement('small'); lab.className = 'mono'; lab.textContent = name; cell.append(lab);
+  $('icons').append(cell);
+}
+</script>
+</body>
+</html>

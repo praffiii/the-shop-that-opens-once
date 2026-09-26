@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Dioramas</title>
+<style>
+  :root { --bg: #fff6e8; --ink: #3d2a2e; --card: #fffdf8; --line: #f0d9bd; --muted: #9c774e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 ui-rounded, system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+    padding: 10px 20px; background: var(--bg); border-bottom: 2px solid var(--line); }
+  header label { display: inline-flex; gap: 6px; align-items: center; }
+  output { font-variant-numeric: tabular-nums; min-width: 3ch; }
+  .strip { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px 0; }
+  main { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 20px 32px; }
+  figure { margin: 0; padding: 8px; background: var(--card); border: 2px solid var(--line); border-radius: 8px; }
+  figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 6px 2px 0; color: var(--muted); }
+  figcaption b { color: var(--ink); }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<header>
+  <b>Seven nights, seven keepsakes: dioramas</b>
+  <label>glow <input id="glow" type="range" min="0" max="1" step="0.01" value="0"><output id="gv">0.00</output></label>
+  <label><input id="still" type="checkbox"> still</label>
+  <label><input id="actors" type="checkbox" checked> placeholder actors</label>
+</header>
+<div class="strip" id="strip"></div>
+<main id="grid"></main>
+<script src="px.js"></script>
+<script src="dioramas.js"></script>
+<script>
+'use strict';
+// URL knobs for review: ?only=station&scale=8&t=1.25&glow=0.6&still=1&actors=0&strip=0
+const Q = new URLSearchParams(location.search);
+const SCALE = Math.max(1, parseInt(Q.get('scale') || '4', 10));
+const FIXED_T = Q.has('t') ? parseFloat(Q.get('t')) : null;
+const NAMES = Q.get('only') ? Q.get('only').split(',') : DIO.names;
+const NIGHT = { station: 1, toyshop: 2, darkroom: 3, archive: 4, lighthouse: 5, desk: 6, home: 7 };
+const ui = { glow: document.getElementById('glow'), gv: document.getElementById('gv'),
+  still: document.getElementById('still'), actors: document.getElementById('actors') };
+if (Q.has('glow')) ui.glow.value = Q.get('glow');
+if (Q.get('still') === '1') ui.still.checked = true;
+if (Q.get('actors') === '0') ui.actors.checked = false;
+
+// Placeholder capsule "ant" with feet at (x, y); h is total height including antennae.
+function capsule(x, y, fill, rim, label, h = 32) {
+  return { x, y, draw(c) {
+    PX.shadow(c, x, y, 8, 2);
+    const top = y - h + 6, r = 5;
+    const body = (dx, col, grow) => {
+      PX.ellipse(c, x + dx, top + r, r + grow, r + grow, col);
+      PX.rect(c, x + dx - r - grow, top + r, 2 * (r + grow) + 1, y - top - 2 * r - 1, col);
+      PX.ellipse(c, x + dx, y - r - 1, r + grow, r + grow, col);
+    };
+    PX.line(c, x - 2, top, x - 4, top - 6, 'ink'); PX.line(c, x + 2, top, x + 4, top - 6, 'ink');
+    body(0, 'ink', 1); body(0, fill, 0);
+    PX.rect(c, x - 3, top + 2, 2, y - top - 6, rim);
+    PX.text(c, label, x - 1, top + 6, 'ink');
+  } };
+}
+// Placeholder keepsake (12x12), centred on the item anchor.
+function itemMark(c, x, y) {
+  PX.rect(c, x - 6, y - 6, 12, 12, 'ink'); PX.rect(c, x - 5, y - 5, 10, 10, 'brass1');
+  PX.rect(c, x - 5, y - 5, 10, 1, 'brass0'); PX.rect(c, x - 5, y + 4, 10, 1, 'brass3');
+  PX.text(c, '?', x - 1, y - 2, 'ink');
+}
+const COL = { a: ['ant1', 'ant0'], b: ['blue', 'sky2'], c: ['cap1', 'cap0'] };
+function placeholders(sc) {
+  const out = [];
+  for (const k of ['a', 'b', 'c']) if (sc.anchors[k]) out.push(capsule(...sc.anchors[k], ...COL[k], k.toUpperCase(), k === 'c' ? 26 : 32));
+  return out;
+}
+// Like the page: keepsakes are placed on top, after the scene (and its glow) has drawn.
+const withItem = sc => ({ w: sc.w, h: sc.h, bg: sc.bg, anchors: sc.anchors,
+  draw(c, view, actors) { sc.draw(c, view, actors); if (actors.length) itemMark(c, ...sc.anchors.item); } });
+
+const cards = [];
+function card(host, name, scale, caption) {
+  const sc = DIO.create(name);
+  const fig = document.createElement('figure');
+  const cv = document.createElement('canvas');
+  cv.style.width = sc.w * scale + 'px'; cv.style.height = sc.h * scale + 'px';
+  fig.append(cv);
+  if (caption) {
+    const cap = document.createElement('figcaption');
+    cap.innerHTML = `<b>Night ${NIGHT[name]} · ${name}</b><span>${Object.entries(sc.anchors).map(([k, v]) => `${k} ${v.join(',')}`).join(' · ')}</span>`;
+    fig.append(cap);
+  }
+  host.append(fig);
+  const stage = new PX.Stage(cv, { scale });
+  cards.push({ sc: withItem(sc), stage, big: !!caption });
+}
+if (Q.get('strip') !== '0') for (const n of NAMES) card(document.getElementById('strip'), n, 1, false);
+for (const n of NAMES) card(document.getElementById('grid'), n, SCALE, true);
+
+let frameMs = 0;
+function frame(now) {
+  const t = FIXED_T ?? now / 1000, glow = +ui.glow.value;
+  ui.gv.value = glow.toFixed(2);
+  const state = { still: ui.still.checked, glow };
+  const t0 = performance.now();
+  for (const { sc, stage, big } of cards) {
+    stage.render(sc, { x: sc.w / 2, y: sc.h / 2 }, t, state, big && ui.actors.checked ? placeholders(sc) : []);
+  }
+  frameMs = performance.now() - t0;
+  if (FIXED_T == null) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+for (const el of [ui.glow, ui.still, ui.actors]) el.addEventListener('input', () => FIXED_T != null && requestAnimationFrame(frame));
+window.addEventListener('resize', () => cards.forEach(c => c.stage.resize()));
+window.dioStats = () => ({ frameMs, cards: cards.length, dpr: devicePixelRatio, S: cards.map(c => c.stage.S) });
+</script>
+</body>
+</html>

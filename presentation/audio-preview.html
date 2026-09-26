@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Audio test</title>
+<style>body{font:14px system-ui;background:#1d1a24;color:#eee;padding:16px}button{margin:3px;padding:6px 10px}#st{font-family:monospace;margin:10px 0}</style>
+<div id="st">-</div>
+<div>
+  <button id="enable">enable</button><button id="disable">disable</button>
+  <button id="pause">pause</button><button id="resume">resume</button>
+  <button id="musicOn">music(true)</button><button id="musicOff">music(false)</button>
+</div>
+<div id="fx"></div>
+<div id="sc"></div>
+<div id="cap" style="margin-top:10px;opacity:.8"></div>
+<script src="audio.js"></script>
+<script>
+  const s = window.s = new Sound();
+  const $ = (id) => document.getElementById(id);
+  $('enable').onclick = () => s.enable().then((r) => (window.lastEnable = r));
+  $('disable').onclick = () => s.disable();
+  $('pause').onclick = () => s.pause();
+  $('resume').onclick = () => s.resume();
+  $('musicOn').onclick = () => s.music(true);
+  $('musicOff').onclick = () => s.music(false);
+  const names = ['bell', 'step', 'step-wood', 'tick', 'chime', 'motif', 'page', 'pop', 'wrong', 'right', 'whoosh'];
+  for (const n of names) {
+    const b = document.createElement('button'); b.textContent = 'sfx ' + n; b.id = 'fx-' + n;
+    b.onclick = () => { const [name, surface] = n.split('-'); s.sfx(name, { surface }); $('cap').textContent = Sound.caption(name); };
+    $('fx').append(b);
+  }
+  for (const m of ['dusk', 'shop', 'memory', 'plan', 'resolved']) {
+    const b = document.createElement('button'); b.textContent = 'scene ' + m; b.id = 'sc-' + m;
+    b.onclick = () => s.setScene(m); $('sc').append(b);
+  }
+  window.errors = [];
+  window.addEventListener('error', (e) => errors.push(String(e.message)));
+  window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+  setInterval(() => {
+    $('st').textContent = `on=${s.on} state=${s.ctx?.state} t=${s.ctx?.currentTime.toFixed(2)} step=${s._step} voices=${s._voices} scene=${s._scene}`;
+  }, 100);
+</script>

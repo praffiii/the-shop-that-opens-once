@@ -1,0 +1,4 @@
+<!doctype html><meta charset=utf-8><style>body{margin:0;background:#9fd3fb;display:grid;gap:20px;padding:20px}canvas{image-rendering:pixelated}</style>
+<body><script src="px.js"></script><script src="title.js"></script><script>
+const t=TITLE.render(); for (const [s,bg] of [[6,'#9fd3fb'],[3,'#ffd3a8'],[1,'#fff']]) { const c=document.createElement('canvas'); c.width=t.width*s; c.height=t.height*s; c.style.width=(t.width*s/devicePixelRatio)+'px'; c.style.background=bg; const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(t,0,0,c.width,c.height); document.body.appendChild(c);} document.title='ok '+t.width+'x'+t.height;
+</script>
