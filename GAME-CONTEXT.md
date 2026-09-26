@@ -51,7 +51,8 @@ Every fact carries a source tag:
 
 **Sharing**
 - `[Decision]` Shareable pages are hosted on Vercel, not Claude Artifacts. (2026-09-26)
-- `[Decision]` The project lives in a private GitHub repo, `praffiii/the-shop-that-opens-once`. The full game gets its own folder once the engine is chosen. (2026-09-26)
+- `[Decision]` The project lives in a public GitHub repo, `praffiii/the-shop-that-opens-once`. The full game gets its own folder once the engine is chosen. (2026-09-26)
+- `[Decision]` The PDFs in `docs/` and the presentation's credits are published as they are, including the team's student IDs. (2026-09-26)
 
 ## The game at a glance `[GDD]`
 
