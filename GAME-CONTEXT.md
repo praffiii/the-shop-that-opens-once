@@ -270,7 +270,6 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 - **Platform:** the GDD targets PC and mobile together, while the report and the user put PC first and mobile later.
 - **AI assets:** the GDD's tool list includes AI-generated art and Suno for music, but the user rejected AI-generated images on 2026-09-26.
 - **Palette:** the GDD asks for a twilight palette; the current direction is bright and light, with a pastel dusk.
-- **Leo's sibling:** the GDD says *kakak*, meaning an older sibling of unspecified gender. The presentation currently says "brother".
 - **Days vs nights:** the GDD calls the chapters "seven nights" but its synopsis speaks of "seven days of searching".
 
 ## Open questions
