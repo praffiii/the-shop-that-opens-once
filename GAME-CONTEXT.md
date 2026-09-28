@@ -2,14 +2,13 @@
 
 The single source of truth for what this game is, what has been decided, and what is still open. Read it before any full-game design, story or development task.
 
-Last updated: 2026-09-26.
+Last updated: 2026-09-28.
 
-**Status:** concept stage. The following exist:
+**Status:** the first playable night. The following exist:
 - a written GDD
 - a feasibility report
 - a web presentation with a code-drawn pixel art library
-
-Full-game development has not started.
+- the game in Godot (`game/`), with Night 1 playable from start to finish
 
 ## How to use this file
 
@@ -43,6 +42,11 @@ Every fact carries a source tag:
 - `[Decision]` The protagonist is drawn as the ant courier with a green cap and a green delivery bag. This is the visual adaptation of the GDD's human protagonist, a young man coming home. (2026-09-26)
 - `[Decision]` The game has no fishing mechanic and is not a timed delivery game. The fishing scene and the parcel handoff in early mood art were atmosphere only. (2026-09-26)
 
+**Building the game**
+- `[Decision]` The game reuses the presentation's code-drawn art: `game/tools/export-art/` renders it to PNG and JSON in `game/art/`. The team may retouch the PNGs in Aseprite later. The game draws on a 480x270 canvas scaled only by whole numbers. (2026-09-28)
+- `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. (2026-09-28)
+- `[Decision]` The game's text is in English. Indonesian may be added later. (2026-09-28)
+
 **Art**
 - `[Decision]` Visuals are hand-authored pixel art. The palette is bright and light, pixels are crisp at whole-number scales, and environments are full of small ambient motion. The user rejected AI-generated images and blurry, dark scenes. Ask the user before introducing any AI-generated asset. (2026-09-26)
 
@@ -52,7 +56,7 @@ Every fact carries a source tag:
 
 **Sharing**
 - `[Decision]` Shareable pages are hosted on Vercel, not Claude Artifacts. (2026-09-26)
-- `[Decision]` The project lives in a public GitHub repo, `praffiii/the-shop-that-opens-once`. The full game gets its own folder once the engine is chosen. (2026-09-26)
+- `[Decision]` The project lives in a public GitHub repo, `praffiii/the-shop-that-opens-once`. The game is the Godot project in `game/`. (2026-09-26, folder 2026-09-28)
 - `[Decision]` The PDFs in `docs/` are published as they are, including the team's student IDs. In the presentation's source list, the GDD appears by title only; the feasibility report keeps its full title and "SE.3 Kelompok 1". (2026-09-28)
 
 ## The game at a glance `[GDD]`
@@ -156,9 +160,9 @@ Nights 1–2 are the MVP `[Decision]`. Nights 3–7 and the epilogue are the ful
 
 Nights 6 and 7 are the ending. Keep them hidden as spoilers in anything shown to players.
 
-### Night 1 clue chain: a draft `[Illustrative]`
+### Night 1 clue chain `[Decision]` (adopted 2026-09-28)
 
-This chain was written for the presentation's playable demo. It is not in the GDD. Adopt it, change it or drop it.
+This chain was written for the presentation's playable demo; the user adopted it for the game. It is not in the GDD.
 - **The keepsake:** a watch stopped at 18:17 and never rewound, with "A.T." engraved on the back.
 - **The station:** an enamel plaque by the door reads "KEEPER A. TATE", and the timetable shows the evening train at 18:17.
 - **Testimony:** a clock mender at the station says Helen has sat on the platform bench every evening before 18:17 for twenty years.
@@ -169,6 +173,16 @@ This chain was written for the presentation's playable demo. It is not in the GD
 - **Right offer:** Helen. Afterwards the shop clock ticks once and the first lantern goes out.
 
 The presentation moves the shop clock forward one minute per resolved night (18:17, then 18:18, and so on). That is its own interpretation; the GDD only says the hands move briefly `[Illustrative]`.
+
+### Night 1 in the game `[Illustrative]`
+
+The playable Night 1 (`game/nights/night_1.gd`) adds details that are not decided yet:
+- The night plays at dusk. The courier arrives in Bellwood, meets Marlow, and follows the trail to the old station, reached by the road at the village's bottom-left.
+- Three residents (a baker, a gardener and a village kid) give small hints toward the station. The notice board and the signpost add atmosphere.
+- The watch's side shows its crown pulled out, which supports the mender's "a promise, not a repair".
+- Helen names the watch's owner, Arthur, and says he stopped it the evening he left. Whether Arthur is alive stays open.
+- After Helen, the scene cuts to the shop: the clock moves to 18:18 and the first lantern goes out.
+- The courier has no name yet; his lines show only his portrait.
 
 ## Art and audio
 
@@ -264,6 +278,7 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 | `docs/game-design-document.pdf` | The GDD `[GDD]` |
 | `docs/feasibility-report.pdf` | The feasibility report `[Report]` |
 | `presentation/` | The web presentation: its code-drawn art library, build script and Vercel deploy script. `the-shop-that-opens-once.html` is the built page, live at https://the-shop-that-opens-once.vercel.app |
+| `game/` | The Godot 4 game. `game/README.md` explains how to run it, how it is built and how to write a night. |
 
 ## Known inconsistencies
 
@@ -276,21 +291,17 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 ## Open questions
 
 **Technology and pipeline**
-- Art pipeline: export the presentation's code-drawn art to sprites, redraw it in Aseprite, or both? What base resolution and pixel scale?
 - Are AI-generated assets acceptable anywhere, for art or for music?
 
 **Game design**
-- Controls: click-to-move only (as in the GDD), or keyboard walking as well?
 - Time structure: does exploration happen at dusk, through the night, or by day between shop visits? Does the town's clock move?
 - Residents: how many, where they are, and on what daily schedules? The report scores NPC schedules 4/5 for difficulty.
 - Saving, chapter select, text speed and other accessibility options.
-- Language: English (as in the presentation), Indonesian (as in the GDD), or both?
 
 **Story**
 - **Protagonist:** his name, age, and pronouns for the ant courier. The GDD's protagonist is a young man.
 - **The mother:** her name, her "deep secret", and what her letter says about why the shop chose him.
 - **Grief:** which phase of grief each night mirrors.
-- **Night 1:** adopt the draft clue chain above?
 - **Night 2:** which clues lead to Nora's grandchild, and who the grandchild is.
 - **Night 3:** what the six photos show, and how the museum donation plays out.
 - **Night 4:** who the former archivist was, what the key opens, and how the player finds it.
