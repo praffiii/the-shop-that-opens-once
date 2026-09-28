@@ -85,6 +85,7 @@ func _hand_over() -> void:
 	courier.held = null
 	courier.pose = "idle"
 	Game.bag.append("watch")
+	sfx("motif")
 
 
 func _marlow() -> void:
@@ -156,6 +157,7 @@ func _mender() -> void:
 			Game.mark(&"knows_helen")
 			note("The clock mender: Helen has waited on the bench every evening before 18:17, for twenty years.")
 		"Show the watch":
+			sfx("wrong")
 			await say("mender", "Let me see... Nothing's broken. Someone let it stop at 18:17 and never wound it again.")
 			await say("mender", "That isn't a repair. That's a promise.")
 			note("The clock mender: the watch isn't broken. Stopping it at 18:17 was a promise.")
@@ -164,6 +166,7 @@ func _mender() -> void:
 func _traveller() -> void:
 	await say("traveller", "Just passing through. Trains don't stop here anymore, did you know? I walked from the junction.")
 	if await _show_watch():
+		sfx("wrong")
 		await say("traveller", "A.T.? Those are my initials too, funnily enough. See, on my case.")
 		await say("traveller", "But that isn't my watch. Ask someone who's waited here longer than me.")
 		note("The traveller's case is marked A.T., but the watch isn't his.")
@@ -199,6 +202,8 @@ func _return_watch() -> void:
 	helen.held = watch
 	helen.pose = "receive"
 	Game.bag.erase("watch")
+	sfx("right")
+	music("memory")
 	await say("helen", "...Arthur's watch.", "moved")
 	await say("helen", "He promised he'd be on the 18:17. He stopped his watch the evening he left, so our time would wait for him.", "moved")
 	await say("helen", "The trains stopped, and I kept coming anyway. I thought if I stopped waiting, I'd lose him.", "moved")
@@ -212,12 +217,15 @@ func _return_watch() -> void:
 
 func _lantern_goes_out() -> void:
 	await go("shop", "counter")
+	music("resolved")
 	var world := main.place.world
 	await wait(0.8)
 	world.show_item("clock_1817", false)
 	world.show_item("clock_1818", true)
+	sfx("tick")
 	await wait(0.6)
 	world.show_item("lantern_0", false)
+	sfx("chime")
 	Game.lanterns_out = 1
 	await wait(0.8)
 	await say("marlow", "There. Did you hear it? The clock moved.")

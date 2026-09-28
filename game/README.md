@@ -27,7 +27,7 @@ To publish a new version, run `game/deploy.sh`. It needs:
 | Open the bag | The bag icon, top right | E |
 | Look closer at a keepsake | Click it in the bag | I |
 | Turn it over | Click `<` or `>` | A / D |
-| Menu | | Esc |
+| Menu: keep playing, sound on or off, back to the title | | Esc |
 
 ## How it is built
 
@@ -39,6 +39,7 @@ To publish a new version, run `game/deploy.sh`. It needs:
 | `core/baked_art.gd` | Draws a place's exported art, depth-sorted with the characters |
 | `core/walk_map.gd` | Where feet can stand, and paths around obstacles |
 | `core/hotspot.gd` | Something to click or walk up to: a person, a sign, a door |
+| `core/sound.gd` | Music, wind and sound effects (autoload `Sound`); each place sets its mood, and whether it is indoors, has a wooden floor or a door bell |
 | `core/night.gd` | The base for night scripts, with helpers such as `say`, `choose` and `go` |
 | `actors/ant.gd` | An ant character: poses, facing, walking, holding an item |
 | `ui/` | The talk box, the bag and inspect view, the HUD, full-screen cards, shared look |

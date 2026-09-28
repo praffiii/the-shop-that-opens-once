@@ -7,6 +7,10 @@
 
 [node name="Shop" type="Node2D"]
 script = ExtResource("1_place")
+mood = "shop"
+indoors = true
+wood_floor = true
+door_bell = true
 
 [node name="World" type="Node2D" parent="."]
 script = ExtResource("2_art")

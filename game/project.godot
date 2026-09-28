@@ -22,6 +22,7 @@ boot_splash/use_filter=false
 [autoload]
 
 Game="*res://core/game.gd"
+Sound="*res://core/sound.gd"
 
 [display]
 

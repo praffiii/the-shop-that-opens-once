@@ -27,9 +27,16 @@ func _ready() -> void:
 	$UI/Screen.theme = Look.theme()
 	courier.name = "courier"
 	talk.courier = courier
-	Game.noted.connect(func(_text: String) -> void: hud.toast("Added to your notes."))
+	Game.noted.connect(_on_noted)
+	courier.stepped.connect(func() -> void: Sound.step(place.wood_floor))
 	hud.bag_pressed.connect(_open_bag)
 	title()
+
+
+func _notification(what: int) -> void:
+	# The courier is kept between places. On the title screen no place holds him, so free him here.
+	if what == NOTIFICATION_PREDELETE and courier.get_parent() == null:
+		courier.free()
 
 
 func title() -> void:
@@ -54,7 +61,10 @@ func title() -> void:
 	match pick:
 		"Begin": _begin(1)
 		"Continue": _begin(Game.saved_night())
-		"Quit": get_tree().quit()
+		"Quit":
+			Sound.stop_all()
+			await get_tree().create_timer(0.3).timeout
+			get_tree().quit()
 
 
 ## Ends the night's story and returns to the title once the current step is over.
@@ -65,8 +75,11 @@ func finish() -> void:
 
 func go(place_name: String, spawn: String) -> void:
 	talk.close()
+	var bell := place != null and place.door_bell
 	await _fade(true)
 	_swap(place_name, spawn)
+	if bell or place.door_bell:
+		Sound.play("bell")
 	await _fade(false)
 	if night:
 		await night.entered(place_name)
@@ -100,6 +113,7 @@ func _swap(place_name: String, spawn: String) -> void:
 		courier.held = null
 		place.enter(courier, spawn)
 	hud.place = place
+	Sound.mood(place.mood, place.indoors)
 	RenderingServer.set_default_clear_color(place.world.bg)
 	_frame_camera()
 
@@ -126,9 +140,16 @@ func _open_bag() -> void:
 
 func _pause() -> void:
 	_hold()
-	if (await talk.choose(["Keep playing", "Back to the title"], get_viewport_rect().size / 2 - Vector2(0, 25))) == 1:
-		finish()
+	var options: PackedStringArray = ["Keep playing", "Sound on" if Sound.muted else "Sound off", "Back to the title"]
+	match (await talk.choose(options, get_viewport_rect().size / 2 - Vector2(0, 32))):
+		1: Sound.muted = not Sound.muted
+		2: finish()
 	_release()
+
+
+func _on_noted(_text: String) -> void:
+	hud.toast("Added to your notes.")
+	Sound.play("page")
 
 
 func _unhandled_input(event: InputEvent) -> void:
