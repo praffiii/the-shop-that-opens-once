@@ -4,8 +4,8 @@ extends Node2D
 ## While any story step runs, the courier can't move; he gets the controls back when all are done.
 
 const NIGHTS := {1: preload("res://nights/night_1.gd")}
-const VIEW := Vector2(480, 270)
 const TITLE_VIEW := Vector2(360, 220) ## Where the title screen looks: the shop at the top of the lane.
+const BASE := Vector2(480, 270) ## The least art the screen shows; the UI is laid out for it.
 
 var place: Place
 var night: Night
@@ -22,6 +22,8 @@ var _held := 0
 
 
 func _ready() -> void:
+	get_tree().root.size_changed.connect(_fit_window)
+	_fit_window()
 	$UI/Screen.theme = Look.theme()
 	courier.name = "courier"
 	talk.courier = courier
@@ -39,13 +41,15 @@ func title() -> void:
 	_swap("village", "")
 	await _fade(false)
 	logo.texture = load("res://art/ui/title.png")
-	logo.position = Vector2(roundf((VIEW.x - logo.texture.get_width()) / 2), 36)
+	var view := get_viewport_rect().size
+	logo.position = Vector2(roundf((view.x - logo.texture.get_width()) / 2), 36)
 	logo.show()
 	var options: PackedStringArray = ["Begin"]
 	if Game.saved_night() > 1 and NIGHTS.has(Game.saved_night()):
 		options.append("Continue")
-	options.append("Quit")
-	var pick := options[(await talk.choose(options, Vector2(240, 196)))]
+	if not OS.has_feature("web"):
+		options.append("Quit")
+	var pick := options[(await talk.choose(options, Vector2(view.x / 2, view.y - 74)))]
 	logo.hide()
 	match pick:
 		"Begin": _begin(1)
@@ -122,7 +126,7 @@ func _open_bag() -> void:
 
 func _pause() -> void:
 	_hold()
-	if (await talk.choose(["Keep playing", "Back to the title"], Vector2(240, 110))) == 1:
+	if (await talk.choose(["Keep playing", "Back to the title"], get_viewport_rect().size / 2 - Vector2(0, 25))) == 1:
 		finish()
 	_release()
 
@@ -157,17 +161,26 @@ func _process(_delta: float) -> void:
 		_frame_camera()
 
 
+## Scales the art by the largest whole number that still shows BASE, and lets the view grow to
+## fill the rest of the window, so pixels stay square and crisp with no bars around the game.
+func _fit_window() -> void:
+	var window := Vector2(get_tree().root.size)
+	var factor := maxf(1.0, floorf(minf(window.x / BASE.x, window.y / BASE.y)))
+	get_tree().root.content_scale_size = Vector2i((window / factor).floor())
+
+
 ## Follows the courier (or looks at the title view), kept inside the place. A place smaller than
 ## the screen is centred.
 func _frame_camera() -> void:
+	var view := get_viewport_rect().size
 	var size := Vector2(place.world.size)
 	var target := courier.position if place.player else TITLE_VIEW
 	var c := target.round()
 	for axis in 2:
-		if size[axis] <= VIEW[axis]:
+		if size[axis] <= view[axis]:
 			c[axis] = roundf(size[axis] / 2)
 		else:
-			c[axis] = clampf(c[axis], VIEW[axis] / 2, size[axis] - VIEW[axis] / 2)
+			c[axis] = clampf(c[axis], roundf(view[axis] / 2), size[axis] - roundf(view[axis] / 2))
 	camera.position = c
 
 

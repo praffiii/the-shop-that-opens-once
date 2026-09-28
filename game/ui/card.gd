@@ -11,11 +11,10 @@ func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 	var paper := ColorRect.new()
 	paper.color = Color("#fff1d2") # dirt0: the same warm cream as the curtain
-	paper.size = Vector2(480, 270)
+	paper.set_anchors_preset(PRESET_FULL_RECT)
 	paper.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(paper)
-	_lines.position = Vector2(40, 0)
-	_lines.size = Vector2(400, 270)
+	_lines.set_anchors_preset(PRESET_FULL_RECT)
 	_lines.alignment = BoxContainer.ALIGNMENT_CENTER
 	_lines.add_theme_constant_override("separation", 6)
 	add_child(_lines)

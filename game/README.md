@@ -8,6 +8,15 @@ The Shop That Opens Once, built in Godot 4. Night 1 is playable from start to fi
 2. Open Godot, choose **Import**, and pick `game/project.godot`.
 3. Press **F5** (Run Project).
 
+## Play it in a browser
+
+The web version is live at https://the-shop-that-opens-once-game.vercel.app. Share that link: it
+works in any desktop browser, with nothing to install.
+
+To publish a new version, run `game/deploy.sh`. It needs:
+- Godot's web export templates. In Godot, open **Editor → Manage Export Templates** and download them.
+- The Vercel CLI, logged in to the `praffis-projects` account.
+
 ## Controls
 
 | Action | Mouse | Keyboard |
@@ -81,7 +90,9 @@ All art comes from the presentation's code-drawn pixel art (`../presentation/`).
 `tools/export-art/` renders it into `art/`. See `tools/export-art/README.md` to re-export. Once the
 team retouches a PNG by hand, stop re-exporting that part, or the export will overwrite it.
 
-The game draws on a 480x270 canvas and scales it only by whole numbers, so pixels stay crisp.
+The game shows at least 480x270 art pixels and scales them only by whole numbers, so pixels stay
+crisp. On a window that isn't an exact multiple, the view grows a little to fill it instead of
+leaving black bars. The UI is laid out for 480x270 and centred.
 
 ## Test
 
