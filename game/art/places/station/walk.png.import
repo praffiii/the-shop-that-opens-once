@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://dd2wf2hpmiick"
+path="res://.godot/imported/walk.png-493d509e2473b01a5320c76b7b8faa09.image"
+
+[deps]
+
+source_file="res://art/places/station/walk.png"
+dest_files=["res://.godot/imported/walk.png-493d509e2473b01a5320c76b7b8faa09.image"]
+
+[params]
+
