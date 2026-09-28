@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Export art</title>
+<!-- Opened by export.py in headless Chrome as export.html?only=<part>. Open it in a normal browser to debug a part. -->
+<pre id="out"></pre>
+<script src="../../../presentation/px.js"></script>
+<script src="../../../presentation/world.js"></script>
+<script src="../../../presentation/chars.js"></script>
+<script src="../../../presentation/interiors.js"></script>
+<script src="../../../presentation/title.js"></script>
+<script src="bake.js"></script>
+<script src="export-village.js"></script>
+<script src="export-rooms.js"></script>
+<script src="export-cast.js"></script>
+<script>
+  (() => {
+    const only = new URLSearchParams(location.search).get('only'), el = document.getElementById('out');
+    try {
+      if (!PARTS[only]) throw new Error(`unknown part "${only}"; known: ${Object.keys(PARTS).join(', ')}`);
+      PARTS[only]();
+      el.textContent = JSON.stringify(BAKE.out);
+    } catch (e) { el.id = 'err'; el.textContent = String((e && e.stack) || e); }
+  })();
+</script>
