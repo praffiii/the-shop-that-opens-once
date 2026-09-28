@@ -109,6 +109,7 @@ func choose(options: PackedStringArray, top_center := Vector2(-1, -1)) -> int:
 	_select(0)
 	_list.show()
 	var picked: int = await _picked
+	Sound.play("pop")
 	_list.hide()
 	return picked
 

@@ -8,17 +8,21 @@
 <script src="../../../presentation/chars.js"></script>
 <script src="../../../presentation/interiors.js"></script>
 <script src="../../../presentation/title.js"></script>
+<script src="../../../presentation/audio.js"></script>
 <script src="bake.js"></script>
 <script src="export-village.js"></script>
 <script src="export-rooms.js"></script>
 <script src="export-cast.js"></script>
+<script src="export-sound.js"></script>
 <script>
-  (() => {
+  // A part may return a promise; export.py awaits `done`, then reads the files (or the error) from the <pre>.
+  window.done = (async () => {
     const only = new URLSearchParams(location.search).get('only'), el = document.getElementById('out');
     try {
       if (!PARTS[only]) throw new Error(`unknown part "${only}"; known: ${Object.keys(PARTS).join(', ')}`);
-      PARTS[only]();
+      await PARTS[only]();
       el.textContent = JSON.stringify(BAKE.out);
     } catch (e) { el.id = 'err'; el.textContent = String((e && e.stack) || e); }
+    return el;
   })();
 </script>

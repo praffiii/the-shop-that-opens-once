@@ -44,6 +44,15 @@ func note(text: String) -> void:
 	Game.note(text)
 
 
+func sfx(sound_name: String) -> void:
+	Sound.play(sound_name)
+
+
+## Changes the music: dusk, shop, memory or resolved.
+func music(mood: String) -> void:
+	Sound.mood(mood, main.place.indoors)
+
+
 func hint(text: String) -> void:
 	main.hud.toast(text)
 

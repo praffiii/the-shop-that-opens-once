@@ -34,6 +34,9 @@ func _ready() -> void:
 	else:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Game.SAVE_PATH))
 	print("PASS: Night 1 plays from start to finish")
+	main.queue_free()
+	Sound.stop_all()
+	await get_tree().create_timer(0.3, true, false, true).timeout
 	get_tree().quit(0)
 
 

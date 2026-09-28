@@ -7,6 +7,11 @@ signal used(hotspot: Hotspot)
 
 const REACH := 20.0 ## How close the courier must be to use a hotspot with the interact key.
 
+@export var mood := "dusk" ## The music here: dusk, shop, memory or resolved.
+@export var indoors := false ## Indoors, the evening wind is quiet.
+@export var wood_floor := false ## Footsteps sound on wood rather than ground.
+@export var door_bell := false ## A bell rings when the courier comes in or goes out.
+
 ## Off while a talk, the bag or a transition has the screen.
 var controls := false:
 	set(value):

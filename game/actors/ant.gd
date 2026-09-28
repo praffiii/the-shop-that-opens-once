@@ -5,6 +5,8 @@ extends Sprite2D
 ## Plays a pose, faces left or right, can hold a small item, and walks through a list of points.
 
 signal arrived
+## A foot touched the ground while walking.
+signal stepped
 
 const SPEED := 56.0 ## Walking pace in art px per second.
 const WALKS := ["walk", "carryWalk", "run"] ## Poses whose frames advance with distance, not time.
@@ -126,6 +128,8 @@ func move_by(motion: Vector2) -> void:
 	while _step >= stride:
 		_step -= stride
 		_show(_frame + 1)
+		if _frame % (int(_pose().frames) / 2) == 0:
+			stepped.emit()
 
 
 func face_to(x: float) -> void:
