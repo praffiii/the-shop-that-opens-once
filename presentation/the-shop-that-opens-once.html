@@ -290,7 +290,7 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
 /* ---------- sources ---------- */
 .sources{background:var(--ink);color:#f4e9ef;padding:clamp(56px,8vw,96px) 0}
 .sources h2{color:#fff;font-size:clamp(28px,1.4rem + 1.6vw,40px);text-shadow:none}
-.src-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px;margin-top:26px}
+.src-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;margin-top:26px}
 .sources h3{font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber-l);margin-bottom:10px}
 .sources ul{margin:0;padding-left:1.1em;font-size:15px;line-height:1.5}
 .sources li{margin:5px 0}
@@ -299,7 +299,7 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
 
 @media (max-width:900px){
   .comic{grid-template-columns:repeat(2,1fr)}
-  .rules,.cast,.legend,.src-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rules,.cast,.legend{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tods,.look-grid{grid-template-columns:1fr}
   .side{grid-template-columns:1fr}
   .night,.split{grid-template-columns:1fr}
@@ -585,16 +585,12 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
     <div class="src-grid">
       <div><h3>Team</h3><ul><li>SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie, Praffi Ramadhani.</li></ul></div>
       <div><h3>Written sources</h3><ul>
-        <li><b>Game Design Document &amp; Concept Proposal</b>, Andika Rafa Akbar (2410511026), SE.3 (A). <span class="muted">World, premise, mechanics, controls, the seven nights.</span></li>
-        <li><b>Game Concept and Development Feasibility Research Report</b>, SE.3 Kelompok 1. <span class="muted">Core loop, audience, references, difficulty estimates, MVP scope, PC first.</span></li>
+        <li><b>Game Design Document</b> <span class="muted">World, story, mechanics and the seven nights.</span></li>
+        <li><b>Feasibility Research Report</b> <span class="muted">Audience, scope and production plan.</span></li>
       </ul></div>
       <div><h3>Art &amp; type</h3><ul>
         <li>Every image here is new pixel art drawn in code for this presentation. No generated or earlier images are used.</li>
         <li>Pixelify Sans and DM Sans, both under the SIL Open Font License. Music and sounds are synthesized in the browser.</li>
-      </ul></div>
-      <div><h3>Notes on accuracy</h3><ul>
-        <li>The Night 1 walkthrough and the playable demo are concept illustrations. The clock mender, the traveller and all dialogue were written for this presentation.</li>
-        <li>The GDD's schedule says “10 weeks” but its table covers four, so no dates are shown.</li>
       </ul></div>
     </div>
   </div>
