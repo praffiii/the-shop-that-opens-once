@@ -296,6 +296,7 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 - Are AI-generated assets acceptable anywhere, for art or for music?
 
 **Game design**
+- Camera: zoom in and out automatically, for example closer during talks? The user wants this later, not now (2026-09-29).
 - Time structure: does exploration happen at dusk, through the night, or by day between shop visits? Does the town's clock move?
 - Residents: how many, where they are, and on what daily schedules? The report scores NPC schedules 4/5 for difficulty.
 - Saving, chapter select, text speed and other accessibility options.
