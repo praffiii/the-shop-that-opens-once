@@ -7,18 +7,18 @@ signal _next
 signal _picked(index: int)
 
 const SPEED := 50.0 ## Characters typed per second.
-const BOX := Rect2(8, 202, 464, 62)
-const TOP := 16.0 ## Where the box moves up to when it would hide the people talking.
+const SIZE := Vector2(464, 62)
+const MARGIN := 6.0 ## Gap between the box and the bottom of the screen.
 
 ## Set by Main: the box moves to the top of the screen rather than hide him.
 var courier: Ant
 
-var _root := Control.new()
-var _box := Look.panel("panel", BOX)
+var _root := Control.new() # the box and everything on it, placed at the box's top-left
+var _box := Look.panel("panel", Rect2(Vector2.ZERO, SIZE))
 var _tag := Look.panel("name")
 var _name := Look.label("", Rect2(), Color(Look.ui().name.text))
-var _text := Look.label("", Rect2(0, 0, 1, 50))
-var _frame := Look.panel("slot", Rect2(BOX.position + Vector2(5, 5), Vector2(52, 52)))
+var _text := Look.label("", Rect2(0, 6, 1, 50))
+var _frame := Look.panel("slot", Rect2(5, 5, 52, 52))
 var _face := TextureRect.new()
 var _arrow := TextureRect.new()
 var _list := Look.panel("panel")
@@ -39,14 +39,14 @@ func _ready() -> void:
 		_root.add_child(node)
 	_tag.add_child(_name)
 	_list.add_child(_mark)
-	_face.position = BOX.position + Vector2(7, 7)
-	_arrow.position = BOX.end - Vector2(16, 13)
+	_face.position = Vector2(7, 7)
+	_arrow.position = SIZE - Vector2(16, 13)
 	close()
 
 
 func close() -> void:
-	for node: Control in [_box, _tag, _text, _frame, _face, _arrow, _list]:
-		node.hide()
+	_root.hide()
+	_list.hide()
 	_stop_speaker()
 
 
@@ -54,23 +54,25 @@ func close() -> void:
 ## portrait ("" for none); `speaker` is the name shown ("" for none).
 func say(speaker: String, who: String, text: String, mood := "neutral", actor: Ant = null) -> void:
 	_list.hide()
-	_box.show()
-	_text.show()
-	_root.position.y = TOP - BOX.position.y if _hides(actor) or _hides(courier) else 0.0
+	var view := get_viewport_rect().size
+	var bottom := view.y - SIZE.y - MARGIN
+	var top := _hides(actor, bottom) or _hides(courier, bottom)
+	_root.position = Vector2(roundf((view.x - SIZE.x) / 2), MARGIN + 10 if top else bottom)
+	_root.show()
 	_face.visible = who != ""
 	_frame.visible = who != ""
 	if who != "":
 		_face.texture = Ant.portrait(who, mood)
 	var left := 62.0 if who != "" else 10.0
-	_text.position = BOX.position + Vector2(left, 6)
-	_text.size.x = BOX.size.x - left - 10
+	_text.position.x = left
+	_text.size.x = SIZE.x - left - 10
 	_text.text = text
 	_text.visible_characters = 0
 	_typed = 0.0
 	_tag.visible = speaker != ""
 	_name.text = speaker
 	_name.position = Vector2(5, 1)
-	_tag.position = BOX.position + Vector2(left - 4, -10)
+	_tag.position = Vector2(left - 4, -10)
 	_tag.size = Vector2(_name.get_minimum_size().x + 10, 14)
 	_stop_speaker()
 	if actor and actor.pose == "idle":
@@ -79,7 +81,7 @@ func say(speaker: String, who: String, text: String, mood := "neutral", actor: A
 	await _next
 
 
-## Lists `options` and returns the index picked. The list sits over the talk box's right end,
+## Lists `options` and returns the index picked. The list sits by the talk box's right end,
 ## or centred under `top_center` when given.
 func choose(options: PackedStringArray, top_center := Vector2(-1, -1)) -> int:
 	for c in _choices:
@@ -98,9 +100,9 @@ func choose(options: PackedStringArray, top_center := Vector2(-1, -1)) -> int:
 	if top_center.x >= 0:
 		_list.position = Vector2(roundf(top_center.x - _list.size.x / 2), top_center.y)
 	else:
-		var box_y := BOX.position.y + _root.position.y
-		var below := _root.position.y < 0
-		_list.position = Vector2(BOX.end.x - _list.size.x, box_y + BOX.size.y + 3 if below else box_y - _list.size.y - 3)
+		var box := _root.position
+		var below := box.y < get_viewport_rect().size.y / 2
+		_list.position = Vector2(box.x + SIZE.x - _list.size.x, box.y + SIZE.y + 3 if below else box.y - _list.size.y - 3)
 	for i in _choices.size():
 		_choices[i].position = Vector2(12, 4 + i * Look.LINE)
 	_arrow.hide()
@@ -113,7 +115,7 @@ func choose(options: PackedStringArray, top_center := Vector2(-1, -1)) -> int:
 
 func _process(delta: float) -> void:
 	_clock += delta
-	if not _text.visible:
+	if not _root.visible:
 		return
 	var total := _text.get_total_character_count()
 	if _text.visible_characters >= 0 and _text.visible_characters < total:
@@ -142,7 +144,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			return
 		get_viewport().set_input_as_handled()
-	elif _box.visible and (event.is_action_pressed("interact") or _is_click(event)):
+	elif _root.visible and (event.is_action_pressed("interact") or _is_click(event)):
 		get_viewport().set_input_as_handled()
 		if _typing():
 			_text.visible_characters = -1
@@ -150,9 +152,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_next.emit()
 
 
-## True when the box at the bottom of the screen would cover most of someone.
-func _hides(someone: Ant) -> bool:
-	return someone != null and someone.is_inside_tree() and (get_viewport().get_canvas_transform() * someone.global_position).y > BOX.position.y + 6
+## True when a box at `box_y` would cover most of someone.
+func _hides(someone: Ant, box_y: float) -> bool:
+	return someone != null and someone.is_inside_tree() and (get_viewport().get_canvas_transform() * someone.global_position).y > box_y + 6
 
 
 func _typing() -> bool:

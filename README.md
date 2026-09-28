@@ -17,6 +17,6 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 
 ## Quick start
 
-- **Play the game:** open `game/project.godot` in Godot 4.7 and press F5. See `game/README.md`.
+- **Play the game:** open https://the-shop-that-opens-once-game.vercel.app in a browser, or open `game/project.godot` in Godot 4.7 and press F5. See `game/README.md`.
 - **See the presentation:** open `presentation/the-shop-that-opens-once.html` in a browser. It works offline.
 - **Change or publish the presentation:** see `presentation/README.md`.

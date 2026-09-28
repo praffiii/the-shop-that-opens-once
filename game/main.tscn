@@ -15,9 +15,11 @@ script = ExtResource("1_main")
 
 [node name="Screen" type="Control" parent="UI"]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 480.0
-offset_bottom = 270.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
 [node name="Hud" type="Control" parent="UI/Screen"]
@@ -41,7 +43,12 @@ mouse_filter = 2
 script = ExtResource("4_bag")
 
 [node name="Card" type="Control" parent="UI/Screen"]
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("5_card")
 
@@ -50,7 +57,11 @@ layer = 5
 
 [node name="Rect" type="ColorRect" parent="Curtain"]
 visible = false
-offset_right = 480.0
-offset_bottom = 270.0
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0.945098, 0.823529, 1)

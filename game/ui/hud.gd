@@ -23,7 +23,6 @@ var _clock := 0.0
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 	_bag.texture_normal = load("res://art/icons/bag.png")
-	_bag.position = Vector2(480 - 16 - 8, 8)
 	_bag.pressed.connect(bag_pressed.emit)
 	_hover_tag.add_child(_hover)
 	_toast_box.add_child(_toast)
@@ -46,7 +45,7 @@ func toast(text: String) -> void:
 	_toast.text = text
 	_toast.position = Vector2(8, 4)
 	_toast_box.size = Vector2(_toast.get_minimum_size().x + 16, Look.LINE + 9)
-	_toast_box.position = Vector2(roundf((480 - _toast_box.size.x) / 2), 6)
+	_toast_box.position = Vector2(roundf((get_viewport_rect().size.x - _toast_box.size.x) / 2), 6)
 	_toast_box.show()
 	_toast_left = TOAST_SECONDS
 
@@ -63,12 +62,13 @@ func _process(delta: float) -> void:
 	_cursor.position = (mouse - Vector2(hotspot[0], hotspot[1])).round()
 
 	_bag.visible = exploring
+	_bag.position = Vector2(get_viewport_rect().size.x - 24, 8)
 	_hover_tag.visible = exploring and place.hover != null
 	if _hover_tag.visible:
 		_hover.text = place.hover.label
 		_hover.position = Vector2(5, 1)
 		_hover_tag.size = Vector2(_hover.get_minimum_size().x + 10, 14)
-		_hover_tag.position = (mouse + Vector2(10, 8)).clamp(Vector2.ZERO, Vector2(480, 270) - _hover_tag.size).round()
+		_hover_tag.position = (mouse + Vector2(10, 8)).clamp(Vector2.ZERO, get_viewport_rect().size - _hover_tag.size).round()
 
 	_prompt.visible = exploring and place.near != null and place.near != place.hover
 	if _prompt.visible:

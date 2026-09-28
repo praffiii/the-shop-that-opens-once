@@ -77,7 +77,7 @@ func _process(_delta: float) -> void:
 			_expect(i >= 0, "option \"%s\" is offered (got %s)" % [_picks[0], options])
 			_picks.remove_at(0)
 		talk._picked.emit(i)
-	elif talk._box.visible:
+	elif talk._root.visible:
 		talk._next.emit()
 	elif main.cards.visible:
 		main.cards._next.emit()
@@ -135,5 +135,5 @@ func _fail(what: String) -> void:
 		_failed = true
 		printerr("FAIL: ", what)
 		if main and main.place:
-			printerr("  in %s, courier at %s, controls %s, talk box %s, list %s, night %s" % [main.place.scene_file_path, main.courier.position, main.place.controls, main.talk._box.visible, main.talk._list.visible, main.night])
+			printerr("  in %s, courier at %s, controls %s, talk box %s, list %s, night %s" % [main.place.scene_file_path, main.courier.position, main.place.controls, main.talk._root.visible, main.talk._list.visible, main.night])
 		get_tree().quit(1)

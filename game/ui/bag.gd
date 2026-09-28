@@ -5,16 +5,16 @@ extends Control
 
 signal _closed
 
-const PANEL := Rect2(40, 20, 400, 230)
+const SIZE := Vector2(400, 230)
 
-var _panel := Look.panel("panel", PANEL)
+var _panel := Look.panel("panel", Rect2(Vector2.ZERO, SIZE)) # everything below is placed on the panel
 var _list := Control.new()   # the bag's contents and the notes
 var _look := Control.new()   # one keepsake up close
 var _slots := HBoxContainer.new()
-var _item_name := Look.label("", Rect2(52, 82, 130, 30))
+var _item_name := Look.label("", Rect2(12, 62, 130, 30))
 var _notes := VBoxContainer.new()
 var _big := TextureRect.new()
-var _side_text := Look.label("", Rect2(70, 176, 340, 30))
+var _side_text := Look.label("", Rect2(30, 156, 340, 30))
 var _looking := ""           # the keepsake being looked at, or ""
 var _side := 0
 
@@ -24,33 +24,34 @@ func _ready() -> void:
 	add_child(_panel)
 	for node: Control in [_list, _look]:
 		node.mouse_filter = MOUSE_FILTER_IGNORE
-		add_child(node)
-	_list.add_child(Look.label("Bag", Rect2(52, 30, 100, 12)))
-	_slots.position = Vector2(52, 48)
+		_panel.add_child(node)
+	_list.add_child(Look.label("Bag", Rect2(12, 10, 100, 12)))
+	_slots.position = Vector2(12, 28)
 	_slots.add_theme_constant_override("separation", 4)
 	_list.add_child(_slots)
 	_list.add_child(_item_name)
-	_list.add_child(Look.label("Notes", Rect2(196, 30, 100, 12)))
-	_notes.position = Vector2(196, 48)
+	_list.add_child(Look.label("Notes", Rect2(156, 10, 100, 12)))
+	_notes.position = Vector2(156, 28)
 	_notes.size = Vector2(232, 180)
 	_notes.add_theme_constant_override("separation", 5)
 	_list.add_child(_notes)
-	_list.add_child(Look.label("E or Esc to close", Rect2(52, 228, 150, 12), Look.SOFT))
+	_list.add_child(Look.label("E or Esc to close", Rect2(12, 208, 150, 12), Look.SOFT))
 	_big.scale = Vector2(2, 2)
 	_side_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_look.add_child(_big)
 	_look.add_child(_side_text)
 	for i in 2:
-		var arrow := Look.label("<" if i == 0 else ">", Rect2(150 + i * 170, 104, 12, 12))
+		var arrow := Look.label("<" if i == 0 else ">", Rect2(110 + i * 170, 84, 12, 12))
 		arrow.mouse_filter = MOUSE_FILTER_STOP
 		arrow.gui_input.connect(_on_arrow.bind(-1 if i == 0 else 1))
 		_look.add_child(arrow)
-	_look.add_child(Look.label("A / D to turn it over. Esc to put it back.", Rect2(52, 228, 300, 12), Look.SOFT))
+	_look.add_child(Look.label("A / D to turn it over. Esc to put it back.", Rect2(12, 208, 300, 12), Look.SOFT))
 	hide()
 
 
 func open() -> void:
 	_looking = ""
+	_panel.position = ((get_viewport_rect().size - SIZE) / 2).round()
 	_refresh()
 	show()
 	await _closed
@@ -83,7 +84,7 @@ func _refresh() -> void:
 	if _looking != "":
 		var side: Array = Keepsakes.ALL[_looking].sides[_side]
 		_big.texture = item_art(_looking, "lg", side[0])
-		_big.position = (Vector2(240, 100) - _big.texture.get_size()).round()
+		_big.position = (Vector2(200, 80) - _big.texture.get_size()).round()
 		_side_text.text = side[1]
 		Game.note(side[2])
 		Game.mark(StringName("seen_%s_%s" % [_looking, side[0]]))
