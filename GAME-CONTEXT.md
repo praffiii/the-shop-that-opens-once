@@ -43,7 +43,8 @@ Every fact carries a source tag:
 - `[Decision]` The game has no fishing mechanic and is not a timed delivery game. The fishing scene and the parcel handoff in early mood art were atmosphere only. (2026-09-26)
 
 **Building the game**
-- `[Decision]` The game reuses the presentation's code-drawn art: `game/tools/export-art/` renders it to PNG and JSON in `game/art/`. The team may retouch the PNGs in Aseprite later. The game draws on a 480x270 canvas scaled only by whole numbers. (2026-09-28)
+- `[Decision]` The game reuses the presentation's code-drawn art: `game/tools/export-art/` renders it to PNG and JSON in `game/art/`. The team may retouch the PNGs in Aseprite later. Everything is scaled only by whole numbers. (2026-09-28)
+- `[Decision]` The camera is close: it shows about 320x180 art pixels of the world, each drawn 2x on a canvas of at least 640x360, and the UI uses that finer canvas. Chosen over 480x270 (too far) and 240x135 (too close). (2026-09-29)
 - `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. (2026-09-28)
 - `[Decision]` The game's text is in English. Indonesian may be added later. (2026-09-28)
 - `[Decision]` The game reuses the presentation's synthesized sound: its piano and music-box music in four moods (dusk, shop, memory, resolved), the evening wind, footsteps, the shop's door bell and small effects. `game/tools/export-art/` exports them to OGG in `game/art/sound/`. (2026-09-29)

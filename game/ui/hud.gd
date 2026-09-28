@@ -73,9 +73,10 @@ func _process(delta: float) -> void:
 	_prompt.visible = exploring and place.near != null and place.near != place.hover
 	if _prompt.visible:
 		_prompt.texture = Look.frame("prompt", int(_clock * 3))
+		_prompt.scale = Vector2.ONE * Main.ZOOM # the bubble belongs to the world: world-sized pixels
 		var area := place.near.global_area()
 		var top := get_viewport().get_canvas_transform() * Vector2(area.get_center().x, area.position.y)
-		_prompt.position = (top - Vector2(_prompt.texture.get_width() / 2.0, _prompt.texture.get_height() + 2)).round()
+		_prompt.position = (top - Vector2(_prompt.texture.get_width() / 2.0, _prompt.texture.get_height() + 1) * Main.ZOOM).round()
 
 	if _toast_left > 0:
 		_toast_left -= delta

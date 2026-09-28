@@ -71,6 +71,11 @@ func walk(char_id: String, to: Vector2) -> void:
 	await who.walk_to(main.place.walk_map.path(who.position, to))
 
 
+## Glides the camera to show a point (such as an anchor), or back to the courier with null.
+func look(at: Variant) -> void:
+	await main.look(at)
+
+
 func go(place_name: String, spawn: String) -> void:
 	await main.go(place_name, spawn)
 

@@ -55,8 +55,10 @@ func _meet_marlow() -> void:
 	await say("marlow", "Ah, there you are. Come in, come in. Mind the step.")
 	await say("courier", "Sorry. I didn't know there was a shop here.")
 	await say("marlow", "Nobody does. It opens once, for seven nights, and then it's gone again.")
+	await look(anchor("lantern3"))
 	await say("marlow", "Each lantern up there keeps a keepsake that never found its way home.")
 	await say("marlow", "I look after them. You, I think, can carry them.")
+	await look(null)
 	if (await choose(["Why me?", "What do I have to do?"])) == 0:
 		await say("marlow", "The shop chose you. It usually knows what it's doing. More than I do, some nights.")
 	else:
@@ -218,6 +220,7 @@ func _return_watch() -> void:
 func _lantern_goes_out() -> void:
 	await go("shop", "counter")
 	music("resolved")
+	await look(anchor("clock"))
 	var world := main.place.world
 	await wait(0.8)
 	world.show_item("clock_1817", false)
