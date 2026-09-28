@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://core/place.gd" id="1_place"]
+[ext_resource type="Script" path="res://core/baked_art.gd" id="2_art"]
+[ext_resource type="Script" path="res://actors/ant.gd" id="3_ant"]
+[ext_resource type="Script" path="res://core/hotspot.gd" id="4_hot"]
+
+[node name="Shop" type="Node2D"]
+script = ExtResource("1_place")
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2_art")
+art_dir = "res://art/places/shop/night"
+
+[node name="marlow" type="Sprite2D" parent="World"]
+position = Vector2(200, 151)
+script = ExtResource("3_ant")
+id = "marlow"
+facing = -1
+
+[node name="marlow" type="Node2D" parent="World/marlow"]
+script = ExtResource("4_hot")
+label = "Marlow"
+area = Rect2(-12, -32, 24, 32)
+spot = Vector2(-44, 35)
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="door" type="Node2D" parent="Hotspots"]
+position = Vector2(180, 234)
+script = ExtResource("4_hot")
+label = "Back outside"
+area = Rect2(-14, -6, 28, 10)
+spot = Vector2(0, 0)
+exit_to = "village/from_shop"
+
+[node name="lanterns" type="Node2D" parent="Hotspots"]
+position = Vector2(180, 41)
+script = ExtResource("4_hot")
+label = "Lanterns"
+area = Rect2(-160, -14, 320, 26)
+spot = Vector2(-70, 159)
+
+[node name="clock" type="Node2D" parent="Hotspots"]
+position = Vector2(180, 74)
+script = ExtResource("4_hot")
+label = "Clock"
+area = Rect2(-19, -19, 38, 38)
+spot = Vector2(-2, 122)
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="door" type="Marker2D" parent="Spawns"]
+position = Vector2(180, 218)
+
+[node name="counter" type="Marker2D" parent="Spawns"]
+position = Vector2(156, 186)

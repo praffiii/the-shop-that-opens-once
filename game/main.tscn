@@ -1,0 +1,56 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" path="res://ui/hud.gd" id="2_hud"]
+[ext_resource type="Script" path="res://ui/talk.gd" id="3_talk"]
+[ext_resource type="Script" path="res://ui/bag.gd" id="4_bag"]
+[ext_resource type="Script" path="res://ui/card.gd" id="5_card"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Camera" type="Camera2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Screen" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 480.0
+offset_bottom = 270.0
+mouse_filter = 2
+
+[node name="Hud" type="Control" parent="UI/Screen"]
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("2_hud")
+
+[node name="Logo" type="TextureRect" parent="UI/Screen"]
+visible = false
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Talk" type="Control" parent="UI/Screen"]
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("3_talk")
+
+[node name="Bag" type="Control" parent="UI/Screen"]
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("4_bag")
+
+[node name="Card" type="Control" parent="UI/Screen"]
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("5_card")
+
+[node name="Curtain" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Rect" type="ColorRect" parent="Curtain"]
+visible = false
+offset_right = 480.0
+offset_bottom = 270.0
+mouse_filter = 2
+color = Color(1, 0.945098, 0.823529, 1)
