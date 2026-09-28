@@ -4,7 +4,7 @@ A cozy, melancholic 2D pixel-art mystery. In the ant town of Bellwood, a shop ap
 
 A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie and Praffi Ramadhani.
 
-**Status:** concept stage. The team has not chosen the engine for the full game yet.
+**Status:** concept stage. The full game will be built in Godot 4 (GDScript).
 
 ## What's in this repo
 
@@ -14,7 +14,7 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 | `docs/` | The game design document and the feasibility report |
 | `presentation/` | The web presentation and its code-drawn pixel art, the game's visual reference. Live at https://the-shop-that-opens-once.vercel.app |
 
-The full game will get its own folder once the team picks an engine.
+The full game will get its own folder for the Godot project.
 
 ## Quick start
 

@@ -35,7 +35,8 @@ Every fact carries a source tag:
 **Scope and platform**
 - `[Decision]` PC comes first. The MVP is 1–2 playable chapters (Nights 1–2). (2026-09-26)
 - `[Decision]` The full-game vision is seven nights plus an epilogue, about 1–3 hours. Mobile comes after the PC version is stable. (2026-09-26)
-- `[Decision]` The engine is not settled: Unity and Godot 4 are both options. The GDD's schedule is not a confirmed plan. (2026-09-26)
+- `[Decision]` The engine is Godot 4 (4.7.2), the standard build with GDScript, not the .NET build: C# projects in Godot 4 cannot export to the web. (2026-09-28)
+- `[Decision]` The GDD's schedule is not a confirmed plan. (2026-09-26)
 
 **Characters and world**
 - `[Decision]` Every character is an ant: expressive reddish-brown ants, as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
@@ -275,7 +276,6 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 ## Open questions
 
 **Technology and pipeline**
-- Engine: Unity or Godot 4 (the GDD's options), or the web?
 - Art pipeline: export the presentation's code-drawn art to sprites, redraw it in Aseprite, or both? What base resolution and pixel scale?
 - Are AI-generated assets acceptable anywhere, for art or for music?
 
