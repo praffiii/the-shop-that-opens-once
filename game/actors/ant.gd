@@ -40,7 +40,7 @@ var held: Texture2D:
 			_hand.visible = value != null
 
 var _info: Dictionary = {}
-var _hand := Sprite2D.new()
+var _hand: Sprite2D # made in _ready, so an ant freed before it enters the tree leaks nothing
 var _time := 0.0
 var _step := 0.0
 var _frame := 0
@@ -66,6 +66,7 @@ static func portrait(char_id: String, mood := "neutral", frame := 0) -> AtlasTex
 
 func _ready() -> void:
 	centered = false
+	_hand = Sprite2D.new()
 	_hand.visible = false
 	add_child(_hand, false, Node.INTERNAL_MODE_FRONT)
 	_hand.texture = held
