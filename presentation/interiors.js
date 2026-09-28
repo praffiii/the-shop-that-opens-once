@@ -775,6 +775,11 @@
       const st = view.state || {}, still = !!st.still, t = still ? 0 : view.t;
       const lan = st.lanterns || [1, 1, 1, 1, 1, 1, 1], keep = st.keepsakes || [0, 0, 0, 0, 0, 0, 0];
       const hi = st.highlight == null ? -1 : st.highlight, mins = st.clockMin == null ? 1097 : st.clockMin;
+      // export hook (game/tools/export-art): st.part draws one piece alone; 'below' is the room without the hands, keepsakes and props
+      const part = st.part;
+      if (part === 'hands') { hands(g, mins); return; }
+      if (part === 'keepsakes') { shelf(g, t, still, keep, hi); return; }
+      if (part === 'item') { props[st.item].draw(g, t); return; }
 
       // window sky: bands, drifting clouds, rooftops
       g.drawImage(sky, SKX, SKY);
@@ -805,34 +810,12 @@
       line(g, px0, py0, bxp, byp - 3, 'brass3');
       disc(g, bxp + 0.5, byp + 0.5, 3.6, (d, lit) => d > 2.8 ? 'brass4' : lit > 0.4 ? 'brass0' : lit > -0.3 ? 'brass1' : 'brass2');
       rect(g, CX - 7, CY + 21, 1, 6, X.glint); rect(g, CX - 6, CY + 21, 1, 3, X.glint);
-      // clock hands from state.clockMin (Bresenham lines)
-      const m = ((mins % 1440) + 1440) % 1440, am = (m % 60) / 60 * Math.PI * 2, ah = ((m / 60) % 12) / 12 * Math.PI * 2;
-      const hx = CX + Math.round(Math.sin(ah) * 7), hy = CY - Math.round(Math.cos(ah) * 7), mx = CX + Math.round(Math.sin(am) * 11), my = CY - Math.round(Math.cos(am) * 11);
-      line(g, CX, CY, hx, hy, 'ink2'); line(g, CX + (Math.abs(Math.cos(ah)) > 0.5 ? 1 : 0), CY + (Math.abs(Math.cos(ah)) > 0.5 ? 0 : 1), hx, hy, 'ink2');
-      line(g, CX, CY, mx, my, 'ink2');
-      rect(g, CX - 1, CY - 1, 3, 3, 'brass3'); dot(g, CX, CY, 'brass0');
+      if (!part) hands(g, mins);
 
       // sleeping cat breathing on the left bookcase
       g.drawImage(step(t, 1.25) % 2 ? catB : catA, 52, 44);
 
-      // keepsakes on the beam shelf
-      const names = [['watch'], ['doll'], ['camera'], ['key'], ['shoes'], ['book'], ['letter', 'musicbox']];
-      for (let i = 0; i < 7; i++) {
-        const sx = LX(i);
-        if (i === hi) {
-          const pulse = still ? 1 : step(t, 4) % 4;
-          ellipse(g, sx, SHELF - 7, 10 + (pulse === 2 ? 1 : 0), 9, X.glow2);
-        }
-        if (!keep[i]) continue;
-        const set = names[i];
-        if (set.length === 1) { const im = item(set[0], 'sm'); g.drawImage(im, sx - (im.width >> 1), SHELF - im.height); }
-        else { const mb = item('musicbox', 'sm', 'closed'), le = item('letter', 'sm'); g.drawImage(mb, sx - mb.width + 4, SHELF - mb.height); g.drawImage(le, sx - 3, SHELF - le.height); }
-        if (i === hi) {
-          const ph = still ? 1 : step(t, 6) % 6, gx = sx + 6, gy = SHELF - 15;
-          const r = ph < 3 ? ph + 1 : 5 - ph;
-          rect(g, gx - r, gy, 2 * r + 1, 1, 'white'); rect(g, gx, gy - r, 1, 2 * r + 1, 'white'); dot(g, gx, gy, 'light1');
-        }
-      }
+      if (!part) shelf(g, t, still, keep, hi);
 
       // lanterns, flicker and smoke wisps
       for (let i = 0; i < 7; i++) {
@@ -863,10 +846,39 @@
         dot(g, Math.round(xx), Math.round(yy), k % 3 ? 'light0' : 'white');
       }
 
-      drawSorted(g, props, actors, t);
+      if (!part) drawSorted(g, props, actors, t);
+    }
+    // clock hands from state.clockMin (Bresenham lines)
+    function hands(g, mins) {
+      const m = ((mins % 1440) + 1440) % 1440, am = (m % 60) / 60 * Math.PI * 2, ah = ((m / 60) % 12) / 12 * Math.PI * 2;
+      const hx = CX + Math.round(Math.sin(ah) * 7), hy = CY - Math.round(Math.cos(ah) * 7), mx = CX + Math.round(Math.sin(am) * 11), my = CY - Math.round(Math.cos(am) * 11);
+      line(g, CX, CY, hx, hy, 'ink2'); line(g, CX + (Math.abs(Math.cos(ah)) > 0.5 ? 1 : 0), CY + (Math.abs(Math.cos(ah)) > 0.5 ? 0 : 1), hx, hy, 'ink2');
+      line(g, CX, CY, mx, my, 'ink2');
+      rect(g, CX - 1, CY - 1, 3, 3, 'brass3'); dot(g, CX, CY, 'brass0');
+    }
+    // keepsakes on the beam shelf
+    function shelf(g, t, still, keep, hi) {
+      const names = [['watch'], ['doll'], ['camera'], ['key'], ['shoes'], ['book'], ['letter', 'musicbox']];
+      for (let i = 0; i < 7; i++) {
+        const sx = LX(i);
+        if (i === hi) {
+          const pulse = still ? 1 : step(t, 4) % 4;
+          ellipse(g, sx, SHELF - 7, 10 + (pulse === 2 ? 1 : 0), 9, X.glow2);
+        }
+        if (!keep[i]) continue;
+        const set = names[i];
+        if (set.length === 1) { const im = item(set[0], 'sm'); g.drawImage(im, sx - (im.width >> 1), SHELF - im.height); }
+        else { const mb = item('musicbox', 'sm', 'closed'), le = item('letter', 'sm'); g.drawImage(mb, sx - mb.width + 4, SHELF - mb.height); g.drawImage(le, sx - 3, SHELF - le.height); }
+        if (i === hi) {
+          const ph = still ? 1 : step(t, 6) % 6, gx = sx + 6, gy = SHELF - 15;
+          const r = ph < 3 ? ph + 1 : 5 - ph;
+          rect(g, gx - r, gy, 2 * r + 1, 1, 'white'); rect(g, gx, gy - r, 1, 2 * r + 1, 'white'); dot(g, gx, gy, 'light1');
+        }
+      }
     }
 
-    return { w: W, h: H, bg: P.wall2, anchors, hotspots: {}, paths: {}, draw };
+    // props: the sorted items; floor and door: [x, y, w, h] of the floor between the walls and the doorway (for walk masks)
+    return { w: W, h: H, bg: P.wall2, anchors, hotspots: {}, paths: {}, draw, props, floor: [4, FY, W - 8, 234 - FY], door: [166, 234, 28, H - 234] };
   }
 
   /* ---------------------------------------------------------------- shop trinkets (shelf dressing) */
@@ -2262,6 +2274,9 @@
       const st = view.state || {}, still = !!st.still, t = still ? 0 : view.t;
       const tod = Math.max(0, Math.min(1, +st.tod || 0)), lv = Math.max(0, Math.min(1, st.lamps == null ? 0 : +st.lamps));
       curLamps = lv; stillNow = still; curTod = tod;
+      // export hook (game/tools/export-art): st.part draws one layer alone: 'below', 'item' (props[st.item]) or 'above'
+      if (st.part === 'item') { props[st.item].draw(g, t); return; }
+      if (st.part === 'above') { foreground(g, t, still, tod); return; }
       const layers = tod < 1 ? [[variant(0), 1]] : [];
       if (tod > 0) layers.push([variant(1), tod < 1 ? tod : 1]);
 
@@ -2317,9 +2332,12 @@
         }
         ellipse(g, 286, 118, Math.round(10 * (0.4 + 0.6 * lv)), Math.round(9 * (0.4 + 0.6 * lv)), X.glow);
       }
+      if (st.part === 'below') return;
       drawSorted(g, props, actors, t);
-
-      // foreground: grass tufts sway, corner bushes, butterflies and falling leaves
+      foreground(g, t, still, tod);
+    }
+    // foreground: grass tufts sway, corner bushes, butterflies and falling leaves
+    function foreground(g, t, still, tod) {
       for (const [tx, ty, ph] of tufts) g.drawImage(tuft[still ? 0 : (step(t * 0.8 + ph, 1.5) % 2)], tx, ty - 4);
       for (const [c, bx, by] of fgBush) { if (tod > 0) { g.drawImage(c, bx, by); g.globalAlpha = tod; g.drawImage(fgBushDusk(c), bx, by); g.globalAlpha = 1; } else g.drawImage(c, bx, by); }
       if (!still) {
@@ -2340,7 +2358,8 @@
       }
     }
 
-    return { w: W, h: H, bg: '#b6e36b', anchors, hotspots, paths: {}, draw };
+    // props: the sorted items; floor: [x, y, w, h] of the platform (for walk masks)
+    return { w: W, h: H, bg: '#b6e36b', anchors, hotspots, paths: {}, draw, props, floor: [0, PB, W, PE - PB] };
   }
 
   window.INTERIORS = { createShop, createStation };

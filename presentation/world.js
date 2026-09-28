@@ -1584,18 +1584,18 @@
     buildMasks(); critterSprites();
     const props = [], shadows = [], trees = [];
     const add = p => { const im = p.img || p.frames[0]; p.w = im.width; p.h = im.height; props.push(p); return p; };
-    const put = (s, x, y, o = {}) => add({ img: s.img, frames: s.frames, ox: Math.round(x - s.ax), oy: Math.round(y - s.ay), y, ...o });
+    const put = (s, x, y, o = {}) => add({ img: s.img, frames: s.frames, ox: Math.round(x - s.ax), oy: Math.round(y - s.ay), x, y, ...o });
     // houses and the shop
     const houses = [bakery(), tailor(), cottage()];
     const litWins = h => { for (const g of h.wins) g.lit = litSprite(h.img, h.ox, h.oy, g); };
-    houses.forEach((h, i) => { h.idx = i; litWins(h); add({ img: h.img, ox: h.ox, oy: h.oy, y: h.y, after: F => litHouse(F.ctx, h, F.win) }); keep.push(h.keep); shadows.push(...h.shadow); });
+    houses.forEach((h, i) => { h.idx = i; litWins(h); add({ img: h.img, ox: h.ox, oy: h.oy, y: h.y, after: F => litHouse(F.ctx, h, F.win), name: ['bakery', 'tailor', 'cottage'][i] }); keep.push(h.keep); shadows.push(...h.shadow); });
     const SH = shop(); keep.push(SH.keep); SH.idx = 3; litWins(SH);
-    const shopProp = add({ img: SH.img, ox: SH.ox, oy: SH.oy, y: SH.y, shop: true });
+    const shopProp = add({ img: SH.img, ox: SH.ox, oy: SH.oy, y: SH.y, shop: true, name: 'shop' });
     // trees, bushes
     for (const o of TREES) {
       const tr0 = o.pine ? makePine(o) : makeTree({ ...o, pal: o.pal || PAL_LEAF });
       const ph = hash(o.seed, 1, 9) * 4, per = 0.9 + hash(o.seed, 2, 9) * 0.8;
-      put(tr0, o.x, o.y, { pick: t => Math.floor(t / per + ph) & 1 });
+      put(tr0, o.x, o.y, { pick: t => Math.floor(t / per + ph) & 1, name: 'tree' });
       const cw = o.pine ? o.wid : o.rx * 2;
       trees.push({ x: o.x, y: o.y, cw, ch: tr0.h, blossom: !!o.blossom });
       shadows.push([o.x + 3, o.y, Math.round(cw * 0.42), Math.round(cw * 0.15)]);
@@ -1604,42 +1604,46 @@
     for (const [x, y, rx, ry, fl] of BUSHES) {
       const b = makeBush({ rx, ry, seed: x * 3 + y, pal: (x + y) % 3 ? PAL_LEAF : PAL_LIME, flowers: fl ? [['pink', 'white', 'rose'], ['white', 'yellow'], ['lilac', 'white']][(x + y) % 3] : null });
       const ph = hash(x, y, 3) * 5;
-      put(b, x, y, { pick: t => (Math.floor(t * 1.3 + ph) % 5 === 0 ? 1 : 0) });
+      put(b, x, y, { pick: t => (Math.floor(t * 1.3 + ph) % 5 === 0 ? 1 : 0), name: 'bush' });
       shadows.push([x + 2, y - 1, rx + 1, 3]); keep.push([x - rx, y - ry * 2, rx * 2, ry * 2 + 2]);
     }
     // lamps (their lit glass is drawn right after the sprite)
     const lamps = LAMPS.map(([k, x, y], i) => {
-      const s = k === 'iron' ? ironLamp() : woodLamp(), p = put(s, x, y);
+      const s = k === 'iron' ? ironLamp() : woodLamp(), p = put(s, x, y, { name: 'lamp' });
       p.lamp = { gx: p.ox + s.glass[0], gy: p.oy + s.glass[1], gw: s.glass[2], gh: s.glass[3], pool: [p.ox + s.head[0], y + 2, 18], i };
       keep.push([x - 5, y - 6, 12, 8]); shadows.push([x + 2, y, 5, 2]);
       return p;
     });
     // street furniture
-    put(bench(), 398, 436, { y: 430 }); put(bench(), 282, 321, { y: 315 });
+    put(bench(), 398, 436, { y: 430, name: 'bench' }); put(bench(), 282, 321, { y: 315, name: 'bench' });
     shadows.push([399, 437, 12, 2], [283, 322, 12, 2]); keep.push([384, 420, 28, 18], [268, 305, 28, 18]);
-    const ban = banner(); for (const [x, y] of [[296, 296], [430, 296]]) { const ph = x / 50; put(ban, x, y, { pick: t => [0, 1, 0, 2][Math.floor(t * 6 + ph) & 3] }); shadows.push([x + 2, y, 4, 1]); }
-    put(planter(5, ['pink', 'rose', 'white']), 252, 398); put(planter(6, ['yellow', 'orange', 'white']), 458, 364);
+    const ban = banner(); for (const [x, y] of [[296, 296], [430, 296]]) { const ph = x / 50; put(ban, x, y, { pick: t => [0, 1, 0, 2][Math.floor(t * 6 + ph) & 3], name: 'banner' }); shadows.push([x + 2, y, 4, 1]); }
+    put(planter(5, ['pink', 'rose', 'white']), 252, 398, { name: 'planter' }); put(planter(6, ['yellow', 'orange', 'white']), 458, 364, { name: 'planter' });
     shadows.push([254, 398, 11, 3], [460, 364, 11, 3]);
-    put(noticeBoard(), 448, 306); shadows.push([450, 306, 11, 2]); keep.push([434, 280, 28, 28]);
-    put(well(), WELLP[0], 358); shadows.push([362, 358, 16, 4]); keep.push([340, 318, 42, 44]);
-    for (const [x, y] of [[252, 322], [263, 326]]) { put(barrel(), x, y); shadows.push([x + 2, y, 6, 2]); }
-    put(crate('bread'), 152, 334); put(crate('bread'), 140, 331); put(crate('apples'), 558, 410); put(barrel(), 650, 418);
+    put(noticeBoard(), 448, 306, { name: 'notice_board' }); shadows.push([450, 306, 11, 2]); keep.push([434, 280, 28, 28]);
+    put(well(), WELLP[0], 358, { name: 'well' }); shadows.push([362, 358, 16, 4]); keep.push([340, 318, 42, 44]);
+    for (const [x, y] of [[252, 322], [263, 326]]) { put(barrel(), x, y, { name: 'barrel' }); shadows.push([x + 2, y, 6, 2]); }
+    put(crate('bread'), 152, 334, { name: 'crate' }); put(crate('bread'), 140, 331, { name: 'crate' }); put(crate('apples'), 558, 410, { name: 'crate' }); put(barrel(), 650, 418, { name: 'barrel' });
     shadows.push([153, 334, 7, 2], [141, 331, 7, 2], [559, 410, 7, 2], [652, 418, 6, 2]);
     const st = stall(), stallGlass = [st.ox + st.glass[0], st.oy + st.glass[1], st.glass[2], st.glass[3]];
-    add({ frames: st.frames, ox: st.ox, oy: st.oy, y: st.y, pick: t => (Math.sin(t * 0.9) > 0.2 ? step(t, 5) % 2 : 0), after: F => { if (F.dk > 0.3) glow(F.ctx, ...stallGlass, (F.dk - 0.3) / 0.7, F.t, 9, null); } });
+    add({ frames: st.frames, ox: st.ox, oy: st.oy, y: st.y, pick: t => (Math.sin(t * 0.9) > 0.2 ? step(t, 5) % 2 : 0), after: F => { if (F.dk > 0.3) glow(F.ctx, ...stallGlass, (F.dk - 0.3) / 0.7, F.t, 9, null); }, name: 'stall' });
     shadows.push(['r', 559, 419, 104, 3]); keep.push([552, 356, 116, 70]);
-    add(rail(false)); add(rail(true));
-    const lau = laundry(); add({ frames: lau.frames, ox: lau.ox, oy: lau.oy, y: lau.y, pick: t => [0, 1, 0, 2][Math.floor(t * 1.8) & 3] });
-    put(signpost(), 46, 500); shadows.push([50, 500, 6, 2]); keep.push([38, 470, 48, 32]);
-    add(vegPatch(440, 478, 498, 522)); keep.push([436, 470, 70, 58]);
-    add(fenceH(436, 500, 478)); add(fenceH(436, 500, 526));
-    for (let y = 486; y < 526; y += 8) { add(fencePost(436, y)); add(fencePost(500, y)); }
-    for (const [x, h] of [[444, 16], [452, 13], [492, 15]]) put(sunflower(h), x, 476);
-    put(tulipBed(48), 292, 492); shadows.push([294, 492, 24, 2]); keep.push([266, 472, 54, 22]);
-    put(basket(), 392, 474); keep.push([366, 458, 40, 20]);
+    add({ ...rail(false), name: 'rail_back' }); add({ ...rail(true), name: 'rail_front' });
+    const lau = laundry(); add({ frames: lau.frames, ox: lau.ox, oy: lau.oy, y: lau.y, pick: t => [0, 1, 0, 2][Math.floor(t * 1.8) & 3], name: 'laundry' });
+    put(signpost(), 46, 500, { name: 'signpost' }); shadows.push([50, 500, 6, 2]); keep.push([38, 470, 48, 32]);
+    add({ ...vegPatch(440, 478, 498, 522), name: 'veg_patch' }); keep.push([436, 470, 70, 58]);
+    add({ ...fenceH(436, 500, 478), name: 'fence' }); add({ ...fenceH(436, 500, 526), name: 'fence' });
+    for (let y = 486; y < 526; y += 8) { add({ ...fencePost(436, y), name: 'fence_post' }); add({ ...fencePost(500, y), name: 'fence_post' }); }
+    for (const [x, h] of [[444, 16], [452, 13], [492, 15]]) put(sunflower(h), x, 476, { name: 'sunflower' });
+    put(tulipBed(48), 292, 492, { name: 'tulip_bed' }); shadows.push([294, 492, 24, 2]); keep.push([266, 472, 54, 22]);
+    put(basket(), 392, 474, { name: 'basket' }); keep.push([366, 458, 40, 20]);
     for (const [x, y, w, h, s] of [[92, 334, 14, 9, 1], [104, 342, 9, 6, 2], [112, 458, 10, 7, 3], [242, 440, 8, 5, 4], [244, 288, 10, 7, 5], [600, 540, 9, 6, 6], [30, 470, 11, 7, 7]]) {
-      put(rock(w, h, s), x, y); shadows.push([x + 2, y, (w >> 1) + 1, 2]);
+      put(rock(w, h, s), x, y, { name: 'rock' }); shadows.push([x + 2, y, (w >> 1) + 1, 2]);
     }
+    // Unique names for the art exporter (scene.bake): a kind placed more than once is numbered in placing order.
+    const kinds = {}, seen = {};
+    for (const p of props) kinds[p.name] = (kinds[p.name] || 0) + 1;
+    for (const p of props) if (kinds[p.name] > 1) { const k = p.name; seen[k] = (seen[k] ?? -1) + 1; p.name = k + '_' + seen[k]; }
     shadows.push(['r', TER.x0, TER.front + TER.wallH, ST.x0 - 6 - TER.x0, 3], ['r', ST.x1 + 6, TER.front + TER.wallH, TER.x1 - ST.x1 - 6, 3], ['r', ST.x1 + 6, TER.front, 2, ST.bot - TER.front - 6]);
     const ground = buildGround(shadows);
     flatRocks(ground);
@@ -1659,15 +1663,31 @@
       (sand(x, y + 7) || sand(x + 8, y) || sand(x - 8, y) || water(x, y + 9) || water(x, y - 9)) && offLedge(x, y) && !(y > TER.front - 3 && y < TER.front + TER.wallH + 3 && x > TER.x0 - 2 && x < TER.x1 + 2))
       .map(([x, y, q]) => [x, y, FCOL[(q * FCOL.length) | 0], q * 6.28]);
     const tuftSpots = scatter(314, 11, [0, 170, W, 390], (x, y) => !water(x, y) && !water(x, y + 3) && !sand(x, y) && !sand(x + 4, y + 2) && !blocked(x, y) && !(y > TER.front - 3 && y < TER.front + TER.wallH + 3 && x > TER.x0 - 2 && x < TER.x1 + 2) && !(x < LEDGE.x1 && y > LEDGE.top - 3 && y < LEDGE.bot + 2)).filter((_, i) => i % 2 === 0);
+    const critters = [...hens.map(([hx, hy, s]) => ({ y: hy, hen: [hx, hy, s], name: 'hen_' + s, box: [hx - 16, hy - 12, 32, 15] })),
+      { y: 448, chick: true, name: 'chick', box: [535, 440, 16, 11] }, { y: 325, cat: true, name: 'cat', box: [164, 312, 16, 16] }];
+    const lanternGlow = (ctx, i, a, t) => glow(ctx, LANTERN_X[i] - 2, LANTERN_Y + 2, 4, 4, a, t, i + 20, [LANTERN_X[i], SHOP.base + 3, 7]);
+
+    // For the art exporter: every depth-sorted entry in draw order (the shop's lantern glows as entries of their own,
+    // right after the shop) with the world box [x, y, w, h] it can ever touch, plus the data its walk mask comes from.
+    const entries = [...props, ...critters].sort((a, b) => a.y - b.y), pad = p => (p.lamp || p.after ? 8 : 0);
+    entries.splice(entries.indexOf(shopProp) + 1, 0, ...LANTERN_X.map((lx, i) => ({ y: SH.y, lantern: i, name: 'shop_lantern_' + i, box: [lx - 10, LANTERN_Y - 5, 21, SHOP.base - LANTERN_Y + 13] })));
+    const byName = new Map(entries.map(e => [e.name, e]));
+    const bake = {
+      items: entries.map(e => ({ name: e.name, x: e.x, y: e.y, box: e.box || [e.ox - pad(e), e.oy - pad(e), e.w + 2 * pad(e), e.h + 2 * pad(e)], animated: !e.img || !!e.lamp })),
+      water: M.water, TER, ST, BR, ledge: inFace,
+    };
 
     function draw(ctx, view, actors = []) {
       const st0 = view.state || {}, still = !!st0.still, t = still ? 0 : Math.max(0, +view.t || 0);
+      // Exporter opt-in: state.part 'below' | 'item' | 'above' draws only what lies under the depth-sorted entries,
+      // the one entry named state.item (see scene.bake), or the air above them. Without it, everything is drawn.
+      const part = st0.part, below = !part || part === 'below', above = !part || part === 'above', one = part === 'item' && byName.get(st0.item);
       setTod(st0.tod ?? 0);
       const vx = view.x, vy = view.y, vw = view.w, vh = view.h, x1 = vx + vw, y1 = vy + vh;
       const clip = vx < 0 || vy < 0 || x1 > W || y1 > H; // only when the view shows outside the world
       if (clip) { ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip(); }
       // sky, clouds, vista, sails
-      if (vy < SKY_H) {
+      if (below && vy < SKY_H) {
         const h = Math.min(SKY_H - vy, vh);
         ctx.drawImage(sky[T.a], vx, vy, vw, h, vx, vy, vw, h);
         if (T.f) { ctx.globalAlpha = T.f; ctx.drawImage(sky[T.b], vx, vy, vw, h, vx, vy, vw, h); ctx.globalAlpha = 1; }
@@ -1678,26 +1698,26 @@
         });
         if (!still) birdsHigh(ctx, t, view);
       }
-      if (vy < 170) {
+      if (below && vy < 170) {
         blitRect(ctx, vista, vx, vy, vw, 170 - vy);
         blit(ctx, sailFrame(still ? 3 : step(t, 6) % 16), MILL[0] - 18, MILL[1] - 29 - 18);
       }
-      blitRect(ctx, ground, vx, vy, vw, vh);
+      if (below) blitRect(ctx, ground, vx, vy, vw, vh);
       // ground life
-      if (vy < 560 && vx < 340) {
+      if (below && vy < 560 && vx < 340) {
         if (!still) { ripples(ctx, t, view); fish(ctx, t); }
         else ripples(ctx, 0, view);
         waterfall(ctx, t); rockFoam(ctx, t);
         lilyPads(lily, ctx, still ? 0.5 : t);
         reeds(reedList, ctx, t); reeds(reedsTop, ctx, t);
       }
-      for (const [x, y] of tuftSpots) {
+      if (below) for (const [x, y] of tuftSpots) {
         if (x < vx - 6 || x > x1 || y < vy - 6 || y > y1 + 2) continue;
         const lean = !still && Math.sin(t * 1.3 + x * 0.05 + y * 0.02) > 0.5 ? 1 : 0;
         td(ctx, x, y - 1, 'grass3'); td(ctx, x + 2, y - 1, 'grass3'); td(ctx, x + 1, y, 'grass3');
         td(ctx, x + lean, y - 2, 'grass1'); td(ctx, x + 2 + lean, y - 3, 'grass1'); td(ctx, x + 1 + lean, y - 2, 'grass3');
       }
-      for (const [x, y, [pc, cc], ph] of nodSpots) { // flowers nodding on their stems
+      if (below) for (const [x, y, [pc, cc], ph] of nodSpots) { // flowers nodding on their stems
         if (x < vx - 4 || x > x1 + 4 || y < vy - 6 || y > y1 + 2) continue;
         const n = !still && Math.sin(t * 1.1 + ph) > 0.55 ? 1 : 0;
         td(ctx, x, y, 'grass3'); td(ctx, x, y - 1, 'grass3'); td(ctx, x + n, y - 2, 'grass3'); td(ctx, x - 1, y, 'grass2');
@@ -1705,33 +1725,33 @@
       }
       const dk = dusk(), nt = night(), lanterns = st0.lanterns || [], win = st0.windows ?? 0, shopP = clamp(st0.shop ?? 1, 0, 1);
       // lamp light pools sit on the ground, under everyone
-      for (const h of [...houses, SH]) { // warm spill in front of lit windows
+      if (below) for (const h of [...houses, SH]) { // warm spill in front of lit windows
         const a = clamp((win - WIN_THR[h.idx]) * 6, 0, 1) * (h === SH ? +(shopP >= 1) : 1); if (a <= 0) continue;
         ctx.globalAlpha = a; for (const g of h.wins) PX.ellipse(ctx, g.gx + (g.gw >> 1), h.y + 4, Math.round(g.gw * 0.7), 2, 'rgba(255,214,110,0.16)'); ctx.globalAlpha = 1;
       }
-      if (dk > 0.3) for (const l of lamps) { const [px, py, rx] = l.lamp.pool; ctx.globalAlpha = (dk - 0.3) / 0.7; PX.ellipse(ctx, px, py, rx + 6, 7, 'rgba(255,214,110,0.1)'); PX.ellipse(ctx, px, py, rx, 5, 'rgba(255,214,110,0.18)'); PX.ellipse(ctx, px, py, 11, 3, 'rgba(255,236,160,0.24)'); ctx.globalAlpha = 1; }
+      if (below && dk > 0.3) for (const l of lamps) { const [px, py, rx] = l.lamp.pool; ctx.globalAlpha = (dk - 0.3) / 0.7; PX.ellipse(ctx, px, py, rx + 6, 7, 'rgba(255,214,110,0.1)'); PX.ellipse(ctx, px, py, rx, 5, 'rgba(255,214,110,0.18)'); PX.ellipse(ctx, px, py, 11, 3, 'rgba(255,236,160,0.24)'); ctx.globalAlpha = 1; }
       // depth-sorted: props, critters, actors
       const list = [];
       for (const p of props) if (p.ox < x1 && p.ox + p.w > vx && p.oy < y1 && p.oy + p.h > vy) list.push(p);
       for (const a of actors) list.push({ y: a.y, actor: a });
-      for (const [hx, hy, s] of hens) list.push({ y: hy, hen: [hx, hy, s] });
-      list.push({ y: 448, chick: true }, { y: 325, cat: true });
+      list.push(...critters);
       list.sort((a, b) => a.y - b.y);
       const F = { ctx, t, win, dk, nt };
-      for (const it of list) {
+      for (const it of one ? [one] : part ? [] : list) {
         if (it.actor) { it.actor.draw(ctx); continue; }
         if (it.hen) { const [hx, hy, s] = it.hen, q = henState(t, s, still); drawSpriteAt(ctx, spr['hen_' + q.pose], hx + q.dx * (s ? -1 : 1), hy, q.dir); continue; }
         if (it.chick) { const q = henState(t + 1.3, 2, still); drawSpriteAt(ctx, spr[q.pose === 'peck' ? 'chick_peck' : 'chick_stand'], 541 + (q.dx >> 1), 448, q.dir); continue; }
         if (it.cat) { const f = still ? 0 : [0, 1, 2, 1, 0, 0, 0, 0, 0, 0][step(t, 6) % 10], bl = !still && (t % 4.3) < 0.18 ? 1 : 0; drawSpriteAt(ctx, spr[`cat_${f}_${bl}`], 172, 325, 1); continue; }
         if (it.shop) { drawShop(ctx, it, t, still, shopP, lanterns, win); continue; }
+        if (it.lantern >= 0) { lanternGlow(ctx, it.lantern, 1, t); continue; } // only reached by an exporter item
         blit(ctx, it.frames ? it.frames[still ? 0 : it.pick(t)] : it.img, it.ox, it.oy);
         if (it.after) it.after(F);
         if (it.lamp && dk > 0.3) { const l = it.lamp; glow(ctx, l.gx, l.gy, l.gw, l.gh, (dk - 0.3) / 0.7, t, l.i + 1, null); }
       }
       // air
-      smoke(ctx, t, houses.flatMap(h => h.smoke).filter((_, i) => i !== 1), still);
-      if (!still) { butterflies(ctx, t, flies); leaves(ctx, t, trees); birdsLow(ctx, t, view); }
-      if (nt > 0.05) fireflies(ctx, t, fireSpots, nt);
+      if (above) smoke(ctx, t, houses.flatMap(h => h.smoke).filter((_, i) => i !== 1), still);
+      if (above && !still) { butterflies(ctx, t, flies); leaves(ctx, t, trees); birdsLow(ctx, t, view); }
+      if (above && nt > 0.05) fireflies(ctx, t, fireSpots, nt);
       if (clip) ctx.restore();
     }
     function drawShop(ctx, it, t, still, p, lanterns, win) {
@@ -1741,7 +1761,7 @@
         if (T.f) { ctx.globalAlpha = T.f; ctx.drawImage(revealImg(it.img, T.b, p), it.ox, it.oy); ctx.globalAlpha = 1; }
       }
       const h = it.h, lit = (lx, ly) => p >= 1 || revealAt(lx - it.ox, ly - it.oy, h) < p;
-      LANTERN_X.forEach((lx, i) => { const a = clamp(+lanterns[i] || 0, 0, 1); if (a > 0.02 && lit(lx, LANTERN_Y + 4)) glow(ctx, lx - 2, LANTERN_Y + 2, 4, 4, a, t, i + 20, [lx, SHOP.base + 3, 7]); });
+      LANTERN_X.forEach((lx, i) => { const a = clamp(+lanterns[i] || 0, 0, 1); if (a > 0.02 && lit(lx, LANTERN_Y + 4)) lanternGlow(ctx, i, a, t); });
       if (p >= 1) litHouse(ctx, SH, win);
       shimmer(ctx, t, still, p, it);
     }
@@ -1768,7 +1788,7 @@
       if (wi < warmList.length * 2) setTimeout(warm, 20);
     };
     setTimeout(warm, 60);
-    return { w: W, h: H, bg: P.sky0, anchors: ANCHORS, paths: PATHS, draw };
+    return { w: W, h: H, bg: P.sky0, anchors: ANCHORS, paths: PATHS, draw, bake };
   }
   // Lit window: the glass region of the building recoloured to warm light (contents stay visible), never graded.
   const LIT = { sky2: 'light1', sky3: 'light2', white: 'light0', wall2: 'light1', wall3: 'light2' };
