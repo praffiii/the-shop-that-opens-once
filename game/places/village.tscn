@@ -1,0 +1,89 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://core/place.gd" id="1_place"]
+[ext_resource type="Script" path="res://core/baked_art.gd" id="2_art"]
+[ext_resource type="Script" path="res://actors/ant.gd" id="3_ant"]
+[ext_resource type="Script" path="res://core/hotspot.gd" id="4_hot"]
+
+[node name="Village" type="Node2D"]
+script = ExtResource("1_place")
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2_art")
+art_dir = "res://art/places/village/dusk"
+
+[node name="baker" type="Sprite2D" parent="World"]
+position = Vector2(202, 338)
+script = ExtResource("3_ant")
+id = "baker"
+
+[node name="baker" type="Node2D" parent="World/baker"]
+script = ExtResource("4_hot")
+label = "Baker"
+area = Rect2(-10, -30, 20, 30)
+spot = Vector2(24, 2)
+
+[node name="gardener" type="Sprite2D" parent="World"]
+position = Vector2(478, 470)
+script = ExtResource("3_ant")
+id = "gardener"
+
+[node name="gardener" type="Node2D" parent="World/gardener"]
+script = ExtResource("4_hot")
+label = "Gardener"
+area = Rect2(-10, -30, 20, 30)
+spot = Vector2(24, 0)
+
+[node name="kid" type="Sprite2D" parent="World"]
+position = Vector2(330, 380)
+script = ExtResource("3_ant")
+id = "kid"
+
+[node name="kid" type="Node2D" parent="World/kid"]
+script = ExtResource("4_hot")
+label = "Village kid"
+area = Rect2(-8, -24, 16, 24)
+spot = Vector2(24, 0)
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="shop_door" type="Node2D" parent="Hotspots"]
+position = Vector2(360, 252)
+script = ExtResource("4_hot")
+label = "Marlow's shop"
+area = Rect2(-10, -24, 20, 27)
+spot = Vector2(0, 0)
+exit_to = "shop/door"
+
+[node name="station_road" type="Node2D" parent="Hotspots"]
+position = Vector2(16, 550)
+script = ExtResource("4_hot")
+label = "Road to the old station"
+area = Rect2(-16, -22, 28, 32)
+spot = Vector2(0, 0)
+exit_to = "station/village"
+
+[node name="signpost" type="Node2D" parent="Hotspots"]
+position = Vector2(46, 500)
+script = ExtResource("4_hot")
+label = "Signpost"
+area = Rect2(-8, -28, 16, 30)
+spot = Vector2(14, 17)
+
+[node name="notice_board" type="Node2D" parent="Hotspots"]
+position = Vector2(448, 306)
+script = ExtResource("4_hot")
+label = "Notice board"
+area = Rect2(-12, -26, 26, 26)
+spot = Vector2(0, 30)
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Spawns"]
+position = Vector2(56, 520)
+
+[node name="from_station" type="Marker2D" parent="Spawns"]
+position = Vector2(56, 520)
+
+[node name="from_shop" type="Marker2D" parent="Spawns"]
+position = Vector2(360, 272)

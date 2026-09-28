@@ -1,0 +1,79 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://core/place.gd" id="1_place"]
+[ext_resource type="Script" path="res://core/baked_art.gd" id="2_art"]
+[ext_resource type="Script" path="res://actors/ant.gd" id="3_ant"]
+[ext_resource type="Script" path="res://core/hotspot.gd" id="4_hot"]
+
+[node name="Station" type="Node2D"]
+script = ExtResource("1_place")
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2_art")
+art_dir = "res://art/places/station/dusk"
+
+[node name="mender" type="Sprite2D" parent="World"]
+position = Vector2(268, 128)
+script = ExtResource("3_ant")
+id = "mender"
+facing = -1
+
+[node name="mender" type="Node2D" parent="World/mender"]
+script = ExtResource("4_hot")
+label = "Clock mender"
+area = Rect2(-16, -36, 32, 38)
+spot = Vector2(-20, 24)
+
+[node name="traveller" type="Sprite2D" parent="World"]
+position = Vector2(312, 141)
+script = ExtResource("3_ant")
+id = "traveller"
+facing = -1
+
+[node name="traveller" type="Node2D" parent="World/traveller"]
+script = ExtResource("4_hot")
+label = "Traveller"
+area = Rect2(-14, -37, 44, 40)
+spot = Vector2(-20, 9)
+
+[node name="helen" type="Sprite2D" parent="World"]
+position = Vector2(372, 122)
+script = ExtResource("3_ant")
+id = "helen"
+facing = -1
+pose = "sit"
+
+[node name="helen" type="Node2D" parent="World/helen"]
+script = ExtResource("4_hot")
+label = "Woman on the bench"
+area = Rect2(-20, -30, 40, 42)
+spot = Vector2(-28, 30)
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="village_road" type="Node2D" parent="Hotspots"]
+position = Vector2(8, 148)
+script = ExtResource("4_hot")
+label = "Back to Bellwood"
+area = Rect2(-8, -20, 14, 30)
+spot = Vector2(0, 0)
+exit_to = "village/from_station"
+
+[node name="plaque" type="Node2D" parent="Hotspots"]
+position = Vector2(79, 83)
+script = ExtResource("4_hot")
+label = "Plaque"
+area = Rect2(-16, -9, 32, 19)
+spot = Vector2(0, 65)
+
+[node name="timetable" type="Node2D" parent="Hotspots"]
+position = Vector2(166, 97)
+script = ExtResource("4_hot")
+label = "Timetable"
+area = Rect2(-23, -14, 46, 36)
+spot = Vector2(0, 51)
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="village" type="Marker2D" parent="Spawns"]
+position = Vector2(30, 148)
