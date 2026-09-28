@@ -48,6 +48,7 @@ var _step := 0.0
 var _frame := 0
 var _path := PackedVector2Array()
 var _walk_id := 0
+var _exact := Vector2.ZERO # where the ant really is while walking; it stands on the nearest whole pixel
 
 
 ## chars.json: every character's poses, frame counts, speeds and hand positions.
@@ -80,9 +81,8 @@ func _process(delta: float) -> void:
 		return
 	if not _path.is_empty():
 		var to := _path[0]
-		move_by((to - position).limit_length(SPEED * delta))
-		if position.is_equal_approx(to):
-			position = to
+		move_by((to - _here()).limit_length(SPEED * delta))
+		if _exact.is_equal_approx(to):
 			_path.remove_at(0)
 			if _path.is_empty():
 				_arrive()
@@ -120,7 +120,8 @@ func _arrive() -> void:
 func move_by(motion: Vector2) -> void:
 	if absf(motion.x) > 0.01:
 		facing = 1 if motion.x > 0 else -1
-	position += motion
+	_exact = _here() + motion
+	position = _exact.round() # whole pixels, so the ant's pixels line up with the zoomed scene's
 	if pose not in WALKS:
 		pose = "walk"
 	_step += motion.length()
@@ -130,6 +131,11 @@ func move_by(motion: Vector2) -> void:
 		_show(_frame + 1)
 		if _frame % (int(_pose().frames) / 2) == 0:
 			stepped.emit()
+
+
+## Where the ant really is: its exact walking position, unless something has moved it since.
+func _here() -> Vector2:
+	return _exact if _exact.round() == position else position
 
 
 func face_to(x: float) -> void:

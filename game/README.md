@@ -69,7 +69,9 @@ never overwrites it.
 ## Writing a night
 
 A night is a script in `nights/` that extends `Night`. It overrides `start()`, `entered(place)` and
-`interact(id)`, and uses the helpers in `core/night.gd`. Await every helper that shows something:
+`interact(id)`, and uses the helpers in `core/night.gd`: `say`, `choose`, `show_text`, `note`, `walk`,
+`go`, `look` (glide the camera to something, then back with `look(null)`), `sfx`, `music` and `card`.
+Await every helper that shows something:
 
 ```gdscript
 func interact(id: String) -> void:
@@ -91,9 +93,10 @@ All art comes from the presentation's code-drawn pixel art (`../presentation/`).
 `tools/export-art/` renders it into `art/`. See `tools/export-art/README.md` to re-export. Once the
 team retouches a PNG by hand, stop re-exporting that part, or the export will overwrite it.
 
-The game shows at least 480x270 art pixels and scales them only by whole numbers, so pixels stay
-crisp. On a window that isn't an exact multiple, the view grows a little to fill it instead of
-leaving black bars. The UI is laid out for 480x270 and centred.
+The world is drawn at 2x and shows at least 320x180 art pixels. The UI uses the canvas's own finer
+pixels (at least 640x360), so text stays small and sharp. Both scale only by whole numbers, so
+pixels stay crisp. On a window that isn't an exact multiple, the view grows a little to fill it
+instead of leaving black bars. Characters always stand on whole world pixels.
 
 ## Test
 

@@ -5,12 +5,17 @@ extends Node2D
 
 const NIGHTS := {1: preload("res://nights/night_1.gd")}
 const TITLE_VIEW := Vector2(360, 220) ## Where the title screen looks: the shop at the top of the lane.
-const BASE := Vector2(480, 270) ## The least art the screen shows; the UI is laid out for it.
+const ZOOM := 2 ## Each world pixel covers this many screen-canvas pixels; the UI keeps the finer ones.
+const BASE := Vector2(640, 360) ## The least canvas the screen shows (the world is BASE / ZOOM).
+const GLIDE := 220.0 ## How fast the camera glides to what it is asked to look at, in world px per second.
 
 var place: Place
 var night: Night
 var courier := Ant.new()
 var _held := 0
+var _look: Variant = null # a world point the camera shows instead of the courier
+var _gliding := false
+var _cam := Vector2.ZERO
 
 @onready var camera: Camera2D = $Camera
 @onready var talk: Talk = $UI/Screen/Talk
@@ -24,6 +29,7 @@ var _held := 0
 func _ready() -> void:
 	get_tree().root.size_changed.connect(_fit_window)
 	_fit_window()
+	camera.zoom = Vector2.ONE * ZOOM
 	$UI/Screen.theme = Look.theme()
 	courier.name = "courier"
 	talk.courier = courier
@@ -49,7 +55,8 @@ func title() -> void:
 	await _fade(false)
 	logo.texture = load("res://art/ui/title.png")
 	var view := get_viewport_rect().size
-	logo.position = Vector2(roundf((view.x - logo.texture.get_width()) / 2), 36)
+	logo.scale = Vector2.ONE * ZOOM # the title is world art: draw it at the world's pixel size
+	logo.position = Vector2(roundf((view.x - logo.texture.get_width() * ZOOM) / 2), 24)
 	logo.show()
 	var options: PackedStringArray = ["Begin"]
 	if Game.saved_night() > 1 and NIGHTS.has(Game.saved_night()):
@@ -85,6 +92,15 @@ func go(place_name: String, spawn: String) -> void:
 		await night.entered(place_name)
 
 
+## Glides the camera to show a world point, or back to the courier with null. Returns once it is there.
+func look(at: Variant) -> void:
+	_look = at
+	talk.courier = null if at != null else courier
+	_gliding = true
+	while _gliding and place:
+		await get_tree().process_frame
+
+
 func card(lines: PackedStringArray) -> void:
 	talk.close()
 	await cards.show_lines(lines)
@@ -115,7 +131,9 @@ func _swap(place_name: String, spawn: String) -> void:
 	hud.place = place
 	Sound.mood(place.mood, place.indoors)
 	RenderingServer.set_default_clear_color(place.world.bg)
-	_frame_camera()
+	_look = null
+	_gliding = false
+	_frame_camera(0.0)
 
 
 func _on_used(h: Hotspot) -> void:
@@ -177,9 +195,9 @@ func _release() -> void:
 			place.controls = true
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if place:
-		_frame_camera()
+		_frame_camera(delta)
 
 
 ## Scales the art by the largest whole number that still shows BASE, and lets the view grow to
@@ -190,19 +208,24 @@ func _fit_window() -> void:
 	get_tree().root.content_scale_size = Vector2i((window / factor).floor())
 
 
-## Follows the courier (or looks at the title view), kept inside the place. A place smaller than
-## the screen is centred.
-func _frame_camera() -> void:
-	var view := get_viewport_rect().size
+## Follows the courier (or looks where it was asked, or at the title view), kept inside the place.
+## A place smaller than the screen is centred. The camera stays on whole world pixels.
+func _frame_camera(delta: float) -> void:
+	var view := get_viewport_rect().size / ZOOM
 	var size := Vector2(place.world.size)
-	var target := courier.position if place.player else TITLE_VIEW
+	var target: Vector2 = _look if _look != null else (courier.position if place.player else TITLE_VIEW)
 	var c := target.round()
 	for axis in 2:
 		if size[axis] <= view[axis]:
 			c[axis] = roundf(size[axis] / 2)
 		else:
 			c[axis] = clampf(c[axis], roundf(view[axis] / 2), size[axis] - roundf(view[axis] / 2))
-	camera.position = c
+	if _gliding:
+		_cam = _cam.move_toward(c, GLIDE * delta)
+		_gliding = _cam != c
+	else:
+		_cam = c
+	camera.position = _cam.round()
 
 
 ## Covers the screen in warm cream (or uncovers it) in four soft steps.
