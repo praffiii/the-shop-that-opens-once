@@ -19,7 +19,7 @@ files the page returns. Open that URL in a normal browser to debug a part.
 | --- | --- |
 | `bake.js` | The shared helpers: sampling animation, packing atlases, writing a place |
 | `export-village.js` | Bellwood at dusk, and its walk mask |
-| `export-rooms.js` | Marlow's shop, the old station and their walk masks; the keepsakes; the UI icons |
+| `export-rooms.js` | Marlow's shop, the old station, Nora's toy shop and their walk masks; the keepsakes; the UI icons |
 | `export-cast.js` | The ant characters, their portraits, the title lettering, the palette and the UI pieces |
 | `export-sound.js` | The music loops, the evening wind and the sound effects |
 
