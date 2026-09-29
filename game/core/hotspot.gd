@@ -19,6 +19,8 @@ extends Node2D
 		queue_redraw()
 ## "place/spawn": stepping into the area goes to that place, arriving at that spawn point.
 @export var exit_to := ""
+## The nights this hotspot is there; empty means every night.
+@export var nights := PackedInt32Array()
 
 
 func global_area() -> Rect2:

@@ -1,6 +1,6 @@
 # The game
 
-The Shop That Opens Once, built in Godot 4. Night 1 is playable from start to finish.
+The Shop That Opens Once, built in Godot 4. Nights 1 and 2, the MVP, are playable from start to finish.
 
 ## Run it
 
@@ -43,7 +43,7 @@ To publish a new version, run `game/deploy.sh`. It needs:
 | `core/night.gd` | The base for night scripts, with helpers such as `say`, `choose` and `go` |
 | `actors/ant.gd` | An ant character: poses, facing, walking, holding an item |
 | `ui/` | The talk box, the bag and inspect view, the HUD, full-screen cards, shared look |
-| `nights/night_1.gd` | All of Night 1: its dialogue, clues and ending |
+| `nights/night_1.gd`, `night_2.gd` | Each night: its dialogue, clues and ending |
 | `nights/keepsakes.gd` | Each keepsake's name and what each side shows |
 | `places/*.tscn` | One scene per place: its art, the people in it, hotspots and spawn points |
 | `art/` | Exported art: places, characters, items, icons, UI pieces |
@@ -57,7 +57,7 @@ A place scene has a `World` node (`baked_art.gd`) that draws its exported art. T
 `Ant` nodes under `World`, so they sort in depth with the art. Each person has a `Hotspot` child
 named after them. Signs and doors are `Hotspot` nodes under `Hotspots`. A hotspot's node name is the
 id the night script receives. A hotspot with `exit_to = "place/spawn"` is a way out. `Spawns` holds
-the points where the courier arrives.
+the points where the courier arrives. A person or hotspot with `nights` set appears only on those nights.
 
 In the editor, a hotspot shows its clickable area in orange and the spot where the courier stands in
 blue.
@@ -70,7 +70,9 @@ never overwrites it.
 
 A night is a script in `nights/` that extends `Night`. It overrides `start()`, `entered(place)` and
 `interact(id)`, and uses the helpers in `core/night.gd`: `say`, `choose`, `show_text`, `note`, `walk`,
-`go`, `look` (glide the camera to something, then back with `look(null)`), `sfx`, `music` and `card`.
+`go`, `look` (glide the camera to something, then back with `look(null)`), `sfx`, `music`, `card`,
+`known` (learn someone's name), `hand_over` (Marlow gives tonight's keepsake), `give_keepsake` and
+`lantern_goes_out`. A night ends with `await main.end_night()`, which saves and starts the next night.
 Await every helper that shows something:
 
 ```gdscript
@@ -101,7 +103,7 @@ instead of leaving black bars. Characters always stand on whole world pixels.
 ## Test
 
 ```sh
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path game res://tests/night_1_test.tscn
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path game res://tests/playthrough_test.tscn
 ```
 
-It plays Night 1 on the real maps at 8x speed and prints `PASS` (exit code 0) or what failed.
+It plays Nights 1 and 2 on the real maps at 8x speed and prints `PASS` (exit code 0) or what failed.

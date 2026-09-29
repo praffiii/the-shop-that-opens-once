@@ -11,4 +11,11 @@ const ALL := {
 			["side", "The crown is pulled out, as if someone stopped it on purpose.", "The watch's crown is pulled out. Someone stopped it on purpose."],
 		],
 	},
+	"doll": {
+		"name": "Rabbit doll",
+		"sides": [
+			["front", "A small rabbit doll, loved nearly bald. One ear was sewn back on with bright blue thread, in tiny, even stitches.", "The rabbit doll's ear was mended with blue thread, in tiny, even stitches."],
+			["foot", "A tiny letter is stitched on the bottom of its foot: N.", "The rabbit doll has an N stitched on its foot."],
+		],
+	},
 }

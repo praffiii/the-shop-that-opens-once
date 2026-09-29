@@ -38,6 +38,10 @@ func _ready() -> void:
 		world.show_item_if_any("keepsake_%d" % i, i >= Game.night or (i == Game.night - 1 and not Game.has(&"keepsake_taken")))
 	for m in 8:
 		world.show_item_if_any("clock_%d" % (1817 + m), m == Game.lanterns_out)
+	# People and hotspots that belong to other nights stay out of sight.
+	for node in find_children("*", "Node2D", true, false):
+		if (node is Ant or node is Hotspot) and not node.nights.is_empty() and Game.night not in node.nights:
+			node.hide()
 
 
 ## Puts the courier at a spawn point: a Marker2D under Spawns, or else an exported anchor.

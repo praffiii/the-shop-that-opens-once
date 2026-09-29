@@ -8,6 +8,7 @@ signal bag_pressed
 const TOAST_SECONDS := 4.0
 
 var place: Place ## Set by Main whenever the place changes.
+var talk: Talk ## Set by Main: hints move below the talk box when it sits at the top.
 
 var _bag := TextureButton.new()
 var _hover_tag := Look.panel("name")
@@ -81,3 +82,5 @@ func _process(delta: float) -> void:
 	if _toast_left > 0:
 		_toast_left -= delta
 		_toast_box.visible = _toast_left > 0
+		var box := talk.box_rect() if talk else Rect2()
+		_toast_box.position.y = box.end.y + 4 if box.has_area() and box.position.y < 40 else 6.0
