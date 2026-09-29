@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toy shop preview</title>
+<style>
+  :root { --bg: #f7eedd; --card: #fffaf0; --ink: #3d2a2e; --mute: #8a6f66; --line: #ead9bd; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px 16px 60px; background: var(--bg); color: var(--ink); font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 28px 0 8px; }
+  p.sub { margin: 0 0 12px; color: var(--mute); }
+  .stage-wrap { overflow-x: auto; max-width: 100%; }
+  canvas.stage { display: block; image-rendering: pixelated; border-radius: 6px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 10px 0 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  .controls label { display: inline-flex; gap: 6px; align-items: center; }
+  .mono { font-family: ui-monospace, Menlo, monospace; }
+  .sheet { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cell { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .cell canvas { image-rendering: pixelated; background-color: #f3e4c8; background-image: linear-gradient(45deg, #ecdcbc 25%, transparent 25%, transparent 75%, #ecdcbc 75%), linear-gradient(45deg, #ecdcbc 25%, transparent 25%, transparent 75%, #ecdcbc 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+  .cell .row { display: flex; gap: 10px; align-items: flex-end; }
+  .cell small { color: var(--mute); }
+  #err { color: #b3261e; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>Nora's toy shop (Night 2)</h1>
+<p class="sub">The room behind the scissors sign on the square, at dusk. The presentation page does not show it; the game exports it. Everything is drawn in code at native resolution and shown at an integer scale.</p>
+<div id="err"></div>
+
+<h2>The toy shop <span class="mono" id="ms"></span></h2>
+<div class="stage-wrap"><canvas class="stage" id="cv"></canvas></div>
+<div class="controls">
+  <label>zoom <select id="zoom"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label>
+  <label><input type="checkbox" id="still"> still</label>
+  <label><input type="checkbox" id="actors" checked> actors</label>
+  <label><input type="checkbox" id="ants"> real ants</label>
+  <label><input type="checkbox" id="walker" checked> walker</label>
+  <label><input type="checkbox" id="anch"> anchors</label>
+  <label><input type="checkbox" id="hot"> hotspots</label>
+</div>
+
+<h2>The keepsake, turned over <small>(lg at 4x, sm at 6x, xs at 8x; needs interiors.js)</small></h2>
+<div class="sheet" id="doll"></div>
+
+<h2>Night 2 portraits <small>(neutral, smile, moved; 48x48 at 2x; needs chars.js)</small></h2>
+<div class="sheet" id="faces"></div>
+
+<script src="px.js"></script>
+<script src="chars.js"></script>
+<script src="interiors.js"></script>
+<script src="toyshop.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const report = e => { $('err').textContent += (e && e.stack || e) + '\n'; console.error(e); };
+const dpr = () => window.devicePixelRatio || 1;
+
+// Placeholder actor: 12x24 capsule with a shadow.
+function capsule(x, y, color) {
+  return { x, y, draw(g) {
+    const top = y - 24;
+    PX.shadow(g, x, y, 7, 2);
+    PX.ellipse(g, x, top + 6, 7, 7, 'ink'); PX.rect(g, x - 7, top + 6, 15, 12, 'ink'); PX.ellipse(g, x, y - 6, 7, 7, 'ink');
+    PX.ellipse(g, x, top + 6, 6, 6, color); PX.rect(g, x - 6, top + 6, 13, 12, color); PX.ellipse(g, x, y - 6, 6, 6, color);
+    PX.rect(g, x - 3, top + 3, 2, 3, 'white');
+  } };
+}
+function marker(x, y) { return { x, y: 9999, draw(g) { PX.rect(g, x - 3, y, 7, 1, '#ff2d7a'); PX.rect(g, x, y - 3, 1, 7, '#ff2d7a'); } }; }
+function hotRect([x, y, w, h]) { return { x: 0, y: 9999, draw(g) { PX.rect(g, x, y, w, 1, '#2d7aff'); PX.rect(g, x, y + h - 1, w, 1, '#2d7aff'); PX.rect(g, x, y, 1, h, '#2d7aff'); PX.rect(g, x + w - 1, y, 1, h, '#2d7aff'); } }; }
+function ant(id, pose, x, y, dir = 1) {
+  return { x, y, draw(g) { const f = Math.floor(performance.now() / 1000 * CH.fps(pose)) % CH.frames(id, pose); CH.draw(g, id, pose, f, x, y, dir); } };
+}
+// Position (and facing) along a ping-pong path at time t.
+function pathAt(path, t, speed) {
+  let total = 0; const seg = [];
+  for (let i = 0; i < path.length - 1; i++) { const [ax, ay] = path[i], [bx, by] = path[i + 1], l = Math.hypot(bx - ax, by - ay); seg.push([ax, ay, bx, by, l]); total += l; }
+  let d = (t * speed) % (2 * total); const back = d > total; if (back) d = 2 * total - d;
+  for (const [ax, ay, bx, by, l] of seg) { if (d <= l) { const k = d / l, dir = (bx - ax) * (back ? -1 : 1) < 0 ? -1 : 1; return [Math.round(ax + (bx - ax) * k), Math.round(ay + (by - ay) * k), dir]; } d -= l; }
+  const p = path[path.length - 1]; return [p[0], p[1], 1];
+}
+function crisp(img, scale) {
+  const S = Math.max(1, Math.round(scale * dpr())), c = document.createElement('canvas');
+  c.width = img.width * S; c.height = img.height * S; c.style.width = (img.width * S) / dpr() + 'px'; c.style.height = (img.height * S) / dpr() + 'px';
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(img, 0, 0, c.width, c.height); return c;
+}
+function cell(parent, label, canvases) {
+  const el = document.createElement('div'); el.className = 'cell';
+  const row = document.createElement('div'); row.className = 'row'; row.append(...canvases); el.append(row);
+  const lab = document.createElement('small'); lab.className = 'mono'; lab.textContent = label; el.append(lab);
+  parent.append(el);
+}
+
+/* ---------------- the room */
+let shop, stage; const timing = { ms: 0 }, state = { still: false };
+try {
+  shop = TOYSHOP.createToyShop();
+  const f = shop.draw; shop.draw = (g, v, a) => { const s = performance.now(); f(g, v, a); timing.ms = timing.ms * 0.9 + (performance.now() - s) * 0.1; };
+  const cv = $('cv'), size = z => { cv.style.width = shop.w * z + 'px'; cv.style.height = shop.h * z + 'px'; };
+  size(3); stage = new PX.Stage(cv, { scale: 3 });
+  $('zoom').onchange = e => { const z = +e.target.value; size(z); stage.fixed = z; stage.resize(); };
+  $('still').onchange = e => { state.still = e.target.checked; };
+} catch (e) { report(e); }
+
+function frame(now) {
+  const t = now / 1000;
+  try {
+    const a = shop.anchors, list = [], ants = $('ants').checked;
+    if ($('actors').checked) {
+      if (ants) list.push(ant('nora', 'talk', a.nora[0], a.nora[1], 1), ant('courier', 'idle', a.customer[0], a.customer[1], 1));
+      else list.push(capsule(a.nora[0], a.nora[1], 'lilac'), capsule(a.customer[0], a.customer[1], 'orange'));
+    }
+    if ($('walker').checked) {
+      const [x, y, dir] = pathAt([a.door, [180, 204], [96, 204], [24, 186], a.rabbits, [104, 182], a.customer, a.shirt, a.spool, [292, 156], a.frame, [298, 202], [200, 212], a.door], t, 22);
+      list.push(ants ? ant('courier', 'walk', x, y, dir) : capsule(x, y, 'roofG1'));
+    }
+    if ($('anch').checked) for (const k in a) list.push(marker(a[k][0], a[k][1]));
+    if ($('hot').checked) for (const k in shop.hotspots) list.push(hotRect(shop.hotspots[k]));
+    stage.render(shop, { x: shop.w / 2, y: shop.h / 2 }, t, state, list);
+    $('ms').textContent = timing.ms.toFixed(2) + ' ms/frame';
+  } catch (e) { report(e); return; }
+  requestAnimationFrame(frame);
+}
+if (shop) requestAnimationFrame(frame);
+
+/* ---------------- the doll, front and turned over; the Night 2 portraits */
+try {
+  for (const [size, z] of [['lg', 4], ['sm', 6], ['xs', 8]]) cell($('doll'), `doll ${size} · plain / foot`, [crisp(IT.item('doll', size), z), crisp(IT.item('doll', size, 'foot'), z)]);
+} catch (e) { report(e); }
+try {
+  for (const id of ['nora', 'mia', 'grandkid']) cell($('faces'), `${id} · neutral / smile / moved`, ['neutral', 'smile', 'moved'].map(m => crisp(CH.portrait(id, 0, m), 2)));
+} catch (e) { report(e); }
+</script>
+</body>
+</html>

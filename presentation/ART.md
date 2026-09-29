@@ -40,7 +40,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 
 Quality bar, as the user put it: "the color more bright and light, make the environment looks alive", not blurry, not AI slop.
 
-## Scene contract (world.js, interiors.js)
+## Scene contract (world.js, interiors.js, toyshop.js)
 
 ```js
 const scene = createX(opts);
@@ -48,7 +48,7 @@ scene.w, scene.h                 // world size in art px
 scene.bg                         // colour for any area outside the world (hex)
 scene.anchors = { name: [x, y] } // actor feet positions and points of interest
 scene.paths   = { name: [[x,y],...] }    // walkable polylines (the village)
-scene.hotspots = { name: [x, y, w, h] }  // clickable rects (the station)
+scene.hotspots = { name: [x, y, w, h] }  // clickable rects (the station, the toy shop)
 scene.draw(ctx, view, actors)
 ```
 
@@ -70,7 +70,7 @@ scene.draw(ctx, view, actors)
 ## Items contract (in interiors.js, `window.IT`)
 
 - `IT.item(name, size = 'xs' | 'sm' | 'lg', variant)` returns a transparent canvas: about 7-10 px for `xs` (held in a hand), 12-16 px for `sm` and 40-48 px for `lg`.
-- Items: `watch` (`front` with hands at 18:17, `back` engraved `A.T.`, `side`), `doll`, `camera`, `key`, `shoes`, `book`, `letter`, `musicbox` (`closed`, `open`), `parcel`, `suitcase`.
+- Items: `watch` (`front` with hands at 18:17, `back` engraved `A.T.`, `side`), `doll` (`foot`: turned over, an `N` stitched on its sole), `camera`, `key`, `shoes`, `book`, `letter`, `musicbox` (`closed`, `open`), `parcel`, `suitcase`.
 - `IT.icon(name)` returns a 16x16 UI icon: `bag`, `look`, `talk`, `hand`, `lantern`, `clock`, `heart`, `note`, `sound-on`, `sound-off`.
 
 ## The world: Bellwood
@@ -78,3 +78,5 @@ scene.draw(ctx, view, actors)
 Bellwood is a small, lush village of ants: cottages with timber frames, terracotta and slate roofs, a stream with a wooden bridge and rope rails, a small waterfall, stone walls with moss, cobble paths on warm sand, flowers everywhere, lanterns on posts, banners, a market stall with a striped awning, barrels, crates, chickens and a cat.
 
 At the top of the lane, Marlow's shop appears for seven nights. It has a teal roof, a green striped awning, and seven small lanterns across its front.
+
+Behind the scissors sign on the square is Nora's toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.
