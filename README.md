@@ -4,7 +4,7 @@ A cozy, melancholic 2D pixel-art mystery. In the ant town of Bellwood, a shop ap
 
 A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie and Praffi Ramadhani.
 
-**Status:** the first playable night. The game is built in Godot 4 (GDScript), and Night 1 plays from start to finish.
+**Status:** the MVP. The game is built in Godot 4 (GDScript), and Nights 1 and 2 play from start to finish.
 
 ## What's in this repo
 

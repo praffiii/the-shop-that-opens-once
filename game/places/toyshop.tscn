@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://core/place.gd" id="1_place"]
+[ext_resource type="Script" path="res://core/baked_art.gd" id="2_art"]
+[ext_resource type="Script" path="res://actors/ant.gd" id="3_ant"]
+[ext_resource type="Script" path="res://core/hotspot.gd" id="4_hot"]
+
+[node name="Toyshop" type="Node2D"]
+script = ExtResource("1_place")
+mood = "shop"
+indoors = true
+wood_floor = true
+door_bell = true
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2_art")
+art_dir = "res://art/places/toyshop/dusk"
+
+[node name="nora" type="Sprite2D" parent="World"]
+position = Vector2(184, 147)
+script = ExtResource("3_ant")
+id = "nora"
+facing = -1
+
+[node name="nora" type="Node2D" parent="World/nora"]
+script = ExtResource("4_hot")
+label = "Toymaker"
+area = Rect2(-12, -32, 24, 32)
+spot = Vector2(-34, 37)
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="door" type="Node2D" parent="Hotspots"]
+position = Vector2(180, 234)
+script = ExtResource("4_hot")
+label = "Back to the square"
+area = Rect2(-14, -6, 28, 10)
+spot = Vector2(0, 0)
+exit_to = "village/from_toyshop"
+
+[node name="rabbits" type="Node2D" parent="Hotspots"]
+position = Vector2(50, 88)
+script = ExtResource("4_hot")
+label = "Rabbit shelf"
+area = Rect2(-40, -36, 80, 72)
+spot = Vector2(0, 52)
+
+[node name="frame" type="Node2D" parent="Hotspots"]
+position = Vector2(297, 104)
+script = ExtResource("4_hot")
+label = "Photo frame"
+area = Rect2(-14, -8, 28, 15)
+spot = Vector2(3, 36)
+
+[node name="shirt" type="Node2D" parent="Hotspots"]
+position = Vector2(210, 151)
+script = ExtResource("4_hot")
+label = "Little shirt"
+area = Rect2(-12, -6, 24, 13)
+spot = Vector2(0, 31)
+
+[node name="spool" type="Node2D" parent="Hotspots"]
+position = Vector2(238, 144)
+script = ExtResource("4_hot")
+label = "Blue thread"
+area = Rect2(-7, -8, 14, 16)
+spot = Vector2(0, 38)
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="door" type="Marker2D" parent="Spawns"]
+position = Vector2(180, 218)

@@ -86,6 +86,11 @@ func say(speaker: String, who: String, text: String, mood := "neutral", actor: A
 	await _next
 
 
+## Where the box is on screen, or an empty rect while it is closed.
+func box_rect() -> Rect2:
+	return Rect2(_root.position, Vector2(_width, HEIGHT)) if _root.visible else Rect2()
+
+
 ## Lists `options` and returns the index picked. The list sits by the talk box's right end,
 ## or centred under `top_center` when given.
 func choose(options: PackedStringArray, top_center := Vector2(-1, -1)) -> int:

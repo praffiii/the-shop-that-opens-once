@@ -23,9 +23,7 @@ func start() -> void:
 func entered(place: String) -> void:
 	if place == "shop" and not Game.has(&"met_marlow"):
 		await _meet_marlow()
-	elif place == "station" and Game.has(&"knows_helen"):
-		actor("helen").get_node("helen").label = "Helen"
-	if place == "station" and not Game.has(&"saw_station"):
+	elif place == "station" and not Game.has(&"saw_station"):
 		Game.mark(&"saw_station")
 		await say("courier", "The old station. I haven't been here since the day I left.")
 
@@ -63,31 +61,11 @@ func _meet_marlow() -> void:
 		await say("marlow", "The shop chose you. It usually knows what it's doing. More than I do, some nights.")
 	else:
 		await say("marlow", "Take tonight's keepsake to the one it belongs to. I can't give you a map. Listen to the town.")
-	await _hand_over()
+	await hand_over("watch")
 	await say("marlow", "A wristwatch. Stopped, and never wound again. Someone has waited a long time for it.")
 	await say("marlow", "Turn it over in your hands. Things remember more than people think.")
 	Game.mark(&"met_marlow")
 	hint("Press E or click the bag to look at what you carry.")
-
-
-func _hand_over() -> void:
-	var marlow := actor("marlow")
-	var courier := actor("courier")
-	var watch := Bag.item_art("watch", "xs", "front")
-	main.place.world.show_item("keepsake_0", false)
-	Game.mark(&"keepsake_taken")
-	marlow.held = watch
-	marlow.pose = "give"
-	await wait(0.7)
-	marlow.held = null
-	marlow.pose = "idle"
-	courier.held = watch
-	courier.pose = "receive"
-	await wait(0.7)
-	courier.held = null
-	courier.pose = "idle"
-	Game.bag.append("watch")
-	sfx("motif")
 
 
 func _marlow() -> void:
@@ -154,9 +132,7 @@ func _mender() -> void:
 		"Ask about the woman on the bench":
 			await say("mender", "That's Helen. She sits on that bench every evening before 18:17. Twenty years now.")
 			await say("mender", "Someone promised to meet her off the evening train.")
-			names["helen"] = "Helen"
-			actor("helen").get_node("helen").label = "Helen"
-			Game.mark(&"knows_helen")
+			known("helen", "Helen")
 			note("The clock mender: Helen has waited on the bench every evening before 18:17, for twenty years.")
 		"Show the watch":
 			sfx("wrong")
@@ -190,21 +166,10 @@ func _helen() -> void:
 
 func _return_watch() -> void:
 	var helen := actor("helen")
-	var courier := actor("courier")
-	var watch := Bag.item_art("watch", "xs", "front")
 	await say("courier", "I think this belongs to you. Or it was always meant to.")
 	helen.position = anchor("helenStand")
 	helen.pose = "idle"
-	helen.face_to(courier.position.x)
-	courier.held = watch
-	courier.pose = "give"
-	await wait(0.7)
-	courier.held = null
-	courier.pose = "idle"
-	helen.held = watch
-	helen.pose = "receive"
-	Game.bag.erase("watch")
-	sfx("right")
+	await give_keepsake("helen", "watch")
 	music("memory")
 	await say("helen", "...Arthur's watch.", "moved")
 	await say("helen", "He promised he'd be on the 18:17. He stopped his watch the evening he left, so our time would wait for him.", "moved")
@@ -214,28 +179,9 @@ func _return_watch() -> void:
 	await say("helen", "But he never let go of our evening, did he? Not for a single minute.", "moved")
 	await say("helen", "I think I can stop waiting now. Thank you, dear.", "moved")
 	await wait(0.8)
-	await _lantern_goes_out()
-
-
-func _lantern_goes_out() -> void:
-	await go("shop", "counter")
-	music("resolved")
-	await look(anchor("clock"))
-	var world := main.place.world
-	await wait(0.8)
-	world.show_item("clock_1817", false)
-	world.show_item("clock_1818", true)
-	sfx("tick")
-	await wait(0.6)
-	world.show_item("lantern_0", false)
-	sfx("chime")
-	Game.lanterns_out = 1
-	await wait(0.8)
+	await lantern_goes_out()
 	await say("marlow", "There. Did you hear it? The clock moved.")
 	await say("marlow", "One lantern out. Six keepsakes still waiting.")
 	await say("marlow", "Go home and rest. The shop will be here tomorrow, at dusk.")
 	await card(["Night 1", "The Stopped Watch", "One lantern has gone out."])
-	Game.night = 2
-	Game.save()
-	await card(["Thank you for playing the first night.", "Night 2 is still being made."])
-	main.finish()
+	await main.end_night()

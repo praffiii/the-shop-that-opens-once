@@ -3,7 +3,7 @@ extends Node2D
 ## Runs the game: the title, the current night's story, moving between places, and the screen UI.
 ## While any story step runs, the courier can't move; he gets the controls back when all are done.
 
-const NIGHTS := {1: preload("res://nights/night_1.gd")}
+const NIGHTS := {1: preload("res://nights/night_1.gd"), 2: preload("res://nights/night_2.gd")}
 const TITLE_VIEW := Vector2(360, 220) ## Where the title screen looks: the shop at the top of the lane.
 const ZOOM := 2 ## Each world pixel covers this many screen-canvas pixels; the UI keeps the finer ones.
 const BASE := Vector2(640, 360) ## The least canvas the screen shows (the world is BASE / ZOOM).
@@ -33,6 +33,7 @@ func _ready() -> void:
 	$UI/Screen.theme = Look.theme()
 	courier.name = "courier"
 	talk.courier = courier
+	hud.talk = talk
 	Game.noted.connect(_on_noted)
 	courier.stepped.connect(func() -> void: Sound.step(place.wood_floor))
 	hud.bag_pressed.connect(_open_bag)
@@ -74,6 +75,18 @@ func title() -> void:
 			get_tree().quit()
 
 
+## Saves the next night and starts it, or thanks the player if it isn't built yet.
+func end_night() -> void:
+	Game.night += 1
+	Game.save()
+	night = null
+	if NIGHTS.has(Game.night):
+		_begin.call_deferred(Game.night)
+	else:
+		await card(["Thank you for playing.", "Night %d is still being made." % Game.night])
+		finish()
+
+
 ## Ends the night's story and returns to the title once the current step is over.
 func finish() -> void:
 	night = null
@@ -89,6 +102,7 @@ func go(place_name: String, spawn: String) -> void:
 		Sound.play("bell")
 	await _fade(false)
 	if night:
+		night.relabel()
 		await night.entered(place_name)
 
 

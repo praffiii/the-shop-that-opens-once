@@ -4,11 +4,11 @@ The single source of truth for what this game is, what has been decided, and wha
 
 Last updated: 2026-09-29.
 
-**Status:** the first playable night. The following exist:
+**Status:** the MVP, Nights 1 and 2, is playable. The following exist:
 - a written GDD
 - a feasibility report
 - a web presentation with a code-drawn pixel art library
-- the game in Godot (`game/`), with Night 1 playable from start to finish
+- the game in Godot (`game/`), with Nights 1 and 2 playable from start to finish
 
 ## How to use this file
 
@@ -44,6 +44,7 @@ Every fact carries a source tag:
 
 **Building the game**
 - `[Decision]` The game reuses the presentation's code-drawn art: `game/tools/export-art/` renders it to PNG and JSON in `game/art/`. The team may retouch the PNGs in Aseprite later. Everything is scaled only by whole numbers. (2026-09-28)
+- `[Decision]` Night 2 uses a new room, Nora's toy shop, entered from the scissors-sign house on the square. Mia lives in the green-shuttered cottage. Nora's grandchild is called Pip. (2026-09-29)
 - `[Decision]` The camera is close: it shows about 320x180 art pixels of the world, each drawn 2x on a canvas of at least 640x360, and the UI uses that finer canvas. Chosen over 480x270 (too far) and 240x135 (too close). (2026-09-29)
 - `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. (2026-09-28)
 - `[Decision]` The game's text is in English. Indonesian may be added later. (2026-09-28)
@@ -176,6 +177,28 @@ This chain was written for the presentation's playable demo; the user adopted it
 
 The presentation moves the shop clock forward one minute per resolved night (18:17, then 18:18, and so on). That is its own interpretation; the GDD only says the hands move briefly `[Illustrative]`.
 
+### Night 2 clue chain `[Decision]` (adopted 2026-09-29)
+
+Drafted for the game and adopted by the user. It is not in the GDD.
+- **The keepsake:** a small rabbit doll. One ear came loose and was sewn back on with blue thread. A tiny "N" is stitched on its foot.
+- **Nora's toy shop** is a new room, entered from the scissors-sign house on the square. Nora recognises her own stitching but won't take the doll: "I made it for someone who never came to collect it."
+- **Testimony:** the baker says Nora had a daughter, Mia. They quarrelled years ago, the week Mia told her she was expecting. Mia now lives in the green-shuttered cottage by the vegetable garden, with her little one.
+- **The washing line** beside Nora's shop holds tiny child-sized clothes, hemmed with the same blue thread. Nora still sews for a grandchild she has never met.
+- **Mia**, in her garden, knows the rabbit at once: "Mom made it. For the baby. I never let her give it." She won't take it: "It was never meant for me."
+- **Pip**, Nora's grandchild, sits by the cottage fence making a rabbit out of an old sock: "I don't have a grandma. Mom says it's complicated."
+- **Wrong offers:** Nora, Mia and the village kid each give a hint.
+- **Right offer: Pip.** Pip runs to Mia with the rabbit, and they walk to the square together. Nora comes out of her shop. Mia says "The ear came loose, Mom," and Nora answers "I can mend it, if you'll let me." The second lantern goes out.
+- **The feeling** `[Illustrative]`: pride and old anger, each waiting for the other to say sorry first.
+
+### Night 2 in the game `[Illustrative]`
+
+The playable Night 2 (`game/nights/night_2.gd`) adds details that are not decided yet:
+- The night opens with a title card, and the courier is back in Bellwood at dusk. The shop's clock says 18:18 and moves to 18:19 at the end.
+- The "N" on the doll's foot is stitched in the same blue thread as its ear.
+- **Nora's toy shop** has a spool of that blue thread on her workbench and shelves of rabbits sewn to the doll's pattern. It also has a photo frame lying face down and a half-finished little shirt.
+- Pip's sock rabbit is called Button. The notice board has a new note: "Lost: one sock. Blue. Answers to Button."
+- In the ending, Nora invites Mia and Pip in for tea. Marlow adds: "Mending takes two, you know."
+
 ### Night 1 in the game `[Illustrative]`
 
 The playable Night 1 (`game/nights/night_1.gd`) adds details that are not decided yet:
@@ -305,7 +328,6 @@ This art is JavaScript canvas code, so a game engine would need it exported to s
 - **Protagonist:** his name, age, and pronouns for the ant courier. The GDD's protagonist is a young man.
 - **The mother:** her name, her "deep secret", and what her letter says about why the shop chose him.
 - **Grief:** which phase of grief each night mirrors.
-- **Night 2:** which clues lead to Nora's grandchild, and who the grandchild is.
 - **Night 3:** what the six photos show, and how the museum donation plays out.
 - **Night 4:** who the former archivist was, what the key opens, and how the player finds it.
 - **Night 5:** who the child on the lighthouse path is (possibly Sam), and who Leo's sibling was.

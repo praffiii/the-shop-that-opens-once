@@ -27,6 +27,7 @@ spot = Vector2(24, 2)
 position = Vector2(478, 470)
 script = ExtResource("3_ant")
 id = "gardener"
+nights = PackedInt32Array(1)
 
 [node name="gardener" type="Node2D" parent="World/gardener"]
 script = ExtResource("4_hot")
@@ -44,6 +45,38 @@ script = ExtResource("4_hot")
 label = "Village kid"
 area = Rect2(-8, -24, 16, 24)
 spot = Vector2(24, 0)
+
+[node name="mia" type="Sprite2D" parent="World"]
+position = Vector2(600, 550)
+script = ExtResource("3_ant")
+id = "mia"
+nights = PackedInt32Array(2)
+facing = -1
+
+[node name="mia" type="Node2D" parent="World/mia"]
+script = ExtResource("4_hot")
+label = "Woman in the garden"
+area = Rect2(-10, -30, 20, 30)
+spot = Vector2(-24, 0)
+
+[node name="grandkid" type="Sprite2D" parent="World"]
+position = Vector2(520, 544)
+script = ExtResource("3_ant")
+id = "grandkid"
+nights = PackedInt32Array(2)
+
+[node name="grandkid" type="Node2D" parent="World/grandkid"]
+script = ExtResource("4_hot")
+label = "Little one"
+area = Rect2(-8, -24, 16, 24)
+spot = Vector2(24, 0)
+
+[node name="nora" type="Sprite2D" parent="World"]
+visible = false
+position = Vector2(540, 332)
+script = ExtResource("3_ant")
+id = "nora"
+facing = -1
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -77,6 +110,23 @@ label = "Notice board"
 area = Rect2(-12, -26, 26, 26)
 spot = Vector2(0, 30)
 
+[node name="toyshop_door" type="Node2D" parent="Hotspots"]
+position = Vector2(538, 327)
+script = ExtResource("4_hot")
+label = "Toy and mending shop"
+area = Rect2(-22, -33, 28, 35)
+spot = Vector2(0, 0)
+exit_to = "toyshop/door"
+nights = PackedInt32Array(2)
+
+[node name="washing_line" type="Node2D" parent="Hotspots"]
+position = Vector2(620, 306)
+script = ExtResource("4_hot")
+label = "Washing line"
+area = Rect2(-30, -18, 60, 34)
+spot = Vector2(-24, 21)
+nights = PackedInt32Array(2)
+
 [node name="Spawns" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Spawns"]
@@ -87,3 +137,9 @@ position = Vector2(56, 520)
 
 [node name="from_shop" type="Marker2D" parent="Spawns"]
 position = Vector2(360, 272)
+
+[node name="from_toyshop" type="Marker2D" parent="Spawns"]
+position = Vector2(538, 340)
+
+[node name="meet" type="Marker2D" parent="Spawns"]
+position = Vector2(488, 340)

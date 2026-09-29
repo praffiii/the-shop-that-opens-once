@@ -27,6 +27,8 @@ static var _cast: Dictionary = {}
 			_frame = 0
 			if is_node_ready():
 				_refresh()
+## The nights this character appears in; empty means every night.
+@export var nights := PackedInt32Array()
 @export_enum("Right:1", "Left:-1") var facing := 1:
 	set(value):
 		facing = value
