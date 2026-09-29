@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://hirunmv2rnok"
+path="res://.godot/imported/walk.png-981d7f44cc7f08df50a2d290f01ffe0a.image"
+
+[deps]
+
+source_file="res://art/places/toyshop/walk.png"
+dest_files=["res://.godot/imported/walk.png-981d7f44cc7f08df50a2d290f01ffe0a.image"]
+
+[params]
+
