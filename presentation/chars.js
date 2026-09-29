@@ -667,7 +667,7 @@
     const p = resolve(id, pose), f = wrap(p, frame);
     return memo(`s|${id}|${p}|${f}`, () => render(id, p, f));
   }
-  const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'] };
+  const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'], nora: ['smile', 'moved'], mia: ['smile', 'moved'], grandkid: ['smile', 'moved'] };
 
   window.CH = {
     ids: IDS,

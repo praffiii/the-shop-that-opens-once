@@ -3371,7 +3371,7 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
     const p = resolve(id, pose), f = wrap(p, frame);
     return memo(`s|${id}|${p}|${f}`, () => render(id, p, f));
   }
-  const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'] };
+  const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'], nora: ['smile', 'moved'], mia: ['smile', 'moved'], grandkid: ['smile', 'moved'] };
 
   window.CH = {
     ids: IDS,
@@ -4537,7 +4537,25 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
     else { line(x, 6, 9, 9, 10, 'ink2'); line(x, 6, 9, 6, 11, 'ink2'); dot(x, 6, 9, 'brass3'); dot(x, 4, 7, 'white'); }
     return c;
   };
-  SM.doll = () => S(`
+  // foot: turned over, lying face down and seen from its feet; the mended ear (now on the left) shows its blue stitches,
+  // and the right sole is embroidered with an N in blue thread (a mark at the small sizes)
+  SM.doll = v => v === 'foot' ? S(`
+    .oo....oo...
+    oabo..oabo..
+    oxbo..oabo..
+    oaxo..oabo..
+    .oxo..obo...
+    .oboooobo...
+    oaabbbbbbo..
+    oabbbcbbbco.
+    oabbbbbbbco.
+    oabbbcbbbco.
+    .obbbbbbco..
+    oolLLLLLdoo.
+    oblLLLLLdbo.
+    .olLwwwLdo..
+    oappo.onpno.
+    .ooo...ooo..`, { o: 'wood4', a: 'cream0', b: 'cream1', c: 'cream2', p: 'pink', x: 'roofB2', l: X.lil0, L: 'lilac', d: 'dusk5', w: 'white', n: 'roofB3' }) : S(`
     .oo....oo...
     oapo..oqqo..
     oapo..oxqo..
@@ -4683,7 +4701,17 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
     const f = v === 'back' ? ['bbb', 'bdb', 'bbb'] : ['fff', 'fkk', 'fkf'];   // front: hands at 6:17
     return sprite(['..ooo..', '..obo..', '.oaabo.', `oa${f[0]}co`, `oa${f[1]}co`, `oa${f[2]}co`, '.obcco.', '..ooo..'], key);
   };
-  XS.doll = () => S(`
+  XS.doll = v => v === 'foot' ? S(`
+    .oo..oo.
+    oxaooabo
+    oaxooabo
+    .obaabo.
+    oaaaaaao
+    oaaaaaao
+    obaaaabo
+    .oLwwLo.
+    oLLLLLLo
+    opo..ono`, { o: 'wood4', a: 'cream0', b: 'cream1', x: 'roofB2', L: 'lilac', w: 'white', p: 'pink', n: 'roofB3' }) : S(`
     .oo..oo.
     oapooqqo
     oapooxqo
@@ -4811,9 +4839,29 @@ h3{margin:0;font-family:var(--px);font-weight:700;font-size:24px;line-height:1.1
     line(x, cx - 8, cy - 7, cx - 5, cy - 10, 'white'); line(x, cx - 7, cy - 5, cx - 6, cy - 6, 'white');
     return c;
   };
-  LG.doll = () => {
+  LG.doll = v => {
     const [c, x] = canvas(40, 48);
     const fur = { o: 'wood4', ol: 'wood3', h: 'white', b: 'cream0', s: 'cream2' };
+    if (v === 'foot') {
+      // turned over, lying face down and seen from its feet. The mended ear, now on the left, shows its blue stitches from behind.
+      x.drawImage(bevel(mask(40, 48, g => lens(g, 15, 19, -1.94, 17, 4.2, '#000')), fur, 1, 1), 0, 0);
+      x.drawImage(bevel(mask(40, 48, g => lens(g, 25, 19, -1.42, 17, 4.2, '#000')), fur, 1, 1), 0, 0);
+      for (const [sx, sy] of [[13, 7], [11, 10], [10, 13]]) { dot(x, sx - 1, sy - 1, 'roofB2'); dot(x, sx + 1, sy + 1, 'roofB2'); dot(x, sx + 1, sy - 1, 'roofB2'); dot(x, sx - 1, sy + 1, 'roofB2'); dot(x, sx, sy, 'roofB3'); }
+      // the back of the head, its seam down the middle; arms lying flat
+      x.drawImage(bevel(mask(40, 48, g => ellipse(g, 20, 24, 11, 8, '#000')), fur, 1, 2), 0, 0);
+      for (let j = 17; j < 32; j += 2) dot(x, 20, j, 'cream2');
+      x.drawImage(bevel(mask(40, 48, g => { ellipse(g, 8, 36, 3, 4, '#000'); ellipse(g, 32, 36, 3, 4, '#000'); }), fur, 1, 1), 0, 0);
+      // the dress from the back: the bow's tails, its white dots and a cotton tail
+      x.drawImage(bevel(mask(40, 48, g => { ellipse(g, 20, 37, 10, 8, '#000'); rect(g, 12, 31, 16, 6, '#000'); }), { o: 'roofB3', ol: 'dusk5', h: X.lil0, b: 'lilac', s: 'dusk5' }, 1, 2), 0, 0);
+      for (const [px, py] of [[25, 35], [14, 38], [26, 40], [15, 33]]) rect(x, px, py, 2, 2, 'white');
+      rect(x, 17, 31, 6, 2, 'roofR2'); rect(x, 18, 31, 4, 1, 'rose'); line(x, 18, 33, 16, 36, 'roofR2'); line(x, 21, 33, 23, 36, 'roofR2');
+      disc(x, 20.5, 40.5, 3.2, (d, lit) => d > 2.6 ? 'cream2' : lit > 0.3 ? 'white' : 'cream0');
+      // the feet toward us: pink felt soles, stitched round; the right one embroidered with an N in blue thread
+      x.drawImage(bevel(mask(40, 48, g => { ellipse(g, 12, 42, 6, 5, '#000'); ellipse(g, 28, 42, 6, 5, '#000'); }), fur, 1, 1), 0, 0);
+      for (const fx of [12, 28]) { ellipse(x, fx, 42, 4, 3, 'pink'); rect(x, fx - 2, 39, 3, 1, 'white'); dot(x, fx - 3, 40, 'white'); for (const [dx, dy] of [[4, -2], [4, 2], [-4, 2], [0, 3]]) dot(x, fx + dx, 42 + dy, 'rose'); }
+      ['#...#', '##..#', '#.#.#', '#..##', '#...#'].forEach((r, j) => { for (let i = 0; i < 5; i++) if (r[i] === '#') dot(x, 26 + i, 40 + j, 'roofB3'); });
+      return c;
+    }
     // ears: the left one upright, the right one mended with a blue patch and big cross stitches
     const earL = mask(40, 48, g => lens(g, 15, 19, -1.72, 18, 4.2, '#000'));
     const earR = mask(40, 48, g => lens(g, 25, 19, -1.2, 18, 4.2, '#000'));

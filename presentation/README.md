@@ -15,6 +15,7 @@ Every image is pixel art drawn in code when the page loads. This folder has no i
 | `world.js` | Bellwood village: day, dusk, evening, and the shop appearing |
 | `chars.js` | The 15 ant characters: poses, walk cycles, portraits |
 | `interiors.js` | Marlow's shop, the station, the keepsakes, UI icons |
+| `toyshop.js` | Nora's toy shop for Night 2, used by the game. The presentation page doesn't load it. |
 | `dioramas.js` | The seven night scenes |
 | `audio.js` | Optional synthesized music and sound effects |
 | `main.js` | Scroll story, playable Night 1, section wiring |
