@@ -2,13 +2,14 @@
 
 The single source of truth for what this game is, what has been decided, and what is still open. Read it before any full-game design, story or development task.
 
-Last updated: 2026-09-29.
+Last updated: 2026-10-18.
 
-**Status:** the MVP, Nights 1 and 2, is playable. The following exist:
-- a written GDD
-- a feasibility report
-- a web presentation with a code-drawn pixel art library
-- the game in Godot (`game/`), with Nights 1 and 2 playable from start to finish
+**Status:** moving from Godot to Unity, on the new design in the UTS GDD. The following exist:
+- the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
+- the earlier concept proposal and the feasibility report
+- a web presentation with a code-drawn pixel art library. It still tells the earlier story.
+- the Godot MVP (Nights 1 and 2 of the earlier story), archived in `archive/godot-mvp/`
+- no Unity project yet
 
 ## How to use this file
 
@@ -21,331 +22,303 @@ Every fact carries a source tag:
 | Tag | Source | Governs |
 |---|---|---|
 | `[Decision]` | The user's explicit choices, dated | Everything. It overrides the other tags. |
-| `[GDD]` | Andika Rafa Akbar's *Game Design Document & Concept Proposal* (`docs/game-design-document.pdf`, in Indonesian) | World, story, mechanics, the seven nights |
-| `[Report]` | SE.3 Kelompok 1, *Game Concept and Development Feasibility Research Report* (`docs/feasibility-report.pdf`, in Indonesian) | Scope, platform, audience, production risk |
+| `[GDD]` | SE.3 Kelompok 1, *Perancangan Game Design Document (GDD) dan Storyboard Game*, the UTS report (`docs/game-design-document.pdf`, in Indonesian) | World, story, characters, mechanics, the seven nights, UI, audio |
+| `[Report]` | SE.3 Kelompok 1, *Game Concept and Development Feasibility Research Report* (`docs/feasibility-report.pdf`, in Indonesian) | Scope, audience, production risk |
+| `[Proposal]` | Andika Rafa Akbar's *Game Design Document & Concept Proposal* (`docs/concept-proposal.pdf`) | Superseded by the GDD. History only. |
 | `[Illustrative]` | Invented for the presentation or a draft | Not canon until the user adopts it |
 | `[Open]` | Undecided | Ask the user |
 
 ## Decisions
 
 **Sources**
-- `[Decision]` The GDD defines the world, premise, mechanics and the seven-night story. The report defines feasibility and scope. (2026-09-26)
+- `[Decision]` The UTS GDD defines the world, story, characters, mechanics and the seven nights. It replaces the concept proposal, whose story (Arthur Tate, the 18:17 clock, Marlow's sister Elise, Sam as a child) is retired. The report still defines feasibility and scope. (2026-10-18)
+
+**Engine and builds**
+- `[Decision]` The engine is Unity 6.6 (6000.6.6f1) with C#. It replaces Godot 4. The editor is VS Code. (2026-10-18)
+- `[Decision]` Build targets: Web first, then Windows. Those two build modules are installed. (2026-10-18)
+- `[Decision]` The Godot MVP is an archive and stays untouched. It lives in `archive/godot-mvp/`, and the git tag `godot-mvp` marks its last commit. Its web build stays live at https://the-shop-that-opens-once-game.vercel.app as a record. (2026-10-18)
+- `[Decision]` Before Unity: the engine was Godot 4.7.2 with GDScript, because C# projects in Godot 4 cannot export to the web. (2026-09-28, superseded 2026-10-18)
 
 **Scope and platform**
-- `[Decision]` PC comes first. The MVP is 1–2 playable chapters (Nights 1–2). (2026-09-26)
-- `[Decision]` The full-game vision is seven nights plus an epilogue, about 1–3 hours. Mobile comes after the PC version is stable. (2026-09-26)
-- `[Decision]` The engine is Godot 4 (4.7.2), the standard build with GDScript, not the .NET build: C# projects in Godot 4 cannot export to the web. (2026-09-28)
-- `[Decision]` The GDD's schedule is not a confirmed plan. (2026-09-26)
+- `[Decision]` PC comes first. The MVP is 1–2 playable chapters (Nights 1–2). Mobile comes after the PC version is stable. (2026-09-26)
+- `[Decision]` The full game is a prologue, seven nights and an epilogue. (2026-09-26, chapters per the GDD 2026-10-18)
 
-**Characters and world**
-- `[Decision]` Every character is an ant: expressive reddish-brown ants, as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
-- `[Decision]` The protagonist is drawn as the ant courier with a green cap and a green delivery bag. This is the visual adaptation of the GDD's human protagonist, a young man coming home. (2026-09-26)
-- `[Decision]` The game has no fishing mechanic and is not a timed delivery game. The fishing scene and the parcel handoff in early mood art were atmosphere only. (2026-09-26)
+**Assets: made from scratch, no AI**
+- `[Decision]` Art, sound and every other asset are made from scratch, the way the Godot build made them: code-drawn pixel art from `presentation/` exported to images, and synthesized music and sound. No AI-generated art, audio or assets. The GDD's AI-assisted pipeline (Midjourney, FLUX, Suno in section 13.3) was written for the formal report only. (2026-09-26, reaffirmed 2026-10-18)
+- `[Decision]` The visual reference is the code-drawn art in `presentation/`, with rules in `presentation/ART.md`. The GDD's figures, such as its zone and interior maps, illustrate the report and are not art references. (2026-10-18)
 
-**Building the game**
-- `[Decision]` The game reuses the presentation's code-drawn art: `game/tools/export-art/` renders it to PNG and JSON in `game/art/`. The team may retouch the PNGs in Aseprite later. Everything is scaled only by whole numbers. (2026-09-28)
-- `[Decision]` Night 2 uses a new room, Nora's toy shop, entered from the scissors-sign house on the square. Mia lives in the green-shuttered cottage. Nora's grandchild is called Pip. (2026-09-29)
-- `[Decision]` The camera is close: it shows about 320x180 art pixels of the world, each drawn 2x on a canvas of at least 640x360, and the UI uses that finer canvas. Chosen over 480x270 (too far) and 240x135 (too close). (2026-09-29)
-- `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. (2026-09-28)
+**Characters and art**
+- `[Decision]` Every character is an ant: chunky, expressive reddish-brown ants as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
+- `[Decision]` The protagonist, Satria in the GDD, is drawn as the ant courier with a green cap and a green bag. (2026-09-26)
+- `[Decision]` The palette is bright and light, and pixels stay crisp at whole-number scales. Dusk and night stay pastel and readable, never dark or muddy. Environments are full of small ambient motion. (2026-09-26)
+- `[Decision]` The game has no fishing mechanic and is not a timed delivery game. (2026-09-26)
+
+**Carried over from the Godot build** (design choices, not engine code)
+- `[Decision]` The camera is close: it shows about 320x180 art pixels of the world, each drawn 2x on a canvas of at least 640x360. The UI uses that finer canvas. (2026-09-29)
+- `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. The GDD adds R to retry a minigame. (2026-09-28)
 - `[Decision]` The game's text is in English. Indonesian may be added later. (2026-09-28)
-- `[Decision]` The game reuses the presentation's synthesized sound: its piano and music-box music in four moods (dusk, shop, memory, resolved), the evening wind, footsteps, the shop's door bell and small effects. `game/tools/export-art/` exports them to OGG in `game/art/sound/`. (2026-09-29)
-
-**Art**
-- `[Decision]` Visuals are hand-authored pixel art. The palette is bright and light, pixels are crisp at whole-number scales, and environments are full of small ambient motion. The user rejected AI-generated images and blurry, dark scenes. Ask the user before introducing any AI-generated asset. (2026-09-26)
 
 **Canon boundaries**
-- `[Decision]` The earlier browser prototype and its two test cases (a wooden songbird and a mended ribbon) are retired, together with all AI-generated art and the reference images it was made from. None of it is part of this project. The code-drawn art in `presentation/` is the only visual reference. (2026-09-26)
+- `[Decision]` The earlier browser prototype, its two test cases (a wooden songbird and a mended ribbon) and all AI-generated art are retired. (2026-09-26)
 - `[Decision]` Difficulty scores are the team's own estimates, not industry data. (2026-09-26)
 
 **Sharing**
 - `[Decision]` Shareable pages are hosted on Vercel, not Claude Artifacts. (2026-09-26)
-- `[Decision]` The project lives in a public GitHub repo, `praffiii/the-shop-that-opens-once`. The game is the Godot project in `game/`. (2026-09-26, folder 2026-09-28)
-- `[Decision]` The PDFs in `docs/` are published as they are, including the team's student IDs. In the presentation's source list, the GDD appears by title only; the feasibility report keeps its full title and "SE.3 Kelompok 1". (2026-09-28)
+- `[Decision]` The project lives in a public GitHub repo, `praffiii/the-shop-that-opens-once`. (2026-09-26)
+- `[Decision]` The PDFs in `docs/` are published as they are, including the team's student IDs. The GDD is stored compressed (images at 200 dpi) to keep the repo small. (2026-09-28, GDD 2026-10-18)
 
 ## The game at a glance `[GDD]`
 
 | | |
 |---|---|
 | Title | The Shop That Opens Once |
-| Genre | 2D pixel-art narrative adventure: a cozy, melancholic mystery, inspired by Odencat |
-| Logline | A young man comes home to Bellwood and finds a shop that appears for only seven nights. With no quest markers, he must return seven keepsakes to their true owners by watching and listening to the townsfolk. The journey slowly leads him to make peace with his mother's death. |
-| Themes | Grief and letting go, empathy, finding the way home |
-| Player feeling | Reflective, warm, bittersweet, and in the end calm (catharsis) |
-| Audience | Ages 16–35. Fans of story-rich indie games, Odencat, To the Moon, Coffee Talk and A Short Hike. |
-| Length | 1–3 hours: seven night chapters plus an epilogue |
-| Failure | None. There is no combat, death, timer or game over. |
-| Platform | PC and mobile in the GDD; PC first by decision |
+| Genre | 2D pixel-art narrative adventure: a cozy, melancholic mystery |
+| Logline | Satria, an ant courier from the city, comes home to Bellwood to sell the late parents' house. A shop that opens only at midnight, in the roots of an old banyan by the station, gives Satria one last job: return seven keepsakes to the villagers. Along the way Satria uncovers the parents' sacrifice and chooses between going back to the city and staying. |
+| Themes | Loss, regret, memory, sacrifice and accepting the past |
+| Player feeling | Empathy, reflection, and a calm, bittersweet coziness |
+| Audience | Ages 16–35, rated Everyone 10+ / Teen for themes of grief. Story-rich and cozy players, and fans of nostalgic pixel art. |
+| Length | 1–3 hours over seven nights (section 2.2 says 3–4; see Known inconsistencies) |
+| Players | Single-player |
+| Failure | None. No combat, health, timer or game over. |
+| Platform | PC (Steam) first, mobile later |
 
-Unique selling points `[GDD]` `[Report]`:
-1. **No quest markers.** There are no arrows or checklists. Progress comes from listening to residents, reading the details of objects and observing Bellwood.
-2. **Emotional resonance.** Small, Odencat-style moments carry the story. The stories are about inner wounds, regret, reconciliation and acceptance, not about saving the world.
-3. **The 18:17 motif.** Warm sunset visuals set against loneliness, and a stopped time that finally moves again.
+Design pillars:
+1. **No quest markers.** No arrows or checklists. The player matches clues from inspecting keepsakes (a station serial number, hands stopped at 10:17, a kind of stitching) with what residents say.
+2. **Things connect people.** Every keepsake is a bridge between characters.
+3. **Kindness over winning.** Wrong guesses get a puzzled reply or a new hint, never a penalty.
+4. **A miniature fable.** An anthropomorphic ant colony lives among human leftovers, such as a walnut-shell cup or a station clock.
+5. **Restoration minigames.** Tactile minigames (calibrating gears, stitching a patchwork, tuning a radio) with instant, penalty-free retries.
 
 ## World and story `[GDD]`
 
-**Bellwood** is a small town where an old road links the centre to the outskirts. Once every few decades, just before sunset, a small shop with no name and no number appears at the end of an alley. It stays for exactly seven nights.
+**Premise.** Satria spent eleven years as an express courier in the metropolis and comes home to the rural ant colony of Bellwood only to settle the deed and sell the late parents' house (Ibu Ratih and Ayah Satria) to a city property agent. A brass bell leads Satria to The Shop That Opens Once: Marlow's old shop in the roots of the banyan tree by the station. It opens only from 00:00 to 00:30, for those with unfinished business. For seven nights Marlow gives Satria one relic box a night.
 
-**Marlow's shop** is kept by an old man called Marlow. Its wall clock is frozen at **18:17**. Seven lanterns hang in the shop, and one goes out each time a keepsake reaches its true owner.
+**Bellwood** is built from natural materials: twigs, roots, walnut shells and leaves. It has four zones joined by footpaths, with no loading screens between them:
 
-**The protagonist** has lived away from home. He comes back to clear out the family house before it is sold, feels he came home too late, and is grieving his mother. He stumbles on the shop. Marlow asks him to return seven keepsakes, each belonging to someone who lost something, to their rightful owners.
+| Zone | What is there |
+|---|---|
+| West: station and old rails | The abandoned station, its tower clock frozen at 10:17, Helen's tea stall on the platform, Mender's forge, mossy sleepers, and the banyan where Marlow's shop appears |
+| Centre: square and market | A gravel square with a walnut-shell fountain, Mia's vegetable stalls, Baker's bakery, the notice board, and Sam's village hall with its underground archive |
+| South: coast and cliffs | Arlo's leaf-rotted jetty, a small lighthouse, the salt store, the remains of the 1952 rope bridge, and stone steps up to Theo's cliff-top studio |
+| East: homes and flower garden | Stilt houses, a wooden bus stop, Gardener's chamomile garden, Pip's twig swing, Nora's house, and Satria's childhood home |
 
-**The arc** runs across the seven nights:
-- The residents' intertwined stories mirror phases of grief and uncover a deep secret of his late mother.
-- On the last night, a letter from her explains why the shop chose him, and he is finally ready to go home to his own life.
-- The shop then vanishes. In the epilogue he carries on its spirit as a small shop that listens to the town's stories.
+Paths: West–Centre, Centre–East and Centre–South.
 
-**Places** named in the GDD:
-- the park, the bakery, the old station, the dusk alley and the riverside
-- the town museum, the former archivist's abandoned house and the lighthouse path
-- Marlow's shop and the family house
+**Nine interiors** can be entered: Satria's childhood home, Marlow's shop, Helen's tea stall, Mender's forge, Baker's bakery, Sam's archive and vault No. 7, Theo's studio and darkroom, Nora's loom house, and Arlo's salt store.
+
+**Lore.** Twenty years before the story, in 1952, a great storm and flash flood hit the Bellwood estuary. It brought down the south bridge and cut the railway for good. At 10:17 that night the last steam train was in danger. Satria's parents and the village elders gave up their tickets to move to the city to help: they led the bridge repairs and sewed warm clothes for the children. Traces of that kindness are left in the relics in Marlow's shop.
+
+**Story arc:**
+1. **Inciting incident.** Satria arrives at dusk with the sale contract from the city agent. That night Marlow's shop appears.
+2. **Rising action (Nights 1–6).** Satria receives a relic each night, restores it through a minigame and returns it, and slowly understands why the parents stayed.
+3. **Climax (Night 7).** Every lantern is out and the shelves are empty. Satria receives the family's walnut music box and Ratih's last letter.
+4. **Ending (Day 8).** In the square, before the agent and the whole village, Satria tears up the contract, refuses the city's compensation, stays and reopens the village post office. Time in Bellwood flows again.
 
 ## Characters `[GDD]`
 
-All characters are ants `[Decision]`. The GDD says more residents will be added to support the story.
+All 18 characters are ants. The GDD's colour codes are suggestions for each ant's palette.
 
-| Character | Role | Story | Keepsake (night) |
+| # | Character | Role | Story |
 |---|---|---|---|
-| The protagonist (the courier) | Playable. In the GDD, a young man who moved away. | Feels he came home too late; grieving his mother | Receives the music box (7) |
-| His mother | Died before the game begins | Her secret and her letter drive the arc | The unsigned letter (7) |
-| Marlow (real name Marcus) | Keeper of the shop, an old man | Trapped in regret over the death of his younger sister, Elise | The book *The Things We Leave Behind* (6) |
-| Arthur Tate and Helen | Station keeper and a former ticket clerk | A couple separated for 20 years by a promise made for 18:17 that was never kept | Old wristwatch (1) |
-| Nora and Mia | Toymaker and her daughter | Estranged for years after a fight when Mia was newly pregnant. Nora has a grandchild. | Rabbit doll with a stitched ear (2) |
-| Theo and Daniel | Old photographer and his best friend | Photographer friends since youth. Daniel died before printing the last photos of Bellwood. | Old film camera (3) |
-| Sam | A small child | Finds the former town archivist's room | Key with no engraving (4) |
-| Leo | Former runner | Stopped running out of guilt over his older sibling's death | Pair of shoes in two sizes (5) |
+| 1 | Satria | Playable courier | Left at 17, thinking the parents were "stuck" in a poor village. Both parents died while Satria was building a city career; Satria carries the regret of never saying goodbye. Quiet, polite, reflective; keeps a journal. |
+| 2 | Marlow (Marcus Bell) | Keeper of the midnight shop | Station master in 1952. Out of guilt over the station's closing, Marlow keeps the shop to help others finish their unfinished business. Speaks in parables and never dictates. |
+| 3 | Helen | Runs the tea stall on the dead platform | Ratih's best friend. Still waits for a train, and a love, that never came back after 1952. |
+| 4 | Pip | Little post-office apprentice | Mia's child; dreams of becoming a great courier. Terrified of thunder since the storm and soothed only by Mochi, a patchwork rabbit Ratih made. |
+| 5 | Nenek Nora | Village elder and weaver | Sewed warm clothes with Ratih at the storm shelter in 1952. |
+| 6 | Theo | Cliff-side photographer | Withdrew from village life after best friend Daniel died. Keeps Daniel's undeveloped 8mm film. |
+| 7 | Sam | Village archivist | Strict and rule-bound but honest. Guards the 1952 archive and vault No. 7 from damp and from the land deal. |
+| 8 | Leo | Former sprinter | Carries the guilt of failing to deliver an emergency message in time when the dyke gave way in 1952. Lives alone on the hill. |
+| 9 | Mender | Station mechanic and blacksmith | Rebuilt the bridge with Satria's father. Blunt, loyal, expert at restoring brass. |
+| 10 | Baker | Bakes at the square | Cheerful hub of village news. |
+| 11 | Gardener | Keeps the flower garden | Patient and poetic; regrew the chamomile after the storm. |
+| 12 | Nelayan Arlo | Fisher at the jetty | Satria's father's sailing friend. |
+| 13 | Kapten Bram | Retired train driver | Blew the whistle for the last train at 10:17 on the night of the storm, and still carries the guilt. |
+| 14 | Mia | Vegetable seller at the square | Pip's mother; protective and kind. |
+| 15 | Agen Properti Bram | City property agent | The narrative antagonist: presses for the sale to turn the house into a resort. A deadline, not a villain to fight. |
+| 16 | Ibu Ratih | Satria's late mother | A generous seamstress who gave up her ticket to care for the storm's children. Present through relics, flashbacks and her letter. |
+| 17 | Ayah Satria | Satria's late father | An AM-radio builder who led the bridge rebuild and never asked for credit. |
+| 18 | Daniel | Theo's late best friend | Filmed the village's important moments on 8mm. |
 
-## Core loop and rules
+## Core loop and rules `[GDD]`
 
-**One night** `[Report]`:
-1. Visit Marlow's shop at dusk.
-2. Take that night's keepsake.
-3. Explore Bellwood.
-4. Talk to residents.
-5. Inspect the keepsake and look for clues.
-6. Connect the clues.
-7. Give the keepsake to the right person.
-8. Witness the emotional resolution.
-9. One shop lantern goes out.
-10. Time moves on to the next night.
+**One night, one keepsake:**
+1. **Night: receive the relic.** At the midnight bell Satria visits the shop and receives a keepsake and a vague first hint. It goes into the courier bag.
+2. **Inspect it.** In the bag the player turns the keepsake to see its front, back and sides (initials, a year, cracks, a scent). Clues go into Notes automatically.
+3. **Morning to midday: explore and talk.** Satria walks the four zones, watches residents and shows them the keepsake.
+4. **Afternoon: the empathy minigame.** A key witness opens a minigame (mend a stitch, tune a radio, clean a lens). Solving it unlocks the memory that names the owner.
+5. **Dusk: the handover.** Satria gives the keepsake to its owner, a reconciliation cutscene plays, and one of the shop's seven lanterns goes out for good.
 
-**Mechanics** `[GDD]`:
-- **Cozy walking and interaction.** The player strolls through Bellwood and interacts with objects and residents.
-- **Inspecting items.** The player rotates and examines keepsakes in the inventory, for example reading engraved initials, unrolling film, noting numbers or listening for subtle clues.
-- **Deductive dialogue.** No dialogue choice is punished as "wrong". Choices let the player gently draw out residents' memories.
-- **The 18:17 trigger.** When a keepsake reaches its owner, the shop clock's hands move briefly away from 18:17, one lantern goes out, and the night ends.
+**Time of day.** A day has four phases: morning, midday, dusk and night. They advance with the player's progress, not with a clock. Each phase changes the light, the music and what the residents are doing. The HUD shows the day and phase on a small dial, never a digital time.
 
-**Winning and failing** `[GDD]`:
-- **Win:** deliver all seven keepsakes, then open the music box on the seventh night.
-- **Fail:** there is no failure state. Offering a keepsake to the wrong person gets a puzzled reply or an extra hint toward the right person.
+**Mechanics:**
+- **Exploration.** The whole map is open from the start. Interactive things show a speech-bubble icon with three dots. What a place offers depends on the time of day and the clues found.
+- **Dialogue.** A dialogue box at the bottom shows the speaker's portrait and name. After the opening lines the player picks one of two replies, and while carrying a keepsake can show it or say goodbye.
+- **Bag and Notes.** Keepsakes on the left with a short description, Notes on the right. A notification at the top of the screen marks each new item or clue.
+- **Clues** come from inspecting keepsakes and from minigames. They point to the next person or place. A keepsake can be handed over only after its required minigames and conversations are done.
+- **Minigames.** Each fits the resident who offers it. Witnesses with clues carry no marker. Some minigames ask the player to remember earlier conversations. The GDD plans 14 or more.
+- **Daily life at home.** Resting and writing the journal. Each night closes with a journal page on what Satria learned.
 
-**Controls** `[GDD]`:
+**Rules:**
+- **Win:** finish all seven nights, open the secret drawer of Ratih's sewing table on Night 7, read her letter, and tear up the contract on the morning of Day 8.
+- **No lose state:** no health, no game over, no permanent failure.
+- **Minigame failure:** a friendly joke and an instant retry (R), with no penalty and no lost progress.
+- **Wrong person:** a natural refusal, village gossip, or a hint toward the right witness.
+- **Rewards:** no money or XP. Rewards are emotional: Notes, and the nightly journal page.
 
-| Action | PC | Mobile (later) |
-|---|---|---|
-| Move | Click a tile | Tap a tile |
-| Talk or interact | Left-click a nearby resident | Tap a nearby resident |
-| Open the inventory | E | Bag icon in the top-right corner |
-| Inspect an item | I, on an item in the inventory | Double-tap the item |
+## The prologue, seven nights and epilogue `[GDD]`
 
-## The seven nights `[GDD]`
+Nights 6 and 7 and the epilogue are the ending. Keep them hidden as spoilers in anything shown to players.
 
-Nights 1–2 are the MVP `[Decision]`. Nights 3–7 and the epilogue are the full-game vision. The lantern counts are cumulative.
-
-| Night | Keepsake | Who | What happens | Lanterns out |
+| Chapter | Keepsake | Owner and place | Minigame or resolution | Theme |
 |---|---|---|---|---|
-| 1 | Old wristwatch, engraved "A.T.", stopped at 18:17 | Arthur Tate and Helen | The player traces the initials "A.T." to Arthur Tate and finds Helen at the old station. The watch releases her from a 20-year wait. | 1 |
-| 2 | Rabbit doll with a stitched ear | Nora, Mia, Nora's grandchild | The player reconnects Nora, who runs the toy shop, with her daughter Mia. The doll goes to Nora's grandchild as a bridge back to each other. | 2 |
-| 3 | Old film camera | Theo, the late Daniel | Theo develops six frames Daniel left behind. The photos lead the player onward until they are donated to the town museum to remember the two friends. | 3 |
-| 4 | Key with no engraving | Sam, the former town archivist | The player follows Sam to the archivist's abandoned house and opens a room that keeps the memories of residents who have died, so they are not lost. | 4 |
-| 5 | Pair of shoes in two sizes | Leo, a small child | Leo makes peace with his guilt over his older sibling's death by practising running with a child on the lighthouse path. | 5 |
-| 6 | The book *The Things We Leave Behind* | Marlow (Marcus) | A book that keeps changing places guides Marlow to write down that he has accepted Elise's death. The book then burns to ash. | 6 |
-| 7 | Unsigned letter and a music box | The protagonist | His late mother's letter reveals why the shop chose him. He receives the music box on the empty shop counter and is ready to go home to his life. In the epilogue the shop vanishes and he carries on its legacy as a small shop that listens to residents' stories. | 7 (implied, not stated) |
+| Prologue: The Boy Who Left (Day 0) | The draft sale contract | Agen Properti Bram; the square and Satria's home | Satria comes home, looks over the house, and finds Marlow's shop in the banyan roots | |
+| 1: The Stopped Watch | A brass service pocket watch stopped at 10:17, engraved with initials | Helen, tea stall on the platform | Clean and calibrate its gears; tell her the truth about that night | Waiting |
+| 2: The Stitched Rabbit | Mochi, a patchwork rabbit with a loose ear | Pip (with Mia); the square and the chamomile garden | Re-stitch the ear on Ratih's treadle sewing machine; it calms Pip's fear of thunder | Caring |
+| 3: The Old Film Camera | Daniel's 8mm camera, dusty lens and undeveloped film | Theo, cliff-top studio and darkroom | Clean the lens and develop Daniel's last film of the villagers | Remembering |
+| 4: The Key With No Engraving | A plain black iron key | Sam, the village hall archive | Find the combination of vault No. 7 and open the 1952 storm-aid register | Preserving |
+| 5: The Mismatched Running Shoes | Spiked running shoes, one worn sole, dried mud | Leo, the hilltop | Restore the sole with damar resin; Leo lets go of the late message | Moving on |
+| 6: The Deer Leather Ledger | The 1952 deer-leather ledger of debts and aid | Marlow, the shop | Read it with Marlow; it reveals the parents' sacrifice | Letting go |
+| 7: The Unsigned Letter and Music Box | The walnut music box and Ratih's letter | Satria, the childhood home | Open the sewing table's secret drawer with the inherited key, wind the music box, read the letter | Choosing |
+| Epilogue: The Morning After (Day 8) | The torn contract and a new post stamp | Agen Properti Bram and the whole village, the square | Refuse the offer, tear up the contract, reopen Bellwood's post office | |
 
-Nights 6 and 7 are the ending. Keep them hidden as spoilers in anything shown to players.
+**Each night's emotional obstacle** (the "bosses" are inner walls, not enemies):
 
-### Night 1 clue chain `[Decision]` (adopted 2026-09-28)
+| Night | Who | How they shut Satria out | The root |
+|---|---|---|---|
+| 1 | Helen | Stiff; won't talk about trains and keeps busy brewing tea | Waiting since 1952 for a love who never came |
+| 2 | Pip | Hides and cries at thunder | Storm trauma and a lost comfort toy |
+| 3 | Theo | Cynical; locks the studio and won't develop the old film | Guilt over Daniel's death |
+| 4 | Sam | Refuses access to the vault | Fear that the 1952 archive will be misused by the city |
+| 5 | Leo | Hides on the hill; harsh about the past | The emergency message that arrived too late |
+| 6 | Marlow | Speaks only in riddles | Takes the blame for the station and the village's decline |
+| 7 | Satria | Wants to sell and leave | Not being there at the end of both parents' lives |
+| Day 8 | The agent | Pushes for the signature with city money | A city that would flatten Bellwood's history |
 
-This chain was written for the presentation's playable demo; the user adopted it for the game. It is not in the GDD.
-- **The keepsake:** a watch stopped at 18:17 and never rewound, with "A.T." engraved on the back.
-- **The station:** an enamel plaque by the door reads "KEEPER A. TATE", and the timetable shows the evening train at 18:17.
-- **Testimony:** a clock mender at the station says Helen has sat on the platform bench every evening before 18:17 for twenty years.
-- **Red herring:** a traveller carries a suitcase marked "A.T.". The initials match, but his story doesn't.
-- **Wrong offers:**
-  - The traveller points the player elsewhere.
-  - The clock mender adds a clue: the watch isn't broken, and keeping it stopped is a promise, not a repair.
-- **Right offer:** Helen. Afterwards the shop clock ticks once and the first lantern goes out.
+**Difficulty curve.** Days 1–2 stay around the station and the square (Helen, Mender, Baker, Mia, Pip). Days 3–4 reach Theo's cliff and Sam's vault. Days 5–6 go deeper with Leo, Nora and Mender. Day 7 brings every zone together.
 
-The presentation moves the shop clock forward one minute per resolved night (18:17, then 18:18, and so on). That is its own interpretation; the GDD only says the hands move briefly `[Illustrative]`.
+**The Godot MVP's clue chains** (Arthur Tate's watch at 18:17 and Nora the toymaker's doll) belong to the retired story. They are archived in `archive/godot-mvp/nights/` and are not canon.
 
-### Night 2 clue chain `[Decision]` (adopted 2026-09-29)
+## UI `[GDD]`
 
-Drafted for the game and adopted by the user. It is not in the GDD.
-- **The keepsake:** a small rabbit doll. One ear came loose and was sewn back on with blue thread. A tiny "N" is stitched on its foot.
-- **Nora's toy shop** is a new room, entered from the scissors-sign house on the square. Nora recognises her own stitching but won't take the doll: "I made it for someone who never came to collect it."
-- **Testimony:** the baker says Nora had a daughter, Mia. They quarrelled years ago, the week Mia told her she was expecting. Mia now lives in the green-shuttered cottage by the vegetable garden, with her little one.
-- **The washing line** beside Nora's shop holds tiny child-sized clothes, hemmed with the same blue thread. Nora still sews for a grandchild she has never met.
-- **Mia**, in her garden, knows the rabbit at once: "Mom made it. For the baby. I never let her give it." She won't take it: "It was never meant for me."
-- **Pip**, Nora's grandchild, sits by the cottage fence making a rabbit out of an old sock: "I don't have a grandma. Mom says it's complicated."
-- **Wrong offers:** Nora, Mia and the village kid each give a hint.
-- **Right offer: Pip.** Pip runs to Mia with the rabbit, and they walk to the square together. Nora comes out of her shop. Mia says "The ear came loose, Mom," and Nora answers "I can mend it, if you'll let me." The second lantern goes out.
-- **The feeling** `[Illustrative]`: pride and old anger, each waiting for the other to say sorry first.
+The UI is minimal: no health bar, timer, minimap or quest markers. Panels are warm cream `#FFFAF0` with dark brown text `#2A1B22`.
 
-### Night 2 in the game `[Illustrative]`
+- **Screens:** the title (Begin, Continue when a save exists, Quit on desktop only); exploration; the pause menu (Keep playing, Sound on/off, Back to the title); the bag; close inspection; dialogue; full-screen story cards with a lantern at the start and end of each night; minigames. Progress saves automatically at the end of each night.
+- **HUD:** the bag icon top right; notifications top centre for 4 seconds; an interaction bubble over nearby things; an object's name next to the cursor; the dialogue box (moves to the top if it would cover a character), with a portrait that talks and blinks, the speaker's name, text typed at 50 characters a second and a "next" arrow; choices; a pixel cursor; and the day-and-phase dial top left.
+- **Bag:** a 400x230 panel. Keepsake slots and their names on the left, Notes on the right, and "E or Esc to close".
+- **Type:** Pixelify Sans for titles, chapter cards, place names and speaker names. DM Sans for dialogue, item descriptions and Notes. Both are already in `presentation/fonts/`.
+- **Icons:** 16x16 and 24x24 with a thin dark-brown outline. A "..." bubble over people, a "?" magnifier over things to inspect, sun, lantern and moon phase icons, and a satchel with a gold dot when something new arrives.
 
-The playable Night 2 (`game/nights/night_2.gd`) adds details that are not decided yet:
-- The night opens with a title card, and the courier is back in Bellwood at dusk. The shop's clock says 18:18 and moves to 18:19 at the end.
-- The "N" on the doll's foot is stitched in the same blue thread as its ear.
-- **Nora's toy shop** has a spool of that blue thread on her workbench and shelves of rabbits sewn to the doll's pattern. It also has a photo frame lying face down and a half-finished little shirt.
-- Pip's sock rabbit is called Button. The notice board has a new note: "Lost: one sock. Blue. Answers to Button."
-- In the ending, Nora invites Mia and Pip in for tea. Marlow adds: "Mending takes two, you know."
+## Audio `[GDD]`
 
-### Night 1 in the game `[Illustrative]`
+All of it is synthesized or recorded from scratch `[Decision]`, as the Godot build did with `presentation/audio.js`.
 
-The playable Night 1 (`game/nights/night_1.gd`) adds details that are not decided yet:
-- The night plays at dusk. The courier arrives in Bellwood, meets Marlow, and follows the trail to the old station, reached by the road at the village's bottom-left.
-- Three residents (a baker, a gardener and a village kid) give small hints toward the station. The notice board and the signpost add atmosphere.
-- The watch's side shows its crown pulled out, which supports the mender's "a promise, not a repair".
-- Helen names the watch's owner, Arthur, and says he stopped it the evening he left. Whether Arthur is alive stays open.
-- After Helen, the scene cuts to the shop: the clock moves to 18:18 and the first lantern goes out.
-- The courier has no name yet; his lines show only his portrait.
+- **Music:** 60–80 BPM, organic instruments: upright piano (Satria and home), nylon guitar (village days), celesta and music box (the shop and the keepsakes), low cello (confessions). Music cross-fades between zones and phases. Six planned tracks: *Quiet Station at Dawn*, *Bellwood Marketplace*, *The Cliff of Lingering Waves*, *Mother's Loom and Memories*, *The Shop at Midnight* and *Uncut Letter* (the epilogue and credits).
+- **Footsteps** on six surfaces: wet soil, creaking boards, gravel, wet sand, grass and tiles.
+- **Object sounds:** a watch ticking, cloth, the 8mm shutter, a key, a music box spring, a lantern going out.
+- **Ambience by phase:** sparrows in the morning, a murmuring market at midday, waves and wind at dusk, crickets and dew at night.
+- **Voices:** no voice acting. Each character has their own pitch of short dialogue blips: calm and middling for Satria, high and quick for Pip, low and heavy for Marlow. A soft chime marks a new clue, and a warm low note marks a lantern going out.
 
-## Art and audio
+## Art `[Decision]` `[GDD]`
 
-**The GDD's direction** `[GDD]`:
-- Expressive pixel-art characters with simple but soulful animation: blinks, head tilts, small emotes.
-- Bellwood drawn in warm detail with a twilight palette: golden orange, dusk purple, and the shop's warm incandescent yellow.
-- Audio: melancholic solo piano, a music box and soft acoustic guitar. Ambient sound includes evening wind, the shop's door bell and the creaking wooden floor of the old station.
-- Visual references: Bear's Restaurant, Fishing Paradiso, Meg's Monster (all by Odencat), A Space for the Unbound and To the Moon.
-
-**The current direction** `[Decision]` (2026-09-26):
-- **View:** angled top-down (3/4) pixel art like the Bellwood village in `presentation/world.js`, with cottages, foliage, stone paths, water, bridges and warm lanterns.
-- **Light:** a bright, sunny Bellwood by day. Dusk and evening stay pastel and readable, never dark or muddy.
-- **Crispness:** art is drawn at its native resolution and only ever scaled by whole numbers, with no blur or soft filtering.
-- **Life:** water, foliage, chimney smoke, animals and villagers are always gently moving.
-- **Characters:** chunky, expressive ants with one big eye, thin legs and antennae, as drawn in `presentation/chars.js`. The courier wears a green cap with a cream patch and carries a green bag.
-- **Sourcing:** hand-authored art only. Ask the user before using any AI-generated asset.
-
-**The visual reference.** `presentation/` holds the code-drawn art library. It is the only visual reference for the game:
-- **Places:** the Bellwood village, including day, dusk and evening versions, the shop appearing, and its lanterns lighting. Also Marlow's shop interior with the working 18:17 clock, the old station, and seven small scenes, one per night.
-- **Characters:** 15 ant characters in 40×40 px frames, about 32 px tall, with poses for walking, talking, giving, receiving, carrying, inspecting, sitting and being moved, plus 48×48 px portraits.
-- **Items and interface:** the keepsakes at three sizes, UI icons and the title lettering.
-- **Palette and sound:** the colour palette (in `px.js`) and synthesized music and sound effects (in `audio.js`).
-
-This art is JavaScript canvas code, so a game engine would need it exported to sprite sheets first. `presentation/ART.md` has the art rules and each module's specifications.
+- **View:** angled top-down (3/4) pixel art like the Bellwood village in `presentation/world.js`.
+- **Light:** four phases: a golden dawn, a soft bright midday, an orange dusk, and a blue night glowing with gold lanterns. All stay pastel and readable.
+- **Palette groups** from the GDD: cream `#FDFBF7` `#F4EFE6`, timber brown `#8B5A2B` `#5C3A21`, midnight navy `#0F172A` `#1E1B4B`, autumn amber `#D97706` `#F59E0B`, moss green `#3F6212` `#65A30D`. Keep night colours light enough to read.
+- **Characters:** chunky ants with one big eye, thin legs and antennae, from `presentation/chars.js`. The presentation has 15 ants; the GDD needs 18.
+- **Asset list:** Satria walking in 4 directions, idle, inspecting, and four portrait moods (neutral, surprised, tired, moved). Marlow behind the counter. Idle and talking sprites for the residents, with translucent silhouettes for Ratih, Satria's father and Daniel. Tilesets for the four zones, props for the nine interiors, and the seven keepsakes.
+- **Pipeline:** made from scratch only. The Godot build drew art in code (`presentation/`) and exported it with `archive/godot-mvp/tools/export-art/`. The Unity pipeline is still open.
 
 ## Production and scope
 
-**Systems needed** `[Report]`:
-- Needed: player movement, NPC interaction, dialogue, inventory, item inspection, an interaction system, chapter progression, the 18:17 time transition, saving and loading, and scene management.
-- Not needed: multiplayer, complex combat, enemy AI, procedural generation, complex physics, skill trees, an open world or online services.
+**Milestones** `[GDD]`. This is the GDD's plan, not yet a confirmed one:
 
-**Where the difficulty is** `[Report]`. These are team estimates, not industry data.
-- **Overall: 8/10 (difficult).** The difficulty comes from content volume, visual consistency, storytelling, clue design and playtesting without markers, not from the code.
+| Weeks | Work |
+|---|---|
+| 1–2 | Movement controller, collisions, a smooth follow camera, dialogue box, door transitions; a vertical slice of Night 1 |
+| 3–5 | Sprites and portraits for 18 characters, tilesets for 4 zones and 9 interiors, 6 music tracks, footsteps and voice blips |
+| 6–7 | Bag and inspection, minigames, all chapters from the prologue to the epilogue |
+| 8 | Playtesting for pacing and soft-locks, lighting and fog polish, the final PC build |
+
+**Systems needed** `[Report]` `[GDD]`: movement, NPC interaction, dialogue, the bag, inspection, clues and Notes, minigames, chapter progression, the day-phase system, saving, scene management. Not needed: combat, enemy AI, multiplayer, procedural generation, complex physics or online services.
+
+**Where the difficulty is** `[Report]`. These are team estimates.
+- **Overall: 8/10.** The difficulty is content, consistent pixel art, story and clue design without markers, not code.
 - **By discipline:** programming about 6/10, pixel art and animation about 8/10, narrative and game design about 9/10.
 
-| Component | Score | Component | Score |
-|---|---|---|---|
-| Player movement | 2/5 | NPC schedules | 4/5 |
-| NPC interaction | 2/5 | Deduction and clue system | 4/5 |
-| Dialogue system | 3/5 | No-quest-marker design | 5/5 |
-| Inventory | 3/5 | Pixel art | 4/5 |
-| Item inspection | 3/5 | Animation | 4/5 |
-| Chapter progression | 3/5 | Environment | 4/5 |
-| 18:17 time system | 3/5 | Narrative design | 5/5 |
-| Audio | 3/5 | Mobile adaptation | 4/5 |
-| Testing | 4/5 | | |
-
 **Main risks** `[Report]`:
-- **Clue clarity without markers.** Too easy and the deduction means nothing; too hard and players get lost. Playtest every case to check players can solve it on their own.
-- **Consistent pixel art across many assets.** Limit the variety of animations to keep this manageable.
-- **Tying the systems to story progression.** Connecting dialogue, inventory and chapter state to the story is the hard part of the code.
+- **Clue clarity without markers.** Playtest every night to check that players can solve it on their own.
+- **Consistent pixel art** across 18 characters, 4 zones and 9 interiors.
+- **Tying systems to the story.** Dialogue, the bag, minigames, day phases and chapter state all depend on story progress.
+- **Scope.** The GDD's 14+ minigames, 18 characters and 9 interiors are far larger than the Godot MVP.
 
-**Roadmap** `[Decision]` `[Report]`:
-1. Prove one case works from start to finish.
-2. Build the MVP: Nights 1–2 playable on PC, playtested to confirm players can solve them without markers.
-3. Expand to all seven nights and the epilogue, then adapt for mobile.
-
-**Proposed tools** `[GDD]`:
-- **Engine:** Unity (C#) or Godot 4 (GDScript).
-- **Art and design:** Aseprite for sprites and animation; Canva or Figma for UI and mood boards.
-- **Sound:** Freesound for foley and sound effects. The GDD also lists AI asset generation and Suno for music (see Known inconsistencies).
-
-**Proposed schedule** `[GDD]`. This is not a confirmed plan.
-
-| Week | Deliverables |
-|---|---|
-| 1 (days 1–7) | Dialogue scripts for all seven nights (text or JSON); 2D movement and basic NPC interaction; tilesets for Bellwood and Marlow's shop |
-| 2 (days 8–14) | Inventory bag and the inspect feature; the dialogue system inside the engine; a playable demo of Nights 1–2 |
-| 3 (days 15–21) | Scripts and events for Nights 3–7 and the ending; the 18:17 trigger and night transitions; piano and music-box music, plus footstep and door-bell sound effects; NPC pixel animation |
-| 4 (days 22–28) | A full playthrough test; fixes to collisions and UI text; the final build (PC executable and mobile APK) |
-
-**Proposed distribution** `[GDD]`:
-- **PC (Steam, itch.io):** a premium one-time purchase at Rp 45,000–65,000 (about $4.99), with Steam achievements and a soundtrack bundle.
-- **Mobile (Google Play, App Store):** Odencat-style freemium. Chapters 1–2 are free; after that, players either buy a one-time, ad-free unlock for Rp 29,000 or watch a rewarded ad to continue to each next night.
-
-**Market position** `[Report]`: the game competes on identity, meaning pixel art, emotional story, a cozy mood and light deduction, rather than on complex mechanics. What sets it apart is that each keepsake links clues, characters and story, so players have to observe as well as follow dialogue.
-
-| Reference game | In common | Its strength | Gap or opportunity | Used as a reference for |
-|---|---|---|---|---|
-| Bear's Restaurant | Pixel art, emotional story, short length | A strong, simple emotional story | Linear, with no deduction | Storytelling |
-| A Space for the Unbound | Pixel art, town exploration, NPCs | A living world and cast | Larger, more complex scope | World-building |
-| Coffee Talk | Cozy mood, character-driven dialogue | Dialogue at the centre | Little exploration or deduction | Atmosphere and dialogue |
-
-**Audiences** `[Report]`:
-- **Primary:** players who like story-rich indie games, pixel art, light mysteries and exploration.
-- **Secondary:** fans of cozy, atmospheric games.
-- **Tertiary:** fans of light mysteries and puzzles.
+**References** `[GDD]`: Coffee Talk (dialogue and atmosphere), To the Moon (memory as the driver), A Space for the Unbound (a living small town). Tools: Aseprite for sprites; Figma, Canva or Ibis Paint X for UI layouts.
 
 ## What's in this repo
 
 | Path | What it is |
 |---|---|
-| `docs/game-design-document.pdf` | The GDD `[GDD]` |
+| `docs/game-design-document.pdf` | The UTS GDD `[GDD]` |
 | `docs/feasibility-report.pdf` | The feasibility report `[Report]` |
-| `presentation/` | The web presentation: its code-drawn art library, build script and Vercel deploy script. `the-shop-that-opens-once.html` is the built page, live at https://the-shop-that-opens-once.vercel.app |
-| `game/` | The Godot 4 game. `game/README.md` explains how to run it, how it is built and how to write a night. |
+| `docs/concept-proposal.pdf` | The earlier concept proposal `[Proposal]` |
+| `presentation/` | The web presentation and its code-drawn art library, live at https://the-shop-that-opens-once.vercel.app. It still tells the earlier story. |
+| `archive/godot-mvp/` | The Godot 4 MVP, archived and untouched |
 
 ## Known inconsistencies
 
-- **Schedule:** the GDD's heading says "10-week MVP", but its table covers only four weeks. Treat neither as a plan.
-- **Platform:** the GDD targets PC and mobile together, while the report and the user put PC first and mobile later.
-- **AI assets:** the GDD's tool list includes AI-generated art and Suno for music, but the user rejected AI-generated images on 2026-09-26.
-- **Palette:** the GDD asks for a twilight palette; the current direction is bright and light, with a pastel dusk.
-- **Days vs nights:** the GDD calls the chapters "seven nights" but its synopsis speaks of "seven days of searching".
+**Inside the GDD**
+- **Length:** 1–3 hours (1.3) against 3–4 hours (2.2).
+- **When keepsakes are handed over:** the shop opens at midnight (2.1, 5.1), but 2.1 also says keepsakes "wait to be returned at dusk", and the loop hands them over at dusk.
+- **Perspective:** 1.3 says side-scrolling and top-down hybrid with a micro-isometric angle. The art decision is 3/4 top-down.
+- **Lanterns:** 2.2 has the seventh lantern go out on the last night; 5.4 has all lanterns already out when Night 7 begins.
+- **The ending:** 2.2 and 5.4 let the player choose to leave or stay; 4.4 makes tearing up the contract the canon win condition.
+- **Two Brams:** Kapten Bram and Agen Properti Bram share a name. Kapten Bram is called both a train driver (*masinis*) and a conductor (*kondektur*).
+- **Helen:** she runs a tea stall on the platform (West zone) everywhere except 5.2, which gives her a grocery stall in the Centre zone.
+- **Leo:** lives on a hilltop (Night 5), but the four zones have no hill, and 8.2 places Leo in the East garden.
+- **Day 7 vs Day 8:** 8.2 puts the contract climax on Day 7; everywhere else it is the morning of Day 8.
+- **Engine:** the GDD still weighs Godot 4 and Unity. The user chose Unity.
+- **Typos:** the title appears as "The Shop That Once Opens" in 4.3, and table 6.1 numbers Mender 9 before Leo 8.
+
+**Between the GDD and decisions or the repo**
+- **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
+- **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
+- **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17.
+- **The presentation** still tells the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and has 15 ants, not 18.
 
 ## Open questions
 
 **Technology and pipeline**
-- Are AI-generated assets acceptable anywhere, for art or for music?
+- How does the Unity project draw and import the art: export PNGs from `presentation/` as Godot did, or a new pipeline? How is sound made and exported?
+- Where does the Unity project live (proposed: `game/`), and how is it tested?
+- Does the Web build replace the Godot build on Vercel, and under which URL?
+- Camera: zoom in during conversations? The user wants this later, not now (2026-09-29).
 
 **Game design**
-- Camera: zoom in and out automatically, for example closer during talks? The user wants this later, not now (2026-09-29).
-- Time structure: does exploration happen at dusk, through the night, or by day between shop visits? Does the town's clock move?
-- Residents: how many, where they are, and on what daily schedules? The report scores NPC schedules 4/5 for difficulty.
+- What does the Unity MVP cover: the prologue and Nights 1–2 of the new story, or Night 1 as a vertical slice first?
+- Day phases: what exactly moves time forward: each clue, each conversation, or entering a new zone?
+- Is the ending a real choice, with a "leave" ending, or only the canon "stay"?
+- Which minigames, and how many: one per night, or the GDD's 14 or more?
+- Is the outdoor world one seamless map, or the four zones as separate scenes?
 - Saving, chapter select, text speed and other accessibility options.
 
 **Story**
-- **Protagonist:** his name, age, and pronouns for the ant courier. The GDD's protagonist is a young man.
-- **The mother:** her name, her "deep secret", and what her letter says about why the shop chose him.
-- **Grief:** which phase of grief each night mirrors.
-- **Night 3:** what the six photos show, and how the museum donation plays out.
-- **Night 4:** who the former archivist was, what the key opens, and how the player finds it.
-- **Night 5:** who the child on the lighthouse path is (possibly Sam), and who Leo's sibling was.
-- **Night 6:** how the book moves from place to place, what Marlow writes, and why he goes by Marlow rather than Marcus.
-- **Night 7 and the epilogue:** what the music box means, and what the epilogue's shop looks like.
+- Satria's pronouns.
+- Night 1: what the watch's engraved initials are, who Helen waited for, and the "truth" Satria tells her.
+- Night 2: Mochi was made by Ratih. Why does Satria have it now?
+- How the two Brams are told apart, or whether one is renamed.
+- What Ratih's letter says.
 
 **Business**
-- The final business model, release targets and schedule.
+- The business model, release targets and schedule. The concept proposal's pricing ideas have not been carried over.
 
 ## Team
 
-SE.3 · Kelompok 1: Andika Rafa Akbar (GDD author), Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie and Praffi Ramadhani.
+SE.3 · Kelompok 1: Andika Rafa Akbar (2410511026), Praffi Ramadhani (2410511028), Khairul Insan (2410511018), Dara Dwi Hidayat (2410511084) and Piere Valkyrie (2410511152).
 
 ## Glossary
 
-- **Keepsake** (in the GDD, *benda peninggalan*): the object Marlow hands out each night. It belongs to a resident's unfinished story.
-- **Night** (a chapter): one keepsake, from receiving it to its resolution.
-- **18:17:** the time at which the shop clock is frozen, and the game's central motif.
+- **Keepsake** (in the GDD, *benda peninggalan* or *relik*): the object Marlow hands out each night. It belongs to a resident's unfinished story.
+- **Night** (a chapter): one keepsake, from receiving it at midnight to handing it over at the next dusk.
+- **10:17:** the time the 1952 storm cut the railway. The station's tower clock, the shop's pendulum clock and the Night 1 watch are frozen there.
 - **Lantern:** one of the seven in the shop. One goes out for each resolved night.
-- **No quest markers:** there are no arrows, waypoints or checklists. Players find each owner through observation and conversation.
-- **The courier:** the playable ant protagonist.
+- **Notes:** the clue list inside the courier bag.
+- **Day phase:** morning, midday, dusk or night, which moves with the story.
+- **No quest markers:** no arrows, waypoints or checklists. Players find each owner by observation and conversation.
