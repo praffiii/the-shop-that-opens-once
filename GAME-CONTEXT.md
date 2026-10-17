@@ -4,12 +4,13 @@ The single source of truth for what this game is, what has been decided, and wha
 
 Last updated: 2026-10-18.
 
-**Status:** moving from Godot to Unity, on the new design in the UTS GDD. The following exist:
+**Status:** building the full game in Unity, on the new design in the UTS GDD. The following exist:
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
 - the earlier concept proposal and the feasibility report
-- a web presentation with a code-drawn pixel art library. It still tells the earlier story.
+- the Unity project in `game/`, still an empty Universal 2D project
+- the art pipeline in `game/ArtSource/`, decided but not set up yet
+- the web presentation, frozen. It still tells the earlier story.
 - the Godot MVP (Nights 1 and 2 of the earlier story), archived in `archive/godot-mvp/`
-- no Unity project yet
 
 ## How to use this file
 
@@ -37,15 +38,18 @@ Every fact carries a source tag:
 - `[Decision]` The engine is Unity 6.6 (6000.6.6f1) with C#. It replaces Godot 4. The editor is VS Code. (2026-10-18)
 - `[Decision]` Build targets: Web first, then Windows. Those two build modules are installed. (2026-10-18)
 - `[Decision]` The Godot MVP is an archive and stays untouched. It lives in `archive/godot-mvp/`, and the git tag `godot-mvp` marks its last commit. Its web build stays live at https://the-shop-that-opens-once-game.vercel.app as a record. (2026-10-18)
+- `[Decision]` The Unity project lives in `game/`. It started from the Universal 2D template (URP with the 2D renderer), trimmed to sprites, the Input System, uGUI and the Test Framework. (2026-10-18)
 - `[Decision]` Before Unity: the engine was Godot 4.7.2 with GDScript, because C# projects in Godot 4 cannot export to the web. (2026-09-28, superseded 2026-10-18)
 
 **Scope and platform**
-- `[Decision]` PC comes first. The MVP is 1–2 playable chapters (Nights 1–2). Mobile comes after the PC version is stable. (2026-09-26)
-- `[Decision]` The full game is a prologue, seven nights and an epilogue. (2026-09-26, chapters per the GDD 2026-10-18)
+- `[Decision]` No MVP in Unity: build the full game, the prologue, seven nights and the epilogue. This replaces the Nights 1–2 MVP. (2026-10-18)
+- `[Decision]` PC comes first. Mobile comes after the PC version is stable. (2026-09-26)
 
 **Assets: made from scratch, no AI**
-- `[Decision]` Art, sound and every other asset are made from scratch, the way the Godot build made them: code-drawn pixel art from `presentation/` exported to images, and synthesized music and sound. No AI-generated art, audio or assets. The GDD's AI-assisted pipeline (Midjourney, FLUX, Suno in section 13.3) was written for the formal report only. (2026-09-26, reaffirmed 2026-10-18)
-- `[Decision]` The visual reference is the code-drawn art in `presentation/`, with rules in `presentation/ART.md`. The GDD's figures, such as its zone and interior maps, illustrate the report and are not art references. (2026-10-18)
+- `[Decision]` Art, sound and every other asset are made from scratch, the way the Godot build made them: pixel art drawn in code and exported to images, and music and sound synthesized in code. No AI-generated art, audio or assets. The GDD's AI-assisted pipeline (Midjourney, FLUX, Suno in section 13.3) was written for the formal report only. (2026-09-26, reaffirmed 2026-10-18)
+- `[Decision]` The art and sound source lives with the game in `game/ArtSource/`: the presentation's drawing and sound code (`px.js`, `chars.js`, `world.js`, `interiors.js`, `toyshop.js`, `audio.js`, `ART.md`) copied in as the starting point, plus the Godot exporter adapted for Unity. It renders in headless Chrome to PNG, JSON and OGG in `game/Assets/Art/`. New art is drawn there in the same style. (2026-10-18)
+- `[Decision]` The presentation is frozen: it stays as it is, live on Vercel, and is no longer updated. Its art set the style. (2026-10-18)
+- `[Decision]` The GDD's figures, such as its zone and interior maps, illustrate the report and are not art references. (2026-10-18)
 
 **Characters and art**
 - `[Decision]` Every character is an ant: chunky, expressive reddish-brown ants as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
@@ -225,7 +229,7 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **Palette groups** from the GDD: cream `#FDFBF7` `#F4EFE6`, timber brown `#8B5A2B` `#5C3A21`, midnight navy `#0F172A` `#1E1B4B`, autumn amber `#D97706` `#F59E0B`, moss green `#3F6212` `#65A30D`. Keep night colours light enough to read.
 - **Characters:** chunky ants with one big eye, thin legs and antennae, from `presentation/chars.js`. The presentation has 15 ants; the GDD needs 18.
 - **Asset list:** Satria walking in 4 directions, idle, inspecting, and four portrait moods (neutral, surprised, tired, moved). Marlow behind the counter. Idle and talking sprites for the residents, with translucent silhouettes for Ratih, Satria's father and Daniel. Tilesets for the four zones, props for the nine interiors, and the seven keepsakes.
-- **Pipeline:** made from scratch only. The Godot build drew art in code (`presentation/`) and exported it with `archive/godot-mvp/tools/export-art/`. The Unity pipeline is still open.
+- **Pipeline:** made from scratch only, in `game/ArtSource/` `[Decision]`. Each place is drawn per day phase, as the Godot build drew dusk and night variants, rather than relit in the engine.
 
 ## Production and scope
 
@@ -259,7 +263,8 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 | `docs/game-design-document.pdf` | The UTS GDD `[GDD]` |
 | `docs/feasibility-report.pdf` | The feasibility report `[Report]` |
 | `docs/concept-proposal.pdf` | The earlier concept proposal `[Proposal]` |
-| `presentation/` | The web presentation and its code-drawn art library, live at https://the-shop-that-opens-once.vercel.app. It still tells the earlier story. |
+| `game/` | The Unity 6.6 project |
+| `presentation/` | The web presentation, frozen, live at https://the-shop-that-opens-once.vercel.app. It still tells the earlier story. |
 | `archive/godot-mvp/` | The Godot 4 MVP, archived and untouched |
 
 ## Known inconsistencies
@@ -281,18 +286,15 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
 - **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
 - **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17.
-- **The presentation** still tells the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and has 15 ants, not 18.
+- **The presentation** is frozen with the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and 15 ants, not 18. That is expected.
 
 ## Open questions
 
 **Technology and pipeline**
-- How does the Unity project draw and import the art: export PNGs from `presentation/` as Godot did, or a new pipeline? How is sound made and exported?
-- Where does the Unity project live (proposed: `game/`), and how is it tested?
-- Does the Web build replace the Godot build on Vercel, and under which URL?
+- Under which URL does the Unity web build go live?
 - Camera: zoom in during conversations? The user wants this later, not now (2026-09-29).
 
 **Game design**
-- What does the Unity MVP cover: the prologue and Nights 1–2 of the new story, or Night 1 as a vertical slice first?
 - Day phases: what exactly moves time forward: each clue, each conversation, or entering a new zone?
 - Is the ending a real choice, with a "leave" ending, or only the canon "stay"?
 - Which minigames, and how many: one per night, or the GDD's 14 or more?

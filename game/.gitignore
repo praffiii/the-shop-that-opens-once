@@ -1,0 +1,15 @@
+# Unity: generated or per-machine, rebuilt when the project opens
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/Build/
+/Builds/
+/MemoryCaptures/
+/.vscode/
+*.csproj
+*.sln
+*.slnx
+*.pidb
+*.userprefs
