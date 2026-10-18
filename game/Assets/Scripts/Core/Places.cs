@@ -33,6 +33,9 @@ namespace Shop
                 {
                     // Morning: Helen brews at her stall, Kapten Bram paces between the frozen clock and the timetable,
                     // a porter carries sacks up from the yard to Helen's stall, and the Mender is at the anvil.
+                    // Midday: Helen wipes cups, Bram polishes the whistle by his carriage, the Mender taps the old
+                    // engine's wheels. Dusk: Helen waits on the bench facing the tunnel, Bram stands by the engine,
+                    // the Mender is back at the forge and the porter has gone home.
                     new Person
                     {
                         Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Pose = "brew", Facing = -1, Phases = new[] { Phase.Morning },
@@ -50,7 +53,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "porter", Label = "Porter", Spot = V(0, -10), Phases = new[] { Phase.Morning },
+                        Id = "porter", Label = "Porter", Spot = V(0, -10), Phases = new[] { Phase.Morning, Phase.Midday },
                         // a sack from the pile in the yard up to Helen's stall, set down by her crates, and back for the next
                         Round = new[]
                         {
@@ -64,7 +67,36 @@ namespace Shop
                         Id = "mender", At = V(566, 626), Label = "Mender", Spot = V(0, 14), Pose = "hammer", Phases = new[] { Phase.Morning },
                         Line = "Morning. Mind the sparks.",
                     },
-                    new Person { Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Facing = -1, Phases = new[] { Phase.Midday, Phase.Dusk } },
+                    new Person
+                    {
+                        Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Every cup gets a wipe, used or not. You never know who'll step off that train.",
+                    },
+                    new Person
+                    {
+                        Id = "bram", At = V(232, 632), Label = "Kapten Bram", Spot = V(18, 4), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Brass goes green if you let it. I give the whistle a rub every day, in case she needs it.",
+                    },
+                    new Person
+                    {
+                        Id = "mender", At = V(520, 266), Label = "Mender", Spot = V(20, 6), Pose = "hammer", Phases = new[] { Phase.Midday },
+                        Line = "Wheels are sound. Bearings too. She could run tomorrow, if anyone let her.",
+                    },
+                    new Person
+                    {
+                        Id = "helen", At = V(430, 277), Label = "Helen", Spot = V(26, 6), Pose = "sit", Seat = 9, Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "I sit here every evening. The tunnel's dark, but I like to be the first face they see.",
+                    },
+                    new Person
+                    {
+                        Id = "bram", At = V(612, 268), Label = "Kapten Bram", Spot = V(20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "The old girl's still got steam in her somewhere. You can hear it, if the evening's quiet.",
+                    },
+                    new Person
+                    {
+                        Id = "mender", At = V(566, 626), Label = "Mender", Spot = V(0, 14), Pose = "hammer", Phases = new[] { Phase.Dusk },
+                        Line = "One more piece before dark. The forge doesn't like to go cold.",
+                    },
                 },
                 Hotspots = new[]
                 {

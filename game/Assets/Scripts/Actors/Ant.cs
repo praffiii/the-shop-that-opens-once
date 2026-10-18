@@ -34,6 +34,7 @@ namespace Shop
         Texture2D sheet;
         string pose = "idle";
         int facing = 1;
+        float seat;
         Heading heading;
         Sprite held;
         float time, step;
@@ -122,6 +123,17 @@ namespace Shop
             {
                 facing = value;
                 Refresh();
+            }
+        }
+
+        /// <summary>How high the seat it sits on is, in art px; it is raised by that while it sits.</summary>
+        public float Seat
+        {
+            get => seat;
+            set
+            {
+                seat = value;
+                Place();
             }
         }
 
@@ -266,7 +278,7 @@ namespace Shop
         void Place()
         {
             var world = transform.parent ? transform.parent.GetComponent<BakedArt>() : null;
-            transform.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + Nudge);
+            transform.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + (pose == "sit" ? seat : 0) + Nudge);
         }
 
         void Refresh()

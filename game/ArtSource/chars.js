@@ -142,7 +142,7 @@
       bent: 1, lash: true,
       parts: [],
     },
-    helen: { sleeve: ['slate1', 'slate2'],
+    helen: { sleeve: ['slate1', 'slate2'], polish: 'cup',
       torso: { rows: ['.yyyyY.', 'SyYYYyS', 'sSSYyYS', 'sSoSYYS', 'sSSSSYT', 'SSSSSTT', '.SSTTT.', '..TTT..'],
                key: { s: 'slate0', S: 'slate1', T: 'slate2', y: 'brass1', Y: 'brass2', o: 'brass0' } },
       lash: true,
@@ -246,7 +246,7 @@
     },
     // Kapten Bram, the retired engine driver: a navy driver's jacket with brass buttons, a red neckerchief, a grey
     // moustache and the striped driver's cap.
-    bram: { sleeve: ['navy1', 'navy2'],
+    bram: { sleeve: ['navy1', 'navy2'], polish: 'whistle',
       torso: { rows: ['.rrrmm.', 'mrRNNNn', 'mNNNNon', 'mNNNNNn', 'mNNNNon', 'NNNNNnn', '.NNnnn.', '..nnn..'],
                key: { r: 'red', R: 'roofR3', m: 'navy0', N: 'navy1', n: 'navy2', o: 'brass1' } },
       bent: 0,
@@ -330,8 +330,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -349,6 +349,7 @@
     if (id === 'mender') s.push('hammer');
     if (id === 'bram') s.push('look');
     if (CAST[id].load) s.push('carry', 'carryWalk', 'lift');
+    if (CAST[id].polish) s.push('polish');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -469,6 +470,10 @@
         r.dy = [0, 0, -1, 0][f]; r.hy -= 1; r.hx -= 1; r.eye = f === 3 ? 'blink' : 'up';
         armN = [[-1, 3], [-3, 4]]; armF = [[-1, 3], [-2, 4]];
         break;
+      case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
+        armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];
+        r.polish = true;
+        break;
     }
     if (pose === 'carry' || pose === 'carryWalk') {
       r.parcel = [3, -1];                                   // parcel fill origin, relative to the near shoulder
@@ -586,7 +591,14 @@
       plated(x, g => { line(g, hand[0], hand[1], ex, ey, 'wood2'); rect(g, ex - 1, ey - 1, 3, 3, 'iron2'); dot(g, ex - 1, ey - 1, 'iron1'); });
       if (r.hammer.spark) { dot(x, ex + 3, ey - 2, 'yellow'); dot(x, ex + 4, ey, 'light0'); dot(x, ex + 2, ey - 3, 'light2'); }
     }
+    if (r.polish) {   // what is polished, in the far hand, under the cloth
+      const [px2, py2] = r.arms[0].pts[r.arms[0].pts.length - 1];
+      plated(x, g => ch.polish === 'cup'
+        ? (rect(g, px2 - 1, py2 - 3, 4, 3, 'white'), dot(g, px2 - 2, py2 - 2, 'white'))
+        : (rect(g, px2, py2 - 5, 2, 5, 'brass1'), dot(g, px2, py2 - 5, 'brass0'), dot(g, px2 + 1, py2 - 2, 'brass2')));
+    }
     if (!r.behind) arm(x, r.arms[1], ch.sleeve);
+    if (r.polish) [[0, -1, 'red'], [1, -1, 'white'], [0, 0, 'white'], [1, 0, 'red']].forEach(([ox, oy, c]) => dot(x, hand[0] + ox, hand[1] + oy, c));   // a checked cloth
     if (r.pot) {   // the teapot by its handle, leaning forward to pour, tea running from the spout
       const [hx2, hy2] = hand, lean = i => (r.pot.tip ? i >> 1 : 0);
       plated(x, g => {

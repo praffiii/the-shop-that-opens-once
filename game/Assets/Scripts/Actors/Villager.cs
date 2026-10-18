@@ -24,6 +24,7 @@ namespace Shop
             {
                 ant.Pose = def.Pose;
                 ant.Facing = def.Facing;
+                ant.Seat = def.Seat;
                 ant.Feet = def.At;
                 return;
             }
@@ -32,12 +33,12 @@ namespace Shop
             v.wait = Random.Range(0f, v.wait); // so no two rounds keep step
         }
 
-        /// <summary>Stops whatever they are doing and turns to the courier.</summary>
+        /// <summary>Stops whatever they are doing and turns to the courier; someone sitting stays seated.</summary>
         public void Talk(float courierX)
         {
             talking = true;
             ant.Stop();
-            ant.Pose = listening = ant.Carrying ? "carry" : "idle";
+            ant.Pose = listening = ant.Carrying ? "carry" : ant.Pose == "sit" ? "sit" : "idle";
             ant.FaceTo(courierX);
         }
 

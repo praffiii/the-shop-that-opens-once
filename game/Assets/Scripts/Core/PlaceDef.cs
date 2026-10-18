@@ -41,6 +41,8 @@ namespace Shop
         public int Facing = 1;
         /// <summary>What they are doing where they stand (brew, hammer...).</summary>
         public string Pose = "idle";
+        /// <summary>How high the seat they sit on is, in art px (a bench's is 9).</summary>
+        public float Seat;
         /// <summary>The chapters they are there; null means every chapter.</summary>
         public int[] Chapters;
         /// <summary>The times of day they are there; null means at any time.</summary>
