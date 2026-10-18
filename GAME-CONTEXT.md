@@ -8,7 +8,7 @@ Last updated: 2026-10-18.
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
 - the earlier concept proposal and the feasibility report
 - the Unity project in `game/` with the foundation built: the Godot core ported to C# (places, walking, talk, the bag, keepsakes, saving, sound), a systems-test chapter that is not part of the story, and a playthrough test that passes
-- the art pipeline in `game/ArtSource/`, exporting into `game/Assets/Resources/Art/`. The outdoor world is redrawn as one seamless map of the four zones (`bellwood.js`) and runs in the game, graded for the time of day. The nine interiors are next; the shop is still the Godot set.
+- the art pipeline in `game/ArtSource/`, exporting into `game/Assets/Resources/Art/`. The outdoor world is redrawn as one seamless map of the four zones (`bellwood.js`) and runs in the game, graded for the time of day. It is being overhauled into a bigger, livelier ant-planet world (design: `docs/superpowers/specs/2026-10-18-bellwood-world-overhaul-design.md`), starting with the West zone. The nine interiors follow; the shop is still the Godot set.
 - the dev log of each step, in Bahasa Indonesia, in `docs/devlog/`
 - the web presentation, frozen. It still tells the earlier story.
 - the Godot MVP (Nights 1 and 2 of the earlier story), archived in `archive/godot-mvp/`
@@ -67,6 +67,18 @@ Every fact carries a source tag:
 - `[Decision]` Leo's hill is in the north-east of the East zone: a raised plateau reached by steps, with Leo's lookout hut on top. (2026-10-18)
 - `[Decision]` The station clock is frozen at 10:17. (2026-10-18)
 
+**The world overhaul** (design: `docs/superpowers/specs/2026-10-18-bellwood-world-overhaul-design.md`, approved 2026-10-18)
+- `[Decision]` Bellwood is an **ant planet**. No humans exist and nothing human is left behind. Ants build everything from nature (twigs, bark, leaves, walnut and acorn shells, mushrooms, pebbles, clay, reeds) and from their own crafts (woodwork, stone, iron from the forge, glass). The railway, the train, the station clock and the lighthouse are ant-made. This overrides the GDD's "human leftovers" (selling point 1.5 and design pillar 4): human leftovers would raise questions the story never answers. (2026-10-18)
+- `[Decision]` The look is natural materials: walnut-shell and acorn houses, leaf roofs, twig fences, mushroom street lamps, pebble paths, and clover, dandelions and ferns towering over the roofs so the ants feel small. Each zone has its own main materials and colours, and no two buildings share both their shape and their main material. (2026-10-18)
+- `[Decision]` The world must never feel empty: no plain patch without a purpose bigger than about a third of the view, forest, fields, water or rock between places instead of lawn, and something moving on every screen. (2026-10-18)
+- `[Decision]` The world grows to about 3 times today's width and height, so walking past everything takes minutes, filled with new sub-areas rather than stretched. Buildings grow too: a home is 3–4 ants tall. (2026-10-18)
+- `[Decision]` Holding Shift makes the courier run. No fast travel and no map. Story places sit close to the main road and the bridges; the extra exploring space lies off to the sides. (2026-10-18)
+- `[Decision]` The only animals are bugs at ant scale (aphids herded like cattle, beetles, snails, ladybugs, crickets, water striders, butterflies, moths, fireflies). No hens, cats, birds or crabs. (2026-10-18)
+- `[Decision]` Homes for the named villagers: Helen's by the station, Mender's by the forge and Kapten Bram's by the rail yard (West); Baker's over the bakery, Mia and Pip's by the market street and Sam's near the hall (Centre); Arlo's by the jetty, and Theo lives at the studio (South); the Gardener's by the fields (East), with Nora's stilt house and Satria's childhood home there too. Other buildings belong to unnamed ants known only by their trade. Where Marlow lives by day is open. (2026-10-18)
+- `[Decision]` The village post office stands on the square, closed since the storm, so Satria can reopen it there on Day 8. (2026-10-18)
+- `[Decision]` Villagers live like NPCs in Harvest Moon or Stardew Valley: homes, work and routines across the four day phases, plus unnamed background ants. Designed later, after the world. (2026-10-18)
+- `[Decision]` The order of work: the look, proven on the West zone; the whole bigger world; living villagers; the nine interiors. Reference packs and the GDD's AI images are studied for technique only; nothing is traced or copied. (2026-10-18)
+
 **Characters and art**
 - `[Decision]` Every character is an ant: chunky, expressive reddish-brown ants as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
 - `[Decision]` The protagonist, Satria in the GDD, is drawn as the ant courier with a green cap and a green bag. (2026-09-26)
@@ -75,7 +87,7 @@ Every fact carries a source tag:
 
 **Carried over from the Godot build** (design choices, not engine code)
 - `[Decision]` The camera is close: it shows about 320x180 art pixels of the world, each drawn 2x on a canvas of at least 640x360. The UI uses that finer canvas. (2026-09-29)
-- `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. The GDD adds R to retry a minigame. (2026-09-28)
+- `[Decision]` Controls: mouse and keyboard. Click to walk or use something, or walk with WASD or the arrow keys and use things with Space or Enter. E opens the bag, I inspects, Esc opens the menu. The GDD adds R to retry a minigame. Holding Shift runs (2026-10-18). (2026-09-28)
 - `[Decision]` The game's text is in English. Indonesian may be added later. (2026-09-28)
 
 **Canon boundaries**
@@ -106,7 +118,7 @@ Design pillars:
 1. **No quest markers.** No arrows or checklists. The player matches clues from inspecting keepsakes (a station serial number, hands stopped at 10:17, a kind of stitching) with what residents say.
 2. **Things connect people.** Every keepsake is a bridge between characters.
 3. **Kindness over winning.** Wrong guesses get a puzzled reply or a new hint, never a penalty.
-4. **A miniature fable.** An anthropomorphic ant colony lives among human leftovers, such as a walnut-shell cup or a station clock.
+4. **A miniature fable.** An anthropomorphic ant colony lives among human leftovers, such as a walnut-shell cup or a station clock. Overridden: Bellwood is an ant planet with no humans; the clock and the cup are ant-made `[Decision]` (2026-10-18).
 5. **Restoration minigames.** Tactile minigames (calibrating gears, stitching a patchwork, tuning a radio) with instant, penalty-free retries.
 
 ## World and story `[GDD]`
@@ -305,6 +317,8 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 **Between the GDD and decisions or the repo**
 - **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
 - **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
+- **Human leftovers:** the GDD (1.5, 5.2) has the ants live among things humans left behind. The decision is an ant planet with no humans.
+- **Animals:** the GDD's world has no rule on animals; the old map had hens, a cat and gulls. The decision is bugs only.
 - **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17, and so does the art carried over from Godot that is not redrawn yet (the title, the shop clock and the watch's A.T.). The redrawn world's station clock reads 10:17; the rest is redrawn with the interiors and keepsakes.
 - **The presentation** is frozen with the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and 15 ants, not 18. That is expected.
 
