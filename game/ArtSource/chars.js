@@ -273,11 +273,12 @@
       ],
     },
     // Kapten Bram, the retired engine driver (GDD 6.13): a navy conductor's uniform with brass buttons and a white
-    // collar, the brass whistle on its silver chain round his neck, a white moustache, the peaked cap with its gold band.
+    // collar, worn white cloth gloves, the brass whistle on its silver chain round his neck, a white moustache, the peaked
+    // cap with its gold band.
     bram: { sleeve: ['navy1', 'navy2'], polish: 'whistle',
       torso: { rows: ['.rrrmm.', 'mrRNNNn', 'mNNNNon', 'mNNNNNn', 'mNNNNon', 'NNNNNnn', '.NNnnn.', '..nnn..'],
                key: { r: 'cream0', R: 'stone1', m: 'navy0', N: 'navy1', n: 'navy2', o: 'brass1' } },
-      bent: 0,
+      bent: 0, glove: ['white', 'cream0', 'cream1'],
       parts: [
         { z: 'body', ol: false, at: [3, 1], rows: ['c..', '.c.', '.c.', '.ww', '.wW'], key: { c: 'stone1', w: 'brass1', W: 'brass2' } },
         { z: 'face', ol: false, at: [5, 7], rows: ['.sss', 'ss.s'], key: { s: 'stone0' } },
@@ -427,7 +428,7 @@
       },
     },
     // Kapten Bram: the navy uniform with its white collar and brass buttons, the whistle on its chain, the white
-    // moustache, the peaked cap with its gold band
+    // moustache, the peaked cap with its gold band (his gloves come with his hands)
     bram: {
       cloth: ['navy0', 'navy1', 'navy2'],
       chest(g, d, back) {
@@ -511,6 +512,16 @@
         for (const sx of [17, 23]) rect(g, sx, 24 + d, 1, 5, 'moss3');
       },
       hat(g, d) { dome(g, d, 'brass1', 'brass2'); rect(g, 14, 13 + d, 13, 3, 'brass3'); for (let x = 15; x < 27; x += 2) dot(g, x, 14 + d, 'brass2'); },
+    },
+    // Pip: the blue and white striped shirt, the letter bundle's strap across it, the oversized postbox-red cap tilted
+    pip: {
+      cloth: ['white', 'white', 'stone1'],
+      chest(g, d, back) { atop(g, () => { for (const y of [25, 27, 29]) rect(g, 16, y + d, 9, 1, y === 29 ? 'roofB2' : 'blue'); line(g, back ? 23 : 17, 24 + d, back ? 17 : 23, 30 + d, 'wood3'); }); },
+      hat(g, d, back) {
+        ellipse(g, 21, 15 + d, 7, 3, 'red'); g.clearRect(0, 16 + d, 40, 24); ellipse(g, 19, 13 + d, 3, 1, 'roofR0'); rect(g, 25, 13 + d, 3, 3, 'roofR3');
+        if (back) rect(g, 15, 15 + d, 13, 1, 'roofR3');
+        else { rect(g, 13, 15 + d, 15, 1, 'red'); rect(g, 13, 16 + d, 15, 1, 'roofR3'); rect(g, 28, 16 + d, 2, 1, 'roofR3'); rect(g, 19, 13 + d, 2, 2, 'cream0'); }
+      },
     },
     // the porter: a brown waistcoat open on the cream shirt, the tweed flat cap
     porter: {
@@ -769,17 +780,17 @@
     const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let e = dx + dy;
     for (;;) { fn(x0, y0); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } }
   }
-  // Stubby arm: a 1 px core (sleeve colour, then a rust hand) wrapped in its own 1 px outline.
+  // Stubby arm: a 1 px core (sleeve colour, then a rust hand, or a gloved one) wrapped in its own 1 px outline.
   // The outline is computed from the core's pixel set directly (no canvas readback).
-  function arm(x, a, sleeve) {
-    const p = a.pts, [lit, shade, bare] = sleeve;
+  function arm(x, a, ch) {
+    const p = a.pts, [lit, shade, bare] = ch.sleeve, [g0, g1, g2] = ch.glove || ['ant0', 'ant1', 'ant2'];
     const up = a.far ? shade : lit, fore = bare ? (a.far ? 'ant2' : 'ant1') : up;
     const el = p.length > 2 ? p[1] : [Math.round((p[0][0] + p[1][0]) / 2), Math.round((p[0][1] + p[1][1]) / 2)];
     const h = p[p.length - 1], core = new Map(), set = (px, py, c) => core.set(px + ',' + py, [px, py, c]);
     raster(p[0][0], p[0][1], el[0], el[1], (px, py) => set(px, py, up));
     raster(el[0], el[1], h[0], h[1], (px, py) => set(px, py, fore));
-    const hand = a.far ? 'ant2' : 'ant1';
-    set(h[0], h[1] - 1, a.far ? 'ant1' : 'ant0'); set(h[0] + 1, h[1] - 1, hand); set(h[0], h[1], hand); set(h[0] + 1, h[1], hand);
+    const hand = a.far ? g2 : g1;
+    set(h[0], h[1] - 1, a.far ? g1 : g0); set(h[0] + 1, h[1] - 1, hand); set(h[0], h[1], hand); set(h[0] + 1, h[1], hand);
     const ol = a.far ? 'ant4' : 'ink';
     for (const [px, py] of core.values()) for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]])
       if (!core.has((px + ox) + ',' + (py + oy))) dot(x, px + ox, py + oy, ol);
@@ -809,13 +820,13 @@
     } };
 
     for (const l of r.legs) if (l.far) leg(x, l, L, ch.shoe);
-    arm(x, r.arms[0], ch.sleeve);
+    arm(x, r.arms[0], ch);
     put(x, P.abd, L.abd[0] + r.dx, L.abd[1] + r.dy);
     for (const l of r.legs) if (!l.far) leg(x, l, L, ch.shoe);
     put(x, P.torso, tx0, ty0);
     layer('body');
     layer('neck');
-    if (r.behind) arm(x, r.arms[1], ch.sleeve);
+    if (r.behind) arm(x, r.arms[1], ch);
     put(x, P.head, hx, hy);
     x.drawImage(memo('eye|' + r.eye, () => grid(EYE[r.eye] || EYE.open, EK)), hx + L.eye[0], hy + L.eye[1]);
     x.drawImage(memo('mouth|' + r.mouth, () => grid(MOUTH[r.mouth], MK)), hx + L.mouth[0], hy + L.mouth[1]);
@@ -848,7 +859,7 @@
         ? (rect(g, px2 - 1, py2 - 3, 4, 3, 'white'), dot(g, px2 - 2, py2 - 2, 'white'))
         : (rect(g, px2, py2 - 5, 2, 5, 'brass1'), dot(g, px2, py2 - 5, 'brass0'), dot(g, px2 + 1, py2 - 2, 'brass2')));
     }
-    if (!r.behind) arm(x, r.arms[1], ch.sleeve);
+    if (!r.behind) arm(x, r.arms[1], ch);
     if (r.polish) [[0, -1, 'red'], [1, -1, 'white'], [0, 0, 'white'], [1, 0, 'red']].forEach(([ox, oy, c]) => dot(x, hand[0] + ox, hand[1] + oy, c));   // a checked cloth
     if (r.pot) {   // the teapot by its handle, leaning forward to pour, tea running from the spout
       const [hx2, hy2] = hand, lean = i => (r.pot.tip ? i >> 1 : 0);
@@ -886,7 +897,10 @@
   /* Someone in TURN facing the camera or turned away, drawn round x 20 from the same colours, each part in its own
      ink outline as the side view's are: the head and its hat, the thorax in its cloth, the abdomen (behind it from the
      front, in front of the legs from the back), two legs stepping in place and two splayed ones, the arms swinging.
-     The gaits keep the side view's timing: the same frames lift the same foot and bob the body. */
+     The gaits keep the side view's timing: the same frames lift the same foot and bob the body. A child is the same
+     drawing smaller: the head hd px lower and the body bd lower over shorter legs, its thorax, abdomen, arms and
+     antennae k px shorter. */
+  const SIZE = { A: { hd: 0, bd: 0, k: 0 }, K: { hd: 4, bd: 3, k: 1 } }, size = ch => SIZE[ch.kid ? 'K' : 'A'];
   const [tT, tX] = scratch(40, 40);
   function plated(x, fn) { tX.clearRect(0, 0, 40, 40); fn(tX); x.drawImage(outline(tT, 'ink'), -1, -1); }
   function gait(pose, f) {
@@ -898,58 +912,59 @@
     return g;
   }
   // where a hand holds an item, turned: at the chest
-  const turnedHand = (pose, f) => [20, 26 + gait(pose, f).dy];
+  const turnedHand = (ch, pose, f) => [20, 26 + size(ch).bd + gait(pose, f).dy];
   function renderTurned(id, pose, f, view) {
     const ch = CAST[id], T = TURN[id], back = view === 'back', g = gait(pose, f), d = g.dy, [c, x] = canvas(40, 40), G = 37;
+    const { hd, bd, k } = size(ch), h = d + hd, b = d + bd;
     const carry = pose === 'carry' || pose === 'carryWalk', bag = T.bag && ch.parts.find(p => p.z === 'body');
     const [lit, mid, shade] = T.cloth || ['ant0', 'ant1', 'ant2'];
     // the splayed middle legs, then (from the front) the abdomen behind the body, then the two walking legs
-    for (const s of [-1, 1]) { line(x, 20 + s * 4, 30 + d, 20 + s * 6, 33 + d, 'ant3'); line(x, 20 + s * 6, 33 + d, 20 + s * 7, 36, 'ant3'); }
+    for (const s of [-1, 1]) { line(x, 20 + s * 4, 30 + b, 20 + s * 6, Math.min(33 + b, 36), 'ant3'); line(x, 20 + s * 6, Math.min(33 + b, 36), 20 + s * 7, 36, 'ant3'); }
     if (!back) {
-      plated(x, gx => { ellipse(gx, 20, 29 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 9, 1, 'ant3'); });
-      if (T.behind) plated(x, gx => T.behind(gx, d));
+      plated(x, gx => { ellipse(gx, 20, 29 + b, 5 - k, 2, 'ant2'); rect(gx, 16 + k, 30 + b, 9 - 2 * k, 1, 'ant3'); });
+      if (T.behind) plated(x, gx => T.behind(gx, b));
     }
     [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => {
-      line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink');
+      line(x, hx, 31 + b, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink');
       if (ch.shoe === 'wrap') rect(x, fx - 1, G - l - 3, 3, 2, 'cream0');
       if (ch.shoe === 'boot') rect(x, fx - 1, G - l - 5, 3, 6, 'moss2');
     });
     // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the load to the chest
     const arms = () => [-1, 1].forEach(s => {
-      const sh = [20 + s * 4, 25 + d], hand = carry ? [20 + s * 4, 28 + d] : [20 + s * 6, 30 + d + (s * g.sw > 0 ? 1 : 0) - (s * g.sw < -1 ? 1 : 0)];
-      arm(x, { far: false, pts: [sh, hand] }, ch.sleeve);
+      const sh = [20 + s * 4, 25 + b], hand = carry ? [20 + s * 4, 28 + b - k] : [20 + s * (6 - k), 30 + b - 2 * k + (s * g.sw > 0 ? 1 : 0) - (s * g.sw < -1 ? 1 : 0)];
+      arm(x, { far: false, pts: [sh, hand] }, ch);
     });
     if (!carry || back) arms();
     // the thorax in its cloth and what crosses it; from the back, the bag
     plated(x, gx => {
-      ellipse(gx, 20, 27 + d, 3, 4, mid); rect(gx, 18, 24 + d, 1, 4, lit); rect(gx, 22, 25 + d, 1, 5, shade);
-      if (T.chest) T.chest(gx, d, back);
+      ellipse(gx, 20, 27 + b, 3, 4 - k, mid); rect(gx, 18, 24 + b, 1, 4 - k, lit); rect(gx, 22, 25 + b, 1, 5 - k, shade);
+      if (T.chest) T.chest(gx, b, back);
     });
-    if (back && bag) put(x, memo('bag|' + id, () => outlined(bag.rows, bag.key)), 16, 23 + d);
+    if (back && bag) put(x, memo('bag|' + id, () => outlined(bag.rows, bag.key)), 16, 23 + b);
     // the head: from the front its eyes and mouth, from the back only its round
-    plated(x, gx => { ellipse(gx, 20, 18 + d, 5, 4, 'ant1'); ellipse(gx, 21, 19 + d, 4, 3, 'ant2'); ellipse(gx, 19, 18 + d, 4, 3, 'ant1'); rect(gx, 17, 16 + d, 2, 1, 'ant0'); if (back) ellipse(gx, 20, 20 + d, 4, 1, 'ant2'); });
+    plated(x, gx => { ellipse(gx, 20, 18 + h, 5, 4, 'ant1'); ellipse(gx, 21, 19 + h, 4, 3, 'ant2'); ellipse(gx, 19, 18 + h, 4, 3, 'ant1'); rect(gx, 17, 16 + h, 2, 1, 'ant0'); if (back) ellipse(gx, 20, 20 + h, 4, 1, 'ant2'); });
     if (!back) {
       for (const ex of [16, 22]) {
-        if (g.blink) rect(x, ex, 19 + d, 2, 1, 'ink');
-        else { rect(x, ex, 17 + d, 2, 3, 'cream0'); rect(x, ex < 20 ? ex + 1 : ex, 18 + d, 1, 2, 'pupil'); dot(x, ex < 20 ? ex : ex + 1, 17 + d, 'white'); }
-        if (ch.lash && !g.blink) dot(x, ex < 20 ? ex - 1 : ex + 2, 16 + d, 'ink');
+        if (g.blink) rect(x, ex, 19 + h, 2, 1, 'ink');
+        else { rect(x, ex, 17 + h, 2, 3, 'cream0'); rect(x, ex < 20 ? ex + 1 : ex, 18 + h, 1, 2, 'pupil'); dot(x, ex < 20 ? ex : ex + 1, 17 + h, 'white'); }
+        if (ch.lash && !g.blink) dot(x, ex < 20 ? ex - 1 : ex + 2, 16 + h, 'ink');
       }
-      if (g.open) { rect(x, 19, 21 + d, 2, 2, 'ink'); dot(x, 19, 22 + d, 'roofR4'); } else rect(x, 19, 21 + d, 2, 1, 'ink');
-      if (T.face) T.face(x, d);
+      if (g.open) { rect(x, 19, 21 + h, 2, 2, 'ink'); dot(x, 19, 22 + h, 'roofR4'); } else rect(x, 19, 21 + h, 2, 1, 'ink');
+      if (T.face) T.face(x, h);
     }
     // the antennae, elbowed outward (one bent at its tip, as in the side view), each with its club
     [-1, 1].forEach((s, i) => {
-      const bx = 20 + s * 2, by = 14 + d, sway = pose === 'idle' && f >= 2 ? 1 : 0;
-      [[0, -1], [0, -2], [1, -3], [1, -4], [2, -5], [2 + sway, -6]].forEach(([ax, ay]) => dot(x, bx + s * ax, by + ay, 'ink'));
-      const tx = bx + s * (2 + sway), ty = by - 6, bent = ch.bent === (back ? 1 - i : i);
+      const bx = 20 + s * 2, by = 14 + h, sway = pose === 'idle' && f >= 2 ? 1 : 0, n = 6 - 2 * k, tip = (n >> 1) - 1;
+      [[0, -1], [0, -2], [1, -3], [1, -4], [2, -5], [2, -6]].slice(0, n).forEach(([ax, ay], j) => dot(x, bx + s * (ax + (j === n - 1 ? sway : 0)), by + ay, 'ink'));
+      const tx = bx + s * (tip + sway), ty = by - n, bent = ch.bent === (back ? 1 - i : i);
       const cx = bent ? tx + s : tx + (s > 0 ? 1 : -2), cy = bent ? ty - 1 : ty - 2;
       if (bent) dot(x, tx + s, ty, 'ink');
       rect(x, cx, cy, 2, 2, 'ant2'); dot(x, cx, cy, 'ant1'); dot(x, cx + 1, cy + 1, 'ant3');
     });
-    if (T.hat) plated(x, gx => T.hat(gx, d, back));
+    if (T.hat) plated(x, gx => T.hat(gx, h, back));
     // from the back, the abdomen in front of the legs, banded
-    if (back) plated(x, gx => { ellipse(gx, 20, 31 + d, 6, 3, 'ant1'); ellipse(gx, 21, 32 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 3, 1, 'ant0'); rect(gx, 15, 33 + d, 11, 1, 'ant3'); });
-    if (carry && !back) { put(x, load(id), 16, 23 + d); arms(); }
+    if (back) plated(x, gx => { ellipse(gx, 20, 31 + b - k, 6 - 2 * k, 3 - k, 'ant1'); ellipse(gx, 21, 32 + b - k, 5 - 2 * k, 2 - k, 'ant2'); rect(gx, 16 + 2 * k, 30 + b - k, 3, 1, 'ant0'); rect(gx, 15 + 2 * k, 33 + b - 2 * k, 11 - 4 * k, 1, 'ant3'); });
+    if (carry && !back) { put(x, load(id), 16, 23 + b); arms(); }
     return c;
   }
 
@@ -1253,7 +1268,7 @@
     sprite: sprite40,
     hand(id, pose, frame = 0) {
       const p = resolve(id, pose), f = wrap(p, frame), t = turned(p);
-      if (t) { const [hx, hy] = turnedHand(t[0], f); return [hx - 20, hy - 37]; }
+      if (t) { const [hx, hy] = turnedHand(CAST[id], t[0], f); return [hx - 20, hy - 37]; }
       const r = rig(CAST[id], p, f), a = r.arms[1].pts, h = r.hold || a[a.length - 1];
       return [h[0] - 20, h[1] - 37];
     },
