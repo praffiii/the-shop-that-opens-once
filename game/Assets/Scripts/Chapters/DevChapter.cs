@@ -13,7 +13,7 @@ namespace Shop
         public override async Awaitable Start()
         {
             await Card("Systems test", "Not part of the story.");
-            await Go("world", "start");
+            await Go("station", "start");
             Hint("Click to walk, or use WASD (hold Shift to run). Space uses what is close.");
         }
 

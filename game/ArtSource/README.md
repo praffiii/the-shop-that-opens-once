@@ -10,8 +10,9 @@ code. Nothing is AI-generated. `export.py` renders it all into `../Assets/Resour
 | `chars.js` | The ants: poses, walking frames and portraits |
 | `village.js` | The village kit: the terrain painter (levels, cliffs, rivers, paths, sand, sea), foliage, trees and small props |
 | `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js` | Each zone's buildings and landmarks |
+| `village-grove.js` | The banyan grove: ancient trees, ferns, logs, mossy rocks and the hidden banyan with Marlow's door |
 | `village-nature.js` | Trees, plants, rocks, yard props and bugs |
-| `world.js` | Bellwood outdoors: the layout of the one seamless map, and everything placed on it |
+| `areas.js` | Bellwood outdoors as five small areas (station, grove, square, east, coast), each laid out and dressed |
 | `interiors.js`, `toyshop.js` | Rooms |
 | `title.js` | The title lettering |
 | `audio.js` | Music, wind and sound effects |
@@ -25,7 +26,7 @@ Needs Google Chrome and `oggenc` (`brew install vorbis-tools`). From `game/`:
 
 ```sh
 python3 ArtSource/export.py            # everything
-python3 ArtSource/export.py world      # one part: world, rooms, cast or sound
+python3 ArtSource/export.py areas      # one part: areas, rooms, cast or sound
 python3 ArtSource/export.py --force    # also rewrite the walk masks
 ```
 
@@ -37,10 +38,12 @@ What it writes, under `Assets/Resources/Art/`:
   `place.json` lists the chunks, the clips (small loops such as ripples or swaying grass, drawn once), the decals
   that place a clip many times with a timing offset, the items with their atlas, and the anchors, paths and hotspots.
   A rebake removes the chunks and atlases its variant no longer writes.
+- `places/<area>/height.png`: the ground's shape for the 3D view: red is each pixel's height above level 0 plus 64,
+  green marks a cliff or bank face, which stands upright (`Assets/Scripts/Core/Relief.cs`).
 - `places/<place>/walk.png`: where feet may go, white on black. It is written when missing; `--force` overwrites it.
-  The world's mask is built from its own data (water, cliffs, buildings' walls, props' footprints), and the export
+  An area's mask is built from its own data (water, cliffs, buildings' walls, props' footprints), and the export
   fails if any path or anchor is not walkable and connected.
-- `grades.json`: the time-of-day colour grades. The world is drawn once, at midday (`places/world/day/`), and the
+- `grades.json`: the time-of-day colour grades. Each area is drawn once, at midday (`places/<area>/day/`), and the
   game grades it for morning, dusk and night in its shader. Lights (lit windows, lamps, fireflies) are separate items
   that show at dusk and night and are never graded.
 - `chars/`: one sheet per ant, their portraits, and `chars.json` (poses, frames, hand positions).

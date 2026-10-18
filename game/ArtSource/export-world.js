@@ -1,11 +1,10 @@
 'use strict';
-/* Bellwood outdoors -> places/world/day/, places/world/walk.png and grades.json.
-   Bakes world.js: its ground is one still image cut into chunks, its small loops and its forest are clips placed as
-   decals, and every depth-sorted thing is an item. The world is drawn once, at midday; the game grades it for the time of day with
-   KIT.GRADES (grades.json). */
+/* Bellwood outdoors -> places/<area>/day/, places/<area>/height.png, places/<area>/walk.png and grades.json.
+   Bakes each area of areas.js: its ground is one still image cut into chunks, its small loops and its forest are
+   clips placed as decals, and every depth-sorted thing is an item. An area is drawn once, at midday; the game grades
+   it for the time of day with KIT.GRADES (grades.json). */
 (() => {
-  PARTS.world = () => bake('world', WORLD.create());
-  // Each outdoor area (areas.js) is its own place.
+  // Each outdoor area is its own place.
   PARTS.areas = () => AREA.ids.forEach(id => bake(id, AREA.build(id)));
 
   function bake(id, S) {

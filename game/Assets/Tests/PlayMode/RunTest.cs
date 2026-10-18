@@ -25,9 +25,9 @@ namespace Shop.Tests
             try
             {
                 var end = Time.realtimeSinceStartup + 60f;
-                while (!(main.Place && main.Place.Def.Id == "world" && main.Place.Controls && !main.Talk.Open))
+                while (!(main.Place && main.Place.Def.Id == "station" && main.Place.Controls && !main.Talk.Open))
                 {
-                    Assert.Less(Time.realtimeSinceStartup, end, "The world never got the controls");
+                    Assert.Less(Time.realtimeSinceStartup, end, "The station never got the controls");
                     yield return null;
                 }
                 var player = main.Place.Player;

@@ -89,18 +89,22 @@ scene.draw(ctx, view, actors)
 
 ## The world: Bellwood
 
-Bellwood is one seamless outdoor world of the GDD's four zones, laid out after the GDD's world map (image 6 of the
-2026-10-18 review): two rivers wind down to the sea on the diagonal and split the land into the West (the old station
-frozen at 10:17, Helen's tea stall on the platform, the rail yard, the forge, and Marlow's shop in the banyan roots),
-the Centre (the round square with its fountain, the hall, the bakery and Mia's stalls), the East (the stilt houses with
-Nora's, the chamomile fields, Satria's home, the bus stop, and Leo's lookout on the hill) and the South (down the cliff
-path: the jetty, the beach, the salt store, the lighthouse and Theo's studio on the cliff). Bridges are the zone
-crossings; forest fills the land between places as a solid mass with paths cut through it; grey rock cliffs step the
-land down to the coast. Only ants live here, and the only animals are bugs.
+Bellwood is five small outdoor areas, one per part of town, joined by exits at their edges with a short fade between
+them, as top-down RPGs build a town (decision of 2026-10-18; the one seamless map is retired). Each is about 15 s to
+walk across. The Station (the old station frozen at 10:17, Helen's tea stall on the platform, the train, the forge and
+Bram's carriage) leads west into the Grove (a narrow path between ancient trees to the great banyan, Marlow's door
+hidden in its roots) and east to the Square (the hall on its terrace, the fountain, the bakery, Mia's stalls, the post
+office). The Square leads east to the East (a bridge over the river, the stilt houses with Nora's, the chamomile
+fields, Satria's home and Leo's lookout on the hill) and down the bluff stairs to the Coast (Theo's studio, the beach,
+the salt store, Arlo's home, the jetty and the lighthouse). Forest fills each area's edges as a solid mass with paths
+cut through it; grey rock cliffs step the land between levels. Only ants live here, and the only animals are bugs.
+
+The game draws them in an HD-2D 3D view: the ground follows each area's height map, so cliffs stand up, and buildings,
+trees and characters are upright cards, under a tilted camera with a tilt-shift blur and bloom.
 
 The ground is a tile map painted by `VIL.ground` (`village.js`); buildings, trees and props are `VIL` sprites (the
-zone kits `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js` and `village-nature.js`), and
-`world.js` lays them out. A sprite maker returns `{ img, ax, ay }` (the feet point in img px) and, where it applies,
+zone kits `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js`, `village-grove.js` and `village-nature.js`), and
+`areas.js` lays them out. A sprite maker returns `{ img, ax, ay }` (the feet point in img px) and, where it applies,
 `base` and `foot` (its footprint), `door`, `lit` (window glass rects that glow at night), `smoke` (chimney tops),
 `shadow` and `frames`/`fps`. Window glass is drawn in `sky2`, `sky3` or `white` so it can be relit.
 
@@ -108,6 +112,6 @@ Forest trees are decals under everything, and the ground under their crowns is s
 behind one; a crown that would hang over a path gives way to a bush. Standalone trees (blossoms, birches, willows)
 are items and sort with the courier.
 
-Marlow's shop is the root gap of the great banyan by the station. Seven lanterns hang in its branches, and one goes out for each night resolved.
+Marlow's shop is the root gap of the great banyan at the end of the grove path. Seven lanterns hang in its branches, and one goes out for each night resolved.
 
 Behind the scissors sign on Nora's house in the East is her toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.

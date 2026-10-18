@@ -458,7 +458,7 @@ namespace Shop
             var size = (Vector2)Place.World.Size;
             var following = look == null && Place.Player;
             var target = look ?? (Place.Player ? courier.Feet : TitleView);
-            var height = Place.World.Relief.Under(Place.Player ? courier.Feet : target);
+            var height = Place.World.Relief.Under(target);
             if (following)
             {
                 var step = courier.Feet - lastFeet;
