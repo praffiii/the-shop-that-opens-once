@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Export art</title>
+<!-- Opened by export.py in headless Chrome as export.html?only=<part>. Open it in a normal browser to debug a part. -->
+<pre id="out"></pre>
+<script src="px.js"></script>
+<script src="world.js"></script>
+<script src="chars.js"></script>
+<script src="interiors.js"></script>
+<script src="toyshop.js"></script>
+<script src="title.js"></script>
+<script src="audio.js"></script>
+<script src="bake.js"></script>
+<script src="export-village.js"></script>
+<script src="export-rooms.js"></script>
+<script src="export-cast.js"></script>
+<script src="export-sound.js"></script>
+<script>
+  // A part may return a promise; export.py awaits `done`, then reads the files (or the error) from the <pre>.
+  window.done = (async () => {
+    const only = new URLSearchParams(location.search).get('only'), el = document.getElementById('out');
+    try {
+      if (!PARTS[only]) throw new Error(`unknown part "${only}"; known: ${Object.keys(PARTS).join(', ')}`);
+      await PARTS[only]();
+      el.textContent = JSON.stringify(BAKE.out);
+    } catch (e) { el.id = 'err'; el.textContent = String((e && e.stack) || e); }
+    return el;
+  })();
+</script>
