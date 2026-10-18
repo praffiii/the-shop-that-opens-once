@@ -12,7 +12,7 @@
     moss0: '#d6e38c', moss1: '#a8c25c', moss2: '#7c9b45', moss3: '#58733a',   // Marlow's waistcoat
     slate0: '#c6d2f2', slate1: '#97a9da', slate2: '#6f81b9',                  // Helen's cardigan
     plum0: '#b48ad6', plum1: '#8a5fb8', plum2: '#633f8f',                       // Nora's knitted wool shawl
-    lilac2: '#9d84de', pink0: '#ffd4ea',
+    lilac0: '#e2d2ff', lilac2: '#9d84de', pink0: '#ffd4ea',
     navy0: '#8197d1', navy1: '#5a6ba8', navy2: '#3f4c82',                       // Kapten Bram's driver's jacket
   };
   const R = k => XC[k] || k;
@@ -294,6 +294,26 @@
         { z: 'hat', at: [-1, -2], rows: ['...11111...', '.112222222.', '12222222223', '33333333333'], key: { 1: 'brass1', 2: 'brass2', 3: 'brass3' } },
       ],
     },
+    // Background ants, known by what they wear, none like a named villager. Two neighbours who chat at the station: an
+    // aunt in a lavender dress, a white apron and a dotted cream headscarf; an uncle in a mustard shirt with brown
+    // braces and a black bowler hat.
+    neighbour_a: { sleeve: ['lilac', 'lilac2'],
+      torso: { rows: ['.rrrWw.', 'rrrrWww', 'rrRWwww', 'rRRWwww', 'rRRWwws', 'RRRWwss', '.RRWss.', '..Wwss.'],
+               key: { r: 'lilac', R: 'lilac2', W: 'cream0', w: 'white', s: 'stone1' } },
+      villager: true, lash: true,
+      parts: [
+        { z: 'hat', at: [-1, -1], rows: ['...sssss...', '.sssSrSSS..', 'ssSrSSSrTT.', 'sSSSrSTT...', 'sSrST......', 'sSST.......', 'sST........', 'ST.........'],
+          key: { s: 'cream0', S: 'cream1', T: 'cream2', r: 'roofR2' } },
+      ],
+    },
+    neighbour_b: { sleeve: ['brass1', 'brass2'],
+      torso: { rows: ['.yyyyY.', 'yBYyyBY', 'yBYyyBY', 'yBYyYBY', 'yBYYYBY', 'YBYYYBZ', '.BYYZB.', '..ZZZ..'],
+               key: { y: 'brass1', Y: 'brass2', Z: 'brass3', B: 'wood4' } },
+      villager: true,
+      parts: [
+        { z: 'hat', at: [0, -3], rows: ['...kkkk...', '..kKKKKk..', '..kKKKKk..', 'kkkkkkkkkk'], key: { k: 'iron4', K: 'iron3' } },
+      ],
+    },
     // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
     porter: { sleeve: ['cream0', 'cream2', true],
       torso: { rows: ['.wwwLL.', 'wwwLLLM', 'wwLLLoM', 'wLLLLLM', 'wLLLLoM', 'LLLLLMM', '.LLMMM.', '..MMM..'],
@@ -470,6 +490,8 @@
     if (id === 'leo') s.push('peer');
     if (id === 'theo') s.push('photo', 'look');
     if (id === 'arlo') s.push('fish', 'tend', 'sit');
+    if (id === 'neighbour_a' || id === 'neighbour_b') s.push('sit');
+    if (id === 'neighbour_a') s.push('look');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -1033,6 +1055,18 @@
         region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 14, 8) && y <= P.cy - 4, (x, y) => band((x - P.cx) + (y - P.cy), -22, -6, ['brass1', 'brass2', 'brass3']));
         rect(g, P.cx - 15, P.cy - 7, 29, 4, 'brass3'); for (let x = P.cx - 14; x < P.cx + 14; x += 2) dot(g, x, P.cy - 6, 'brass2');
         rect(g, P.cx - 3, P.cy - 17, 4, 2, 'brass2');
+      }); } },
+    neighbour_a: { cloth: ['lilac0', 'lilac', 'lilac2'], lash: true,
+      bust(g) { region(g, (x, y) => inBust(x, y) && x >= 20 && x <= 37 && y >= 37, (x, y) => (x > 34 ? 'stone1' : 'white')); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 1, 14, 12) && !inE(x, y, P.cx + 5, P.cy + 4, 12, 11) && y <= P.cy + 6, hairShade(P, ['cream0', 'cream1', 'cream2']));
+        for (const [dx, dy] of [[-8, -8], [-2, -11], [3, -8], [-11, -2], [-6, -4]]) rect(g, P.cx + dx, P.cy + dy, 2, 2, 'roofR2');
+      }); } },
+    neighbour_b: { cloth: ['brass0', 'brass1', 'brass2'],
+      bust(g) { for (const bx of [19, 33]) { line(g, bx, 35, bx - 1, 47, 'wood4'); line(g, bx + 1, 35, bx, 47, 'wood3'); } },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 9, 10, 7) && y <= P.cy - 5, (x, y) => band(x - P.cx + (y - P.cy), -22, -10, ['iron2', 'iron3', 'iron4']));
+        rect(g, P.cx - 15, P.cy - 6, 29, 2, 'iron4');
       }); } },
     porter: { cloth: ['wood1', 'wood2', 'wood3'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },

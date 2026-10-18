@@ -82,6 +82,36 @@ namespace Shop
                         Id = "mender", At = V(520, 266), Label = "Mender", Spot = V(20, 6), Pose = "hammer", Phases = new[] { Phase.Midday },
                         Line = "Wheels are sound. Bearings too. She could run tomorrow, if anyone let her.",
                     },
+                    // Two neighbours who come by to chat on the platform: he stands and listens, she talks, wanders off to read
+                    // the notices or look in at Helen's stall, and comes back with more to say. At dusk they sit together on
+                    // the platform's other bench.
+                    new Person
+                    {
+                        Id = "neighbour_a", Label = "Neighbour", Spot = V(-20, 6), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(470, 336), Pose = "talk", Facing = 1, Wait = 7f },
+                            new Stop { At = V(626, 322), Pose = "look", Facing = 1, Wait = 5f },
+                            new Stop { At = V(470, 336), Pose = "talk", Facing = 1, Wait = 7f },
+                            new Stop { At = V(380, 334), Facing = -1, Wait = 4f },
+                        },
+                        Line = "Have you heard? The Baker's trying a new rye. Again. We'll all be very polite about it.",
+                    },
+                    new Person
+                    {
+                        Id = "neighbour_b", At = V(494, 338), Label = "Neighbour", Spot = V(20, 6), Facing = -1, Phases = new[] { Phase.Morning, Phase.Midday },
+                        Line = "Fine day for standing about. Trains or no trains, a station's the place for it.",
+                    },
+                    new Person
+                    {
+                        Id = "neighbour_a", At = V(572, 277), Seat = 9, Label = "Neighbour", Spot = V(-22, 8), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "We sit here every evening. A habit, that's all. You never know who might step off.",
+                    },
+                    new Person
+                    {
+                        Id = "neighbour_b", At = V(590, 277), Seat = 9, Label = "Neighbour", Spot = V(22, 8), Pose = "sit", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "Evening already. My knees say bench, and my knees are usually right.",
+                    },
                     new Person
                     {
                         Id = "helen", At = V(430, 277), Label = "Helen", Spot = V(26, 6), Pose = "sit", Seat = 9, Facing = -1, Phases = new[] { Phase.Dusk },
