@@ -110,6 +110,49 @@ namespace Shop
             {
                 Id = "square",
                 Variants = new[] { "day" },
+                People = new[]
+                {
+                    // Morning: the Baker carries trays of loaves down from the bakery to the bread stall, Mia carries
+                    // crates from home to set out her vegetable stall, Pip runs letters from the shut post office's
+                    // steps to the neighbours' doors, and Sam sweeps outside the hall's door.
+                    new Person
+                    {
+                        Id = "baker", Label = "Baker", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(438, 404), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
+                            new Stop { At = V(800, 738), Pose = "lift", Facing = -1, Wait = 2.5f },
+                        },
+                        Line = "Morning! First batch is out. Take a roll, they're better warm. So is the news.",
+                    },
+                    new Person
+                    {
+                        Id = "mia", Label = "Mia", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(950, 628), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
+                            new Stop { At = V(562, 568), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Line = "Cabbages up front, carrots behind. If Pip runs past you, tell him to stop for breakfast.",
+                    },
+                    new Person
+                    {
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(310, 628), Pose = "lift", Facing = -1, Wait = 2f, Carry = true },
+                            new Stop { At = V(1110, 628), Pose = "lift", Facing = -1, Wait = 2f },
+                            new Stop { At = V(310, 628), Pose = "lift", Facing = 1, Wait = 2f, Carry = true },
+                            new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 2f },
+                        },
+                        Line = "Letters! The post office is shut, so I carry them myself. One day I'll be a real courier, like you!",
+                    },
+                    new Person
+                    {
+                        Id = "sam", At = V(614, 404), Label = "Sam", Spot = V(-18, -4), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Morning },
+                        Line = "Steps first, then the ledgers. Everything in its order, or nothing can ever be found again.",
+                    },
+                },
                 Hotspots = new[]
                 {
                     West("to_station", 640, "To the station", "station/from_square"),
