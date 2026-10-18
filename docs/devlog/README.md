@@ -12,6 +12,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [03](03-fondasi.md) | 2026-10-18 | Pipeline art dan fondasi sistem game | `m1-foundation` |
 | [04](04-dunia-bellwood.md) | 2026-10-18 | Dunia Bellwood: empat zona dalam satu peta | `m2-world` |
 | [05](05-desa-gaya-rpg.md) | 2026-10-18 | Bellwood digambar ulang: desa gaya RPG yang hidup | |
+| [06](06-hd2d-dan-area.md) | 2026-10-18 | Tampilan HD-2D, hutan beringin tersembunyi, dan lima area kecil | |
 
 ## Format setiap entri
 
