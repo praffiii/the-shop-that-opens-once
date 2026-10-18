@@ -586,7 +586,7 @@
       sand: (x, y) => y > SHORE(x) - 190 + 14 * Math.sin(x / 33),
       roads: [[[[480, -20], [480, 180], [470, 300], [470, 462]], 20], [[[120, 462], [860, 462]], 10]],
       gap: 40,
-      clear: [[480, 330, 480, 80]],
+      clear: [[480, 330, 480, 80], [700, 192, 210, 44]],   // the road down, and the bluff top east of it out to the bench
       species: mix(P => [[0.7, P.pine], [1, P.oak]]),
       jetty: [500, 760, 150],
       things(at) {
