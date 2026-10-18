@@ -27,6 +27,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [18](18-sehari-di-pesisir.md) | 2026-10-19 | Sehari di pesisir: Theo dan Nelayan Arlo dari GDD | |
 | [19](19-semut-latar-di-stasiun.md) | 2026-10-19 | Semut latar di stasiun: dua tetangga yang mengobrol | |
 | [20](20-semut-latar-di-alun-alun.md) | 2026-10-19 | Semut latar di alun-alun: pembeli dan penjual bunga | |
+| [21](21-semut-latar-di-area-timur.md) | 2026-10-19 | Semut latar di area timur: buruh kebun dan penggembala kutu daun | |
 
 ## Format setiap entri
 
