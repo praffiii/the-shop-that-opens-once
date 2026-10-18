@@ -90,12 +90,28 @@ namespace Shop
             return mat;
         }
 
-        /// <summary>The pixel material for sprite renderers, which supply their own texture.</summary>
-        public static Material SpriteMaterial => spriteMaterial ??= new Material(Resources.Load<Shader>("Shaders/Pixel"));
+        /// <summary>The pixel material for the characters' sprite renderers, which supply their own texture.</summary>
+        public static Material SpriteMaterial
+        {
+            get
+            {
+                if (spriteMaterial) return spriteMaterial;
+                spriteMaterial = new Material(Resources.Load<Shader>("Shaders/Pixel"));
+                spriteMaterial.SetFloat("_Actor", 1);
+                return spriteMaterial;
+            }
+        }
+
+        /// <summary>
+        /// How far the view camera (Main) looks down, in degrees. Places are stretched to match (<see cref="Place.Scale"/>),
+        /// so art pixels show square whatever it is; ArtSource/model.js builds its houses for the same tilt.
+        /// </summary>
+        public const float Pitch = 35f;
+        static readonly float Cos2 = Mathf.Pow(Mathf.Cos(Pitch * Mathf.Deg2Rad), 2), Sin2 = 1 - Cos2;
 
         /// <summary>
         /// Art point <paramref name="p"/> on a surface <paramref name="h"/> px high, in its place's 3D space: the art is
-        /// drawn top-down at 45 degrees, so a point h px up lies h px further back. Raising h moves a thing toward the
+        /// drawn as seen from the camera, so a point h px up lies h px further back. Raising h moves a thing toward the
         /// camera along its line of sight, without moving it on the screen.
         /// </summary>
         public static Vector3 World(Vector2 p, float h) => new(p.x, h, -(p.y + h));
@@ -105,15 +121,15 @@ namespace Shop
 
         /// <summary>
         /// How high a point <paramref name="up"/> art px up something standing is lifted from its feet. Standing things
-        /// face the camera: they lean back 45 degrees, so each px up goes half a px up and half a px back. They stay as
-        /// drawn on the screen, every part of them as far from the camera as their feet (sharp together in the depth
-        /// of field), and tall ones never loom toward the camera.
+        /// (trees, characters) face the camera: they lean back as far as it looks down, so each px up goes cos² px up
+        /// and sin² px back. They stay as drawn on the screen, every part of them as far from the camera as their feet
+        /// (sharp together in the depth of field), and tall ones never loom toward the camera.
         /// </summary>
-        public static float Lean(float up) => up / 2;
+        public static float Lean(float up) => up * Cos2;
 
         /// <summary>How a standing thing's own frame (x right, y up its art) turns and squeezes to lean as <see cref="Lean"/> does.</summary>
-        public static readonly Quaternion Leaning = Quaternion.Euler(45, 0, 0);
-        public static readonly Vector3 LeaningScale = new(1, Mathf.Sqrt(0.5f), 1);
+        public static readonly Quaternion Leaning = Quaternion.Euler(Mathf.Atan2(Sin2, Cos2) * Mathf.Rad2Deg, 0, 0);
+        public static readonly Vector3 LeaningScale = new(1, Mathf.Sqrt(Cos2 * Cos2 + Sin2 * Sin2), 1);
 
         public static Color Color(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : UnityEngine.Color.magenta;
 

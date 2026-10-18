@@ -7,6 +7,12 @@
 // The world moves a little: a piece with a sway (Core/BakedArt.cs Pieces) bends in the wind, each texel row shifted
 // by whole texels, more toward its top; and cloud shadows (_Clouds, set per time of day) drift over everything that
 // is graded, their edges on the art pixel grid.
+// The sun casts real shadows (Core/Grade.cs turns it for the time of day): everything that is cut out casts and
+// receives them, looked up at the centre of each art pixel so their edges stay on the pixel grid too. A face turned
+// from the sun (uv2.z, how far: Core/BakedArt.cs) is shadowed the same way.
+// After dark the lights glow on what is near them (_Lamps, Core/BakedArt.cs), in four steps. The characters (_Actor)
+// catch a rim of sky light along their tops (_Rim) and each casts a small dark spot on what it stands on (_Feet,
+// Core/Place.cs).
 Shader "Shop/Pixel"
 {
     Properties
@@ -17,6 +23,7 @@ Shader "Shop/Pixel"
         [HideInInspector] _Src ("Blend from", Float) = 1
         [HideInInspector] _Dst ("Blend to", Float) = 0
         [HideInInspector] _ZWrite ("Depth write", Float) = 1
+        [Toggle] _Actor ("Character (rim light, casts a spot)", Float) = 0
     }
     SubShader
     {
@@ -26,6 +33,7 @@ Shader "Shop/Pixel"
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
         TEXTURE2D(_MainTex);
         SAMPLER(sampler_MainTex);
@@ -36,17 +44,27 @@ Shader "Shop/Pixel"
             float _Src;
             float _Dst;
             float _ZWrite;
+            float _Actor;
         CBUFFER_END
 
         float4 _GradeScale;      // mul - 1
         float4 _GradeAdd;
         float4 _GradeShade;
         float _Clouds;           // 0 (none) to 1 (full shadow)
-        float4x4 _ArtFromWorld;  // world space to the place's art px (Core/Place.cs)
+        float4x4 _ArtFromWorld;  // world space to the place's art px (Core/Place.cs), and back
+        float4x4 _WorldFromArt;
+        float4 _ShadowTint;      // what the sun's shadow multiplies the art by (sRGB)
+        float4 _Lamps[32];       // world position and reach of each light that glows on its surroundings
+        float _LampCount;
+        float4 _LampTint;        // the glow's colour (sRGB) and strength
+        float4 _Feet[8];         // world position under each character, and the spot's half width
+        float _FeetCount;
+        float4 _Rim;             // the rim light's colour (sRGB) and strength
 
-        // rect: the piece's own texels in the atlas (u0, v top, u1, v bottom); sway: (amplitude in texels, phase).
-        struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 rect : TEXCOORD1; float2 sway : TEXCOORD2; };
-        struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float4 rect : TEXCOORD1; float2 sway : TEXCOORD2; float2 ground : TEXCOORD3; };
+        // rect: the piece's own texels in the atlas (u0, v top, u1, v bottom); sway: (amplitude in texels, phase,
+        // how much darker this face is).
+        struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 rect : TEXCOORD1; float4 sway : TEXCOORD2; };
+        struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float4 rect : TEXCOORD1; float4 sway : TEXCOORD2; float2 ground : TEXCOORD3; float3 art : TEXCOORD4; };
 
         Varyings vert(Attributes v)
         {
@@ -58,6 +76,7 @@ Shader "Shop/Pixel"
             // Where on the ground this is, in art px seen from above: clouds shade what stands under them.
             float3 art = mul(_ArtFromWorld, float4(TransformObjectToWorld(v.positionOS.xyz), 1)).xyz;
             o.ground = float2(art.x, -art.z);
+            o.art = art;
             return o;
         }
 
@@ -115,6 +134,7 @@ Shader "Shop/Pixel"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
 
             half4 frag(Varyings i) : SV_Target
             {
@@ -130,7 +150,57 @@ Shader "Shop/Pixel"
                     float n = Noise(p / 260) * 0.6 + Noise(p / 96) * 0.28 + Noise(p / 31) * 0.12;   // the fine octave curls the edges
                     s *= lerp(1, float3(0.8, 0.84, 0.94), step(0.6, n) * _Clouds);
                 }
-                return half4(SRGBToLinear(s), 1);
+                float3 texel = mul(_WorldFromArt, float4(floor(i.art) + 0.5, 1)).xyz;
+                float sun = min(MainLightRealtimeShadow(TransformWorldToShadowCoord(texel)), 1 - i.sway.z);
+                s *= lerp(_ShadowTint.rgb, 1, sun);
+                if (_Actor > 0.5)
+                {
+                    // Lit along the top edge, where the texel above is clear.
+                    float cols, rows;
+                    _MainTex.GetDimensions(cols, rows);
+                    s = lerp(s, _Rim.rgb, _Rim.a * step(SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv + float2(0, 1 / rows)).a, 0.5));
+                }
+                else
+                    for (int k = 0; k < _FeetCount; k++)
+                    {
+                        float3 d = (texel - _Feet[k].xyz) / _Feet[k].w;
+                        s *= lerp(1, _ShadowTint.rgb, step(dot(d.xz * float2(1, 2.6), d.xz * float2(1, 2.6)), 1) * step(abs(d.y), 0.4) * 0.8);
+                    }
+                float glow = 0;
+                for (int l = 0; l < _LampCount; l++) glow += saturate(1 - distance(texel, _Lamps[l].xyz) / _Lamps[l].w);
+                glow = floor(saturate(glow) * 4) / 4 * _LampTint.a;
+                s = s * (1 + _LampTint.rgb * glow * 0.8) + _LampTint.rgb * glow * 0.04;
+                return half4(SRGBToLinear(saturate(s)), 1);
+            }
+            ENDHLSL
+        }
+
+        // The sun's shadow map, cut out the same way; lights cast none.
+        Pass
+        {
+            Tags { "LightMode" = "ShadowCaster" }
+            ZWrite On
+            ColorMask 0
+
+            HLSLPROGRAM
+            #pragma vertex caster
+            #pragma fragment depth
+
+            float3 _LightDirection;
+
+            Varyings caster(Attributes v)
+            {
+                Varyings o = vert(v);
+                float3 world = TransformObjectToWorld(v.positionOS.xyz) + _LightDirection * _ShadowBias.x;
+                o.positionCS = ApplyShadowClamping(TransformWorldToHClip(world));
+                return o;
+            }
+
+            half depth(Varyings i) : SV_Target
+            {
+                if (_Light > 0.5) discard;
+                Cut(i, Texel(i).a);
+                return 0;
             }
             ENDHLSL
         }

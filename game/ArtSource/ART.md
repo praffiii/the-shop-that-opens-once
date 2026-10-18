@@ -41,7 +41,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
    - Trees 60–120 tall, in several species. Fence 16–18 tall. Lamp post about 40. Tiles: a 16 px ground grid.
 7. **View.** Angled top-down (3/4): ground seen from above, walls facing the viewer, roofs seen from above and in
    front (a big roof over a short wall, as in Harvest Moon and zedpxl's village). Characters are side-facing (right,
-   flipped for left).
+   flipped for left); the courier also faces the camera and turns away from it (`pose_front`, `pose_back`).
 8. **Alive.**
    - Every scene has gentle, continuous motion: water, foliage sway, smoke, critters, flicker, drifting motes.
    - Stepped sprite animation runs at 6–12 fps. Anything moving across the scene snaps to integer pixels each frame.
@@ -79,6 +79,7 @@ scene.draw(ctx, view, actors)
   - `CH.frames(id, pose)` returns the number of frames. `CH.fps(pose)` returns the suggested playback rate.
   - `CH.hand(id, pose, frame)` returns `[dx, dy]`, the offset from the feet to a held item's centre (facing right).
   - `CH.portrait(id, frame = 0, mood = 'neutral')` returns a 48x48 transparent bust canvas.
+- **Turning.** The courier's `idle`, `walk`, `run`, `carry` and `carryWalk` also come as `<pose>_front` (facing the camera) and `<pose>_back` (turned away), drawn round x 20 with the same frames and timing. The game never mirrors them.
 - **Sitting.** For the `sit` pose, the feet anchor is the point on the seat surface where the character sits. Legs dangle below it.
 
 ## Items contract (in interiors.js, `window.IT`)
@@ -92,15 +93,29 @@ scene.draw(ctx, view, actors)
 Bellwood is five small outdoor areas, one per part of town, joined by exits at their edges with a short fade between
 them, as top-down RPGs build a town (decision of 2026-10-18; the one seamless map is retired). Each is about 15 s to
 walk across. The Station (the old station frozen at 10:17, Helen's tea stall on the platform, the train, the forge and
-Bram's carriage) leads west into the Grove (a narrow path between ancient trees to the great banyan, Marlow's door
-hidden in its roots) and east to the Square (the hall on its terrace, the fountain, the bakery, Mia's stalls, the post
+Bram's carriage) leads west into the Grove (a narrow path between ancient trees to Marlow's shop, grown into one of
+them) and east to the Square (the hall on its terrace, the fountain, the bakery, Mia's stalls, the post
 office). The Square leads east to the East (a bridge over the river, the stilt houses with Nora's, the chamomile
 fields, Satria's home and Leo's lookout on the hill) and down the bluff stairs to the Coast (Theo's studio, the beach,
 the salt store, Arlo's home, the jetty and the lighthouse). Forest fills each area's edges as a solid mass with paths
 cut through it; grey rock cliffs step the land between levels. Only ants live here, and the only animals are bugs.
 
-The game draws them in an HD-2D 3D view: the ground follows each area's height map, so cliffs stand up, and buildings,
-trees and characters are upright cards, under a tilted camera with a tilt-shift blur and bloom.
+The camera stays inside an area, but in perspective it sees past the edges, most at the top corners. So `areas.js`
+builds each area on a wider canvas (256 px more left and right, 320 above, 64 below), where the forest goes on and
+the roads and rails that leave run on out of sight; only the area itself is walked. Past the area's edges the forest
+is solid and close up to the way out, its floor in the shade of its crowns, so the land never just ends; ancient trees
+stand either side of each road where it leaves (none on the camera's side), and toward the camera the edge is a dense,
+low hedge. `place.json` keeps the area's own
+coordinates and gives the canvas's corner as `origin`. At each exit a waymark (`VIL.waysign`) points the way with the
+name of the next area, its lantern lit after dark.
+
+The game draws them in an HD-2D 3D view: the ground follows each area's height map, so cliffs stand up; trees, props
+and characters are upright cards; and buildings are being rebuilt as 3D models (`model.js`: walls, roof slopes,
+gables, eave boards and chimneys, each face a picture drawn in code), so far the forge and Marlow's shop. A model
+maker returns `{ model, base, depth, door, cards, smoke }`: cards are sprites that stand in or hang on it
+(`[x, back, up]` in texels), and `areas.js` places it with `placeModel`. The camera looks down 35 degrees, a texel
+back is `MODEL.DEEP` rows up, and the scene has a strong tilt-shift blur and bloom. The camera stands back to show
+about 640x360 art px, so one art px is 3 screen px at 1080p: draw detail that still reads at that size.
 
 The ground is a tile map painted by `VIL.ground` (`village.js`); buildings, trees and props are `VIL` sprites (the
 zone kits `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js`, `village-grove.js` and `village-nature.js`), and
@@ -109,9 +124,12 @@ zone kits `village-west.js`, `village-centre.js`, `village-south.js`, `village-e
 `shadow` and `frames`/`fps`. Window glass is drawn in `sky2`, `sky3` or `white` so it can be relit.
 
 Forest trees are decals under everything, and the ground under their crowns is solid, so the courier never stands
-behind one; a crown that would hang over a path gives way to a bush. Standalone trees (blossoms, birches, willows)
+behind one; a crown that would hang over a path gives way to a bush. Within 120 px of an area's bottom edge, the
+side nearest the camera, the forest is only things under 48 px tall, so it frames the view without hiding it. Standalone trees (blossoms, birches, willows)
 are items and sort with the courier.
 
-Marlow's shop is the root gap of the great banyan at the end of the grove path. Seven lanterns hang in its branches, and one goes out for each night resolved.
+Marlow's shop is an old shopfront at the end of the grove path, grown into the ancient tree behind it: roots over its
+roof and down its corners, ivy, moss and ferns. Seven lanterns hang from its front verges, and one goes out for each
+night resolved; by day its door is closed with a CLOSED card.
 
 Behind the scissors sign on Nora's house in the East is her toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.

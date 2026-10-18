@@ -1,18 +1,14 @@
 'use strict';
-/* The banyan grove in the village kit: the hidden way to Marlow's shop. A narrow path winds between ancient trees
-   whose roots tangle over the ground, through ferns, moss and fallen logs, to the great banyan. Its small wooden
-   door sits back in the gap between two of its roots: easy to walk past, plain once you see it.
+/* The grove in the village kit: the hidden way to Marlow's shop (village-west.js). A narrow path winds between
+   ancient trees whose roots tangle over the ground, through ferns, moss and fallen logs.
    Every maker returns the VIL sprite contract ({ img, ax, ay } with the feet at ax, ay); rows below the feet are what
    lies on the ground in front (roots), which the game lays flat. */
 (() => {
   const V = VIL, { fill, px, disc, inked, foliage, LEAF } = V, { hash } = KIT, P = PX.PAL;
-  const BARK = ['#ad937c', '#876c5d', '#654d45', '#46343a'];   // the banyan's, as the West's
   const OLD = ['#a59a88', '#7c7266', '#595049', '#3a3236'];    // ancient grey-brown bark
-  const MOSS = LEAF.deep, FERN = LEAF.green, HOLLOW = '#1d1420';
+  const MOSS = LEAF.deep, FERN = LEAF.green;
   const inEllipse = (cx, cy, rx, ry) => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
   const anyOf = fs => (x, y) => fs.some(f => f(x, y));
-  const archIn = (w, j) => { const r = w / 2, d = r - j - 0.5; return d > 0 ? Math.round(r - Math.sqrt(Math.max(0, r * r - d * d))) : 0; };
-  function arch(b, x, y, w, h, c) { for (let j = 0; j < h; j++) { const i = archIn(w, j); fill(b, x + i, y + j, w - 2 * i, 1, c); } }
 
   /* A root along pts ([x, y] in order away from the trunk), thinning from w0 to w1. Seen from above at a slant: its
      rounded back lit, its near side a dark band, so it reads as lying on the ground and humping over it. */
@@ -96,96 +92,6 @@
     return { img: out.canvas(), ax: cx + 1, ay: feet + 1, base: [-Math.round(tw / 2) - 2, Math.round(tw / 2) + 2], foot: 10, shadow: [Math.round(r * 0.95), Math.round(r * 0.3)] };
   }
 
-  /* The great banyan. A wide, low crown on heavy limbs, aerial roots hanging from them and thickened into pillars, a
-     trunk of braided root strands that splays into buttresses. Between the two middle buttresses is a narrow gap,
-     and set back in it, under a root that arches over, Marlow's small wooden door, half behind a curtain of hanging
-     roots and ferns. door: 0 (the gap is at the feet's x); lanterns: the hooks of the seven story lanterns; lit: the
-     door's little window and the glowing mushrooms. */
-  function hiddenBanyan() {
-    const W = 300, H = 252, cx = 150, feet = 226, seed = 31, lit = [], hooks = [];
-    const limbY = x => { const u = Math.abs(x - cx) / 128; return Math.round(118 - u ** 1.5 * 14 + Math.sin(u * 8 + (x > cx ? 1 : 0)) * 3); };
-    const limbT = x => Math.max(3, Math.round(12 - Math.abs((x - cx) / 128) * 8));
-    const out = inked(W, H, b => {
-      // prop roots: hanging roots that reached the ground and grew into pillars
-      for (const [h, w] of [[-120, 5], [-92, 4], [-70, 3], [72, 3], [95, 4], [122, 5]]) for (let y = limbY(cx + h); y < feet - 4; y++) {
-        const x = cx + h + Math.round(Math.sin(y / 15 + h) * 1.4), fl = y > feet - 12 ? (y - (feet - 12)) >> 1 : 0;
-        fill(b, x - fl, y, w + 2 * fl, 1, BARK[1]); px(b, x - fl, y, BARK[0]); px(b, x + w - 1 + fl, y, BARK[3]); if (w > 3) px(b, x + w - 2 + fl, y, BARK[2]);
-      }
-      // the limbs
-      for (let x = cx - 130; x <= cx + 130; x++) {
-        const y = limbY(x), t = limbT(x), y0 = y - (t >> 1);
-        fill(b, x, y0, 1, t, BARK[1]); px(b, x, y0, BARK[0]); px(b, x, y0 + t - 1, BARK[3]); if (t > 4) px(b, x, y0 + t - 2, BARK[2]);
-      }
-      // roots running out over the ground, behind and beside the trunk
-      const spread = [[-1, 0.9, 70, 14], [1, 0.95, 74, 14], [-1, 1.35, 58, 12], [1, 1.3, 62, 12], [-1, 1.75, 44, 10], [1, 1.7, 46, 10]];
-      spread.forEach(([s, ang, reach, w], k) => {
-        const x0 = cx + s * 40, y0 = feet - 8, pts = [[x0, y0]];
-        for (let i = 1; i <= 5; i++) { const t = i / 5; pts.push([x0 + s * Math.sin(ang) * reach * t * 1.2 + Math.sin(i * 1.7 + k) * 3, y0 + Math.cos(ang) * reach * t * 0.42 + (hash(k, i, seed) - 0.5) * 3]); }
-        root(b, pts, w, 2, BARK, seed + k);
-      });
-      // the trunk: braided strands, outer ones first, splaying into buttresses at the foot
-      const strands = [];
-      for (let k = -7; k <= 7; k++) strands.push([k, 7 + ((hash(k, 5, seed) * 3) | 0), hash(k, 6, seed) * 6, hash(k, 8, seed) < 0.35]);
-      strands.sort((p, q) => Math.abs(q[0]) - Math.abs(p[0]));
-      for (const [k, sw0, ph, pale] of strands) for (let y = 96; y < feet; y++) {
-        const d = Math.max(0, y - (feet - 52)), sw = sw0 + (d > 30 ? (d - 30) >> 2 : 0);
-        const x0 = Math.round(cx + k * 6.6 - sw / 2 + Math.sign(k) * d * d * 0.004 * Math.abs(k) ** 0.8 + Math.sin(y / 11 + ph) * 2);
-        const body = k > 2 ? BARK[2] : pale && k < 2 ? BARK[0] : BARK[1], lip = k > 2 ? BARK[1] : BARK[0];
-        for (let s = 0; s < sw; s++) px(b, x0 + s, y, s === sw - 1 ? BARK[3] : s === sw - 2 ? BARK[2] : s < 2 && k <= 2 ? lip : body);
-        if ((y + k * 7) % 13 === 0) { px(b, x0 + 2, y, BARK[2]); px(b, x0 + 3, y + 1, BARK[2]); }
-      }
-      // the crown's shade on the top of the trunk
-      const dim = new Map(BARK.slice(0, 3).map((c, i) => [KIT.u32(c), KIT.u32(BARK[i + 1])]));
-      for (let y = 96; y < 118; y++) for (let x = cx - 70; x < cx + 70; x++) if (y < 104 + ((hash(x >> 2, 0, seed) * 10) | 0)) { const v = dim.get(b.get(x, y)); if (v) b.set(x, y, v); }
-
-      // the gap between the middle buttresses: deep shadow, the door set back in it
-      const gw = 30, gh = 46, gx = cx - gw / 2, gy = feet - gh;
-      arch(b, gx - 3, gy - 3, gw + 6, gh + 3, BARK[3]); arch(b, gx - 1, gy - 1, gw + 2, gh + 1, P.ink2); arch(b, gx + 1, gy + 1, gw - 2, gh - 1, HOLLOW);
-      const dw = 16, dh = 25, dx = cx - dw / 2, dy = feet - 1 - dh;
-      arch(b, dx - 2, dy - 2, dw + 4, dh + 2, 'wood4');
-      arch(b, dx, dy, dw, dh, 'wood2');
-      for (let x = dx + 4; x < dx + dw - 2; x += 4) for (let j = 2; j < dh; j++) if (archIn(dw, j) < Math.min(x - dx, dx + dw - 1 - x)) px(b, x, dy + j, 'wood3');
-      for (let j = 0; j < dh; j++) { const i = archIn(dw, j); px(b, dx + i, dy + j, 'wood1'); px(b, dx + dw - 1 - i, dy + j, 'wood4'); }
-      fill(b, dx + 1, dy + 9, dw - 2, 1, 'wood4'); fill(b, dx + 1, dy + dh - 6, dw - 2, 1, 'wood4');
-      // a little round window and a ring knocker
-      disc(b, cx, dy + 5, 2, 2, 'wood4'); disc(b, cx, dy + 5, 1, 1, 'light2'); px(b, cx, dy + 5, 'light1'); lit.push([cx - 1, dy + 4, 3, 3]);
-      px(b, dx + dw - 4, dy + 14, 'brass1'); px(b, dx + dw - 5, dy + 15, 'brass2'); px(b, dx + dw - 3, dy + 15, 'brass3'); px(b, dx + dw - 4, dy + 16, 'brass3');
-      // a worn step of root in front of it
-      fill(b, dx - 3, feet - 2, dw + 6, 2, BARK[1]); fill(b, dx - 3, feet - 2, dw + 6, 1, BARK[0]);
-      // the buttresses either side bulge over the gap's edges, and a root arches over its top
-      for (const s of [-1, 1]) root(b, [[cx + s * 32, gy + 2], [cx + s * 21, gy + 16], [cx + s * 16, gy + 32], [cx + s * 17, feet - 4], [cx + s * 26, feet + 8], [cx + s * 40, feet + 18], [cx + s * 54, feet + 22]], 17, 6, BARK, seed + 20 + s);
-      root(b, [[cx - 26, gy + 2], [cx - 10, gy - 6], [cx + 6, gy - 7], [cx + 24, gy + 1]], 9, 8, BARK, seed + 30);
-      // hanging roots before the left half of the gap, a curtain to part
-      for (let i = 0; i < 12; i++) {
-        const x = gx + 1 + i + (i > 7 ? i - 7 : 0), len = 20 + ((hash(i, 9, seed) * 22) | 0);
-        for (let j = 0; j < len; j++) px(b, x + (j % 9 > 6 ? 1 : 0), gy - 4 + j, j > len - 3 ? 'dirt2' : i % 3 === 0 ? BARK[0] : BARK[2]);
-      }
-      // moss on the roots and the buttresses
-      for (const [x, y, w] of [[cx - 50, feet - 30, 10], [cx + 38, feet - 24, 12], [cx - 30, gy + 2, 8], [cx + 20, gy - 2, 8], [cx - 82, feet + 2, 12], [cx + 70, feet + 4, 10], [cx - 36, feet + 6, 7]]) moss(b, x, y, w, seed + x);
-      // ferns tucked at the gap's feet, partly over it
-      for (const [x, y, s] of [[cx - 22, feet + 4, -1], [cx + 24, feet + 5, 1], [cx - 64, feet + 14, 0], [cx + 62, feet + 16, 0]]) fernAt(b, x, y, 13, s, seed + x);
-      // glowing mushrooms among the roots
-      for (const [x, y] of [[cx - 44, feet + 10], [cx - 58, feet + 4], [cx + 40, feet + 12], [cx + 56, feet + 2], [cx - 20, feet - 34], [cx + 64, feet - 18]]) {
-        fill(b, x, y, 1, 2, 'cream1'); fill(b, x - 1, y - 1, 3, 1, 'sky2'); px(b, x, y - 2, 'sky1');
-        lit.push([x - 1, y - 2, 3, 2]);
-      }
-      // the crown: a dark fringe underneath, then great lobes of clumps
-      foliage(b, inEllipse(cx, 92, 130, 12), [cx - 130, 80, cx + 130, 104], LEAF.teal, seed + 1, { tone: () => 1.6 });
-      const lobes = [[0, 24, 50, 22], [-48, 32, 54, 26], [50, 30, 52, 26], [-100, 56, 38, 24], [102, 54, 38, 24], [-62, 64, 48, 26], [64, 62, 48, 26], [0, 60, 56, 28], [-118, 82, 26, 14], [118, 80, 26, 14], [-36, 88, 44, 16], [38, 88, 44, 16]];
-      lobes.forEach(([h, y, rx, ry], i) => foliage(b, inEllipse(cx + h, y, rx, ry), [cx + h - rx, y - ry, cx + h + rx, y + ry], LEAF.deep, seed + i * 7, { cw: 11, ch: 8, dx: 8, dy: 5, tone: (_, my) => 0.9 + (my - 56) / 60 }));
-      // aerial roots: frayed bundles hanging from the limbs and the crown's edge
-      for (const [h, n] of [[-128, 2], [-106, 3], [-80, 3], [-52, 2], [52, 2], [82, 3], [106, 3], [128, 2]]) for (let i = 0; i < n; i++) {
-        const x = cx + h + i, len = 14 + ((hash(h, i, seed) * (Math.abs(h) > 70 ? 46 : 28)) | 0);
-        let y = 78; while (y < 140 && b.get(x, y + 1)) y++;
-        for (let j = 1; j <= len; j++) px(b, x, y + j, j > len - 2 ? 'dirt2' : i === 0 ? BARK[1] : BARK[2]);
-      }
-      // lantern hooks: a knot under each limb, three a side, and one on the root over the gap
-      for (const h of [-112, -84, -56, 56, 84, 112]) { const x = cx + h, y = limbY(x) - (limbT(x) >> 1) + limbT(x); px(b, x, y, BARK[3]); hooks.push([x + 1, y + 2]); }
-      hooks.splice(3, 0, [cx + 1, gy - 6]);
-    });
-    return { img: out.canvas(), ax: cx + 1, ay: feet + 1, base: [-46, 46], foot: 14, door: 0, lit: lit.map(([x, y, w, h]) => [x + 1, y + 1, w, h]), lanterns: hooks, shadow: [120, 26] };
-  }
-
   // A fern: fronds arching out from (x, y) to one side (s) or both (0), lit tips.
   function fernAt(b, x, y, n, s, seed) {
     for (let k = 0; k < n; k++) {
@@ -223,5 +129,5 @@
     return { img: out.canvas(), ax: 12, ay: 14, foot: 4, shadow: [10, 3] };
   }
 
-  Object.assign(VIL, { grandTree, hiddenBanyan, fern, log, mossRock });
+  Object.assign(VIL, { grandTree, fern, log, mossRock, root, OLD });
 })();

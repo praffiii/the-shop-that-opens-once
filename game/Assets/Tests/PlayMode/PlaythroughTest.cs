@@ -18,11 +18,12 @@ namespace Shop.Tests
         public IEnumerator SystemsTestPlaysThrough()
         {
             var saved = Game.SavedChapter();
-            Main.Auto = true;
-            Time.timeScale = 8f;
-            var main = new GameObject("Main").AddComponent<Main>();
+            Main main = null;
             try
             {
+                Main.Auto = true;
+                Time.timeScale = 8f;
+                main = new GameObject("Main").AddComponent<Main>();
                 var play = Play(main);
                 var end = Time.realtimeSinceStartup + TimeLimit;
                 while (!play.IsCompleted)
@@ -34,7 +35,7 @@ namespace Shop.Tests
             }
             finally
             {
-                UnityEngine.Object.Destroy(main.gameObject);
+                if (main) UnityEngine.Object.Destroy(main.gameObject);
                 Time.timeScale = 1f;
                 Main.Auto = false;
                 if (saved < 0) Game.DeleteSave();

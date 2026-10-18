@@ -7,7 +7,9 @@ namespace Shop
 {
     /// <summary>
     /// An ant drawn from its exported sheet (Art/chars/&lt;id&gt;). <see cref="Feet"/> is where it stands, in art pixels.
-    /// Plays a pose, faces left or right, can hold a small item, and walks through a list of points.
+    /// Plays a pose, faces left or right, can hold a small item, and walks through a list of points. Walking mostly up or
+    /// down the screen it turns away from the camera or toward it, where its sheet has that view of the pose (pose_back,
+    /// pose_front).
     /// </summary>
     public sealed class Ant : MonoBehaviour
     {
@@ -16,7 +18,11 @@ namespace Shop
         static readonly string[] Walks = { "walk", "carryWalk", "run" }; // poses whose frames advance with distance, not time
         /// <summary>How far toward the camera (art px) an ant stands from its feet line, and its hand from its body.</summary>
         const float Nudge = 0.3f;
+        const int Tall = 30; // art px, cap included
         static JObject cast;
+        // Which way it is turned: across the screen (Facing says which side), toward the camera or away from it.
+        enum Heading { Side, Front, Back }
+        static readonly string[] Views = { "", "_front", "_back" };
 
         /// <summary>A foot touched the ground while walking.</summary>
         public event Action Stepped;
@@ -28,6 +34,7 @@ namespace Shop
         Texture2D sheet;
         string pose = "idle";
         int facing = 1;
+        Heading heading;
         Sprite held;
         float time, step;
         int frame;
@@ -69,6 +76,8 @@ namespace Shop
             var sr = new GameObject(name).AddComponent<SpriteRenderer>();
             sr.transform.SetParent(parent, false);
             sr.sharedMaterial = Art.SpriteMaterial;
+            sr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            sr.receiveShadows = true;
             return sr;
         }
 
@@ -157,7 +166,12 @@ namespace Shop
         /// <summary>Steps by <paramref name="motion"/> (keyboard walking): faces the way it goes and moves the legs by distance.</summary>
         public void MoveBy(Vector2 motion)
         {
-            if (Mathf.Abs(motion.x) > 0.01f) Facing = motion.x > 0 ? 1 : -1;
+            if (Mathf.Abs(motion.y) > Mathf.Abs(motion.x)) Turn(motion.y > 0 ? Heading.Front : Heading.Back);
+            else if (Mathf.Abs(motion.x) > 0.01f)
+            {
+                heading = Heading.Side;
+                Facing = motion.x > 0 ? 1 : -1;
+            }
             var to = Here() + motion;
             Feet = to;
             exact = to;
@@ -176,7 +190,16 @@ namespace Shop
 
         public void FaceTo(float x)
         {
+            heading = Heading.Side;
             if (Mathf.Abs(x - feet.x) > 1f) Facing = x > feet.x ? 1 : -1;
+            else Refresh();
+        }
+
+        void Turn(Heading to)
+        {
+            if (to == heading) return;
+            heading = to;
+            Refresh();
         }
 
         void Update()
@@ -209,7 +232,9 @@ namespace Shop
         // Where it really is: its exact walking position, unless something has moved it since.
         Vector2 Here() => new Vector2(Mathf.Round(exact.x), Mathf.Round(exact.y)) == feet ? exact : feet;
 
-        JToken Current() => info["poses"][pose] ?? info["poses"]["idle"];
+        // The pose's frames as it is turned, if its sheet has that view; else the side view, which faces and flips.
+        JToken Turned() => heading == Heading.Side ? null : info["poses"][pose + Views[(int)heading]];
+        JToken Current() => Turned() ?? info["poses"][pose] ?? info["poses"]["idle"];
 
         void Show(int f)
         {
@@ -219,13 +244,16 @@ namespace Shop
             var feetAt = Art.Point(Cast["feet"]);
             int w = (int)cell.x, h = (int)cell.y;
             body.sprite = Art.Sprite(sheet, new RectInt(frame * w, (int)p["row"] * h, w, h), Vector2Int.RoundToInt(feetAt));
-            body.flipX = facing < 0;
-            // Flipping mirrors around the feet pixel's left edge; one pixel over keeps the feet on the same column.
-            body.transform.localPosition = new Vector3(facing < 0 ? 1 : 0, 0);
+            var side = Turned() == null ? facing : 1;
+            // Mirrored by its scale, as the shader takes no sprite flip. That mirrors around the feet pixel's left
+            // edge; one pixel over keeps the feet on the same column.
+            body.transform.localScale = new Vector3(side, 1, 1);
+            body.transform.localPosition = new Vector3(side < 0 ? 1 : 0, 0);
             var handAt = Art.Point(p["hand"][frame]);
-            hand.enabled = held != null;
+            // turned away, what it holds is in front of it, out of sight
+            hand.enabled = held != null && !(heading == Heading.Back && Turned() != null);
             hand.sprite = held;
-            hand.transform.localPosition = Art.Card(new Vector2(handAt.x * facing, handAt.y)) + Vector3.back * Nudge;
+            hand.transform.localPosition = Art.Card(new Vector2(handAt.x * side, handAt.y)) + Vector3.back * Nudge;
             Place();
         }
 
@@ -233,7 +261,7 @@ namespace Shop
         void Place()
         {
             var world = transform.parent ? transform.parent.GetComponent<BakedArt>() : null;
-            transform.localPosition = Art.World(feet, (world ? world.Relief.Under(feet) : 0) + Nudge);
+            transform.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + Nudge);
         }
 
         void Refresh()

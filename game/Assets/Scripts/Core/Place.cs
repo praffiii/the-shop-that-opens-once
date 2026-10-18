@@ -14,10 +14,15 @@ namespace Shop
         public const float Reach = 20f;
         /// <summary>
         /// A place is built in art px and shown at this scale: 64 px to a unit, so the camera stands a few units away
-        /// and its lens blurs what is nearer and farther as a miniature's would; heights and depths stretched by the
-        /// square root of 2, so the 45 degree camera (Main) shows art pixels square.
+        /// and its lens blurs what is nearer and farther as a miniature's would; heights stretched by 1 / cos and depths
+        /// by 1 / sin of the camera's tilt (<see cref="Art.Pitch"/>), so it shows art pixels square, on the ground and
+        /// up a wall alike.
         /// </summary>
-        public static readonly Vector3 Scale = new Vector3(1, Mathf.Sqrt(2), Mathf.Sqrt(2)) / 64;
+        public static readonly Vector3 Scale = new Vector3(1, 1 / Mathf.Cos(Art.Pitch * Mathf.Deg2Rad), 1 / Mathf.Sin(Art.Pitch * Mathf.Deg2Rad)) / 64;
+
+        /// <summary>The half width of the dark spot each ant casts on what it stands on, in world units (art px times scale).</summary>
+        static readonly float SpotWidth = 7 * Scale.x;
+        static readonly int FeetId = Shader.PropertyToID("_Feet"), FeetCountId = Shader.PropertyToID("_FeetCount");
 
         public event Action<Hotspot> Used;
 
@@ -32,6 +37,7 @@ namespace Shop
 
         readonly List<Hotspot> hotspots = new();
         readonly Dictionary<string, Ant> people = new();
+        readonly Vector4[] spots = new Vector4[8];
         bool controls, keys;
 
         /// <summary>Off while a talk, the bag or a transition has the screen.</summary>
@@ -54,6 +60,7 @@ namespace Shop
             Grade.Apply(Game.Phase, def.Indoors);
             place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform);
             Shader.SetGlobalMatrix("_ArtFromWorld", place.World.transform.worldToLocalMatrix);
+            Shader.SetGlobalMatrix("_WorldFromArt", place.World.transform.localToWorldMatrix);
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {
@@ -70,6 +77,27 @@ namespace Shop
                     place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo });
             place.FollowStory();
             return place;
+        }
+
+        // The lights nearest the courier, and the spots under the courier and whoever else is shown, for Pixel.shader.
+        void LateUpdate()
+        {
+            var n = 0;
+            if (Player)
+            {
+                World.LightNear(Player.transform.position);
+                spots[n++] = Spot(Player);
+            }
+            foreach (var ant in people.Values)
+                if (n < spots.Length && ant.gameObject.activeInHierarchy) spots[n++] = Spot(ant);
+            Shader.SetGlobalVectorArray(FeetId, spots);
+            Shader.SetGlobalFloat(FeetCountId, n);
+        }
+
+        static Vector4 Spot(Ant ant)
+        {
+            var at = ant.transform.position;
+            return new Vector4(at.x, at.y, at.z, SpotWidth);
         }
 
         static bool Here(int[] chapters) => chapters == null || Array.IndexOf(chapters, Game.Chapter) >= 0;

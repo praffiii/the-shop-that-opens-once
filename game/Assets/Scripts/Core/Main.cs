@@ -11,21 +11,28 @@ namespace Shop
     /// Runs the game: the title, the current chapter's story, moving between places, and the screen UI.
     /// While any story step runs, the courier can't move; the controls come back when all are done.
     ///
-    /// The world is drawn in 3D at the window's full resolution, through a camera tilted 45 degrees down (as the art is
-    /// drawn) in a narrow perspective, with depth of field, bloom and a vignette: the HD-2D look. The UI is drawn into
+    /// The world is drawn in 3D at the window's full resolution, through a camera tilted down (<see cref="Art.Pitch"/>)
+    /// in a gentle perspective, with depth of field, bloom and a vignette: the HD-2D look. The UI is drawn into
     /// a small screen canvas, at least <see cref="Base"/>, then scaled up over the world by the largest whole number
     /// that fits the window, so its pixels stay square and crisp.
     /// </summary>
     public sealed class Main : MonoBehaviour
     {
-        /// <summary>Each world pixel covers this many screen-canvas pixels (at the camera's focus); the UI keeps the finer ones.</summary>
+        /// <summary>Art drawn over the screen (the title, prompts) shows each of its pixels this many screen-canvas pixels.</summary>
         public const int Zoom = 2;
-        /// <summary>The view camera: its tilt down and its vertical field of view, in degrees.</summary>
-        const float Pitch = 45f, Fov = 20f;
-        /// <summary>The depth of field: a long lens, wide open, keeps the courier's ground sharp and softens what is nearer and farther.</summary>
-        const float FocalLength = 300f, Aperture = 4f;
+        /// <summary>
+        /// Each world pixel covers this many screen-canvas pixels at the camera's focus: the camera stands back, as
+        /// Octopath's does, so the courier is small in a wide view of the place.
+        /// </summary>
+        const int WorldZoom = 1;
+        /// <summary>How far past a place's edge (art px) the camera may look, so the courier is never pinned to the screen's edge; there the forest goes on.</summary>
+        const float Overscan = 96f;
+        /// <summary>The view camera's vertical field of view, in degrees; it looks down at <see cref="Art.Pitch"/>.</summary>
+        const float Fov = 42f;
+        /// <summary>The depth of field (blur grows as 1 / distance², so the aperture follows the camera's distance): a long lens keeps a band round the courier sharp and blurs what is nearer and farther, like a miniature.</summary>
+        const float FocalLength = 150f, Aperture = 3.2f;
         const int UiLayer = 5;
-        /// <summary>The least canvas the screen shows (the world is Base / Zoom).</summary>
+        /// <summary>The least canvas the screen shows (the world is Base / WorldZoom).</summary>
         static readonly Vector2 Base = new(640, 360);
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
         const float Glide = 220f;
@@ -191,9 +198,14 @@ namespace Shop
             return c;
         }
 
-        // The HD-2D look over the view: depth of field (its focus follows the camera), bloom on the lights, a soft vignette.
+        // The HD-2D look over the view: the sun and its shadows, a strong depth of field (its focus follows the camera),
+        // bloom on the lights, a dark vignette.
         DepthOfField Effects()
         {
+            var sun = RenderSettings.sun = new GameObject("Sun").AddComponent<Light>();
+            sun.transform.SetParent(transform, false);
+            sun.type = LightType.Directional;
+            sun.shadows = LightShadows.Hard;
             var volume = new GameObject("Effects").AddComponent<Volume>();
             volume.transform.SetParent(transform, false);
             volume.isGlobal = true;
@@ -208,8 +220,8 @@ namespace Shop
             bloom.intensity.Override(0.9f);
             bloom.scatter.Override(0.75f);
             var vignette = profile.Add<Vignette>();
-            vignette.intensity.Override(0.22f);
-            vignette.smoothness.Override(0.6f);
+            vignette.intensity.Override(0.38f);
+            vignette.smoothness.Override(0.5f);
             return dof;
         }
 
@@ -450,11 +462,12 @@ namespace Shop
         }
 
         // Follows the courier softly, a little ahead of where it walks (or looks where it was asked, or at the title
-        // view), kept inside the place. A place smaller than the screen is centred. The view camera looks down at 45
-        // degrees at that point on the ground, from as far as shows Zoom canvas px per art px there, and focuses on it.
+        // view), kept inside the place but for a look past its edges (Overscan). A place smaller than the screen is
+        // centred. The view camera looks down (Art.Pitch) at that point on the ground, from as far as shows WorldZoom
+        // canvas px per art px there, and focuses on it.
         void FrameCamera(float delta)
         {
-            var view = Size / Zoom;
+            var view = Size / WorldZoom;
             var size = (Vector2)Place.World.Size;
             var following = look == null && Place.Player;
             var target = look ?? (Place.Player ? courier.Feet : TitleView);
@@ -471,7 +484,7 @@ namespace Shop
             for (var axis = 0; axis < 2; axis++)
                 c[axis] = size[axis] <= view[axis]
                     ? Mathf.Round(size[axis] / 2)
-                    : Mathf.Clamp(c[axis], Mathf.Round(view[axis] / 2), size[axis] - Mathf.Round(view[axis] / 2));
+                    : Mathf.Clamp(c[axis], Mathf.Round(view[axis] / 2 - Overscan), size[axis] - Mathf.Round(view[axis] / 2 - Overscan));
             if (gliding)
             {
                 cam = Vector2.MoveTowards(cam, c, Glide * delta);
@@ -490,8 +503,8 @@ namespace Shop
                 camVelocity = lead = Vector2.zero;
                 camClimb = 0f;
             }
-            var turn = Quaternion.Euler(Pitch, 0, 0);
-            var distance = Screen.height / (2f * factor * Zoom) * Place.Scale.x / Mathf.Tan(Fov * Mathf.Deg2Rad / 2);
+            var turn = Quaternion.Euler(Art.Pitch, 0, 0);
+            var distance = Screen.height / (2f * factor * WorldZoom) * Place.Scale.x / Mathf.Tan(Fov * Mathf.Deg2Rad / 2);
             var at = Place.transform.TransformPoint(Art.World(cam, camHeight));
             View.transform.SetPositionAndRotation(at - turn * Vector3.forward * distance, turn);
             focus.focusDistance.Override(distance);

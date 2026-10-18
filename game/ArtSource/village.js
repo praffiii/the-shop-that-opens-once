@@ -205,6 +205,12 @@
         st.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') b.set(x + i, y + j, row[i] === '0' ? DI[0] : row[i] === '3' ? DI[3] : DI[4]); });
       }
     }
+    // Grit: fine darker specks over the paths and darker blades through the grass, so wide ground reads as a surface.
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const c = b.get(x, y), n = vnoise(x / 3, y / 2, seed + 50);
+      if ((c === DI[1] || c === DI[2]) && n > 0.78) b.set(x, y, c === DI[1] ? DI[2] : DI[3]);
+      else if ((c === GR[2] || c === GRP) && n > 0.82) b.set(x, y, GR[3]);
+    }
     // Contact shadow along the foot of a face.
     for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
@@ -506,6 +512,25 @@
     });
     return { img: out.canvas(), ax: 14, ay: 31, shadow: [6, 2] };
   }
+  /* A waymark where a road leaves an area: an arrow board on a post naming where it leads (dir 1 points right, -1
+     left, 0 on ahead), a lantern hanging from the board's tail that glows at night (lit: its glass). */
+  function waysign(label, dir = 1) {
+    const tw = PX.textWidth(label) + (dir ? 0 : 6), bw = tw + 10 + (dir ? 5 : 0), W = bw + 2, H = 36, cx = W >> 1;
+    const tail = dir < 0 ? bw - 6 : 2;
+    const out = inked(W, H, b => {
+      fill(b, cx - 2, 12, 4, H - 12, 'wood3'); fill(b, cx - 2, 12, 1, H - 12, 'wood1'); fill(b, cx + 1, 12, 1, H - 12, 'wood4'); fill(b, cx - 4, H - 3, 8, 3, 'wood4');
+      for (let y = 0; y < 11; y++) {
+        const cut = dir ? 5 - Math.min(5, Math.min(y, 10 - y)) : 0, l = 1 + (dir < 0 ? cut : 0), r = 1 + bw - (dir > 0 ? cut : 0);
+        fill(b, l, 1 + y, r - l, 1, y === 0 ? 'wood1' : y === 10 ? 'wood4' : 'wood2');
+      }
+      const g = { fillStyle: '', fillRect(x0, y0, w, h) { fill(b, x0, y0, w, h, this.fillStyle); } }, tx = 1 + (dir < 0 ? 9 : 5);
+      if (!dir) { px(b, tx + 1, 4, 'wood5'); fill(b, tx, 5, 3, 1, 'wood5'); fill(b, tx - 1, 6, 5, 1, 'wood5'); }
+      PX.text(g, label, tx + (dir ? 0 : 6), 4, 'wood5');
+      // the lantern on its hook under the board
+      fill(b, tail + 2, 12, 1, 2, 'iron3'); fill(b, tail, 14, 5, 7, 'iron3'); fill(b, tail + 1, 15, 3, 5, 'sky3'); px(b, tail + 1, 15, 'white'); fill(b, tail, 21, 5, 1, 'iron4');
+    });
+    return { img: out.canvas(), ax: cx + 1, ay: H + 1, lit: [[tail + 2, 16, 3, 5]], shadow: [6, 2] };
+  }
   function hay() {
     const out = inked(22, 18, b => {
       disc(b, 11, 10, 10, 8, '#e8b93a'); disc(b, 10, 8, 8, 6, '#ffd860'); disc(b, 8, 6, 4, 3, '#fff0a0');
@@ -542,5 +567,5 @@
     return { deck: deck.canvas(), rail: rail().canvas() };
   }
 
-  window.VIL = { T, C, col, rgb, shade, FACE, BANK, ground, shadows, inked, fill, px, disc, LEAF, foliage, tree, pine, bush, house, fence, lampPost, well, barrel, crate, rock, stump, signpost, hay, flowers, tuft, bridge };
+  window.VIL = { T, C, col, rgb, shade, FACE, BANK, ground, shadows, inked, fill, px, disc, LEAF, foliage, tree, pine, bush, house, fence, lampPost, well, barrel, crate, rock, stump, signpost, waysign, hay, flowers, tuft, bridge };
 })();

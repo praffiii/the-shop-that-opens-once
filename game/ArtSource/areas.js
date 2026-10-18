@@ -14,7 +14,7 @@
      what grows instead, smallest last, where that tree's crown would hide open ground,
      things(at): places sprites with at(name, sprite, x, y, item fields),
      jetty: [x, y, length] a walkable deck out over the sea, fields: [x, y] chamomile rows behind a fence,
-     after(S, things), dress(S, G): adds to it and paints and scatters what lies on its ground, anchors: { name: [x, y] },
+     dress(S, G): paints and scatters what lies on its ground, anchors: { name: [x, y] },
      glow: [[cx, cy, rx, ry]] where fireflies fly at night, dragonflies: [[x, y]] where they hover by day }. */
 (() => {
   const V = VIL, T = V.T;
@@ -22,7 +22,8 @@
   /* ---------- rasterising onto tiles ---------- */
   const near = (pts, hw, x, y) => KIT.lineDist(x, y, pts)[0] <= hw;
   const inEll = ([cx, cy, rx, ry], x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
-  function layout(def, lanes, clearings) {
+  const EDGE = 8; // art px: how far the forest keeps back from a road or the track past an area's edge, a wall either side
+  function layout(def, lanes, clearings, inArea) {
     const TW = def.w / T, TH = def.h / T, roads = [...def.roads, ...lanes], clear = [...(def.clear || []), ...clearings], rails = def.rails || [];
     const mat = Array.from({ length: TH }, () => new Array(TW).fill('g')), lev = Array.from({ length: TH }, () => new Array(TW).fill(0));
     const each = f => { for (let ty = 0; ty < TH; ty++) for (let tx = 0; tx < TW; tx++) f(tx, ty, tx * T + T / 2, ty * T + T / 2); };
@@ -32,9 +33,11 @@
       if (w) mat[ty][tx] = w;
       else if (def.sand && def.sand(x, y)) mat[ty][tx] = 's';
     });
-    // Forest wherever nothing else is: away from the clearings, the roads and the track.
+    // Forest wherever nothing else is: away from the clearings, the roads and the track, and close up to the way out
+    // past the edges, so the land round an area is all forest.
     each((tx, ty, x, y) => {
-      if (mat[ty][tx] !== 'g' || clear.some(c => inEll(c, x, y)) || roads.some(([pts, hw]) => near(pts, hw + def.gap, x, y)) || rails.some(pts => near(pts, 20 + def.gap, x, y))) return;
+      const gap = inArea(x, y) ? def.gap : EDGE;
+      if (mat[ty][tx] !== 'g' || clear.some(c => inEll(c, x, y)) || roads.some(([pts, hw]) => near(pts, hw + gap, x, y)) || rails.some(pts => near(pts, 20 + gap, x, y))) return;
       mat[ty][tx] = 'f';
     });
     for (const [pts, hw] of roads) each((tx, ty, x, y) => { if (near(pts, hw, x, y) && mat[ty][tx] !== '_') mat[ty][tx] = mat[ty][tx] === '~' ? '=' : 'd'; });
@@ -67,7 +70,10 @@
   });
   /* Trees fill the forest, as decals: the ground under each crown is solid, so the player walks up to the forest and
      in front of its trees, never behind them. A crown that would hang over open ground (a path, a clearing) gives way
-     to a bush, so what is open stays in sight. Every tree sways a little in the wind. */
+     to a bush, so what is open stays in sight; past the edges crowns arch over the way out, as no one walks there.
+     The floor under the crowns lies in their shade. Every tree sways a little in the wind. */
+  const NEAR = 120, LOW = 48; // art px: how far in from an area's camera side its forest stays low, and how tall low is
+  const SHADE = 0.6; // how much light reaches the floor under the crowns
   function forest(S, G, species, under = P => P.bush) {
     const W = S.w, H = S.h, alpha = new Map(), A = s => alpha.get(s) || alpha.set(s, s.img.getContext('2d').getImageData(0, 0, s.img.width, s.img.height).data).get(s);
     const crown = (s, x, y, f) => {
@@ -75,19 +81,29 @@
       for (let j = Math.max(0, -by); by + j < y; j++) for (let i = 0; i < w; i++) if (a[(j * w + i) * 4 + 3] && bx + i >= 0 && bx + i < W && f(bx + i, by + j)) return true;
       return false;
     };
-    const onPath = (x, y) => !G.forest(x, y);
-    const pts = KIT.scatter(11, 22, [0, 0, W, H], (x, y) => G.forest(x, y) && G.forest(x, y - 8) && !G.blocked(x, y), 2.2);
+    const [ax, ay, aw, ah] = S.area, inArea = (x, y) => x >= ax && y >= ay && x < ax + aw && y < ay + ah;
+    const onPath = (x, y) => inArea(x, y) && !G.forest(x, y);
+    // Toward the camera the forest is low, bushes only, so it frames the place without hiding it.
+    const near = y => y > S.area[1] + S.area[3] - NEAR;
+    // Past the edge there they stand closer together, overlapping into a hedge.
+    const ok = (x, y) => G.forest(x, y) && G.forest(x, y - 8) && !G.blocked(x, y), hedge = (x, y) => near(y) && !inArea(x, y);
+    const pts = [...KIT.scatter(11, 22, [0, 0, W, H], (x, y) => ok(x, y) && !hedge(x, y), 2.2), ...KIT.scatter(12, 11, [0, 0, W, H], (x, y) => ok(x, y) && hedge(x, y), 2.2)];
     const trees = pts.map(([x, y, r]) => {
-      const s = [species(x, y, r, pools()), ...under(pools())].find(s => !crown(s, x, y, onPath));
+      const s = (near(y) ? under(pools()).filter(s => s.img.height < LOW) : [species(x, y, r, pools()), ...under(pools())]).find(s => !crown(s, x, y, onPath));
       return s && { x, y, s };
     }).filter(Boolean).sort((a, b) => a.y - b.y);
     const clipOf = new Map();
     for (const { x, y, s } of trees) {
-      if (s.shadow) S.shadows.push([x + 2, y - 1, s.shadow[0], s.shadow[1]]);
       if (!clipOf.has(s)) { const k = 'tree_' + clipOf.size; clipOf.set(s, k); S.clips[k] = { w: s.img.width, h: s.img.height, sway: s.img.height > 70 ? 2 : 1, draw: gg => gg.drawImage(s.img, 0, 0) }; }
       S.decals.below.push([clipOf.get(s), x - s.ax + 1, y - s.ay + 1, 0]);
       crown(s, x, y, (cx, cy) => { if (cy < H) S.canopy[cy * W + cx] = 1; });
     }
+    const g = S.ground.getContext('2d'), img = g.getImageData(0, 0, W, H), d = img.data;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (S.canopy[i] && (G.forest(x, y) || !inArea(x, y))) for (let c = 0; c < 3; c++) d[i * 4 + c] *= SHADE;
+    }
+    g.putImageData(img, 0, 0);
   }
 
   /* ---------- open ground: tufts, flowers, bushes along the forest's edge ---------- */
@@ -100,14 +116,13 @@
     KIT.scatter(23, 34, [0, 0, W, H], edge, 2).forEach(([x, y, r]) => {
       const s = P.bush[(r * 97 | 0) % P.bush.length], bx = x - s.ax + 1, by = y - s.ay + 1;
       S.items.push({ name: 'bush', y, box: [bx, by, s.img.width, s.img.height], foot: 3, sway: 1, draw: g => g.drawImage(s.img, bx, by) });
-      S.shadows.push([x + 2, y - 1, s.shadow[0], s.shadow[1]]);
     });
   }
 
   /* ---------- bugs: butterflies by day, fireflies at night ---------- */
   // Each flies a small loop that repeats every 6 s, its position stepped at 7.5 fps so the loop bakes to few frames.
   function bugs(S, G, glow, dragonflies = []) {
-    const open = (x, y) => G.mat(x, y) === 'g' && !G.forest(x, y) && !G.blocked(x, y);
+    const open = (x, y) => G.mat(x, y) === 'g' && !S.blocked(x, y);
     const fly = (name, s, x, y, rx, ry, ph, o) => {
       const box = [x - rx - s.ax - 1, y - ry - s.ay - 1, 2 * rx + s.img.width + 2, 2 * ry + s.img.height + 2];
       S.items.push({ name, y: y + 24, box, animated: true, walk: true, ...o, draw: (g, t) => {
@@ -124,20 +139,26 @@
   }
 
   /* ---------- water: bridges, glints, waves ---------- */
-  // Each run of bridge tiles gets a plank deck on the ground and a rail along each side; the deck is walkable.
+  // Each patch of bridge tiles (a road over a river) gets one plank deck over its bounding box, on the ground, and a
+  // rail along each side; the deck is walkable.
   function bridges(S, rows, TW, TH) {
     const seen = new Set();
     for (let ty = 0; ty < TH; ty++) for (let tx = 0; tx < TW; tx++) {
       if (rows[ty][tx] !== '=' || seen.has(ty * TW + tx)) continue;
-      let x1 = tx, y1 = ty;
-      while (x1 + 1 < TW && rows[ty][x1 + 1] === '=') x1++;
-      while (y1 + 1 < TH && rows[y1 + 1][tx] === '=') y1++;
-      for (let j = ty; j <= y1; j++) for (let i = tx; i <= x1; i++) seen.add(j * TW + i);
-      const X0 = tx * T - 10, X1 = (x1 + 1) * T + 10, Y0 = ty * T + 2, Y1 = (y1 + 1) * T - 2, b = V.bridge(X0, X1, Y0, Y1);
+      let x0 = tx, x1 = tx, y0 = ty, y1 = ty;
+      for (const stack = [[tx, ty]]; stack.length;) {
+        const [i, j] = stack.pop();
+        if (i < 0 || j < 0 || i >= TW || j >= TH || rows[j][i] !== '=' || seen.has(j * TW + i)) continue;
+        seen.add(j * TW + i);
+        x0 = Math.min(x0, i); x1 = Math.max(x1, i); y0 = Math.min(y0, j); y1 = Math.max(y1, j);
+        stack.push([i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]);
+      }
+      const X0 = x0 * T - 10, X1 = (x1 + 1) * T + 10, Y0 = y0 * T + 2, Y1 = (y1 + 1) * T - 2, b = V.bridge(X0, X1, Y0, Y1);
       S.ground.getContext('2d').drawImage(b.deck, X0, Y0);
       S.items.push({ name: 'bridge_rail', y: Y0, box: [X0 + 1, Y0 - 9, b.rail.width, b.rail.height], walk: true, draw: g => g.drawImage(b.rail, X0 + 1, Y0 - 9) });
       S.items.push({ name: 'bridge_rail', y: Y1 + 1, box: [X0 + 1, Y1 - 8, b.rail.width, b.rail.height], walk: true, draw: g => g.drawImage(b.rail, X0 + 1, Y1 - 8) });
       S.decks.push([X0, Y0 + 3, X1, Y1 - 3]);
+      S.flats.push([X0, Y0 - 2, X1, Y1 + 2]);
     }
   }
   /* Glints wink on open water; waves roll up the beach where sand meets the sea. Both are small loops placed many
@@ -196,41 +217,110 @@
   }
 
   /* A sprite stands with its feet at (x, y). A building blocks its base, glows at night (its window glass as light
-     items), smokes from its chimneys and casts a hard shadow to the lower right; a door is an anchor in front of it. */
+     items) and smokes from its chimneys; a body (eave and ridge rows) makes it stand as a house in the game, which
+     casts its real shadow; a door is an anchor in front of it. */
   function place(S, { name, s, x, y, o }) {
     const ox = Math.round(x - s.ax), oy = Math.round(y - s.ay), fr = s.frames, fps = s.fps || 4;
     const it = { name, y, box: [ox, oy, s.img.width, s.img.height], foot: s.foot ?? 3, ...o };
     if (s.base) it.base = [x + s.base[0], x + s.base[1]];
+    if (s.body) it.body = [oy + s.body[0], oy + s.body[1], Math.round(x + s.base[0]), Math.round(x + s.base[1])];
+    // its window lights and smoke lie on its walls and over its roof (a body with no side walls)
+    const on = s.body ? { body: [oy + s.body[0], oy + s.body[1], 0, 0] } : {};
     if (fr) { it.animated = true; it.draw = (g, t) => g.drawImage(fr[Math.floor(t * fps) % fr.length], ox, oy); } else it.draw = g => g.drawImage(s.img, ox, oy);
     S.items.push(it);
     (s.lit || []).forEach(([gx, gy, gw, gh], i) => {
       const c = KIT.litSprite(s.img, 0, 0, { gx, gy, gw, gh });
-      S.items.push({ name: `${name}_lit_${i}`, y, box: [ox + gx, oy + gy, gw, gh], light: true, draw: g => g.drawImage(c, ox + gx, oy + gy) });
+      S.items.push({ name: `${name}_lit_${i}`, y, box: [ox + gx, oy + gy, gw, gh], light: true, ...on, draw: g => g.drawImage(c, ox + gx, oy + gy) });
     });
-    (s.smoke || []).forEach(([sx, sy], i) => S.items.push({ name: `${name}_smoke_${i}`, y, box: [ox + sx - 14, oy + sy - 46, 30, 48], animated: true, walk: true, draw: (g, t) => KIT.smoke(g, t, [[ox + sx, oy + sy]]) }));
-    if (s.shadow) S.shadows.push([Math.round(x) + 2, Math.round(y) - 1, s.shadow[0], s.shadow[1]]);
-    else if (s.base && s.foot > 20) S.shadows.push(['r', Math.round(x + s.base[1]) + 1, Math.round(y - s.foot), 6, s.foot + 3], ['r', Math.round(x + s.base[0]) + 6, Math.round(y), s.base[1] - s.base[0], 3]);
+    (s.smoke || []).forEach(([sx, sy], i) => S.items.push({ name: `${name}_smoke_${i}`, y, box: [ox + sx - 14, oy + sy - 46, 30, 48], animated: true, walk: true, ...on, draw: (g, t) => KIT.smoke(g, t, [[ox + sx, oy + sy]]) }));
     if (s.door !== undefined) S.anchors[name + '_door'] = [Math.round(x + s.door), Math.round(y) + 8];
   }
 
+  /* A house built in 3D (model.js) stands with its front line's middle at (x, y): it blocks its base back depth
+     texels, its lit windows glow at night (its light model), cards stand in and on it ([img, ax, ay] at x across and
+     back texels back, lifted up: on a wall they hang upright from it), and its chimneys smoke ([x, up, back]). */
+  function placeModel(S, { name, s, x, y, o }) {
+    const rows = t => y - t * MODEL.DEEP;
+    S.items.push({ name, y, base: [x + s.base[0], x + s.base[1]], foot: Math.round(s.depth * MODEL.DEEP), ...o, ...MODEL.item(s.model, x, y) });
+    if (s.model.lit.length) S.items.push({ name: `${name}_lit`, y, light: true, walk: true, ...MODEL.item({ faces: s.model.lit }, x, y) });
+    (s.cards || []).forEach((c, i) => {
+      const fy = Math.round(rows(c.back) - c.up), ox = Math.round(x + c.x - c.ax), oy = fy - c.ay;
+      S.items.push({
+        name: `${name}_${c.name || 'card_' + i}`, y: fy, box: [ox, oy, c.img.width, c.img.height], foot: 3, walk: !!c.walk,
+        ...(c.up ? { lift: c.up, on: [x, y] } : {}), ...(c.wall ? { body: [oy - 1, oy - 1, 0, 0] } : {}), ...(c.light ? { light: true } : {}), ...(c.day ? { day: true } : {}),
+        draw: g => g.drawImage(c.img, ox, oy),
+      });
+    });
+    (s.smoke || []).forEach(([sx, up, back], i) => {
+      const cx = x + sx, cy = Math.round(rows(back) - up);
+      S.items.push({ name: `${name}_smoke_${i}`, y: cy + 2, box: [cx - 14, cy - 46, 30, 48], animated: true, walk: true, lift: up, on: [x, y], draw: (g, t) => KIT.smoke(g, t, [[cx, cy]]) });
+    });
+    if (s.door !== undefined) S.anchors[name + '_door'] = [Math.round(x + s.door), Math.round(y) + 8];
+  }
+
+  /* ---------- beyond the edges ---------- */
+  /* The camera stays inside an area, but in perspective it sees past the edges, farthest at the top corners. So each
+     area is built on a canvas with this much more land round it (art px: left and right, above, below), where the
+     forest goes on and the roads and rails that leave it run on out of sight. Only the area itself is walked. */
+  const MX = 256, MT = 320, MB = 64;
+  // A line that ends at an edge runs on past it the way it was going.
+  function runOn(pts, w, h) {
+    const atEdge = ([x, y]) => x < 48 || y < 48 || x > w - 48 || y > h - 48;
+    const on = (a, b) => { const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [b[0] + ((b[0] - a[0]) / l) * 640, b[1] + ((b[1] - a[1]) / l) * 640]; };
+    const n = pts.length;
+    return n < 2 ? pts : [...(atEdge(pts[0]) ? [on(pts[1], pts[0])] : []), ...pts, ...(atEdge(pts[n - 1]) ? [on(pts[n - 2], pts[n - 1])] : [])];
+  }
+  // An area's def as the canvas sees it: every point MX right and MT down.
+  function widen(def) {
+    const P = ([x, y]) => [x + MX, y + MT], E = ([x, y, ...r]) => [...P([x, y]), ...r], f = fn => fn && ((x, y, ...r) => fn(x - MX, y - MT, ...r));
+    return {
+      ...def, w: def.w + 2 * MX, h: def.h + MT + MB,
+      level: f(def.level), water: f(def.water), sand: f(def.sand), paving: f(def.paving), species: f(def.species),
+      roads: def.roads.map(([pts, hw]) => [runOn(pts, def.w, def.h).map(P), hw]),
+      rails: (def.rails || []).map(pts => runOn(pts, def.w, def.h).map(P)),
+      clear: (def.clear || []).map(E), glow: (def.glow || []).map(E), dragonflies: (def.dragonflies || []).map(P),
+      jetty: def.jetty && E(def.jetty), fields: def.fields && P(def.fields),
+      anchors: Object.fromEntries(Object.entries(def.anchors).map(([k, p]) => [k, P(p)])),
+      things: at => def.things((name, s, x, y, o = {}) => at(name, s, x + MX, y + MT, o.lane ? { ...o, lane: o.lane.map(P) } : o)),
+    };
+  }
+
+  /* Where a road leaves, ancient trees stand either side of it just past the edge, so the way out is a doorway into
+     the forest; none on the camera's side of it, where it would stand in front of the area. */
+  const GATE = 36; // art px past the edge
+  function gates(def, [ax, ay, aw, ah], at) {
+    const out = ([x, y]) => x < ax || y < ay || x >= ax + aw || y >= ay + ah;
+    def.roads.forEach(([pts, hw], r) => [[pts[0], pts[1]], [pts.at(-1), pts.at(-2)]].forEach(([end, from], e) => {
+      const l = Math.hypot(end[0] - from[0], end[1] - from[1]), dx = (end[0] - from[0]) / l, dy = (end[1] - from[1]) / l;
+      if (!out(end) || dy > 0.7) return;
+      // the point GATE past the edge the road crosses, then either side of it
+      const t = Math.abs(dx) > Math.abs(dy) ? ((dx < 0 ? ax - GATE : ax + aw + GATE) - from[0]) / dx : (ay - GATE - from[1]) / dy;
+      const cx = from[0] + dx * t, cy = from[1] + dy * t, side = hw + 26;
+      [-1, 1].filter(k => dx * k <= 0.5).forEach(k => at(`gate_tree_${r}_${e}_${k}`, V.grandTree({ r: 46, seed: 80 + r * 4 + e * 2 + (k > 0), leaf: k > 0 ? 'deep' : 'teal' }),
+        Math.round(cx - dy * side * k), Math.round(cy + dx * side * k), { sway: 1, clear: false }));
+    }));
+  }
+
   function build(id) {
-    const def = AREAS[id], P = [], lanes = [], clearings = [];
+    const def = widen(AREAS[id]), P = [], lanes = [], clearings = [], area = [MX, MT, AREAS[id].w, AREAS[id].h];
+    const inArea = (x, y) => x >= area[0] && y >= area[1] && x < area[0] + area[2] && y < area[1] + area[3];
     // Things are listed first: a building clears the forest around itself (unless clear is false), and its lane runs
     // from its door to a road.
     const at = (name, s, x, y, o = {}) => {
       const { lane, clear = true, ...rest } = o;
       P.push({ name, s, x, y, o: rest });
-      if (s.base && clear) clearings.push([x, y - s.ay / 2, s.img.width / 2 + 36, s.ay / 2 + 36]);
+      if (s.base && clear) clearings.push([x, y - s.ay / 2, (s.img ? s.img.width : s.w) / 2 + 36, s.ay / 2 + 36]);
       if (lane) lanes.push([[[x + (s.door || 0), y + 4], ...lane], 10]);
     };
     def.things(at);
-    const { rows, lev, TW, TH } = layout(def, lanes, clearings);
+    gates(def, area, at);
+    const { rows, lev, TW, TH } = layout(def, lanes, clearings, inArea);
     const G = V.ground(rows, { seed: def.seed, level: (tx, ty) => lev[Math.min(TH - 1, Math.max(0, ty))][Math.min(TW - 1, Math.max(0, tx))] });
-    const S = { id, w: def.w, h: def.h, bg: def.bg, start: def.start, clips: {}, decals: { below: [] }, items: [], shadows: [], anchors: { ...def.anchors }, paths: {}, decks: [] };
+    const S = { id, w: def.w, h: def.h, area, bg: def.bg, start: def.start, clips: {}, decals: { below: [] }, items: [], anchors: { ...def.anchors }, paths: {}, decks: [], flats: [] };
     const onDeck = (x, y) => S.decks.some(([x0, y0, x1, y1]) => x >= x0 && x < x1 && y >= y0 && y < y1);
     S.canopy = new Uint8Array(def.w * def.h);
     S.height = G.height; S.vertical = G.vertical;
-    S.blocked = (x, y) => !onDeck(x, y) && (G.blocked(x, y) || G.forest(x, y) || S.canopy[(y | 0) * def.w + (x | 0)] === 1);
+    S.blocked = (x, y) => !inArea(x, y) || (!onDeck(x, y) && (G.blocked(x, y) || G.forest(x, y) || S.canopy[(y | 0) * def.w + (x | 0)] === 1));
     railway(G.buf, def.rails || []);
     dress(S, G, def.rails);
     if (def.dress) def.dress(S, G);
@@ -239,20 +329,18 @@
     waterLife(S, G);
     if (def.jetty) jetty(S, def.jetty);
     if (def.fields) fields(S, def.fields);
-    P.forEach(t => place(S, t));
-    if (def.after) def.after(S, P);
+    P.forEach(t => (t.s.model ? placeModel : place)(S, t));
     bugs(S, G, def.glow || [], def.dragonflies);
     forest(S, G, def.species, def.under);
-    V.shadows(S.ground, S.shadows);
     return S;
   }
 
   /* ---------- the areas ---------- */
   const smooth = (pts, n = 3) => n ? smooth([pts[0], ...pts.slice(1).flatMap((b, i) => { const a = pts[i]; return [[a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]]; }).slice(1, -1), pts[pts.length - 1]], n - 1) : pts;
 
-  /* The banyan grove, west of the station: a narrow path winds in from the station's side between ancient trees,
-     climbs root-steps onto the knoll and ends at the great banyan, Marlow's door in the gap between its roots. */
-  const GROVE_PATH = smooth([[660, 498], [590, 508], [526, 486], [462, 500], [414, 466], [404, 420], [446, 380], [500, 352], [502, 312], [470, 282], [400, 270], [330, 266], [301, 254]]);
+  /* The grove, west of the station: a narrow path winds in from the station's side between ancient trees, climbs
+     root-steps onto the knoll and ends at Marlow's shop, hidden among them. */
+  const GROVE_PATH = smooth([[660, 498], [590, 508], [526, 486], [462, 500], [414, 466], [404, 420], [446, 380], [500, 352], [502, 312], [470, 282], [400, 270], [330, 266], [301, 250]]);
   const KNOLL = [300, 196, 196, 86];
 
   // How the town's trees mix, as [chance below, pool]: the old West dark pines, the Centre round broadleaves, the
@@ -267,7 +355,7 @@
   // The square: the hall and its neighbours up on a terrace, the round paved square below it.
   const TERRACE = wavy(270, 6, 40), PLAZA = [480, 440, 160];
   // The east: the river down its west side, Leo's hill in the north-east corner.
-  const RIVER = smooth([[150, -20], [182, 200], [160, 400], [190, 620], [170, 852]]);
+  const RIVER = smooth([[140, -360], [150, -20], [182, 200], [160, 400], [190, 620], [170, 852], [176, 940]]);
   const HILL = wavy(300, 8, 37);
   // The coast: a terrace along the north, then grass, the beach and the sea; the land runs out to a point in the east.
   const BLUFF = wavy(230, 7, 45), SHORE = x => 610 + 20 * Math.sin(x / 70) + Math.max(0, x - 800) * 0.8;
@@ -281,7 +369,11 @@
       species: (x, y, r, P) => { const pick = a => a[(r * 997 | 0) % a.length]; return pick(r < 0.5 ? P.grand : r < 0.8 ? P.pineDeep : P.oakDeep); },
       under: P => [...P.oakDeep, ...P.bushDeep],
       things(at) {
-        at('banyan', V.hiddenBanyan(), 300, 236, { clear: false });
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_station', V.waysign('STATION', 1), 614, 486);
+        at('shop', V.marlowShop(), 300, 236, { clear: false });
+        // the ancient tree the shop grew into: behind it, its roots over the roof, its crown over the ridge
+        at('shop_tree', V.grandTree({ r: 66, seed: 9, leaf: 'deep', tall: 96 }), 300, 176, { sway: 1, clear: false });
         // ancient trees along the way, just behind the path so their roots reach it, never in front of it: in the
         // 3D view a crown between the camera and the path would hide it
         [[600, 470, 56, 1, 'deep'], [250, 548, 58, 2, 'teal'], [150, 432, 50, 3, 'deep'], [604, 340, 54, 4, 'teal'], [118, 300, 60, 5, 'deep'], [378, 412, 46, 6, 'deep'], [60, 590, 58, 7, 'teal'], [566, 196, 52, 8, 'deep']]
@@ -291,11 +383,6 @@
           .forEach(([x, y], i) => at('fern_' + i, V.fern(i + 1), x, y, { walk: true, sway: 1 }));
         at('log_0', V.log(62, 1), 430, 548); at('log_1', V.log(48, 2), 560, 404);
         [[372, 492], [524, 446], [410, 330], [236, 292], [586, 540]].forEach(([x, y], i) => at('moss_rock_' + i, V.mossRock(i + 1), x, y));
-      },
-      // the banyan's lanterns, dark by day and lit at dusk and night
-      after(S, P) {
-        const bn = P.find(t => t.name === 'banyan'), bx = bn.x - bn.s.ax, by = bn.y - bn.s.ay;
-        [false, true].forEach(on => { const l = V.lantern(on); bn.s.lanterns.forEach(([hx, hy], i) => { const ox = bx + hx - l.ax, oy = by + hy - l.ay; S.items.push({ name: `shop_lantern_${i}${on ? '' : '_day'}`, y: bn.y + 1, box: [ox, oy, l.img.width, l.img.height], walk: true, ...(on ? { light: true } : { day: true }), draw: g => g.drawImage(l.img, ox, oy) }); }); });
       },
       // moss in the shade and leaves fallen on the path
       dress(S, G) {
@@ -324,6 +411,8 @@
       clear: [[540, 360, 330, 90], [600, 560, 380, 120]],
       species: mix(P => [[0.45, P.pine], [0.75, P.pineDeep], [1, P.oakDeep]]),
       things(at) {
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_grove', V.waysign('GROVE', -1), 44, 662); at('way_square', V.waysign('SQUARE', 1), 916, 658);
         at('station', V.station(), 530, 326);
         at('tea_stall', V.teaStall(), 400, 372);
         at('info_board', V.noticeBoard(), 740, 368);
@@ -353,6 +442,8 @@
       clear: [[480, 450, 360, 220], [480, 690, 380, 110]],
       species: mix(P => [[0.6, P.oak], [0.77, P.oakDeep], [0.98, P.pine], [1, P.autumn]]),
       things(at) {
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_station', V.waysign('STATION', -1), 44, 442); at('way_east', V.waysign('EAST', 1), 916, 442); at('way_coast', V.waysign('COAST', 0), 514, 784);
         at('hall', V.hall(), 480, 226, { lane: [[480, 300]] });
         at('bakery', V.bakery(), 190, 236, { lane: [[236, 320], [330, 380]] });
         at('home_brick', V.centreHome('brick'), 780, 236, { lane: [[770, 320], [640, 380]] });
@@ -384,6 +475,8 @@
       species: mix(P => [[0.58, P.oak], [0.61, P.autumn], [1, P.pine]]),
       fields: [260, 100],
       things(at) {
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_square', V.waysign('SQUARE', -1), 44, 444);
         at('stilt_nora', V.stiltHouse('nora'), 330, 430);
         at('stilt_a', V.stiltHouse('a'), 520, 430);
         at('satria_home', V.satriaHome(), 900, 420);
@@ -415,6 +508,8 @@
       species: mix(P => [[0.7, P.pine], [1, P.oak]]),
       jetty: [500, 760, 150],
       things(at) {
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_square', V.waysign('SQUARE', 0), 514, 46);
         at('theo_studio', V.theoStudio(), 250, 200, { lane: [[360, 196], [480, 190]] });
         at('rope_bridge', V.ropeBridgeRemains(), 80, 214);
         at('salt_store', V.saltStore(), 220, 430);

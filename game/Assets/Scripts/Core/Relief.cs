@@ -5,11 +5,11 @@ namespace Shop
 {
     /// <summary>
     /// The shape of a place's ground in the 3D view, from its height.png (ArtSource/export-world.js): how high each art
-    /// pixel's surface stands above level 0, and whether it stands upright (a cliff or bank face). A place without one
-    /// (the rooms) is flat.
+    /// pixel's surface stands above level 0, and whether it stands upright (a cliff or bank face). An area's map reaches
+    /// past its edges, so its top left stands at an origin in the place. A place without one (the rooms) is flat.
     ///
-    /// The art is drawn top-down at 45 degrees, so an art pixel at row r on a surface h px high sits at depth r + h
-    /// (<see cref="Art.World"/>). Seen from the 45 degree camera, every pixel lands back where it was drawn; seen in
+    /// The art is drawn as the camera sees it, so an art pixel at row r on a surface h px high sits at depth r + h
+    /// (<see cref="Art.World"/>). Seen along the camera's tilt, every pixel lands back where it was drawn; seen in
     /// perspective, cliffs stand up and the ground recedes.
     /// </summary>
     public sealed class Relief
@@ -17,10 +17,12 @@ namespace Shop
         readonly short[] height;
         readonly bool[] upright;
         readonly int width, rows;
+        readonly Vector2Int origin;
 
-        /// <summary><paramref name="tex"/> is a height.png imported readable (see Editor/PixelArtImport.cs), or null for flat ground.</summary>
-        public Relief(Texture2D tex)
+        /// <summary><paramref name="tex"/> is a height.png imported readable (see Editor/PixelArtImport.cs), or null for flat ground; its top left is at <paramref name="origin"/> (art px).</summary>
+        public Relief(Texture2D tex, Vector2Int origin)
         {
+            this.origin = origin;
             if (tex == null) return;
             width = tex.width;
             rows = tex.height;
@@ -37,12 +39,27 @@ namespace Shop
         }
 
         /// <summary>The surface height (art px) at art pixel (x, y), clamped to the map.</summary>
-        public float Height(int x, int y) => height == null ? 0 : height[Mathf.Clamp(y, 0, rows - 1) * width + Mathf.Clamp(x, 0, width - 1)];
+        public float Height(int x, int y) => height == null ? 0 : height[Index(x, y)];
+
+        int Index(int x, int y) => Mathf.Clamp(y - origin.y, 0, rows - 1) * width + Mathf.Clamp(x - origin.x, 0, width - 1);
 
         /// <summary>The height of the ground under feet at <paramref name="feet"/>: the pixel just behind the feet line.</summary>
         public float Under(Vector2 feet) => Height(Mathf.FloorToInt(feet.x), Mathf.FloorToInt(feet.y) - 1);
 
-        bool Upright(int x, int y) => upright != null && upright[Mathf.Clamp(y, 0, rows - 1) * width + Mathf.Clamp(x, 0, width - 1)];
+        /// <summary>
+        /// How high to stand something <paramref name="tall"/> px tall that leans back to face the camera (an ant) at
+        /// <paramref name="feet"/>: on the ground, or raised toward the camera where the ground behind it climbs faster
+        /// than it leans (steep stairs, the foot of a cliff), so the ground never covers it.
+        /// </summary>
+        public float Stand(Vector2 feet, int tall)
+        {
+            int x = Mathf.FloorToInt(feet.x), y = Mathf.FloorToInt(feet.y) - 1;
+            var h = Height(x, y);
+            for (var up = 1; up <= tall; up++) h = Mathf.Max(h, Height(x, y - up) - Art.Lean(up));
+            return h;
+        }
+
+        bool Upright(int x, int y) => upright != null && upright[Index(x, y)];
 
         /// <summary>
         /// The ground under <paramref name="part"/> (art px) as a mesh showing a texture of that part. Each column of
@@ -59,7 +76,7 @@ namespace Shop
             var line = new List<Vector3>();
             // (depth, height, texture row) of each row's top and bottom, down one column and the one left of it,
             // ending on the top of the next part's first row so the parts join.
-            int n = part.height * 2 + (part.yMax < rows ? 1 : 0);
+            int n = part.height * 2 + (part.yMax < origin.y + rows ? 1 : 0);
             Vector3[] left = new Vector3[n], here = new Vector3[n];
             float U(int x) => (Mathf.Clamp(x, part.xMin, part.xMax - 1) - part.xMin + 0.5f) / part.width;
             float V(float row) => 1 - (row - part.yMin) / part.height;

@@ -138,13 +138,13 @@
 
   // Cut a layer image into CHUNK x CHUNK images, skipping the empty ones. Returns [{ image, at }].
   const CHUNK = 1024;
-  function chunks(dir, name, img) {
+  function chunks(dir, name, img, [ox, oy]) {
     const out = [], g = img.getContext('2d');
     for (let y = 0; y < img.height; y += CHUNK) for (let x = 0; x < img.width; x += CHUNK) {
       const w = Math.min(CHUNK, img.width - x), h = Math.min(CHUNK, img.height - y), d = g.getImageData(x, y, w, h);
       if (!new Uint32Array(d.data.buffer).some(v => v >>> 24)) continue;
       const [c, cg] = canvas(w, h); cg.putImageData(d, 0, 0);
-      const file = `${name}_${x / CHUNK}_${y / CHUNK}.png`; png(`${dir}/${file}`, c); out.push({ image: file, at: [x, y] });
+      const file = `${name}_${x / CHUNK}_${y / CHUNK}.png`; png(`${dir}/${file}`, c); out.push({ image: file, at: [x + ox, y + oy] });
     }
     return out;
   }
@@ -152,17 +152,25 @@
   /* Write one place variant to places/<place>/<variant>/: place.json, the layer chunks and the atlases.
      spec: { size: [W, H], bg, below: layer() | still(), above: layer() | still() | null,
              clips: { name: track }, decals: { below: [[clip, x, y, offset]], above: [...] },
-             items: [{ name, y, track, light, day }], anchors, paths, hotspots, extra }
+             items: [{ name, y, track, light, day, model, lift, on }], anchors, paths, hotspots, extra, origin }
      A clip is a small loop drawn once and placed many times as decals; a decal's offset (in samples) staggers it.
      A layer's animated tiles become one-off clips. Items whose track is null are skipped. A light item shows only at
      dusk and night and is never graded; a day item shows only in the morning and at midday. A clip or item with a
-     sway (art px at its top) bends in the wind in the game's shader. */
+     sway (art px at its top) bends in the wind in the game's shader. A model item is a house in 3D (model.js): its
+     track is the sheet of its faces' pictures. An item with a lift hangs that high over the ground at on (a lantern
+     under a house's eave). Everything is drawn in the coordinates of the layers' canvas, whose top left stands at
+     origin in the place (an area's canvas reaches past its edges, see areas.js); place.json is written in the
+     place's own. */
   function place(placeName, variant, spec) {
     const dir = `places/${placeName}/${variant}`, clipNames = Object.keys(spec.clips || {}), tracks = [];
+    const origin = spec.origin || [0, 0], [ox, oy] = origin, P = ([x, y]) => [x + ox, y + oy];
+    const each = (o = {}, f) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, f(v)]));
+    // a house's body is its eave and ridge rows, and the x of its side walls if it has them
+    const body = ([e, r, x0, x1]) => [e + oy, r + oy, ...(x1 > x0 ? [x0 + ox, x1 + ox] : [x0, x1])];
     const clipIx = new Map(), addTrack = tr => (tracks.push(tr), tracks.length - 1);
     for (const n of clipNames) clipIx.set(n, addTrack(spec.clips[n]));
-    const layerDecals = l => (l ? l.tiles.map(tr => [addTrack(tr), tr.at[0], tr.at[1], 0]) : []);
-    const named = (list = []) => list.map(([n, x, y, o]) => { if (!clipIx.has(n)) throw new Error(`no clip "${n}"`); return [clipIx.get(n), x, y, o | 0]; });
+    const layerDecals = l => (l ? l.tiles.map(tr => [addTrack(tr), tr.at[0] + ox, tr.at[1] + oy, 0]) : []);
+    const named = (list = []) => list.map(([n, x, y, o]) => { if (!clipIx.has(n)) throw new Error(`no clip "${n}"`); return [clipIx.get(n), x + ox, y + oy, o | 0]; });
     const decals = {
       below: [...layerDecals(spec.below), ...named(spec.decals && spec.decals.below)],
       above: [...layerDecals(spec.above), ...named(spec.decals && spec.decals.above)],
@@ -175,15 +183,15 @@
     const clipOf = t => { if (!used.has(t)) { used.set(t, clips.length); clips.push({ atlas: placed[t].atlas, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq), ...(tracks[t].sway ? { sway: tracks[t].sway } : {}) }); } return used.get(t); };
     const dec = list => list.map(([t, x, y, o]) => [clipOf(t), x, y, o]);
     json(`${dir}/place.json`, {
-      size: spec.size, bg: spec.bg, fps: FPS, loop: N, atlases: canvases.length,
-      below: { chunks: chunks(dir, 'below', spec.below.base), decals: dec(decals.below) },
-      above: spec.above ? { chunks: chunks(dir, 'above', spec.above.base), decals: dec(decals.above) } : null,
+      size: spec.size, ...(spec.origin ? { origin } : {}), bg: spec.bg, fps: FPS, loop: N, atlases: canvases.length,
+      below: { chunks: chunks(dir, 'below', spec.below.base, origin), decals: dec(decals.below) },
+      above: spec.above ? { chunks: chunks(dir, 'above', spec.above.base, origin), decals: dec(decals.above) } : null,
       clips,
       items: items.map(({ it, t }) => ({
-        name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}), ...(it.sway ? { sway: it.sway } : {}),
-        atlas: placed[t].atlas, at: tracks[t].at, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq),
+        name: it.name, y: Math.round(it.y + oy), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}), ...(it.sway ? { sway: it.sway } : {}), ...(it.body ? { body: body(it.body) } : {}), ...(it.model ? { model: { ...it.model, at: P(it.model.at) } } : {}), ...(it.lift ? { lift: it.lift, on: P(it.on) } : {}),
+        atlas: placed[t].atlas, at: it.model ? tracks[t].at : P(tracks[t].at), size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq),
       })),
-      anchors: spec.anchors || {}, paths: spec.paths || {}, hotspots: spec.hotspots || {},
+      anchors: each(spec.anchors, P), paths: each(spec.paths, pts => pts.map(P)), hotspots: spec.hotspots || {},
       ...(spec.extra || {}),
     });
   }

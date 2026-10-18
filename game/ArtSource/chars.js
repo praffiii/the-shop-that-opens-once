@@ -2,7 +2,8 @@
 /* Ant cast for "The Shop That Opens Once" (v2). Every pixel is authored here in code:
    ASCII part grids (head, abdomen, torso + clothes, hats) wrapped in a 1 px ink outline,
    plus thin ink limbs (legs placed by a tiny two-bone IK, arms by explicit elbows).
-   Defines window.CH per ART.md "Character contract": 40x40 frames, body faces RIGHT, feet at (20, 37). */
+   Defines window.CH per ART.md "Character contract": 40x40 frames, body faces RIGHT, feet at (20, 37); the courier's
+   pose_front and pose_back views face the camera and away from it. */
 (() => {
   const { canvas, sprite, outline, flip, shadow } = PX;
 
@@ -246,13 +247,18 @@
 
   /* ---------------- poses ---------------- */
   const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2 };
+  // The courier also faces the camera (pose_front) and turns away from it (pose_back) as it stands, walks, runs and carries.
+  const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
+  for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
+  const turned = pose => { const [p, v] = pose.split('_'); return v ? [p, v] : null; };
   const HAS = {};
   for (const id of IDS) {
     const s = ['idle', 'walk'];
     if (!CAST[id].villager) s.push('talk');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
-    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
+    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', ...TURNS.flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     if (id === 'helen') s.push('sit', 'moved');
     if (id === 'marlow') s.push('wave');
     if (id === 'leo') s.push('run');
@@ -264,7 +270,6 @@
     if (s.includes(pose)) return pose;
     return s.includes(FALLBACK[pose]) ? FALLBACK[pose] : 'idle';
   };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2 };
 
   /* ---------------- rig: pose -> joint positions (sprite coords) ---------------- */
   // Two-bone IK for knees: returns the middle joint, bending forward.
@@ -469,6 +474,75 @@
     return c;
   }
 
+  /* ---------------- front and back views ---------------- */
+  /* The courier facing the camera or turned away, drawn round x 20 from the same colours, each part in its own ink
+     outline as the side view's are: the head and its cap, the thorax with its sash and satchel, the abdomen (behind it
+     from the front, in front of the legs from the back), two legs stepping in place and two splayed ones, the arms
+     swinging. The gaits keep the side view's timing: the same frames lift the same foot and bob the body. */
+  const [tT, tX] = scratch(40, 40);
+  function plated(x, fn) { tX.clearRect(0, 0, 40, 40); fn(tX); x.drawImage(outline(tT, 'ink'), -1, -1); }
+  function gait(pose, f) {
+    const g = { lift: [0, 0], dy: 0, sw: 0, blink: false, open: false };
+    if (pose === 'idle') { g.dy = [0, -1, -1, 0][f]; g.blink = f === 3; }
+    else if (pose === 'carry') g.dy = [0, -1][f];
+    else if (pose === 'walk' || pose === 'carryWalk') { const L = [0, 0, 0, 0, 2, 1]; g.lift = [L[f], L[(f + 3) % 6]]; g.dy = [0, -1, -1, 0, -1, -1][f]; g.sw = [-1, -1, 1, 1, 1, -1][f]; }
+    else if (pose === 'run') { g.lift = [RUNL[f], RUNL[(f + 3) % 6]]; g.dy = [0, -1, -2, 0, -1, -2][f]; g.sw = [-2, -1, 1, 2, 1, -1][f]; g.open = true; }
+    return g;
+  }
+  // where the courier's hand holds an item, turned: at its chest
+  const turnedHand = (pose, f) => [20, 26 + gait(pose, f).dy];
+  function renderTurned(id, pose, f, view) {
+    const ch = CAST[id], back = view === 'back', g = gait(pose, f), d = g.dy, [c, x] = canvas(40, 40), G = 37;
+    const carry = pose === 'carry' || pose === 'carryWalk', side = back ? -1 : 1, bag = ch.parts.find(p => p.z === 'body');
+    // the splayed middle legs, then (from the front) the abdomen behind the body, then the two walking legs
+    for (const s of [-1, 1]) { line(x, 20 + s * 4, 30 + d, 20 + s * 6, 33 + d, 'ant3'); line(x, 20 + s * 6, 33 + d, 20 + s * 7, 36, 'ant3'); }
+    if (!back) {
+      plated(x, gx => { ellipse(gx, 20, 29 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 9, 1, 'ant3'); });
+      if (bag) plated(x, gx => { ellipse(gx, 20, 25 + d, 5, 2, 'cap3'); rect(gx, 15, 24 + d, 11, 1, 'cap2'); });   // the bag on its back, either side of it
+    }
+    [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => { line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink'); });
+    // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the parcel to the chest
+    const arms = () => [-1, 1].forEach(s => {
+      const sh = [20 + s * 4, 25 + d], hand = carry ? [20 + s * 4, 28 + d] : [20 + s * 6, 30 + d + (s * g.sw > 0 ? 1 : 0) - (s * g.sw < -1 ? 1 : 0)];
+      arm(x, { far: false, pts: [sh, hand] }, ch.sleeve);
+    });
+    if (!carry || back) arms();
+    // the thorax and the bag's strap across it; from the back, the bag itself
+    plated(x, gx => {
+      ellipse(gx, 20, 27 + d, 3, 4, 'ant1'); rect(gx, 18, 24 + d, 1, 4, 'ant0'); rect(gx, 22, 25 + d, 1, 5, 'ant2');
+      for (let k = 0; k < 7; k++) { const sx = 20 - side * (3 - k); rect(gx, sx, 24 + d + k, 1, 2, k < 3 ? 'cap2' : 'cap3'); }
+    });
+    if (back && bag) put(x, memo('bag|' + id, () => outlined(bag.rows, bag.key)), 16, 23 + d);
+    // the head: from the front its eyes and mouth, from the back only its round
+    plated(x, gx => { ellipse(gx, 20, 18 + d, 5, 4, 'ant1'); ellipse(gx, 21, 19 + d, 4, 3, 'ant2'); ellipse(gx, 19, 18 + d, 4, 3, 'ant1'); rect(gx, 17, 16 + d, 2, 1, 'ant0'); if (back) ellipse(gx, 20, 20 + d, 4, 1, 'ant2'); });
+    if (!back) {
+      for (const ex of [16, 22]) {
+        if (g.blink) rect(x, ex, 19 + d, 2, 1, 'ink');
+        else { rect(x, ex, 17 + d, 2, 3, 'cream0'); rect(x, ex < 20 ? ex + 1 : ex, 18 + d, 1, 2, 'pupil'); dot(x, ex < 20 ? ex : ex + 1, 17 + d, 'white'); }
+      }
+      if (g.open) { rect(x, 19, 21 + d, 2, 2, 'ink'); dot(x, 19, 22 + d, 'roofR4'); } else rect(x, 19, 21 + d, 2, 1, 'ink');
+    }
+    // the antennae, elbowed outward (one bent at its tip, as in the side view), each with its club
+    [-1, 1].forEach((s, i) => {
+      const bx = 20 + s * 2, by = 14 + d, sway = pose === 'idle' && f >= 2 ? 1 : 0;
+      [[0, -1], [0, -2], [1, -3], [1, -4], [2, -5], [2 + sway, -6]].forEach(([ax, ay]) => dot(x, bx + s * ax, by + ay, 'ink'));
+      const tx = bx + s * (2 + sway), ty = by - 6, bent = ch.bent === (back ? 1 - i : i);
+      const cx = bent ? tx + s : tx + (s > 0 ? 1 : -2), cy = bent ? ty - 1 : ty - 2;
+      if (bent) dot(x, tx + s, ty, 'ink');
+      rect(x, cx, cy, 2, 2, 'ant2'); dot(x, cx, cy, 'ant1'); dot(x, cx + 1, cy + 1, 'ant3');
+    });
+    // the cap: its dome, the brim toward whichever way the courier faces
+    plated(x, gx => {
+      ellipse(gx, 20, 15 + d, 6, 4, 'cap2'); gx.clearRect(0, 16 + d, 40, 24); ellipse(gx, 19, 13 + d, 4, 2, 'cap1'); rect(gx, 17, 12 + d, 2, 1, 'cap0');
+      if (back) { rect(gx, 14, 15 + d, 13, 1, 'cap3'); rect(gx, 19, 14 + d, 3, 1, 'cream1'); }
+      else { rect(gx, 13, 15 + d, 15, 2, 'cap3'); rect(gx, 13, 15 + d, 15, 1, 'cap2'); rect(gx, 19, 12 + d, 2, 2, 'cream0'); dot(gx, 20, 13 + d, 'cream1'); }
+    });
+    // from the back, the abdomen in front of the legs, banded
+    if (back) plated(x, gx => { ellipse(gx, 20, 31 + d, 6, 3, 'ant1'); ellipse(gx, 21, 32 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 3, 1, 'ant0'); rect(gx, 15, 33 + d, 11, 1, 'ant3'); });
+    if (carry && !back) { put(x, memo('parcel', () => outlined(PARCEL, PARCEL_K)), 16, 23 + d); arms(); }
+    return c;
+  }
+
   /* ---------------- portraits (48x48, bust facing right, three-quarter view) ---------------- */
   // Same design language as the sprites at 2x detail: layered hard-edged ellipse bands for form,
   // every part in its own ink outline, per-character clothing / headwear / face gear on top.
@@ -665,7 +739,7 @@
   const wrap = (pose, frame) => { const n = POSES[pose]; return ((frame | 0) % n + n) % n; };
   function sprite40(id, pose, frame = 0) {
     const p = resolve(id, pose), f = wrap(p, frame);
-    return memo(`s|${id}|${p}|${f}`, () => render(id, p, f));
+    return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return t ? renderTurned(id, t[0], f, t[1]) : render(id, p, f); });
   }
   const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'], nora: ['smile', 'moved'], mia: ['smile', 'moved'], grandkid: ['smile', 'moved'] };
 
@@ -674,18 +748,19 @@
     POSES,
     poses: id => HAS[id].slice(),
     // px of ground covered per frame by walk / carryWalk / run, so feet don't skate (advance a frame every stride px)
-    stride: (id, pose) => (resolve(id, pose) === 'run' ? (CAST[id].kid ? 4 : 5) : CAST[id].kid ? 2 : 3),
+    stride: (id, pose) => (resolve(id, pose).split('_')[0] === 'run' ? (CAST[id].kid ? 4 : 5) : CAST[id].kid ? 2 : 3),
     frames: (id, pose) => POSES[resolve(id, pose)],
     fps: pose => FPS[pose] || 6,
     sprite: sprite40,
     hand(id, pose, frame = 0) {
-      const p = resolve(id, pose), f = wrap(p, frame);
+      const p = resolve(id, pose), f = wrap(p, frame), t = turned(p);
+      if (t) { const [hx, hy] = turnedHand(t[0], f); return [hx - 20, hy - 37]; }
       const r = rig(CAST[id], p, f), a = r.arms[1].pts, h = r.hold || a[a.length - 1];
       return [h[0] - 20, h[1] - 37];
     },
     draw(ctx, id, pose, frame, x, y, dir = 1, opts = {}) {
       x = Math.round(x); y = Math.round(y);
-      if (opts.shadow !== false) shadow(ctx, x - 2 * dir, y, CAST[id].kid ? 6 : 8, 1);
+      if (opts.shadow !== false) shadow(ctx, turned(resolve(id, pose)) ? x : x - 2 * dir, y, CAST[id].kid ? 6 : 8, 1);
       const s = sprite40(id, pose, frame);
       if (dir < 0) ctx.drawImage(flip(s), x - 19, y - 37); else ctx.drawImage(s, x - 20, y - 37);
     },
