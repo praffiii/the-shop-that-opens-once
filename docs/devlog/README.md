@@ -10,6 +10,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [01](01-migrasi-ke-unity.md) | 2026-10-18 | Pindah dari Godot ke Unity dan ke GDD UTS | `godot-mvp` (arsip) |
 | [02](02-proyek-unity.md) | 2026-10-18 | Proyek Unity 6.6 dan alat kerja | |
 | [03](03-fondasi.md) | 2026-10-18 | Pipeline art dan fondasi sistem game | `m1-foundation` |
+| [04](04-dunia-bellwood.md) | 2026-10-18 | Dunia Bellwood: empat zona dalam satu peta | `m2-world` |
 
 ## Format setiap entri
 
@@ -33,3 +34,4 @@ Setiap milestone diberi git tag, sehingga keadaan game di titik itu bisa dibuka 
 |---|---|
 | `godot-mvp` | Commit terakhir versi Godot (Night 1 dan 2 dari cerita lama), sebelum pindah ke Unity |
 | `m1-foundation` | Fondasi sistem di Unity: tempat, berjalan, dialog, tas, keepsake, simpan, suara |
+| `m2-world` | Dunia luar Bellwood digambar ulang: empat zona dalam satu peta, dengan fase hari lewat shader |

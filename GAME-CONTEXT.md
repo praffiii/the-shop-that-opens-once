@@ -8,7 +8,7 @@ Last updated: 2026-10-18.
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
 - the earlier concept proposal and the feasibility report
 - the Unity project in `game/` with the foundation built: the Godot core ported to C# (places, walking, talk, the bag, keepsakes, saving, sound), a systems-test chapter that is not part of the story, and a playthrough test that passes
-- the art pipeline in `game/ArtSource/`, set up and exporting into `game/Assets/Resources/Art/`. The art is still the Godot set; the maps are not redrawn yet.
+- the art pipeline in `game/ArtSource/`, exporting into `game/Assets/Resources/Art/`. The outdoor world is redrawn as one seamless map of the four zones (`bellwood.js`) and runs in the game, graded for the time of day. The nine interiors are next; the shop is still the Godot set.
 - the dev log of each step, in Bahasa Indonesia, in `docs/devlog/`
 - the web presentation, frozen. It still tells the earlier story.
 - the Godot MVP (Nights 1 and 2 of the earlier story), archived in `archive/godot-mvp/`
@@ -55,8 +55,17 @@ Every fact carries a source tag:
 
 **Tools and process**
 - `[Decision]` The game is built in code, as the Godot build was. One scene (`Main.unity`) holds an object with `Main`, which builds the cameras, UI and places. Places are C# data (`Places.cs`); each chapter's story is a C# class. The world and UI draw into a small canvas that is scaled up by a whole number. (2026-10-18)
-- `[Decision]` Unity MCP: the free community server CoplayDev/unity-mcp, pinned to v10.3.0, set up in `.mcp.json` and in the project's packages. Unity's official MCP needs a Unity AI subscription. (2026-10-18)
+- `[Decision]` Unity MCP: the free community server CoplayDev/unity-mcp, pinned to v10.3.0, in the project's packages. Unity's official MCP needs a Unity AI subscription. (2026-10-18)
+- `[Decision]` `.mcp.json` connects to the server the Unity package runs, over HTTP at `http://127.0.0.1:8080/mcp`, instead of starting its own over stdio. Open the project in Unity first. (2026-10-18)
 - `[Decision]` Every step of the work gets a dev log entry in Bahasa Indonesia in `docs/devlog/`, with its goal, what was built, the decisions, the problems, screenshots, how it was checked, and its commits. Each milestone gets a git tag. The project is a course assignment, and the log records its progress. (2026-10-18)
+
+**The world** (chosen while redrawing the maps, on the user's go-ahead)
+- `[Decision]` Bellwood outdoors is one seamless map of the four zones, as GDD 8.1 describes it ("seamless connected world"), not four scenes. The West (the station and Marlow's banyan) and the Centre (the square) are joined by a bridge over the west river; the Centre and the East by a bridge over the east river; the South lies below the cliff, down the cliff steps. Interiors are separate places behind doors. (2026-10-18)
+- `[Decision]` The time of day is a colour grade, not a redrawn variant. Each place is drawn once, at midday, and the game's pixel shader grades it per phase with the grades in `ArtSource/kit.js`. Lit windows, lamps, lanterns and fireflies are separate pieces that show at dusk and night and are never graded; butterflies show in the morning and at midday. This replaces drawing every place per phase, which would have meant four copies of every place. (2026-10-18)
+- `[Decision]` Helen's tea stall is on the station platform (West zone), as most of the GDD has it. (2026-10-18)
+- `[Decision]` Marlow's shop is in the roots of the great banyan by the station (West zone), as the GDD's text has it. Seven lanterns hang in its branches. (2026-10-18)
+- `[Decision]` Leo's hill is in the north-east of the East zone: a raised plateau reached by steps, with Leo's lookout hut on top. (2026-10-18)
+- `[Decision]` The station clock is frozen at 10:17. (2026-10-18)
 
 **Characters and art**
 - `[Decision]` Every character is an ant: chunky, expressive reddish-brown ants as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
@@ -236,7 +245,7 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **Palette groups** from the GDD: cream `#FDFBF7` `#F4EFE6`, timber brown `#8B5A2B` `#5C3A21`, midnight navy `#0F172A` `#1E1B4B`, autumn amber `#D97706` `#F59E0B`, moss green `#3F6212` `#65A30D`. Keep night colours light enough to read.
 - **Characters:** chunky ants with one big eye, thin legs and antennae, from `presentation/chars.js`. The presentation has 15 ants; the GDD needs 18.
 - **Asset list:** Satria walking in 4 directions, idle, inspecting, and four portrait moods (neutral, surprised, tired, moved). Marlow behind the counter. Idle and talking sprites for the residents, with translucent silhouettes for Ratih, Satria's father and Daniel. Tilesets for the four zones, props for the nine interiors, and the seven keepsakes.
-- **Pipeline:** made from scratch only, in `game/ArtSource/` `[Decision]`. Each place is drawn per day phase, as the Godot build drew dusk and night variants, rather than relit in the engine.
+- **Pipeline:** made from scratch only, in `game/ArtSource/` `[Decision]`. Each place is drawn once, at midday, and graded per day phase in the game's shader; lights are drawn separately and never graded `[Decision]` (2026-10-18). This replaces drawing a variant per phase.
 
 ## Production and scope
 
@@ -286,17 +295,17 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **Lanterns:** 2.2 has the seventh lantern go out on the last night; 5.4 has all lanterns already out when Night 7 begins.
 - **The ending:** 2.2 and 5.4 let the player choose to leave or stay; 4.4 makes tearing up the contract the canon win condition.
 - **Two Brams:** Kapten Bram and Agen Properti Bram share a name. Kapten Bram is called both a train driver (*masinis*) and a conductor (*kondektur*).
-- **Helen:** she runs a tea stall on the platform (West zone) everywhere except 5.2, which gives her a grocery stall in the Centre zone.
-- **Leo:** lives on a hilltop (Night 5), but the four zones have no hill, and 8.2 places Leo in the East garden.
+- **Helen:** she runs a tea stall on the platform (West zone) everywhere except 5.2, which gives her a grocery stall in the Centre zone. Resolved: the tea stall on the platform (2026-10-18).
+- **Leo:** lives on a hilltop (Night 5), but the four zones have no hill, and 8.2 places Leo in the East garden. Resolved: a hill in the north-east of the East zone, above the garden (2026-10-18).
 - **Day 7 vs Day 8:** 8.2 puts the contract climax on Day 7; everywhere else it is the morning of Day 8.
 - **Engine:** the GDD still weighs Godot 4 and Unity. The user chose Unity.
-- **Where Marlow's shop is:** the text puts it in the banyan roots by the station (West zone), but the Centre zone map's legend lists "Toko Marlow".
+- **Where Marlow's shop is:** the text puts it in the banyan roots by the station (West zone), but the Centre zone map's legend lists "Toko Marlow". Resolved: the banyan in the West (2026-10-18).
 - **Typos:** the title appears as "The Shop That Once Opens" in 4.3, and table 6.1 numbers Mender 9 before Leo 8.
 
 **Between the GDD and decisions or the repo**
 - **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
 - **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
-- **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17, and so does the art carried over from Godot (the title, the shop clock, the station timetable and the KEEPER A. TATE plaque, and the watch's A.T.). It is redrawn with the maps.
+- **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17, and so does the art carried over from Godot that is not redrawn yet (the title, the shop clock and the watch's A.T.). The redrawn world's station clock reads 10:17; the rest is redrawn with the interiors and keepsakes.
 - **The presentation** is frozen with the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and 15 ants, not 18. That is expected.
 
 ## Open questions
@@ -309,7 +318,6 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - Day phases: what exactly moves time forward: each clue, each conversation, or entering a new zone?
 - Is the ending a real choice, with a "leave" ending, or only the canon "stay"?
 - Which minigames, and how many: one per night, or the GDD's 14 or more?
-- Is the outdoor world one seamless map, or the four zones as separate scenes?
 - Saving, chapter select, text speed and other accessibility options.
 
 **Story**
