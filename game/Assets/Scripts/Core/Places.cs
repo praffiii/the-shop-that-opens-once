@@ -220,6 +220,48 @@ namespace Shop
                         Id = "sam", At = V(648, 402), Label = "Sam", Spot = V(-22, 2), Away = true, Phases = new[] { Phase.Dusk },
                         Line = "Doors locked, lamps out, ledgers shelved. A day properly closed.",
                     },
+                    // The flower seller waters the white and the yellow flowers out on the west lawn, then sets her pots
+                    // straight at her stall, while a shopper goes round the stalls with her basket: home, the bread
+                    // stall, the flowers, Mia's vegetables, and home again. At dusk the flower seller
+                    // carries her pots home and the shopper rests on the bench under the oak.
+                    new Person
+                    {
+                        Id = "florist", Label = "Flower seller", Spot = V(-16, 6), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(406, 692), Pose = "water", Facing = 1, Wait = 5f },
+                            new Stop { At = V(136, 692), Pose = "water", Facing = 1, Wait = 5f },
+                            new Stop { At = V(520, 748), Pose = "lift", Facing = 1, Wait = 4f },
+                        },
+                        Line = "Little and often, that's the trick with pots. Too much water and they sulk.",
+                    },
+                    new Person
+                    {
+                        Id = "shopper", Label = "Shopper", Spot = V(-16, 6), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(1110, 628), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
+                            new Stop { At = V(760, 750), Pose = "lift", Facing = -1, Wait = 4f, Carry = true },
+                            new Stop { At = V(594, 750), Pose = "lift", Facing = -1, Wait = 4f, Carry = true },
+                            new Stop { At = V(500, 576), Pose = "lift", Facing = 1, Wait = 4f, Carry = true },
+                        },
+                        Line = "Bread, carrots, and something pretty for the table. A basket's not full till it has flowers in it.",
+                    },
+                    new Person
+                    {
+                        Id = "florist", Label = "Flower seller", Spot = V(-16, 6), Phases = new[] { Phase.Dusk },
+                        Round = new[]
+                        {
+                            new Stop { At = V(520, 750), Pose = "lift", Facing = 1, Wait = 3f, Carry = true },
+                            new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Line = "Pots in for the night. They'd keep out here, but I sleep better with them indoors.",
+                    },
+                    new Person
+                    {
+                        Id = "shopper", At = V(1040, 755), Seat = 8, Label = "Shopper", Spot = V(0, 20), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Basket full, feet tired. I'll sit under the oak a while before I go in.",
+                    },
                 },
                 Hotspots = new[]
                 {

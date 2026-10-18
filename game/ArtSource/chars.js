@@ -314,6 +314,27 @@
         { z: 'hat', at: [0, -3], rows: ['...kkkk...', '..kKKKKk..', '..kKKKKk..', 'kkkkkkkkkk'], key: { k: 'iron4', K: 'iron3' } },
       ],
     },
+    // Two in the square: a shopper in an aqua cardigan over a cream blouse and a cream sun hat with an aqua ribbon, her
+    // wicker basket on her arm; the flower seller in a pink pinafore over a white blouse, sleeves rolled, a wreath of
+    // flowers round her head, a tray of potted flowers to carry home.
+    shopper: { sleeve: ['water2', 'water3'],
+      torso: { rows: ['.aaaAc.', 'aaaaAcc', 'aaAAocc', 'aAAAAcc', 'aAAAocs', 'AAAAAss', '.AAAss.', '..AAs..'],
+               key: { a: 'water2', A: 'water3', c: 'cream0', s: 'cream1', o: 'white' } },
+      villager: true, lash: true,
+      load: { rows: ['..TTTT..', '.T.cc.T.', '.TgccgT.', 'WWWWWWWW', 'WwWwWwWW', '.wWwWww.'], key: { T: 'wood3', c: 'wood1', g: 'grass2', W: 'dirt2', w: 'dirt3' } },
+      parts: [
+        { z: 'hat', at: [-3, -2], rows: ['.....11111.....', '....1222222....', '...aaaaaaaa....', '111222222222223'], key: { 1: 'cream0', 2: 'cream1', 3: 'cream2', a: 'water3' } },
+      ],
+    },
+    florist: { sleeve: ['white', 'stone1', true],
+      torso: { rows: ['.wwwpw.', 'wwwpppw', 'wwppPpw', 'wpppPpp', 'wppPPpp', 'ppPPPPp', '.pPPPP.', '..PPP..'],
+               key: { w: 'white', p: 'pink', P: 'rose' } },
+      villager: true, lash: true,
+      load: { rows: ['.pp...yy.', 'gppg.gyyg', '.gg...gg.', 'RRRR.RRRR', 'rRRR.rRRR', '.RR...RR.'], key: { p: 'pink', y: 'yellow', g: 'leaf3', R: 'roofR2', r: 'roofR1' } },
+      parts: [
+        { z: 'hat', ol: false, at: [-1, -2], rows: ['..pgygwgp..', '.gpgygwgpg.', 'g.........g'], key: { g: 'leaf3', y: 'yellow', w: 'white', p: 'rose' } },
+      ],
+    },
     // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
     porter: { sleeve: ['cream0', 'cream2', true],
       torso: { rows: ['.wwwLL.', 'wwwLLLM', 'wwLLLoM', 'wLLLLLM', 'wLLLLoM', 'LLLLLMM', '.LLMMM.', '..MMM..'],
@@ -492,6 +513,8 @@
     if (id === 'arlo') s.push('fish', 'tend', 'sit');
     if (id === 'neighbour_a' || id === 'neighbour_b') s.push('sit');
     if (id === 'neighbour_a') s.push('look');
+    if (id === 'shopper') s.push('look', 'sit');
+    if (id === 'florist') s.push('water');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -1067,6 +1090,18 @@
       hat(x, P) { plate(x, g => {
         region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 9, 10, 7) && y <= P.cy - 5, (x, y) => band(x - P.cx + (y - P.cy), -22, -10, ['iron2', 'iron3', 'iron4']));
         rect(g, P.cx - 15, P.cy - 6, 29, 2, 'iron4');
+      }); } },
+    shopper: { cloth: ['water1', 'water2', 'water3'], lash: true,
+      bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 32, (x, y) => (x > 30 ? 'cream1' : 'cream0')); dot(g, 24, 40, 'white'); dot(g, 24, 44, 'white'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx, P.cy - 5, 22, 3), (x, y) => (y < P.cy - 5 ? 'cream0' : 'cream1'));
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 10, 10, 6) && y <= P.cy - 7, (x, y) => band(x + y, P.cx + P.cy - 16, P.cx + P.cy - 6, ['cream0', 'cream1', 'cream2']));
+        rect(g, P.cx - 10, P.cy - 9, 20, 2, 'water3');
+      }); } },
+    florist: { cloth: ['white', 'white', 'stone1'], lash: true,
+      bust(g) { region(g, (x, y) => inBust(x, y) && y >= 39 && x >= 17 && x <= 37, (x, y) => (x > 33 ? 'rose' : 'pink')); for (const bx of [19, 35]) line(g, bx, 34, bx, 39, 'pink'); },
+      hat(x, P) { plate(x, g => {
+        for (let k = -12; k <= 12; k += 3) { const y = P.cy - 9 + Math.round((k / 12) ** 2 * 6); rect(g, P.cx + k - 1, y, 3, 2, 'leaf3'); dot(g, P.cx + k, y, ['rose', 'yellow', 'white'][(k + 12) / 3 % 3]); }
       }); } },
     porter: { cloth: ['wood1', 'wood2', 'wood3'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },
