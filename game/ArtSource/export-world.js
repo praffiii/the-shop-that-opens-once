@@ -1,44 +1,39 @@
 'use strict';
 /* Bellwood outdoors -> places/world/day/, places/world/walk.png and grades.json.
-   Renders bellwood.js through its exporter opt-in: view.state.part draws only the layer below the depth-sorted
-   entries, one entry, or the air above them, and scene.bake lists the entries and the walk-mask data.
-   The world is drawn once, at midday; the game grades it for the time of day with KIT.GRADES (grades.json). */
+   Bakes west.js: its ground is one still image cut into chunks, its small loops are clips placed as decals, and every
+   depth-sorted thing is an item. The world is drawn once, at midday; the game grades it for the time of day with
+   KIT.GRADES (grades.json). */
 (() => {
   PARTS.world = () => {
-    const S = BELLWOOD.createWorld(), W = S.w, H = S.h;
-    const draw = (g, t, more) => S.draw(g, { x: 0, y: 0, w: W, h: H, t, state: more });
-    const CELL = 8; // animated ground tiles: small, so the water's frames stay small and repeat
-    const below = BAKE.layer(W, H, (g, t) => draw(g, t, { part: 'below' }), { cell: CELL });
-    const above = BAKE.layer(W, H, (g, t) => draw(g, t, { part: 'above' }), { cell: CELL });
-    const items = S.bake.items.map(it => ({
-      name: it.name, y: it.y, light: it.light, day: it.day, foot: it.foot,
-      track: BAKE.item((g, t) => draw(g, t, { part: 'item', item: it.name }), it.box, { n: it.animated ? BAKE.N : 1 }),
-    }));
-    BAKE.place('world', 'day', { size: [W, H], bg: S.bg, below, above, items, anchors: S.anchors, paths: S.paths });
+    const S = WEST.create(), W = S.w, H = S.h;
+    const clips = Object.fromEntries(Object.entries(S.clips).map(([k, c]) => [k, BAKE.item(c.draw, [0, 0, c.w, c.h])]));
+    for (const [k, c] of Object.entries(clips)) if (!c) throw new Error(`clip "${k}" draws nothing`);
+    // A clip's track is cropped to what it drew; shift each decal by that crop.
+    const decal = ([k, x, y, o]) => [k, x + clips[k].at[0], y + clips[k].at[1], o];
+    const items = S.items.map(it => ({ ...it, track: BAKE.item(it.draw, it.box, { n: it.animated ? BAKE.N : 1 }) }));
+    BAKE.place('world', 'day', {
+      size: [W, H], bg: S.bg, below: BAKE.still(W, H, g => g.drawImage(S.ground, 0, 0)), above: null,
+      clips, decals: { below: S.decals.below.map(decal) }, items, anchors: S.anchors, paths: S.paths,
+    });
     BAKE.json('grades.json', KIT.GRADES);
     const walk = walkMask(S, items);
     BAKE.png('places/world/walk.png', walk.canvas);
     if (walk.missing.length) throw new Error('world walk mask: not walkable or not connected: ' + walk.missing.join(', '));
   };
 
-  /* Walk mask: opaque white where a character's feet may stand, opaque black elsewhere. It comes from the world's own
-     data and art: water (not under a deck), the cliff and the hill faces (not their steps), the wood, the rails, the
-     platform's edge, the fields, and each prop's footprint: its lowest rows, or for a building the span of its walls
-     from its base back (never its roof, nor a sign hanging off a wall). Solids grow by the room an ant's feet need: 8 px sideways and 3 px in front and behind, where
-     depth sorting already keeps its body in front of or behind the prop. Only what the start can reach is kept, and
-     every path and every spot a character walks to must be in it. */
+  /* Walk mask: opaque white where a character's feet may stand, opaque black elsewhere. Solid is what the world calls
+     blocked (water, rock faces, the woods, the platform's edge) plus each item's footprint: for a building or prop
+     with a base, the span of its walls from its base back `foot` rows; otherwise its lowest `foot` drawn rows. Lights
+     and items marked walk (fireflies, smoke, bugs) never block. Solids grow by the room an ant's feet need: 8 px
+     sideways and 3 px in front and behind, where depth sorting already keeps its body in front of or behind the prop.
+     Only what the start can reach is kept, and every path and anchor must be in it. */
   function walkMask(S, items) {
-    const W = S.w, H = S.h, B = S.bake, A = S.anchors;
+    const W = S.w, H = S.h, A = S.anchors;
     const solid = new Uint8Array(W * H), at = (x, y) => y * W + x, inside = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
-    const terrain = (x, y) => (B.water(x, y) && !B.onDeck(x, y)) || (B.onCliff(x, y) && !B.onSteps(x, y)) || (B.onHillFace(x, y) && !B.onHillSteps(x, y)) ||
-      B.onHillSide(x, y) || B.inForest(x, y) || B.onRails(x, y) || B.onPlatformFace(x, y) || B.inGarden(x, y) || B.inWheat(x, y);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (terrain(x, y)) solid[at(x, y)] = 1;
-    const free = /^(hen_|chick$|cat$|crab$|gull$|boat$|butterfly_|firefly_|tunnel$|rail_bridge$)/;
-    const base = new Map(B.items.map(it => [it.name, it.base]));
-    for (const { name, y, light, foot, track } of items) {
-      if (!track || light || free.test(name)) continue;
-      const span = base.get(name);
-      if (span) { for (let j = Math.round(y) - foot; j < Math.round(y); j++) for (let i = span[0]; i <= span[1]; i++) if (inside(i, j)) solid[at(i, j)] = 1; continue; }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (S.blocked(x, y)) solid[at(x, y)] = 1;
+    for (const { y, light, walk, foot = 4, base, track } of items) {
+      if (!track || light || walk) continue;
+      if (base) { for (let j = Math.round(y) - foot; j < Math.round(y); j++) for (let i = Math.round(base[0]); i <= base[1]; i++) if (inside(i, j)) solid[at(i, j)] = 1; continue; }
       const [ax, ay] = track.at, [w, h] = track.size, bot = ay + h - 1, y0 = bot - foot;
       for (const im of track.frames) for (let j = Math.max(0, y0 - ay); j <= bot - ay; j++) for (let i = 0; i < w; i++)
         if (im.data[(j * w + i) * 4 + 3] && inside(ax + i, ay + j)) solid[at(ax + i, ay + j)] = 1;

@@ -155,8 +155,13 @@
              items: [{ name, y, track, light, day }], anchors, paths, hotspots, extra }
      A clip is a small loop drawn once and placed many times as decals; a decal's offset (in samples) staggers it.
      A layer's animated tiles become one-off clips. Items whose track is null are skipped. A light item shows only at
-     dusk and night and is never graded; a day item shows only in the morning and at midday. */
+     dusk and night and is never graded; a day item shows only in the morning and at midday. Everything but the lights
+     gets the game's look (KIT.LOOK) here, so the images are the final colours. */
   function place(placeName, variant, spec) {
+    const looked = tr => (tr && tr.frames.forEach(KIT.lookData), tr);
+    for (const l of [spec.below, spec.above]) if (l) { KIT.lookCanvas(l.base); l.tiles.forEach(looked); }
+    Object.values(spec.clips || {}).forEach(looked);
+    spec.items.forEach(it => { if (!it.light) looked(it.track); });
     const dir = `places/${placeName}/${variant}`, clipNames = Object.keys(spec.clips || {}), tracks = [];
     const clipIx = new Map(), addTrack = tr => (tracks.push(tr), tracks.length - 1);
     for (const n of clipNames) clipIx.set(n, addTrack(spec.clips[n]));
@@ -174,7 +179,7 @@
     const clipOf = t => { if (!used.has(t)) { used.set(t, clips.length); clips.push({ atlas: placed[t].atlas, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq) }); } return used.get(t); };
     const dec = list => list.map(([t, x, y, o]) => [clipOf(t), x, y, o]);
     json(`${dir}/place.json`, {
-      size: spec.size, bg: spec.bg, fps: FPS, loop: N, atlases: canvases.length,
+      size: spec.size, bg: KIT.lookHex(spec.bg), fps: FPS, loop: N, atlases: canvases.length,
       below: { chunks: chunks(dir, 'below', spec.below.base), decals: dec(decals.below) },
       above: spec.above ? { chunks: chunks(dir, 'above', spec.above.base), decals: dec(decals.above) } : null,
       clips,
