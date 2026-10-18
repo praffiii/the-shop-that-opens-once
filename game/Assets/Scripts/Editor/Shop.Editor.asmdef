@@ -1,0 +1,10 @@
+{
+    "name": "Shop.Editor",
+    "rootNamespace": "Shop.Editor",
+    "references": [
+        "Shop"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

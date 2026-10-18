@@ -1,0 +1,238 @@
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using UnityEngine;
+
+namespace Shop
+{
+    /// <summary>
+    /// An ant drawn from its exported sheet (Art/chars/&lt;id&gt;). <see cref="Feet"/> is where it stands, in art pixels.
+    /// Plays a pose, faces left or right, can hold a small item, and walks through a list of points.
+    /// </summary>
+    public sealed class Ant : MonoBehaviour
+    {
+        /// <summary>Walking pace in art px per second.</summary>
+        public const float Speed = 56f;
+        static readonly string[] Walks = { "walk", "carryWalk", "run" }; // poses whose frames advance with distance, not time
+        static JObject cast;
+
+        /// <summary>A foot touched the ground while walking.</summary>
+        public event Action Stepped;
+
+        public string Id { get; private set; }
+
+        SpriteRenderer body, hand;
+        JObject info;
+        Texture2D sheet;
+        string pose = "idle";
+        int facing = 1;
+        Sprite held;
+        float time, step;
+        int frame;
+        Vector2 feet, exact; // exact: where it really is while walking; it stands on the nearest whole pixel
+        readonly List<Vector2> path = new();
+        readonly List<AwaitableCompletionSource> waiting = new();
+        int walkId;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Reset() => cast = null;
+
+        /// <summary>chars.json: every character's poses, frame counts, speeds and hand positions.</summary>
+        public static JObject Cast => cast ??= Art.Json("chars/chars");
+
+        /// <summary>A 48x48 portrait frame of a character in a mood (falls back to neutral). Frame 0 rests, 1 talks, 2 blinks.</summary>
+        public static Sprite Portrait(string id, string mood = "neutral", int frame = 0)
+        {
+            var moods = (JArray)Cast["chars"][id]["moods"];
+            var row = 0;
+            for (var i = 0; i < moods.Count; i++)
+                if ((string)moods[i] == mood) row = i;
+            return Art.Sprite(Art.Texture($"chars/portraits/{id}"), new RectInt(frame * 48, row * 48, 48, 48));
+        }
+
+        public static Ant Create(string id, Transform parent)
+        {
+            var ant = new GameObject(id).AddComponent<Ant>();
+            ant.transform.SetParent(parent, false);
+            ant.body = Part("body", ant.transform);
+            ant.hand = Part("hand", ant.transform);
+            ant.SetId(id);
+            return ant;
+        }
+
+        static SpriteRenderer Part(string name, Transform parent)
+        {
+            var sr = new GameObject(name).AddComponent<SpriteRenderer>();
+            sr.transform.SetParent(parent, false);
+            sr.sharedMaterial = Art.SpriteMaterial;
+            return sr;
+        }
+
+        public void SetId(string id)
+        {
+            Id = id;
+            name = id;
+            info = (JObject)Cast["chars"][id];
+            sheet = Art.Texture($"chars/{id}");
+            Refresh();
+        }
+
+        public Vector2 Feet
+        {
+            get => feet;
+            set
+            {
+                feet = new Vector2(Mathf.Round(value.x), Mathf.Round(value.y));
+                exact = value;
+                Place();
+            }
+        }
+
+        public string Pose
+        {
+            get => pose;
+            set
+            {
+                if (value == pose) return;
+                pose = value;
+                time = step = 0f;
+                frame = 0;
+                Refresh();
+            }
+        }
+
+        /// <summary>1 faces right, -1 faces left.</summary>
+        public int Facing
+        {
+            get => facing;
+            set
+            {
+                facing = value;
+                Refresh();
+            }
+        }
+
+        /// <summary>A small item shown in the hand, or null.</summary>
+        public Sprite Held
+        {
+            get => held;
+            set
+            {
+                held = value;
+                Show(frame);
+            }
+        }
+
+        public bool Walking => path.Count > 0;
+
+        /// <summary>Walks through <paramref name="points"/>. True on arrival, false if another walk or <see cref="Stop"/> took over.</summary>
+        public async Awaitable<bool> Walk(List<Vector2> points)
+        {
+            var mine = ++walkId;
+            if (points.Count == 0) return true;
+            path.Clear();
+            path.AddRange(points);
+            Pose = "walk";
+            var done = new AwaitableCompletionSource();
+            waiting.Add(done);
+            await done.Awaitable;
+            return mine == walkId;
+        }
+
+        /// <summary>Stops walking, stands still, and releases anyone awaiting <see cref="Walk"/> with false.</summary>
+        public void Stop()
+        {
+            walkId++;
+            path.Clear();
+            Arrive();
+        }
+
+        /// <summary>Steps by <paramref name="motion"/> (keyboard walking): faces the way it goes and moves the legs by distance.</summary>
+        public void MoveBy(Vector2 motion)
+        {
+            if (Mathf.Abs(motion.x) > 0.01f) Facing = motion.x > 0 ? 1 : -1;
+            var to = Here() + motion;
+            Feet = to;
+            exact = to;
+            if (Array.IndexOf(Walks, pose) < 0) Pose = "walk";
+            step += motion.magnitude;
+            var p = Current();
+            var stride = (float)p["stride"];
+            var frames = (int)p["frames"];
+            while (step >= stride)
+            {
+                step -= stride;
+                Show(frame + 1);
+                if (frame % (frames / 2) == 0) Stepped?.Invoke();
+            }
+        }
+
+        public void FaceTo(float x)
+        {
+            if (Mathf.Abs(x - feet.x) > 1f) Facing = x > feet.x ? 1 : -1;
+        }
+
+        void Update()
+        {
+            if (path.Count > 0)
+            {
+                var to = path[0];
+                MoveBy(Vector2.ClampMagnitude(to - Here(), Speed * Time.deltaTime));
+                if (Vector2.Distance(exact, to) < 0.001f)
+                {
+                    path.RemoveAt(0);
+                    if (path.Count == 0) Arrive();
+                }
+            }
+            else if (Array.IndexOf(Walks, pose) < 0)
+            {
+                time += Time.deltaTime;
+                Show((int)(time * (float)Current()["fps"]));
+            }
+        }
+
+        void Arrive()
+        {
+            if (Array.IndexOf(Walks, pose) >= 0) Pose = "idle";
+            var done = waiting.ToArray();
+            waiting.Clear();
+            foreach (var w in done) w.SetResult();
+        }
+
+        // Where it really is: its exact walking position, unless something has moved it since.
+        Vector2 Here() => new Vector2(Mathf.Round(exact.x), Mathf.Round(exact.y)) == feet ? exact : feet;
+
+        JToken Current() => info["poses"][pose] ?? info["poses"]["idle"];
+
+        void Show(int f)
+        {
+            var p = Current();
+            frame = f % (int)p["frames"];
+            var cell = Art.Point(Cast["cell"]);
+            var feetAt = Art.Point(Cast["feet"]);
+            int w = (int)cell.x, h = (int)cell.y;
+            body.sprite = Art.Sprite(sheet, new RectInt(frame * w, (int)p["row"] * h, w, h), Vector2Int.RoundToInt(feetAt));
+            body.flipX = facing < 0;
+            // Flipping mirrors around the feet pixel's left edge; one pixel over keeps the feet on the same column.
+            body.transform.localPosition = new Vector3(facing < 0 ? 1 : 0, 0);
+            var handAt = Art.Point(p["hand"][frame]);
+            hand.enabled = held != null;
+            hand.sprite = held;
+            hand.transform.localPosition = Art.World(new Vector2(handAt.x * facing, handAt.y));
+            Place();
+        }
+
+        void Place()
+        {
+            transform.localPosition = Art.World(feet);
+            body.sortingOrder = BakedArt.Order(feet.y, 1);
+            hand.sortingOrder = BakedArt.Order(feet.y, 2);
+        }
+
+        void Refresh()
+        {
+            if (info == null) return;
+            Show(frame);
+        }
+    }
+}

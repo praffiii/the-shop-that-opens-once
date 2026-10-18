@@ -1,0 +1,17 @@
+{
+    "name": "Shop.Tests",
+    "rootNamespace": "Shop.Tests",
+    "references": [
+        "Shop",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ]
+}

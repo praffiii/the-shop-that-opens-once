@@ -1,0 +1,142 @@
+using Newtonsoft.Json.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Shop
+{
+    /// <summary>
+    /// The UI's shared look: colours from the art palette, the pixel font, and the pieces in Art/ui.
+    /// UI positions are screen-canvas pixels from the top-left, y down, like the art.
+    /// </summary>
+    public static class Look
+    {
+        public static readonly Color Ink = Art.Color("#2a1b22");
+        public static readonly Color Soft = Art.Color("#7a452e"); // wood4, for quieter text
+        public static readonly Color Cream = Art.Color("#fff1d2"); // dirt0: the curtain and the cards
+        /// <summary>Pixelify Sans spaces its letters evenly here (at 12 the "a" runs wide).</summary>
+        public const int FontSize = 13;
+        /// <summary>Line pitch of text, in canvas px.</summary>
+        public const int Line = 14;
+
+        static Font font;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Reset() => font = null;
+
+        /// <summary>ui.json: sizes, 9-slice margins, frame counts and cursor hotspots of the UI pieces.</summary>
+        public static JObject Ui => Art.Json("ui/ui");
+
+        public static Font Font
+        {
+            get
+            {
+                if (font) return font;
+                font = Resources.Load<Font>("Fonts/PixelifySans");
+                Font.textureRebuilt -= Sharpen;
+                Font.textureRebuilt += Sharpen;
+                Sharpen(font);
+                return font;
+            }
+        }
+
+        // Glyphs are drawn to the font's texture as they are needed; keep it unfiltered so letters stay crisp.
+        static void Sharpen(Font f)
+        {
+            if (f == font && f.material.mainTexture) f.material.mainTexture.filterMode = FilterMode.Point;
+        }
+
+        /// <summary>An empty UI node covering <paramref name="rect"/> in its parent.</summary>
+        public static RectTransform Node(string name, Transform parent, Rect rect = default)
+        {
+            var rt = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+            rt.SetParent(parent, false);
+            Place(rt, rect);
+            return rt;
+        }
+
+        /// <summary>Puts a UI node at <paramref name="rect"/> (top-left origin, y down) inside its parent.</summary>
+        public static void Place(RectTransform rt, Rect rect)
+        {
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+            rt.anchoredPosition = new Vector2(rect.x, -rect.y);
+            rt.sizeDelta = rect.size;
+        }
+
+        public static void Move(RectTransform rt, Vector2 at) => rt.anchoredPosition = new Vector2(Mathf.Round(at.x), -Mathf.Round(at.y));
+
+        public static void Resize(RectTransform rt, Vector2 size) => rt.sizeDelta = size;
+
+        public static Vector2 Pos(RectTransform rt) => new(rt.anchoredPosition.x, -rt.anchoredPosition.y);
+
+        /// <summary>A picture at its own size (times <paramref name="scale"/>).</summary>
+        public static Image Picture(string name, Transform parent, Sprite sprite = null, int scale = 1)
+        {
+            var img = Node(name, parent).gameObject.AddComponent<Image>();
+            img.raycastTarget = false;
+            SetSprite(img, sprite, scale);
+            return img;
+        }
+
+        public static void SetSprite(Image img, Sprite sprite, int scale = 1)
+        {
+            img.sprite = sprite;
+            img.enabled = sprite != null;
+            if (sprite) img.rectTransform.sizeDelta = sprite.rect.size * scale;
+        }
+
+        /// <summary>A 9-slice panel from Art/ui/&lt;piece&gt;, covering <paramref name="rect"/>.</summary>
+        public static Image Panel(string piece, Transform parent, Rect rect = default)
+        {
+            var tex = Art.Texture("ui/" + piece);
+            var m = Ui[piece]["margins"]; // left, top, right, bottom
+            var border = new Vector4((float)m[0], (float)m[3], (float)m[2], (float)m[1]);
+            var img = Node(piece, parent, rect).gameObject.AddComponent<Image>();
+            img.raycastTarget = false;
+            img.sprite = Art.Sprite(tex, new RectInt(0, 0, tex.width, tex.height), default, border);
+            img.type = Image.Type.Sliced;
+            return img;
+        }
+
+        /// <summary>Frame <paramref name="i"/> of a horizontal strip in Art/ui/&lt;piece&gt;.</summary>
+        public static Sprite Frame(string piece, int i)
+        {
+            var tex = Art.Texture("ui/" + piece);
+            var frames = (int)Ui[piece]["frames"];
+            var w = tex.width / frames;
+            return Art.Sprite(tex, new RectInt(w * (i % frames), 0, w, tex.height));
+        }
+
+        public static Sprite Piece(string piece) => Art.Sprite(Art.Texture("ui/" + piece));
+
+        /// <summary>Text in the pixel font. With a width it wraps; without, it is sized to its text.</summary>
+        public static Text Label(string text, Transform parent, Rect rect = default, Color? color = null)
+        {
+            var t = Node("label", parent, rect).gameObject.AddComponent<Text>();
+            t.raycastTarget = false;
+            t.font = Font;
+            t.fontSize = FontSize;
+            t.color = color ?? Ink;
+            t.supportRichText = true;
+            t.alignment = TextAnchor.UpperLeft;
+            t.horizontalOverflow = rect.width > 0 ? HorizontalWrapMode.Wrap : HorizontalWrapMode.Overflow;
+            t.verticalOverflow = VerticalWrapMode.Overflow;
+            SetText(t, text);
+            return t;
+        }
+
+        /// <summary>Changes a label's text; a label with no wrapping width is resized to fit it.</summary>
+        public static void SetText(Text t, string text)
+        {
+            t.text = text;
+            if (t.horizontalOverflow == HorizontalWrapMode.Overflow)
+                t.rectTransform.sizeDelta = new Vector2(Width(t), Mathf.Max(Line, Mathf.Ceil(t.preferredHeight)));
+        }
+
+        /// <summary>How wide a label's text is, in canvas px.</summary>
+        public static float Width(Text t) => Mathf.Ceil(t.preferredWidth);
+
+        /// <summary>True when the mouse is over this UI node and it is showing.</summary>
+        public static bool Hit(RectTransform rt) =>
+            rt.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(rt, Main.UiPoint, Main.Instance.Camera);
+    }
+}
