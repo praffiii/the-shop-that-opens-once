@@ -30,7 +30,7 @@ namespace Shop
         public Vector2 GlobalSpot => Position + Spot;
     }
 
-    /// <summary>Someone standing in a place, with the hotspot to talk to them.</summary>
+    /// <summary>Someone in a place at their activity, with the hotspot to talk to them.</summary>
     public sealed class Person
     {
         public string Id;
@@ -39,9 +39,29 @@ namespace Shop
         public Rect Area = new(-10, -30, 20, 30);
         public Vector2 Spot = new(24, 0);
         public int Facing = 1;
+        /// <summary>What they are doing where they stand (brew, hammer...).</summary>
         public string Pose = "idle";
         /// <summary>The chapters they are there; null means every chapter.</summary>
         public int[] Chapters;
+        /// <summary>The times of day they are there; null means at any time.</summary>
+        public Phase[] Phases;
+        /// <summary>Stops they walk round in turn, starting at the first, instead of staying at <see cref="At"/>.</summary>
+        public Stop[] Round;
+        /// <summary>What they say when the chapter has nothing for them.</summary>
+        public string Line;
+    }
+
+    /// <summary>A stop on someone's round: they walk there and keep a pose for a while.</summary>
+    public sealed class Stop
+    {
+        public Vector2 At;
+        public string Pose = "idle";
+        /// <summary>1 faces right, -1 left, 0 keeps the way they came.</summary>
+        public int Facing;
+        /// <summary>Seconds they stay.</summary>
+        public float Wait = 4f;
+        /// <summary>They carry their load on the walk from here to the next stop.</summary>
+        public bool Carry;
     }
 
     /// <summary>A place to explore: its art, the people in it, its hotspots and where the courier can arrive.</summary>

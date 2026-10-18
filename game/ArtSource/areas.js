@@ -349,10 +349,10 @@
   const mix = table => (x, y, r, P) => { const a = table(P).find(([p]) => r < p)[1]; return a[(r * 997 | 0) % a.length]; };
   const wavy = (y0, a, f) => x => y0 + a * Math.sin(x / f);
 
-  // The station: the line comes out of the ridge's tunnel and curves down past the platform; a siding runs to the yard.
+  // The station: the line comes out of the ridge's tunnel and runs along the back of the platform.
   const RIDGE = wavy(136, 10, 53);
-  const STATION_RAILS = [[[80, 190], [86, 260], [140, 350], [250, 408], [400, 418], [940, 418]], [[420, 418], [500, 428], [560, 466], [620, 476], [940, 476]]].map(p => smooth(p, 4));
-  const PLATFORM = [300, 326, 780, 390], YARD = wavy(536, 4, 60); // the platform; the foot of the yard's embankment
+  const STATION_RAILS = [smooth([[70, 190], [80, 220], [130, 238], [240, 242], [940, 242]], 4)];
+  const PLATFORM = [214, 252, 920, 352], EDGE_Y = 352, YARD = wavy(536, 4, 60); // the platform, paved up to the station terrace's edge; the foot of the yard's embankment
   // The square: the hall and its neighbours shoulder to shoulder up on a terrace, the round paved square below it.
   const TERRACE = wavy(420, 6, 40), PLAZA = [640, 645, 200, 170]; // the plaza: a rounded square, its middle and half sizes
   // The east: the river down its west side, Leo's hill in the north-east corner.
@@ -401,58 +401,65 @@
       glow: [[300, 290, 200, 60], [500, 440, 110, 90]],
     },
 
-    /* The old station, built like an Octopath town: up on the yard's embankment the station hall with its clock tower
-       and the homes of Helen and the mender either side of it, the signal box by the line and a cottage at the end; the
-       platform before them with the train, Helen's tea stall and its lamps; stairs down by the gate to the road, where
-       the engine shed, Bram's carriage, a cottage, the forge and the gate stand shoulder to shoulder. West to the grove,
+    /* The old station, built like an Octopath town: the line comes out of the ridge's tunnel and runs along the back,
+       the old train standing on it by the platform; Helen's cottage at the platform's west end and the station hall at
+       its east end, both facing the forecourt, with Helen's tea stall, benches, the timetable board and lamps along the
+       platform between them, all up on one paved terrace walled in stone, so the station reads as one place; stairs
+       down from the hall's door and from the platform's west end to the goods yard before it, kept low, and on to the road,
+       where Bram's carriage, the forge and the Mender's house stand shoulder to shoulder. West to the grove,
        east to the square. */
     station: {
       w: 960, h: 768, seed: 7, bg: '#2f6a37', start: 'start',
-      level: (x, y) => y < RIDGE(x) ? 2 : y < YARD(x) ? 1 : 0,
-      roads: [[[[-20, 690], [300, 684], [600, 694], [980, 686]], 22], [[[800, 360], [812, 450], [818, 690]], 16]],
+      level: (x, y) => y < RIDGE(x) ? 3 : y < EDGE_Y ? 2 : y < YARD(x) ? 1 : 0,
+      roads: [[[[-20, 690], [300, 684], [600, 694], [980, 686]], 22], [[[810, 336], [812, 450], [818, 690]], 16], [[[812, 452], [600, 456], [360, 452], [264, 440], [262, 340]], 10]],
       rails: STATION_RAILS, gap: 40,
       paving: (x, y) => x >= PLATFORM[0] && x < PLATFORM[2] && y >= PLATFORM[1] && y < PLATFORM[3],
-      clear: [[540, 360, 400, 90], [520, 620, 460, 100]],
+      clear: [[460, 290, 280, 60], [480, 430, 460, 120], [520, 620, 460, 100]],
       species: mix(P => [[0.45, P.pine], [0.75, P.pineDeep], [1, P.oakDeep]]),
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
         at('way_grove', V.waysign('GROVE', -1), 20, 712); at('way_square', V.waysign('SQUARE', 1), 936, 664);
-        // up on the embankment behind the platform: the station, Helen's cottage beside it, trees and a garden round them
-        at('helen_house', V.helenHouse(), 336, 306, { lane: [[336, 340]] });
-        at('station', V.station(), 530, 326);
-        at('oak_n', V.oak(6), 214, 318); at('fruit_n', V.fruitTree(2), 724, 300); at('blossom_m', V.blossom(7), 790, 322, { sway: 2 });
-        [[250, 344, 'rose'], [690, 340, 'yellow'], [760, 346, 'white']].forEach(([x, y, c], i) => at('garden_' + i, V.flowerClump(i + 40, c), x, y, { walk: true }));
-        at('tunnel', V.tunnelPortal(), 80, 186, { walk: true });
-        // the platform: the train, Helen's tea stall, the notice board, benches, lamps and the luggage
-        at('tea_stall', V.teaStall(), 400, 372);
-        at('info_board', V.noticeBoard(), 740, 368);
-        at('bench_p0', V.bench(), 460, 352); at('bench_p1', V.bench(), 604, 352);
-        [[316, 386], [500, 386], [680, 386], [772, 386]].forEach(([x, y], i) => at('lamp_p' + i, V.lamp(), x, y));
-        at('crates_p', V.crateStack(2), 322, 352); at('barrel_p', V.barrel(), 652, 346);
-        at('locomotive', V.locomotive(), 640, 424); at('wagon_0', V.wagon(1), 532, 424); at('wagon_1', V.wagon(2), 890, 482);
-        at('water_tower', V.waterTower(), 900, 404);
-        // the goods yard between the line and the road, kept low so it never stands before the platform: sleepers,
-        // crates, sacks and barrels, hedges along the top of the embankment
-        [[160, 470], [214, 486], [580, 506]].forEach(([x, y], i) => at('sleepers_' + i, V.sleepers(), x, y));
-        at('crates_g0', V.crateStack(3), 380, 500); at('crates_g1', V.crateStack(4), 680, 506); at('sacks_g', V.sacks(), 420, 508);
-        [[552, 520], [700, 520]].forEach(([x, y], i) => at('barrel_g' + i, V.barrel(), x, y));
-        [[290, 526], [470, 530], [760, 528]].forEach(([x, y], i) => at('hedge_y' + i, V.hedge(48), x, y));
+        // the line out of the ridge's tunnel, the old train standing on it by the platform; the water tower and trees
+        // behind it against the ridge
+        at('tunnel', V.tunnelPortal(), 70, 186, { walk: true });
+        at('wagon_0', V.wagon(1), 420, 248); at('locomotive', V.locomotive(), 540, 248);
+        at('water_tower', V.waterTower(), 236, 220);
+        at('oak_n', V.oak(6), 340, 214); at('blossom_m', V.blossom(7), 650, 216, { sway: 2 });
+        // the platform: Helen's cottage at its west end and the station hall at its east end, both facing the
+        // forecourt; between them Helen's tea stall, the luggage, benches, the timetable board and lamps
+        at('helen_house', V.helenHouse(), 150, 314, { lane: [[150, 340]] });
+        at('station', V.station(), 810, 322);
+        at('tea_stall', V.teaStall(), 290, 306); at('crates_p', V.crateStack(2), 222, 300);
+        at('bench_p0', V.bench(), 430, 276); at('bench_p1', V.bench(), 580, 276); at('barrel_p', V.barrel(), 500, 272);
+        at('info_board', V.noticeBoard(), 640, 306);
+        [[236, 322], [410, 322], [560, 322], [690, 322]].forEach(([x, y], i) => at('lamp_p' + i, V.lamp(), x, y));
+        [[90, 336, 'rose'], [212, 338, 'yellow'], [700, 344, 'white'], [930, 340, 'rose']].forEach(([x, y, c], i) => at('garden_' + i, V.flowerClump(i + 40, c), x, y, { walk: true }));
+        // Helen's garden below her cottage, at the foot of the terrace: herbs for the tea in rows behind a picket fence
+        [['cabbage', 402], ['carrot', 418]].forEach(([k, y], i) => at('herbs_' + i, V.vegRow(k, 48), 120, y, { walk: true }));
+        at('herb_fence', V.pickets(7), 124, 440);
+        // the goods yard along the cart track between the platform and the road, kept low so it never stands before
+        // the platform: crates, the sack pile, a hand cart and barrels; hedges along the top of the embankment
+        at('crates_g0', V.crateStack(3), 330, 428); at('sacks_g', V.sacks(), 400, 430); at('cart_g', V.cart(), 480, 432);
+        at('crates_g1', V.crateStack(4), 570, 428); [[620, 432], [646, 426]].forEach(([x, y], i) => at('barrel_g' + i, V.barrel(), x, y));
+        [[290, 526], [470, 530], [700, 528]].forEach(([x, y], i) => at('hedge_y' + i, V.hedge(48), x, y));
         // down by the road
         at('bram_home', V.bramHome(), 172, 626, { lane: [[203, 690]] });
         // between them a garden: an old oak, a bench, a well
         at('oak_s', V.oak(5), 290, 628); at('bench_s', V.bench2(3), 340, 662); at('well_s', V.wellRoofed('roofG'), 388, 640);
-        at('blossom_n', V.blossom(5), 852, 318, { sway: 2 }); at('blossom_e', V.blossom(6), 906, 640, { sway: 2 });
+        at('blossom_e', V.blossom(6), 906, 640, { sway: 2 });
         // Mender's forge, and Mender's house beside it
         at('forge', V.forge(), 520, 630, { lane: [[504, 690]] });
         at('mender_house', V.menderHouse(), 708, 630, { lane: [[708, 690]] });
-        at('gate', V.gateArch('BELLWOOD'), 816, 600, { walk: true });
+        // no welcome arch: Bellwood is reached by rail, so the hall's name board greets arrivals; a waymark at the
+        // foot of the stairs instead, as at the area's exits
+        at('way_station', V.waysign('STATION', 0), 846, 664);
         at('crates_y', V.crateStack(1), 236, 668); at('cart_y', V.cart(), 770, 664); at('logs_y', V.logPile(), 436, 666);
         [[250, 712], [520, 716], [760, 712]].forEach(([x, y], i) => at('lamp_r' + i, V.lamp(), x, y));
-        [[390, 668, 'yellow'], [496, 668, 'rose'], [868, 668, 'white'], [40, 720, 'lilac'], [960 - 30, 724, 'yellow']]
+        [[390, 668, 'yellow'], [496, 668, 'rose'], [40, 720, 'lilac'], [960 - 30, 724, 'yellow']]
           .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 20, c), x, y, { walk: true }));
         [[110, 560], [640, 548]].forEach(([x, y], i) => at('boulder_' + i, V.boulder(i + 1), x, y));
       },
-      anchors: { start: [530, 360], from_grove: [40, 690], from_square: [920, 686] },
+      anchors: { start: [460, 300], from_grove: [40, 690], from_square: [920, 686] },
       glow: [[200, 740, 140, 30]],
     },
 

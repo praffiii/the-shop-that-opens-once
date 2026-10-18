@@ -43,7 +43,7 @@ namespace Shop
                     await Say("marlow", Game.Bag.Count > 0 ? "The platform is up the steps and past the forge, by the tea stall." : "Mind the lanterns.");
                     break;
                 default:
-                    await ShowText($"Nothing written here yet ({id}).");
+                    await Chat(id);
                     break;
             }
         }

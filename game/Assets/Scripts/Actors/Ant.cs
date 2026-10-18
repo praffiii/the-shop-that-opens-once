@@ -141,6 +141,11 @@ namespace Shop
         /// <summary>Walks at <see cref="RunSpeed"/> with the run pose, by keys or along a path.</summary>
         public bool Running { get; set; }
 
+        /// <summary>Carries its load: walks with carryWalk and stands with carry.</summary>
+        public bool Carrying { get; set; }
+
+        string Gait => Running ? "run" : Carrying ? "carryWalk" : "walk";
+
         /// <summary>Walks through <paramref name="points"/>. True on arrival, false if another walk or <see cref="Stop"/> took over.</summary>
         public async Awaitable<bool> Walk(List<Vector2> points)
         {
@@ -148,7 +153,7 @@ namespace Shop
             if (points.Count == 0) return true;
             path.Clear();
             path.AddRange(points);
-            Pose = Running ? "run" : "walk";
+            Pose = Gait;
             var done = new AwaitableCompletionSource();
             waiting.Add(done);
             await done.Awaitable;
@@ -175,7 +180,7 @@ namespace Shop
             var to = Here() + motion;
             Feet = to;
             exact = to;
-            if (Array.IndexOf(Walks, pose) < 0 || Running != (pose == "run")) Pose = Running ? "run" : "walk";
+            if (pose != Gait) Pose = Gait;
             step += motion.magnitude;
             var p = Current();
             var stride = (float)p["stride"];
@@ -223,7 +228,7 @@ namespace Shop
 
         void Arrive()
         {
-            if (Array.IndexOf(Walks, pose) >= 0) Pose = "idle";
+            if (Array.IndexOf(Walks, pose) >= 0) Pose = Carrying ? "carry" : "idle";
             var done = waiting.ToArray();
             waiting.Clear();
             foreach (var w in done) w.SetResult();

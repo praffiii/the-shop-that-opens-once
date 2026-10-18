@@ -57,7 +57,7 @@ Shader "Shop/Pixel"
         float4 _Lamps[32];       // world position and reach of each light that glows on its surroundings
         float _LampCount;
         float4 _LampTint;        // the glow's colour (sRGB) and strength
-        float4 _Feet[8];         // world position under each character, and the spot's half width
+        float4 _Feet[16];       // world position under each character, and the spot's half width
         float _FeetCount;
         float4 _Rim;             // the rim light's colour (sRGB) and strength
 

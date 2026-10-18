@@ -12,6 +12,8 @@ namespace Shop
         public static PlaceDef Get(string id) =>
             All.TryGetValue(id, out var def) ? def : throw new System.ArgumentException($"No place called {id}");
 
+        public static IEnumerable<PlaceDef> Every => All.Values;
+
         static Rect R(float x, float y, float w, float h) => new(x, y, w, h);
         static Vector2 V(float x, float y) => new(x, y);
 
@@ -29,14 +31,47 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
-                    new Person { Id = "helen", At = V(366, 318), Label = "Helen", Area = R(-10, -30, 20, 30), Spot = V(-22, 2), Facing = -1 },
+                    // Morning: Helen brews at her stall, Kapten Bram paces between the frozen clock and the timetable,
+                    // a porter carries sacks up from the yard to Helen's stall, and the Mender is at the anvil.
+                    new Person
+                    {
+                        Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Pose = "brew", Facing = -1, Phases = new[] { Phase.Morning },
+                        Line = "Morning, love. The first cup always goes on the end of the counter, in case the train comes in.",
+                    },
+                    new Person
+                    {
+                        Id = "bram", Label = "Kapten Bram", Spot = V(-20, 4), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(810, 340), Pose = "look", Facing = -1, Wait = 6f },
+                            new Stop { At = V(664, 318), Facing = -1, Wait = 4f },
+                        },
+                        Line = "The board still says the morning train is due. I check it anyway. Forty years on the footplate does that.",
+                    },
+                    new Person
+                    {
+                        Id = "porter", Label = "Porter", Spot = V(0, -10), Phases = new[] { Phase.Morning },
+                        // a sack from the pile in the yard up to Helen's stall, set down by her crates, and back for the next
+                        Round = new[]
+                        {
+                            new Stop { At = V(432, 432), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
+                            new Stop { At = V(252, 326), Pose = "lift", Facing = -1, Wait = 2.5f },
+                        },
+                        Line = "Sugar and tea for Helen's stall. She goes through a sack a week, pouring for a train that never comes.",
+                    },
+                    new Person
+                    {
+                        Id = "mender", At = V(566, 626), Label = "Mender", Spot = V(0, 14), Pose = "hammer", Phases = new[] { Phase.Morning },
+                        Line = "Morning. Mind the sparks.",
+                    },
+                    new Person { Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Facing = -1, Phases = new[] { Phase.Midday, Phase.Dusk } },
                 },
                 Hotspots = new[]
                 {
                     West("to_grove", 690, "Into the trees", "grove/from_station"),
                     East("to_square", 960, 686, "To the square", "square/from_station"),
-                    new Hotspot { Id = "station_clock", At = V(530, 225), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 135) },
-                    new Hotspot { Id = "info_board", At = V(740, 368), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
+                    new Hotspot { Id = "station_clock", At = V(810, 221), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 120) },
+                    new Hotspot { Id = "info_board", At = V(640, 306), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
             },
             ["square"] = new PlaceDef

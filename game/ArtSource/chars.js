@@ -13,6 +13,7 @@
     slate0: '#c6d2f2', slate1: '#97a9da', slate2: '#6f81b9',                  // Helen's cardigan
     dusty0: '#ffd2da', dusty1: '#f2a6b6', dusty2: '#cf7d94',                  // Nora's headscarf
     lilac2: '#9d84de', pink0: '#ffd4ea',
+    navy0: '#8197d1', navy1: '#5a6ba8', navy2: '#3f4c82',                       // Kapten Bram's driver's jacket
   };
   const R = k => XC[k] || k;
   // PX raster primitives that also understand the extra colour keys above.
@@ -103,6 +104,7 @@
     happy:  ['....', '.kk.', 'k..k', '....'],
     closed: ['....', '....', 'kkkk', '.kk.'],
     squint: ['....', 'kkkk', 'wwph', '.ww.'],
+    up:     ['.wpp', 'wwph', 'wwww', '.ww.'],
   };
   const MK = { k: 'ink', r: 'roofR4' };
   const MOUTH = {
@@ -242,13 +244,95 @@
         { z: 'hat', at: [-3, -1], rows: ['....12222...', '...1222223..', '3332222233..'], key: { 1: 'roofR0', 2: 'red', 3: 'roofR3' } },
       ],
     },
+    // Kapten Bram, the retired engine driver: a navy driver's jacket with brass buttons, a red neckerchief, a grey
+    // moustache and the striped driver's cap.
+    bram: { sleeve: ['navy1', 'navy2'],
+      torso: { rows: ['.rrrmm.', 'mrRNNNn', 'mNNNNon', 'mNNNNNn', 'mNNNNon', 'NNNNNnn', '.NNnnn.', '..nnn..'],
+               key: { r: 'red', R: 'roofR3', m: 'navy0', N: 'navy1', n: 'navy2', o: 'brass1' } },
+      bent: 0,
+      parts: [
+        { z: 'face', ol: false, at: [5, 7], rows: ['.sss', 'ss.s'], key: { s: 'stone2' } },
+        { z: 'hat', at: [0, -2], rows: ['..wbwbwb..', '.wbwbwbwb.', 'wbwbwbwbwb', 'BBBBBBBBBBkk'], key: { w: 'cream0', b: 'roofB2', B: 'roofB3', k: 'roofB4' } },
+      ],
+    },
+    // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
+    porter: { sleeve: ['cream0', 'cream2', true],
+      torso: { rows: ['.wwwLL.', 'wwwLLLM', 'wwLLLoM', 'wLLLLLM', 'wLLLLoM', 'LLLLLMM', '.LLMMM.', '..MMM..'],
+               key: { w: 'cream0', L: 'wood2', M: 'wood3', o: 'brass1' } },
+      villager: true,
+      load: { rows: ['..1T1...', '.122221.', '12222223', '12222233', '22222233', '.223333.'], key: { 1: 'cream0', 2: 'cream1', 3: 'cream2', T: 'wood3' } },
+      parts: [
+        { z: 'hat', at: [-1, -1], rows: ['...111111...', '.1122222223.', '1222222222333'], key: { 1: 'stone2', 2: 'stone3', 3: 'stone4' } },
+      ],
+    },
   };
   const IDS = Object.keys(CAST);
 
+  /* How each character that turns looks from the front and from the back, over the shared ant body (drawn round x 20,
+     d the body's bob): cloth on its thorax ([lit, mid, shade]; bare ant without), what crosses it (chest), what shows
+     either side of the body from the front (behind), the bag on its back (bag), its hat, and marks on its face. */
+  const dome = (g, d, c0, c1) => { ellipse(g, 20, 15 + d, 6, 4, c1); g.clearRect(0, 16 + d, 40, 24); ellipse(g, 19, 13 + d, 4, 2, c0); };
+  const atop = (g, fn) => { g.globalCompositeOperation = 'source-atop'; fn(); g.globalCompositeOperation = 'source-over'; };
+  const TURN = {
+    courier: {
+      chest(g, d, back) { const side = back ? -1 : 1; for (let k = 0; k < 7; k++) rect(g, 20 - side * (3 - k), 24 + d + k, 1, 2, k < 3 ? 'cap2' : 'cap3'); },
+      behind(g, d) { ellipse(g, 20, 25 + d, 5, 2, 'cap3'); rect(g, 15, 24 + d, 11, 1, 'cap2'); },
+      bag: true,
+      // the cap: its dome, the brim toward whichever way the courier faces
+      hat(g, d, back) {
+        ellipse(g, 20, 15 + d, 6, 4, 'cap2'); g.clearRect(0, 16 + d, 40, 24); ellipse(g, 19, 13 + d, 4, 2, 'cap1'); rect(g, 17, 12 + d, 2, 1, 'cap0');
+        if (back) { rect(g, 14, 15 + d, 13, 1, 'cap3'); rect(g, 19, 14 + d, 3, 1, 'cream1'); }
+        else { rect(g, 13, 15 + d, 15, 2, 'cap3'); rect(g, 13, 15 + d, 15, 1, 'cap2'); rect(g, 19, 12 + d, 2, 2, 'cream0'); dot(g, 20, 13 + d, 'cream1'); }
+      },
+    },
+    // Helen: the slate cardigan, a brass chain at the collar, the headscarf with its bun at the back
+    helen: {
+      cloth: ['slate0', 'slate1', 'slate2'],
+      chest(g, d) { rect(g, 17, 23 + d, 7, 1, 'brass1'); },
+      hat(g, d, back) {
+        dome(g, d, 'stone0', 'stone1');
+        if (back) { ellipse(g, 20, 17 + d, 4, 2, 'stone2'); ellipse(g, 20, 11 + d, 2, 2, 'stone1'); }
+      },
+    },
+    // the Mender: a cream shirt under the leather apron, its straps crossed at the back, goggles pushed up
+    mender: {
+      cloth: ['cream0', 'cream1', 'cream2'],
+      chest(g, d, back) {
+        if (back) { line(g, 17, 24 + d, 23, 30 + d, 'wood4'); line(g, 23, 24 + d, 17, 30 + d, 'wood4'); }
+        else { rect(g, 18, 25 + d, 5, 7, 'wood3'); rect(g, 18, 25 + d, 1, 7, 'wood2'); dot(g, 18, 24 + d, 'wood4'); dot(g, 22, 24 + d, 'wood4'); }
+      },
+      hat(g, d, back) {
+        rect(g, 15, 15 + d, 11, 1, 'wood4');
+        if (!back) for (const ex of [17, 22]) { rect(g, ex - 1, 14 + d, 3, 3, 'brass1'); dot(g, ex, 15 + d, 'water1'); }
+      },
+    },
+    // Kapten Bram: the navy jacket, the red neckerchief and brass buttons, the moustache, the striped driver's cap
+    bram: {
+      cloth: ['navy0', 'navy1', 'navy2'],
+      chest(g, d, back) { rect(g, 17, 23 + d, 7, 1, 'red'); if (!back) { dot(g, 20, 24 + d, 'roofR3'); dot(g, 20, 26 + d, 'brass1'); dot(g, 20, 28 + d, 'brass1'); } },
+      face(x, d) { rect(x, 18, 20 + d, 5, 1, 'stone2'); dot(x, 17, 21 + d, 'stone2'); dot(x, 23, 21 + d, 'stone2'); },
+      hat(g, d, back) {
+        dome(g, d, 'cream0', 'cream0');
+        atop(g, () => { for (let x = 15; x < 26; x += 2) rect(g, x, 10 + d, 1, 6, 'roofB2'); });
+        rect(g, 14, 15 + d, 13, 1, 'roofB3');
+        if (!back) rect(g, 15, 16 + d, 11, 1, 'roofB4');
+      },
+    },
+    // the porter: a brown waistcoat open on the cream shirt, the tweed flat cap
+    porter: {
+      cloth: ['wood1', 'wood2', 'wood3'],
+      chest(g, d, back) { if (!back) { rect(g, 19, 23 + d, 3, 6, 'cream0'); dot(g, 20, 26 + d, 'brass1'); } },
+      hat(g, d, back) {
+        dome(g, d, 'stone2', 'stone3');
+        if (back) rect(g, 14, 15 + d, 13, 1, 'stone4'); else { rect(g, 14, 15 + d, 13, 2, 'stone4'); rect(g, 14, 15 + d, 13, 1, 'stone3'); }
+      },
+    },
+  };
+
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2 };
-  // The courier also faces the camera (pose_front) and turns away from it (pose_back) as it stands, walks, runs and carries.
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2 };
+  // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
   const turned = pose => { const [p, v] = pose.split('_'); return v ? [p, v] : null; };
@@ -258,10 +342,14 @@
     if (!CAST[id].villager) s.push('talk');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
-    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', ...TURNS.flatMap(p => VIEWS.map(v => `${p}_${v}`)));
-    if (id === 'helen') s.push('sit', 'moved');
+    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
+    if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'marlow') s.push('wave');
     if (id === 'leo') s.push('run');
+    if (id === 'mender') s.push('hammer');
+    if (id === 'bram') s.push('look');
+    if (CAST[id].load) s.push('carry', 'carryWalk', 'lift');
+    if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
   const FALLBACK = { run: 'walk', carryWalk: 'walk', carry: 'idle', talk: 'idle' };
@@ -361,6 +449,26 @@
         r.hy += 2; r.hx += 1; r.eye = 'closed'; r.mouth = 'sad'; r.droop = 1; r.tear = f === 1;
         armN = [[1, 3], [7, -2]]; armF = [[2, 3], [4, 5]]; r.hold = [1, 5];   // item held low so the bowed face and tear stay visible
         break;
+      case 'brew':   // pouring tea: the pot held out over the counter, tipped to pour on the middle frames
+        r.pot = { tip: f === 1 || f === 2, pour: f === 2 };
+        armN = r.pot.tip ? [[3, 2], [7, 2]] : [[3, 2], [6, 1]]; armF = [[3, 3], [6, 4]];
+        if (f === 3) r.eye = 'blink';
+        break;
+      case 'hammer':   // at the anvil: the hammer raised, raised high, struck down, bounced up; tongs hold the work
+        armN = [[[3, 0], [3, -4]], [[2, -2], [2, -6]], [[4, 1], [7, 2]], [[4, 1], [6, 0]]][f];
+        armF = [[3, 3], [7, 4]];
+        r.hammer = { to: [[-2, -4], [-3, -3], [4, 3], [4, -1]][f], spark: f === 2 };
+        if (f === 2) { r.dx = 1; r.hy += 1; }
+        break;
+      case 'lift':   // bent over the load on the ground, hands on it: lifting it on the first frame, setting it down on the next
+        r.dx = 1; r.hx += 2; r.hy += 4; r.dy = f ? 1 : 0;
+        armN = [[3, 5], [6, 9 - f]]; armF = [[4, 5], [9, 9 - f]];
+        r.ground = f ? 0 : 1;
+        break;
+      case 'look':   // looking up (at the clock), hands clasped behind the back
+        r.dy = [0, 0, -1, 0][f]; r.hy -= 1; r.hx -= 1; r.eye = f === 3 ? 'blink' : 'up';
+        armN = [[-1, 3], [-3, 4]]; armF = [[-1, 3], [-2, 4]];
+        break;
     }
     if (pose === 'carry' || pose === 'carryWalk') {
       r.parcel = [3, -1];                                   // parcel fill origin, relative to the near shoulder
@@ -397,6 +505,8 @@
 
   const PARCEL = ['11TT1111', '22UU2222', '22UU2223', '22222223', '22222233', '33333333'];
   const PARCEL_K = { 1: 'dirt1', 2: 'dirt2', 3: 'dirt3', T: 'wood1', U: 'wood2' };
+  // What someone carries: their own load (the porter's sack), else the courier's parcel.
+  const load = id => memo('load|' + id, () => { const l = CAST[id].load; return l ? outlined(l.rows, l.key) : outlined(PARCEL, PARCEL_K); });
 
   function leg(x, l, L, shoe) {
     const c = l.far ? 'ant3' : 'ink';
@@ -468,17 +578,34 @@
     if (!ch.antTop) ants();
     layer('hat');
     if (ch.antTop) ants();
-    if (r.parcel) put(x, memo('parcel', () => outlined(PARCEL, PARCEL_K)), r.parcel[0], r.parcel[1]);
+    if (r.parcel) put(x, load(id), r.parcel[0], r.parcel[1]);
+    if (r.ground !== undefined) { const L = load(id); put(x, L, 26, 37 - L.height + 2 - r.ground); }   // the load at its feet, just off the ground as it lifts
+    const hand = r.arms[1].pts[r.arms[1].pts.length - 1];
+    if (r.hammer) {   // the handle from the hand, the iron head across its end, a spark off the anvil as it strikes
+      const [ex, ey] = [hand[0] + r.hammer.to[0], hand[1] + r.hammer.to[1]];
+      plated(x, g => { line(g, hand[0], hand[1], ex, ey, 'wood2'); rect(g, ex - 1, ey - 1, 3, 3, 'iron2'); dot(g, ex - 1, ey - 1, 'iron1'); });
+      if (r.hammer.spark) { dot(x, ex + 3, ey - 2, 'yellow'); dot(x, ex + 4, ey, 'light0'); dot(x, ex + 2, ey - 3, 'light2'); }
+    }
     if (!r.behind) arm(x, r.arms[1], ch.sleeve);
+    if (r.pot) {   // the teapot by its handle, leaning forward to pour, tea running from the spout
+      const [hx2, hy2] = hand, lean = i => (r.pot.tip ? i >> 1 : 0);
+      plated(x, g => {
+        for (let i = 0; i < 5; i++) { const t = hy2 - 3 + lean(i); rect(g, hx2 + 1 + i, t, 1, 4, 'pink'); dot(g, hx2 + 1 + i, t, 'pink0'); dot(g, hx2 + 1 + i, t + 3, 'rose'); }
+        rect(g, hx2 + 2, hy2 - 4 + lean(2), 3, 1, 'rose'); dot(g, hx2 + 3, hy2 - 5 + lean(3), 'rose');
+        const sy = hy2 - 2 + lean(4) + (r.pot.tip ? 1 : 0);
+        dot(g, hx2 + 6, sy, 'pink'); dot(g, hx2 + 7, sy + (r.pot.tip ? 1 : -1), 'pink');
+      });
+      if (r.pot.pour) for (let k = 1; k <= 4; k++) dot(x, hx2 + 8, hy2 + k, 'wood2');
+    }
     if (r.tear) { dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 4, 'water1'); dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 5, 'white'); }
     return c;
   }
 
   /* ---------------- front and back views ---------------- */
-  /* The courier facing the camera or turned away, drawn round x 20 from the same colours, each part in its own ink
-     outline as the side view's are: the head and its cap, the thorax with its sash and satchel, the abdomen (behind it
-     from the front, in front of the legs from the back), two legs stepping in place and two splayed ones, the arms
-     swinging. The gaits keep the side view's timing: the same frames lift the same foot and bob the body. */
+  /* Someone in TURN facing the camera or turned away, drawn round x 20 from the same colours, each part in its own
+     ink outline as the side view's are: the head and its hat, the thorax in its cloth, the abdomen (behind it from the
+     front, in front of the legs from the back), two legs stepping in place and two splayed ones, the arms swinging.
+     The gaits keep the side view's timing: the same frames lift the same foot and bob the body. */
   const [tT, tX] = scratch(40, 40);
   function plated(x, fn) { tX.clearRect(0, 0, 40, 40); fn(tX); x.drawImage(outline(tT, 'ink'), -1, -1); }
   function gait(pose, f) {
@@ -489,28 +616,29 @@
     else if (pose === 'run') { g.lift = [RUNL[f], RUNL[(f + 3) % 6]]; g.dy = [0, -1, -2, 0, -1, -2][f]; g.sw = [-2, -1, 1, 2, 1, -1][f]; g.open = true; }
     return g;
   }
-  // where the courier's hand holds an item, turned: at its chest
+  // where a hand holds an item, turned: at the chest
   const turnedHand = (pose, f) => [20, 26 + gait(pose, f).dy];
   function renderTurned(id, pose, f, view) {
-    const ch = CAST[id], back = view === 'back', g = gait(pose, f), d = g.dy, [c, x] = canvas(40, 40), G = 37;
-    const carry = pose === 'carry' || pose === 'carryWalk', side = back ? -1 : 1, bag = ch.parts.find(p => p.z === 'body');
+    const ch = CAST[id], T = TURN[id], back = view === 'back', g = gait(pose, f), d = g.dy, [c, x] = canvas(40, 40), G = 37;
+    const carry = pose === 'carry' || pose === 'carryWalk', bag = T.bag && ch.parts.find(p => p.z === 'body');
+    const [lit, mid, shade] = T.cloth || ['ant0', 'ant1', 'ant2'];
     // the splayed middle legs, then (from the front) the abdomen behind the body, then the two walking legs
     for (const s of [-1, 1]) { line(x, 20 + s * 4, 30 + d, 20 + s * 6, 33 + d, 'ant3'); line(x, 20 + s * 6, 33 + d, 20 + s * 7, 36, 'ant3'); }
     if (!back) {
       plated(x, gx => { ellipse(gx, 20, 29 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 9, 1, 'ant3'); });
-      if (bag) plated(x, gx => { ellipse(gx, 20, 25 + d, 5, 2, 'cap3'); rect(gx, 15, 24 + d, 11, 1, 'cap2'); });   // the bag on its back, either side of it
+      if (T.behind) plated(x, gx => T.behind(gx, d));
     }
     [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => { line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink'); });
-    // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the parcel to the chest
+    // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the load to the chest
     const arms = () => [-1, 1].forEach(s => {
       const sh = [20 + s * 4, 25 + d], hand = carry ? [20 + s * 4, 28 + d] : [20 + s * 6, 30 + d + (s * g.sw > 0 ? 1 : 0) - (s * g.sw < -1 ? 1 : 0)];
       arm(x, { far: false, pts: [sh, hand] }, ch.sleeve);
     });
     if (!carry || back) arms();
-    // the thorax and the bag's strap across it; from the back, the bag itself
+    // the thorax in its cloth and what crosses it; from the back, the bag
     plated(x, gx => {
-      ellipse(gx, 20, 27 + d, 3, 4, 'ant1'); rect(gx, 18, 24 + d, 1, 4, 'ant0'); rect(gx, 22, 25 + d, 1, 5, 'ant2');
-      for (let k = 0; k < 7; k++) { const sx = 20 - side * (3 - k); rect(gx, sx, 24 + d + k, 1, 2, k < 3 ? 'cap2' : 'cap3'); }
+      ellipse(gx, 20, 27 + d, 3, 4, mid); rect(gx, 18, 24 + d, 1, 4, lit); rect(gx, 22, 25 + d, 1, 5, shade);
+      if (T.chest) T.chest(gx, d, back);
     });
     if (back && bag) put(x, memo('bag|' + id, () => outlined(bag.rows, bag.key)), 16, 23 + d);
     // the head: from the front its eyes and mouth, from the back only its round
@@ -519,8 +647,10 @@
       for (const ex of [16, 22]) {
         if (g.blink) rect(x, ex, 19 + d, 2, 1, 'ink');
         else { rect(x, ex, 17 + d, 2, 3, 'cream0'); rect(x, ex < 20 ? ex + 1 : ex, 18 + d, 1, 2, 'pupil'); dot(x, ex < 20 ? ex : ex + 1, 17 + d, 'white'); }
+        if (ch.lash && !g.blink) dot(x, ex < 20 ? ex - 1 : ex + 2, 16 + d, 'ink');
       }
       if (g.open) { rect(x, 19, 21 + d, 2, 2, 'ink'); dot(x, 19, 22 + d, 'roofR4'); } else rect(x, 19, 21 + d, 2, 1, 'ink');
+      if (T.face) T.face(x, d);
     }
     // the antennae, elbowed outward (one bent at its tip, as in the side view), each with its club
     [-1, 1].forEach((s, i) => {
@@ -531,15 +661,10 @@
       if (bent) dot(x, tx + s, ty, 'ink');
       rect(x, cx, cy, 2, 2, 'ant2'); dot(x, cx, cy, 'ant1'); dot(x, cx + 1, cy + 1, 'ant3');
     });
-    // the cap: its dome, the brim toward whichever way the courier faces
-    plated(x, gx => {
-      ellipse(gx, 20, 15 + d, 6, 4, 'cap2'); gx.clearRect(0, 16 + d, 40, 24); ellipse(gx, 19, 13 + d, 4, 2, 'cap1'); rect(gx, 17, 12 + d, 2, 1, 'cap0');
-      if (back) { rect(gx, 14, 15 + d, 13, 1, 'cap3'); rect(gx, 19, 14 + d, 3, 1, 'cream1'); }
-      else { rect(gx, 13, 15 + d, 15, 2, 'cap3'); rect(gx, 13, 15 + d, 15, 1, 'cap2'); rect(gx, 19, 12 + d, 2, 2, 'cream0'); dot(gx, 20, 13 + d, 'cream1'); }
-    });
+    if (T.hat) plated(x, gx => T.hat(gx, d, back));
     // from the back, the abdomen in front of the legs, banded
     if (back) plated(x, gx => { ellipse(gx, 20, 31 + d, 6, 3, 'ant1'); ellipse(gx, 21, 32 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 3, 1, 'ant0'); rect(gx, 15, 33 + d, 11, 1, 'ant3'); });
-    if (carry && !back) { put(x, memo('parcel', () => outlined(PARCEL, PARCEL_K)), 16, 23 + d); arms(); }
+    if (carry && !back) { put(x, load(id), 16, 23 + d); arms(); }
     return c;
   }
 
@@ -690,6 +815,19 @@
       bust(g) { for (let y = 38; y < 48; y += 4) region(g, (x, yy) => inBust(x, yy) && yy >= y && yy < y + 2, (x) => (x > 31 ? 'roofB2' : 'blue')); },
       hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 6, 13, 7) && y <= P.cy - 5, (x, y) => band((x - P.cx) + (y - P.cy) * 1.5, -20, -4, ['roofR0', 'red', 'roofR3']));
         rect(g, P.cx - 22, P.cy - 7, 10, 3, 'red'); rect(g, P.cx - 22, P.cy - 5, 10, 1, 'roofR3'); rect(g, P.cx - 14, P.cy - 6, 27, 2, 'roofR3'); }); } },
+    bram: { cloth: ['navy0', 'navy1', 'navy2'],
+      bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'red' : 'roofR3')); for (const y of [40, 44]) rect(g, 28, y, 2, 2, 'brass1'); },
+      face(x, P) { rect(x, P.mx - 4, P.my - 1, 7, 2, 'stone1'); dot(x, P.mx - 5, P.my + 1, 'stone1'); dot(x, P.mx + 3, P.my + 1, 'stone1'); rect(x, P.mx - 4, P.my, 7, 1, 'stone2'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx, P.cy - 6, 14, 8) && y <= P.cy - 5, (x, y) => ((x >> 1) % 2 ? 'cream0' : 'roofB2'));
+        rect(g, P.cx - 14, P.cy - 5, 28, 2, 'roofB3'); rect(g, P.cx + 6, P.cy - 4, 11, 2, 'roofB4');
+      }); } },
+    porter: { cloth: ['wood1', 'wood2', 'wood3'],
+      bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 14, 6) && y <= P.cy - 4, (x, y) => band(x - P.cx + (y - P.cy), -22, -8, ['stone2', 'stone3', 'stone4']));
+        rect(g, P.cx + 4, P.cy - 5, 12, 2, 'stone4');
+      }); } },
     sam: { cloth: ['light1', 'yellow', 'light3'], kid: true,
       back(x, P) { plate(x, g => region(g, (x, y) => inE(x, y, 13, 36, 9, 6), (x, y) => band(x + y, 43, 52, ['light1', 'yellow', 'light3']))); },
       bust(g) { rect(g, 28, 38, 2, 1, 'brass3'); rect(g, 28, 43, 2, 1, 'brass3'); line(g, 27, 33, 26, 47, 'light3'); line(g, 33, 34, 20, 47, 'wood3'); line(g, 34, 34, 21, 47, 'wood2'); } },

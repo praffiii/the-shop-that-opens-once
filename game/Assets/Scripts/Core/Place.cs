@@ -37,7 +37,8 @@ namespace Shop
 
         readonly List<Hotspot> hotspots = new();
         readonly Dictionary<string, Ant> people = new();
-        readonly Vector4[] spots = new Vector4[8];
+        readonly Dictionary<string, Person> here = new(); // who each of them is now
+        readonly Vector4[] spots = new Vector4[16]; // as many as Pixel.shader's _Feet holds
         bool controls, keys;
 
         /// <summary>Off while a talk, the bag or a transition has the screen.</summary>
@@ -64,12 +65,11 @@ namespace Shop
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {
-                if (!Here(p.Chapters)) continue;
+                if (!Here(p.Chapters) || !Now(p.Phases)) continue;
                 var ant = Ant.Create(p.Id, place.World.transform);
-                ant.Pose = p.Pose;
-                ant.Facing = p.Facing;
-                ant.Feet = p.At;
+                Villager.Add(ant, p, place.Walk);
                 place.people[p.Id] = ant;
+                place.here[p.Id] = p;
                 place.hotspots.Add(new Hotspot { Id = p.Id, Label = p.Label, Area = p.Area, Spot = p.Spot, Owner = ant });
             }
             foreach (var h in def.Hotspots)
@@ -102,6 +102,8 @@ namespace Shop
 
         static bool Here(int[] chapters) => chapters == null || Array.IndexOf(chapters, Game.Chapter) >= 0;
 
+        static bool Now(Phase[] phases) => phases == null || Array.IndexOf(phases, Game.Phase) >= 0;
+
         // Marlow's shop follows the story: a lantern goes out for each night resolved, and each night's keepsake
         // stays on its shelf until Marlow hands it over.
         void FollowStory()
@@ -116,15 +118,21 @@ namespace Shop
         }
 
         /// <summary>Puts the courier at a spawn point, or else at an exported anchor of that name.</summary>
-        public void Enter(Ant courier, string spawn)
+        public void Enter(Ant courier, string spawn) => Enter(courier, Def.Spawns.TryGetValue(spawn, out var at) ? at : World.Anchor(spawn));
+
+        /// <summary>Puts the courier at a point.</summary>
+        public void Enter(Ant courier, Vector2 at)
         {
             Player = courier;
             courier.transform.SetParent(World.transform, false);
-            courier.Feet = Def.Spawns.TryGetValue(spawn, out var at) ? at : World.Anchor(spawn);
+            courier.Feet = at;
         }
 
         /// <summary>Someone in this place by id ("courier" is the player), or null.</summary>
         public Ant Actor(string id) => id == "courier" ? Player : people.TryGetValue(id, out var ant) ? ant : null;
+
+        /// <summary>Who someone in this place is now (their activity and line), or null.</summary>
+        public Person Who(string id) => here.GetValueOrDefault(id);
 
         public Hotspot Find(string id) => hotspots.Find(h => h.Id == id);
 
@@ -186,6 +194,8 @@ namespace Shop
             if (points.Count == 0) return false;
             var arrived = await Player.Walk(points);
             if (!arrived || h == null || !controls) return false;
+            // someone on their round has walked on meanwhile: follow them
+            if (h.Owner && h.Owner.Walking && Vector2.Distance(Player.Feet, h.GlobalSpot) > Reach) return await WalkTo(h, h.GlobalSpot);
             Use(h);
             return true;
         }

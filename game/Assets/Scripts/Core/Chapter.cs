@@ -50,6 +50,13 @@ namespace Shop
         protected Awaitable Say(string who, string text, string mood = "neutral") =>
             Main.Talk.Say(names.GetValueOrDefault(who, ""), who, text, mood, Actor(who));
 
+        /// <summary>Someone's own line when the chapter has nothing for them, under the name on their hotspot.</summary>
+        protected Awaitable Chat(string id)
+        {
+            var line = Main.Place.Who(id)?.Line;
+            return line == null ? ShowText($"Nothing written here yet ({id}).") : Main.Talk.Say(Main.Place.Find(id).Label, id, line, "neutral", Actor(id));
+        }
+
         /// <summary>Words with no speaker: what the courier sees or reads.</summary>
         protected Awaitable ShowText(string text) => Main.Talk.Say("", "", text);
 

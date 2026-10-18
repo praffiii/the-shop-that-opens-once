@@ -344,6 +344,7 @@ namespace Shop
         async Awaitable Use(Hotspot h)
         {
             Hold();
+            var villager = h.Owner ? h.Owner.GetComponent<Villager>() : null;
             if (h.ExitTo != null)
             {
                 var to = h.ExitTo.Split('/');
@@ -351,9 +352,28 @@ namespace Shop
             }
             else if (Story != null)
             {
-                if (h.Owner && h.Owner.Pose == "idle") h.Owner.FaceTo(courier.Feet.x);
+                if (villager) villager.Talk(courier.Feet.x);
                 await Story.Interact(h.Id);
             }
+            Release();
+            // after the talk box has closed and let go of the speaker's pose
+            if (villager) villager.Done();
+        }
+
+        // Developer builds only: the time of day moves on where the courier stands, so morning and midday can be seen
+        // before the story moves them.
+        async Awaitable NextPhase()
+        {
+            Hold();
+            Game.Phase = (Phase)(((int)Game.Phase + 1) % 4);
+            var at = courier.Feet;
+            await Fade(true);
+            Swap(Place.Def.Id, "");
+            courier.gameObject.SetActive(true);
+            Place.Enter(courier, at);
+            FrameCamera(0f);
+            await Fade(false);
+            Hud.Toast(Game.Phase.ToString());
             Release();
         }
 
@@ -422,6 +442,11 @@ namespace Shop
                 else if (Controls.Cancel)
                 {
                     Run(Pause());
+                    input = false;
+                }
+                else if (Debug.isDebugBuild && Controls.NextPhase)
+                {
+                    Run(NextPhase());
                     input = false;
                 }
             }
