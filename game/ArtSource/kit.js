@@ -122,22 +122,6 @@
     dusk: { mul: [0.98, 0.87, 0.83], add: [6, 6, 14], shade: [22, 4, 34] },
     night: { mul: [0.72, 0.77, 0.84], add: [10, 16, 50], shade: [16, 14, 32] },
   };
-  /* The look: every place's art is muted toward a warm, weathered palette with deep darks, after the references the
-     user chose (2026-10-18). Applied once, at export, to the places' art; lights, the UI and the cast stay as drawn.
-     Per pixel on sRGB 0..1: desaturate toward luma by sat, deepen with gamma, lift toward warm paper, then warm. */
-  const LOOK = { sat: 0.55, gamma: 1.18, lift: 0.06, paper: [0.93, 0.85, 0.72], warm: [1, 0.97, 0.89] };
-  function lookPixel(p, i) {
-    const { sat, gamma, lift, paper, warm } = LOOK, l = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) / 255;
-    for (let k = 0; k < 3; k++) {
-      const v = Math.max(0, l + (p[i + k] / 255 - l) * sat) ** gamma;
-      p[i + k] = Math.round(clamp((v * (1 - lift) + lift * paper[k]) * warm[k], 0, 1) * 255);
-    }
-  }
-  // In place, on an ImageData.
-  function lookData(d) { const p = d.data; for (let i = 0; i < p.length; i += 4) if (p[i + 3]) lookPixel(p, i); return d; }
-  function lookCanvas(c) { const g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height); g.putImageData(lookData(d), 0, 0); return c; }
-  function lookHex(h) { const p = [...rgbOf(h), 255]; lookPixel(p, 0); return toHex(p[0], p[1], p[2]); }
-
   function gradeCanvas(src, phase) {
     const g = GRADES[phase]; if (!g || phase === 'midday') return src;
     const [c, x] = canvas(src.width, src.height); x.drawImage(src, 0, 0);
@@ -157,7 +141,7 @@
     constructor(w, h) { this.w = w = Math.ceil(w); this.h = h = Math.ceil(h); this.d = new Uint32Array(w * h); }
     set(x, y, c) { x |= 0; y |= 0; if (x >= 0 && y >= 0 && x < this.w && y < this.h) this.d[y * this.w + x] = typeof c === 'number' ? c : u32(c); }
     get(x, y) { x |= 0; y |= 0; return x >= 0 && y >= 0 && x < this.w && y < this.h ? this.d[y * this.w + x] : 0; }
-    rect(x, y, w, h, c) { const v = u32(c); for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) this.set(i, j, v); }
+    rect(x, y, w, h, c) { const v = typeof c === 'number' ? c : u32(c); for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) this.set(i, j, v); }
     canvas() { const [c, x] = canvas(this.w, this.h), id = x.createImageData(this.w, this.h); new Uint32Array(id.data.buffer).set(this.d); x.putImageData(id, 0, 0); return c; }
   }
 
@@ -835,5 +819,5 @@
   }
 
 
-  window.KIT = { canvas, sprite, outline, recolor, C, hex, clamp, R, D, E, TX, L, S, poly, hash, vnoise, scatter, segDist, lineDist, rgbOf, toHex, step, GRADES, gradeCanvas, LOOK, lookData, lookCanvas, lookHex, u32, Buf, PAL_LEAF, PAL_DEEP, PAL_LIME, paintClumps, leafMarks, makeTree, makePine, makeBush, stoneBlock, blob, STONES, stone, pave, PAVE, TUFT, stamp, FLOWER, FCOL, flowerPatch, paintShadows, RAMP, TILES, roof, wall, stoneBlock_c, windowAt, doorAt, gableAt, chimneyAt, bracketSign, onCanvas, ICON, moss, LANTERN, LANTERN_OFF, awning, pot, ironLamp, woodLamp, bench, barrel, crate, noticeBoard, banner, well, signpost, planter, rock, fenceH, fencePost, vegPatch, tulipBed, basket, sunflower, arc, lilyPads, reeds, smoke, BIRD, bird, butterflies, fireflies, leaves, glow, critterSprites, spr, henState, drawSpriteAt, LIT, litSprite };
+  window.KIT = { canvas, sprite, outline, recolor, C, hex, clamp, R, D, E, TX, L, S, poly, hash, vnoise, scatter, segDist, lineDist, rgbOf, toHex, step, GRADES, gradeCanvas, u32, Buf, PAL_LEAF, PAL_DEEP, PAL_LIME, paintClumps, leafMarks, makeTree, makePine, makeBush, stoneBlock, blob, STONES, stone, pave, PAVE, TUFT, stamp, FLOWER, FCOL, flowerPatch, paintShadows, RAMP, TILES, roof, wall, stoneBlock_c, windowAt, doorAt, gableAt, chimneyAt, bracketSign, onCanvas, ICON, moss, LANTERN, LANTERN_OFF, awning, pot, ironLamp, woodLamp, bench, barrel, crate, noticeBoard, banner, well, signpost, planter, rock, fenceH, fencePost, vegPatch, tulipBed, basket, sunflower, arc, lilyPads, reeds, smoke, BIRD, bird, butterflies, fireflies, leaves, glow, critterSprites, spr, henState, drawSpriteAt, LIT, litSprite };
 })();

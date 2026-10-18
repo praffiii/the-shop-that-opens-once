@@ -120,7 +120,8 @@ namespace Shop
 
     /// <summary>
     /// One picture placed in a place: where it is (art pixels), its frames in an atlas, which frame shows at each loop
-    /// sample, and how many samples its loop runs ahead. Decals of one clip share its frames and sequence.
+    /// sample, and how many samples its loop runs ahead. Decals of one clip share its frames and sequence. A piece
+    /// with a sway (art pixels at its top) bends in the wind in the shader.
     /// </summary>
     public struct Piece
     {
@@ -129,6 +130,7 @@ namespace Shop
         public Vector2Int[] Frames;
         public int[] Seq;
         public int Offset;
+        public float Sway;
 
         public static Piece Of(JToken t, Vector2 at)
         {
@@ -138,18 +140,21 @@ namespace Shop
             var seq = new List<int>();
             foreach (var run in t["seq"])
                 for (var r = 0; r < (int)run[1]; r++) seq.Add((int)run[0]);
-            return new Piece { At = at, Size = Vector2Int.RoundToInt(Art.Point(t["size"])), Frames = frames, Seq = seq.ToArray() };
+            return new Piece { At = at, Size = Vector2Int.RoundToInt(Art.Point(t["size"])), Frames = frames, Seq = seq.ToArray(), Sway = (float?)t["sway"] ?? 0 };
         }
     }
 
     /// <summary>
-    /// Pieces of a place drawn from its atlas as one mesh. Each piece plays its own run of frames through the shared
-    /// loop; only the pieces whose frame changed are updated.
+    /// Pieces of a place drawn from its atlas as one mesh, in list order. Each piece plays its own run of frames through
+    /// the shared loop; only the pieces whose frame changed are updated. A swaying piece's quad is widened by its sway
+    /// on both sides, so the bent rows have room; the shader keeps to the piece's own texels (uv1) and bends them by
+    /// uv2 (sway, phase).
     /// </summary>
     public sealed class Pieces : MonoBehaviour
     {
         Mesh mesh;
         Vector2[] uvs;
+        Vector4[] rects;
         Piece[] pieces;
         int[] shown;
         Vector2 atlasSize;
@@ -168,6 +173,8 @@ namespace Shop
             p.pieces = new Piece[n];
             p.shown = new int[n];
             p.uvs = new Vector2[n * 4];
+            p.rects = new Vector4[n * 4];
+            var sways = new Vector2[n * 4];
             var verts = new Vector3[n * 4];
             var tris = new int[n * 6];
             var moving = false;
@@ -175,7 +182,9 @@ namespace Shop
             {
                 var piece = p.pieces[i] = pieces[i];
                 moving |= piece.Frames.Length > 1;
-                var (at, size) = (piece.At, (Vector2)piece.Size);
+                var pad = Mathf.Ceil(piece.Sway);
+                var (at, size) = (piece.At - new Vector2(pad, 0), (Vector2)piece.Size + new Vector2(pad * 2, 0));
+                for (var k = 0; k < 4; k++) sways[i * 4 + k] = new Vector2(piece.Sway, piece.At.x * 0.013f + piece.At.y * 0.004f);
                 verts[i * 4] = Art.World(at);
                 verts[i * 4 + 1] = Art.World(at + new Vector2(size.x, 0));
                 verts[i * 4 + 2] = Art.World(at + size);
@@ -191,6 +200,8 @@ namespace Shop
             p.mesh = new Mesh { name = name, indexFormat = verts.Length > 65000 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16 };
             p.mesh.SetVertices(verts);
             p.mesh.SetUVs(0, p.uvs);
+            p.mesh.SetUVs(1, p.rects);
+            p.mesh.SetUVs(2, sways);
             p.mesh.SetTriangles(tris, 0);
             go.AddComponent<MeshFilter>().sharedMesh = p.mesh;
             var mr = go.AddComponent<MeshRenderer>();
@@ -205,12 +216,13 @@ namespace Shop
             shown[i] = frame;
             var a = pieces[i].Frames[frame];
             var s = pieces[i].Size;
-            float u0 = a.x / atlasSize.x, u1 = (a.x + s.x) / atlasSize.x;
+            float u0 = a.x / atlasSize.x, u1 = (a.x + s.x) / atlasSize.x, pad = Mathf.Ceil(pieces[i].Sway) / atlasSize.x;
             float v0 = 1f - a.y / atlasSize.y, v1 = 1f - (a.y + s.y) / atlasSize.y;
-            uvs[i * 4] = new Vector2(u0, v0);
-            uvs[i * 4 + 1] = new Vector2(u1, v0);
-            uvs[i * 4 + 2] = new Vector2(u1, v1);
-            uvs[i * 4 + 3] = new Vector2(u0, v1);
+            uvs[i * 4] = new Vector2(u0 - pad, v0);
+            uvs[i * 4 + 1] = new Vector2(u1 + pad, v0);
+            uvs[i * 4 + 2] = new Vector2(u1 + pad, v1);
+            uvs[i * 4 + 3] = new Vector2(u0 - pad, v1);
+            for (var k = 0; k < 4; k++) rects[i * 4 + k] = new Vector4(u0, v0, u1, v1);
         }
 
         void Update()
@@ -228,7 +240,9 @@ namespace Shop
                 SetFrame(i, f);
                 changed = true;
             }
-            if (changed) mesh.SetUVs(0, uvs);
+            if (!changed) return;
+            mesh.SetUVs(0, uvs);
+            mesh.SetUVs(1, rects);
         }
 
         void OnDestroy() => Destroy(mesh);

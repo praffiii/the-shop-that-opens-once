@@ -15,21 +15,33 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 2. **Crisp.** Draw only integer-aligned pixels and rects. The helpers in `px.js` already do this.
    - Canvas `arc`, `stroke` and `bezier` shapes, gradients, blur, `filter`, smoothing and sub-pixel positions are all forbidden.
    - Soft-looking light and shadow must be hard-edged, flat-colour pixel shapes. Use stepped bands for light pools, and `PX.shadow` or flat ellipses for cast shadows.
-3. **Bright and light.** The mood is a sunny afternoon in a cozy village: high value, fresh saturation, never neon, never muddy.
-   - No dark overlays or multiply washes.
-   - Shadows are hue-shifted toward violet or teal, never grey or black.
-   - The dusk and night grades stay light and pastel: peach, rose, lilac sky with warm lamps. They must not become a dark night.
-4. **Palette.** Use the ramps in `PX.PAL`. You may add up to about 12 extra colours per module, derived by hue-shifting existing ramps. Each object should use 3–5 colours per material.
-5. **Readable form.**
-   - Light comes from the top-left: highlights on top and left edges, shade on bottom and right.
-   - Use 1px selective outlines in the darkest hue-shifted colour of each material, never pure black. Characters get a full `ink` outline.
-   - Texture comes from intentional clusters of 2–6 px. No single-pixel salt-and-pepper noise. Avoid dithering, except sparingly in sky bands.
-   - Keep silhouettes clean and shapes chunky, like the existing cast in `chars.js`.
+3. **Bright, bold and readable**, like a top-down RPG village pack (references, studied for technique only: zedpxl's
+   village and forest packs, Kenmi's Cute Fantasy, Maeve's farm RPG, LimeZu's Modern Farm and Exteriors, anokolisa's
+   pack). Saturated but not neon, with deep darks where depth needs them. No global grade or muting at export.
+   - Shadows are hard, one step darker than what they fall on (`VIL.shade`), hue-shifted, never grey or black.
+   - The dusk and night grades (in the game's shader) stay light and pastel; lamps glow warm.
+4. **Palette.** `VIL.C` (ground: grass, path, water, rock, earth) and `PX.PAL` (wood, roofs, walls, stone, iron,
+   brass, flowers, light), plus `VIL.LEAF` for foliage. Up to about 12 extra colours per module, derived from these.
+   Each material uses a 3–5 step ramp.
+5. **Readable form** (what the packs do):
+   - Light from the top-left: lit top and left edges, darker bottom and right.
+   - Everything that stands up gets a 1 px dark `ink` outline around its silhouette (`VIL.inked`), the same as the
+     ants, so characters and world belong together. Inner detail lines use the material's darkest step.
+   - Big areas are **flat colour**. Texture is a few deliberate marks: a sprig, a pebble cluster, a crack, a plank
+     seam. Never noise, speckle or dithering spread evenly over a surface.
+   - Foliage is **leaf clumps** (`VIL.foliage`): rounded clumps with a lit cap and a dark hem, in offset rows, upper
+     clumps over lower ones, lighter to the upper left of the crown.
+   - Height reads through **thickness**: cliff faces, kerbs, steps, footings, roof eaves, plank edges, each with a
+     lit top edge and a dark bottom edge, and a contact shadow where it meets the ground.
+   - Buildings are rich: trim, beams, frames, sills, flower boxes, signs, lamps, clutter that says who lives there.
 6. **Scale** (in art px):
-   - Adult ant: about 32 tall including antennae, about 22 without. Child: about 24.
-   - Door: about 26 tall. Cottage front wall: 30–36 tall. Roof depth: 30–44. Trees: 48–100 tall.
-   - Cobblestones: 5–9 px. Flowers: 2–4 px clusters. Lantern head: about 6x8.
-7. **View.** Angled top-down (3/4), like Bellwood in `bellwood.js`: ground seen from above, walls facing the viewer, roofs seen from above and in front. Characters are side-facing (right, flipped for left).
+   - Adult ant: about 32 tall including antennae. Child: about 24.
+   - Door: 34–40 tall, 20–26 wide (taller than an ant). Home: front wall 44–56, roof 48–64 deep, 110–160 wide.
+     Landmarks up to about 260 wide and 220 tall.
+   - Trees 60–120 tall, in several species. Fence 16–18 tall. Lamp post about 40. Tiles: a 16 px ground grid.
+7. **View.** Angled top-down (3/4): ground seen from above, walls facing the viewer, roofs seen from above and in
+   front (a big roof over a short wall, as in Harvest Moon and zedpxl's village). Characters are side-facing (right,
+   flipped for left).
 8. **Alive.**
    - Every scene has gentle, continuous motion: water, foliage sway, smoke, critters, flicker, drifting motes.
    - Stepped sprite animation runs at 6–12 fps. Anything moving across the scene snaps to integer pixels each frame.
@@ -40,7 +52,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 
 Quality bar, as the user put it: "the color more bright and light, make the environment looks alive", not blurry, not AI slop.
 
-## Scene contract (bellwood.js, interiors.js, toyshop.js)
+## Scene contract (interiors.js, toyshop.js)
 
 ```js
 const scene = createX(opts);
@@ -77,7 +89,24 @@ scene.draw(ctx, view, actors)
 
 ## The world: Bellwood
 
-Bellwood is one seamless outdoor world (`bellwood.js`, 1536x1152) of the GDD's four zones: the West (the old station frozen at 10:17, Helen's tea stall on the platform, the forge, and Marlow's shop in the banyan roots), the Centre (the square with its walnut fountain, the hall, the bakery and Mia's stalls, between two rivers), the East (Nora's and the stilt house, the chamomile garden, Satria's home, the bus stop, and Leo's lookout on the hill) and the South (Theo's studio and the lighthouse on the cliff, the beach, the salt store and the jetty). It is a small, lush village of ants: cottages with timber frames, terracotta and slate roofs, a stream with a wooden bridge and rope rails, a small waterfall, stone walls with moss, cobble paths on warm sand, flowers everywhere, lanterns on posts, banners, a market stall with a striped awning, barrels, crates, chickens and a cat.
+Bellwood is one seamless outdoor world of the GDD's four zones, laid out after the GDD's world map (image 6 of the
+2026-10-18 review): two rivers wind down to the sea on the diagonal and split the land into the West (the old station
+frozen at 10:17, Helen's tea stall on the platform, the rail yard, the forge, and Marlow's shop in the banyan roots),
+the Centre (the round square with its fountain, the hall, the bakery and Mia's stalls), the East (the stilt houses with
+Nora's, the chamomile fields, Satria's home, the bus stop, and Leo's lookout on the hill) and the South (down the cliff
+path: the jetty, the beach, the salt store, the lighthouse and Theo's studio on the cliff). Bridges are the zone
+crossings; forest fills the land between places as a solid mass with paths cut through it; grey rock cliffs step the
+land down to the coast. Only ants live here, and the only animals are bugs.
+
+The ground is a tile map painted by `VIL.ground` (`village.js`); buildings, trees and props are `VIL` sprites (the
+zone kits `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js` and `village-nature.js`), and
+`world.js` lays them out. A sprite maker returns `{ img, ax, ay }` (the feet point in img px) and, where it applies,
+`base` and `foot` (its footprint), `door`, `lit` (window glass rects that glow at night), `smoke` (chimney tops),
+`shadow` and `frames`/`fps`. Window glass is drawn in `sky2`, `sky3` or `white` so it can be relit.
+
+Forest trees are decals under everything, and the ground under their crowns is solid, so the courier never stands
+behind one; a crown that would hang over a path gives way to a bush. Standalone trees (blossoms, birches, willows)
+are items and sort with the courier.
 
 Marlow's shop is the root gap of the great banyan by the station. Seven lanterns hang in its branches, and one goes out for each night resolved.
 

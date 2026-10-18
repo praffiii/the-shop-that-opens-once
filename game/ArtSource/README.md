@@ -8,7 +8,10 @@ code. Nothing is AI-generated. `export.py` renders it all into `../Assets/Resour
 | `px.js` | The drawing toolkit and the palette |
 | `kit.js` | Shared props (lamps, benches, trees, windows) and the time-of-day grades |
 | `chars.js` | The ants: poses, walking frames and portraits |
-| `bellwood.js` | Bellwood outdoors: one seamless world of the four zones |
+| `village.js` | The village kit: the terrain painter (levels, cliffs, rivers, paths, sand, sea), foliage, trees and small props |
+| `village-west.js`, `village-centre.js`, `village-south.js`, `village-east.js` | Each zone's buildings and landmarks |
+| `village-nature.js` | Trees, plants, rocks, yard props and bugs |
+| `world.js` | Bellwood outdoors: the layout of the one seamless map, and everything placed on it |
 | `interiors.js`, `toyshop.js` | Rooms |
 | `title.js` | The title lettering |
 | `audio.js` | Music, wind and sound effects |

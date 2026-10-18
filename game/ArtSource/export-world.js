@@ -1,13 +1,13 @@
 'use strict';
 /* Bellwood outdoors -> places/world/day/, places/world/walk.png and grades.json.
-   Bakes west.js: its ground is one still image cut into chunks, its small loops are clips placed as decals, and every
-   depth-sorted thing is an item. The world is drawn once, at midday; the game grades it for the time of day with
+   Bakes world.js: its ground is one still image cut into chunks, its small loops and its forest are clips placed as
+   decals, and every depth-sorted thing is an item. The world is drawn once, at midday; the game grades it for the time of day with
    KIT.GRADES (grades.json). */
 (() => {
   PARTS.world = () => {
-    const S = WEST.create(), W = S.w, H = S.h;
-    const clips = Object.fromEntries(Object.entries(S.clips).map(([k, c]) => [k, BAKE.item(c.draw, [0, 0, c.w, c.h])]));
-    for (const [k, c] of Object.entries(clips)) if (!c) throw new Error(`clip "${k}" draws nothing`);
+    const S = WORLD.create(), W = S.w, H = S.h;
+    const clips = Object.fromEntries(Object.entries(S.clips).map(([k, c]) => [k, Object.assign(BAKE.item(c.draw, [0, 0, c.w, c.h], { n: c.animated ? BAKE.N : 1 }) || {}, c.sway ? { sway: c.sway } : {})]));
+    for (const [k, c] of Object.entries(clips)) if (!c.frames) throw new Error(`clip "${k}" draws nothing`);
     // A clip's track is cropped to what it drew; shift each decal by that crop.
     const decal = ([k, x, y, o]) => [k, x + clips[k].at[0], y + clips[k].at[1], o];
     const items = S.items.map(it => ({ ...it, track: BAKE.item(it.draw, it.box, { n: it.animated ? BAKE.N : 1 }) }));

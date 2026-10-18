@@ -4,23 +4,30 @@ namespace Shop
 {
     /// <summary>
     /// The time of day as a colour grade on everything drawn outdoors (Shaders/Pixel): Art/grades.json, from
-    /// ArtSource/kit.js. Indoors and at midday the art shows as drawn. Lights are never graded.
+    /// ArtSource/kit.js. Indoors and at midday the art shows as drawn. Lights are never graded. Cloud shadows drift
+    /// over the outdoors by day and fade out toward night.
     /// </summary>
     public static class Grade
     {
         static readonly int ScaleId = Shader.PropertyToID("_GradeScale");
         static readonly int AddId = Shader.PropertyToID("_GradeAdd");
         static readonly int ShadeId = Shader.PropertyToID("_GradeShade");
+        static readonly int CloudsId = Shader.PropertyToID("_Clouds");
         static Vector3 mul, add, shade;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Reset() => Set(Vector3.one, Vector3.zero, Vector3.zero);
+        static void Reset()
+        {
+            Set(Vector3.one, Vector3.zero, Vector3.zero);
+            Shader.SetGlobalFloat(CloudsId, 0);
+        }
 
         public static void Apply(Phase phase, bool indoors)
         {
             var g = indoors ? null : Art.Json("grades")[phase.ToString().ToLowerInvariant()];
-            if (g == null) Reset();
+            if (g == null) Set(Vector3.one, Vector3.zero, Vector3.zero);
             else Set(V(g["mul"]), V(g["add"]), V(g["shade"]));
+            Shader.SetGlobalFloat(CloudsId, indoors ? 0 : phase switch { Phase.Morning => 0.8f, Phase.Midday => 1f, Phase.Dusk => 0.4f, _ => 0f });
         }
 
         /// <summary><paramref name="c"/> graded as the shader grades art, for colours that are not art (the backdrop).</summary>

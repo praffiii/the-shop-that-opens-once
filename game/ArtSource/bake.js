@@ -155,13 +155,9 @@
              items: [{ name, y, track, light, day }], anchors, paths, hotspots, extra }
      A clip is a small loop drawn once and placed many times as decals; a decal's offset (in samples) staggers it.
      A layer's animated tiles become one-off clips. Items whose track is null are skipped. A light item shows only at
-     dusk and night and is never graded; a day item shows only in the morning and at midday. Everything but the lights
-     gets the game's look (KIT.LOOK) here, so the images are the final colours. */
+     dusk and night and is never graded; a day item shows only in the morning and at midday. A clip or item with a
+     sway (art px at its top) bends in the wind in the game's shader. */
   function place(placeName, variant, spec) {
-    const looked = tr => (tr && tr.frames.forEach(KIT.lookData), tr);
-    for (const l of [spec.below, spec.above]) if (l) { KIT.lookCanvas(l.base); l.tiles.forEach(looked); }
-    Object.values(spec.clips || {}).forEach(looked);
-    spec.items.forEach(it => { if (!it.light) looked(it.track); });
     const dir = `places/${placeName}/${variant}`, clipNames = Object.keys(spec.clips || {}), tracks = [];
     const clipIx = new Map(), addTrack = tr => (tracks.push(tr), tracks.length - 1);
     for (const n of clipNames) clipIx.set(n, addTrack(spec.clips[n]));
@@ -176,15 +172,15 @@
     canvases.forEach((c, i) => png(`${dir}/atlas_${i}.png`, c));
     // Clips are the tracks decals use, numbered in order of first use.
     const used = new Map(), clips = [];
-    const clipOf = t => { if (!used.has(t)) { used.set(t, clips.length); clips.push({ atlas: placed[t].atlas, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq) }); } return used.get(t); };
+    const clipOf = t => { if (!used.has(t)) { used.set(t, clips.length); clips.push({ atlas: placed[t].atlas, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq), ...(tracks[t].sway ? { sway: tracks[t].sway } : {}) }); } return used.get(t); };
     const dec = list => list.map(([t, x, y, o]) => [clipOf(t), x, y, o]);
     json(`${dir}/place.json`, {
-      size: spec.size, bg: KIT.lookHex(spec.bg), fps: FPS, loop: N, atlases: canvases.length,
+      size: spec.size, bg: spec.bg, fps: FPS, loop: N, atlases: canvases.length,
       below: { chunks: chunks(dir, 'below', spec.below.base), decals: dec(decals.below) },
       above: spec.above ? { chunks: chunks(dir, 'above', spec.above.base), decals: dec(decals.above) } : null,
       clips,
       items: items.map(({ it, t }) => ({
-        name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}),
+        name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}), ...(it.sway ? { sway: it.sway } : {}),
         atlas: placed[t].atlas, at: tracks[t].at, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq),
       })),
       anchors: spec.anchors || {}, paths: spec.paths || {}, hotspots: spec.hotspots || {},

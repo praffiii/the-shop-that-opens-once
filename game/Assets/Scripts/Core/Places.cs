@@ -23,15 +23,15 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
-                    new Person { Id = "helen", At = V(976, 648), Label = "Helen", Area = R(-10, -30, 20, 30), Spot = V(-22, 2), Facing = -1 },
+                    new Person { Id = "helen", At = V(536, 1146), Label = "Helen", Area = R(-10, -30, 20, 30), Spot = V(-22, 2), Facing = -1 },
                 },
                 Hotspots = new[]
                 {
-                    new Hotspot { Id = "shop_door", At = V(700, 1418), Label = "Marlow's shop", Area = R(-12, -42, 24, 44), Spot = V(0, 16), ExitTo = "shop/door" },
-                    new Hotspot { Id = "station_clock", At = V(700, 474), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 166) },
-                    new Hotspot { Id = "info_board", At = V(790, 622), Label = "Signpost", Area = R(-14, -34, 28, 36), Spot = V(0, 18) },
+                    new Hotspot { Id = "shop_door", At = V(650, 1930), Label = "Marlow's shop", Area = R(-12, -42, 24, 44), Spot = V(0, 16), ExitTo = "shop/door" },
+                    new Hotspot { Id = "station_clock", At = V(760, 994), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 190) },
+                    new Hotspot { Id = "info_board", At = V(1030, 1196), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
-                Spawns = new() { ["start"] = V(660, 640), ["from_shop"] = V(700, 1434) },
+                Spawns = new() { ["start"] = V(760, 1192), ["from_shop"] = V(650, 1950) },
             },
             ["shop"] = new PlaceDef
             {
