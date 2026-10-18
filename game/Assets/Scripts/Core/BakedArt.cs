@@ -20,6 +20,12 @@ namespace Shop
         public JObject Data { get; private set; }
 
         readonly Dictionary<string, Pieces> items = new();
+        // Tall items that turn see-through while someone stands behind them: their renderer, art box and feet row.
+        readonly List<(Renderer renderer, Rect box, float y)> tall = new();
+        readonly HashSet<Renderer> faded = new();
+        static readonly int FadeId = Shader.PropertyToID("_Fade");
+        const int TallFrom = 40; // art px
+        const float SeeThroughAlpha = 0.45f;
 
         /// <summary>Sorting order for something whose feet are at art row <paramref name="y"/>: items, then people, then what people hold, then lights (a lit window over its own wall).</summary>
         public static int Order(float y, int layer = 0) => Mathf.RoundToInt(y) * 4 + layer;
@@ -46,7 +52,8 @@ namespace Shop
                 if ((light && !dark) || (day && dark)) continue;
                 var name = (string)it["name"];
                 var piece = Piece.Of(it, Art.Point(it["at"]));
-                art.items[name] = Pieces.Build(name, art.transform, atlases[(int)it["atlas"]], fps, loop, new[] { piece }, Order((float)it["y"], light ? 3 : 0), light);
+                var built = art.items[name] = Pieces.Build(name, art.transform, atlases[(int)it["atlas"]], fps, loop, new[] { piece }, Order((float)it["y"], light ? 3 : 0), light);
+                if (!light && piece.Size.y >= TallFrom) art.tall.Add((built.GetComponent<Renderer>(), new Rect(piece.At, piece.Size), (float)it["y"]));
             }
             if (data["above"] is JObject above) art.Layer(dir, "above", above, Above, atlases, clips, fps, loop);
             return art;
@@ -63,6 +70,25 @@ namespace Shop
         public void ShowItemIfAny(string name, bool visible)
         {
             if (items.TryGetValue(name, out var item)) item.gameObject.SetActive(visible);
+        }
+
+        /// <summary>Tall items in front of feet at <paramref name="feet"/> (art px) that would hide the body standing there go see-through, as in most top-down games.</summary>
+        public void SeeThrough(Vector2 feet)
+        {
+            var body = new Rect(feet.x - 5, feet.y - 24, 10, 22);
+            foreach (var (renderer, box, y) in tall)
+            {
+                var hides = y > feet.y && box.Overlaps(body);
+                if (hides == faded.Contains(renderer)) continue;
+                var block = new MaterialPropertyBlock();
+                if (hides)
+                {
+                    block.SetFloat(FadeId, SeeThroughAlpha);
+                    faded.Add(renderer);
+                }
+                else faded.Remove(renderer);
+                renderer.SetPropertyBlock(block);
+            }
         }
 
         /// <summary>A layer: its still images, then its clips placed as decals, one mesh per atlas.</summary>

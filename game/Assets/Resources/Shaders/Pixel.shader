@@ -1,12 +1,13 @@
 // Draws exported pixel art, alpha blended, graded for the time of day (Core/Grade.cs) unless it is a light.
 // The grade is ArtSource/kit.js's, on sRGB 0-255: out = in * mul + add + shade * (1 - luma). All zero globals leave
-// the art as drawn. The textures are point filtered on import (Editor/PixelArtImport.cs), so pixels stay crisp.
+// the art as drawn. _Fade makes a thing see-through while someone stands behind it. The textures are point filtered on import (Editor/PixelArtImport.cs), so pixels stay crisp.
 Shader "Shop/Pixel"
 {
     Properties
     {
         [MainTexture] _MainTex ("Texture", 2D) = "white" {}
         [Toggle] _Light ("Light (never graded)", Float) = 0
+        _Fade ("Opacity", Float) = 1
     }
     SubShader
     {
@@ -29,6 +30,7 @@ Shader "Shop/Pixel"
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
                 float _Light;
+                float _Fade;
             CBUFFER_END
 
             float4 _GradeScale; // mul - 1
@@ -49,6 +51,7 @@ Shader "Shop/Pixel"
             half4 frag(Varyings i) : SV_Target
             {
                 half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                c.a *= _Fade;
                 if (_Light > 0.5) return c;
                 float3 s = LinearToSRGB(c.rgb);
                 float shade = 1 - dot(s, float3(0.299, 0.587, 0.114));

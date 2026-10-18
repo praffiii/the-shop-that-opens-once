@@ -104,6 +104,7 @@ namespace Shop
         public void Tick(bool input)
         {
             if (!Player) return;
+            World.SeeThrough(Player.Feet);
             Hover = controls ? HotspotAt(Shop.Controls.MouseWorld) : null;
             Near = controls ? Nearest() : null;
             Player.Running = controls && input && Shop.Controls.Run;

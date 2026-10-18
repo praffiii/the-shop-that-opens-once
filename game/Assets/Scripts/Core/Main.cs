@@ -20,8 +20,10 @@ namespace Shop
         static readonly Vector2 Base = new(640, 360);
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
         const float Glide = 220f;
-        /// <summary>Where the title screen looks: the banyan shop above the old platform.</summary>
-        static readonly Vector2 TitleView = new(334, 380);
+        /// <summary>Following the courier: how far ahead of its walk the camera leads (world px), how softly it catches up (seconds), and from how far it jumps instead (a new place, a teleport).</summary>
+        const float Lead = 28f, Follow = 0.2f, SnapFrom = 160f;
+        /// <summary>Where the title screen looks: Marlow's door in the banyan's roots, down in its dell.</summary>
+        static readonly Vector2 TitleView = new(700, 1336);
         const float FadeSeconds = 0.4f;
 
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
@@ -52,7 +54,7 @@ namespace Shop
         Ant courier;
         int held, factor;
         Vector2Int window;
-        Vector2 offset, cam;
+        Vector2 offset, cam, camVelocity, lead, lastFeet;
         Vector2? look; // a world point the camera shows instead of the courier
         bool gliding;
 
@@ -397,13 +399,22 @@ namespace Shop
             Look.Place(curtain.rectTransform, new Rect(Vector2.zero, Size));
         }
 
-        // Follows the courier (or looks where it was asked, or at the title view), kept inside the place.
-        // A place smaller than the screen is centred. The camera stays on whole world pixels.
+        // Follows the courier softly, a little ahead of where it walks (or looks where it was asked, or at the title
+        // view), kept inside the place. A place smaller than the screen is centred. The camera stays on whole world pixels.
         void FrameCamera(float delta)
         {
             var view = Size / Zoom;
             var size = (Vector2)Place.World.Size;
+            var following = look == null && Place.Player;
             var target = look ?? (Place.Player ? courier.Feet : TitleView);
+            if (following)
+            {
+                var step = courier.Feet - lastFeet;
+                lastFeet = courier.Feet;
+                var walking = step.sqrMagnitude > 0.0001f && step.magnitude < 20f;
+                lead = Vector2.MoveTowards(lead, walking ? step.normalized * Lead : Vector2.zero, Lead * 2f * delta);
+                target += lead;
+            }
             var c = new Vector2(Mathf.Round(target.x), Mathf.Round(target.y));
             for (var axis = 0; axis < 2; axis++)
                 c[axis] = size[axis] <= view[axis]
@@ -414,7 +425,13 @@ namespace Shop
                 cam = Vector2.MoveTowards(cam, c, Glide * delta);
                 gliding = cam != c;
             }
-            else cam = c;
+            else if (following && delta > 0f && Vector2.Distance(cam, c) < SnapFrom)
+                cam = Vector2.SmoothDamp(cam, c, ref camVelocity, Follow, Mathf.Infinity, delta);
+            else
+            {
+                cam = c;
+                camVelocity = lead = Vector2.zero;
+            }
             Camera.transform.localPosition = Art.World(new Vector2(Mathf.Round(cam.x), Mathf.Round(cam.y)), -10);
         }
 

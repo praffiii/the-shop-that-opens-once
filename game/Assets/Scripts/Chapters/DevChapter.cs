@@ -14,7 +14,7 @@ namespace Shop
         {
             await Card("Systems test", "Not part of the story.");
             await Go("world", "start");
-            Hint("Click to walk, or use WASD. Space uses what is close.");
+            Hint("Click to walk, or use WASD (hold Shift to run). Space uses what is close.");
         }
 
         public override async Awaitable Entered(string place)
@@ -40,7 +40,7 @@ namespace Shop
                     await Main.EndChapter();
                     break;
                 case "marlow":
-                    await Say("marlow", Game.Bag.Count > 0 ? "The platform is just down the path, by the tea stall." : "Mind the lanterns.");
+                    await Say("marlow", Game.Bag.Count > 0 ? "The platform is up the steps and past the forge, by the tea stall." : "Mind the lanterns.");
                     break;
                 default:
                     await ShowText($"Nothing written here yet ({id}).");
