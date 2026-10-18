@@ -1,5 +1,5 @@
 'use strict';
-/* Rooms: Marlow's shop, the old station and Nora's toy shop as places, plus the keepsake items and the UI icons (PARTS.rooms).
+/* Rooms: Marlow's shop and Nora's toy shop as places, plus the keepsake items and the UI icons (PARTS.rooms).
    The scenes are split with the export hook in interiors.js and toyshop.js (view.state.part). Output format: see bake.js. */
 (() => {
   const { canvas, png, json, layer, item, place } = BAKE;
@@ -7,13 +7,12 @@
 
   // The scenes' sorted props, in the order interiors.js and toyshop.js push them.
   const SHOP_PROPS = ['counter', 'floor_lamp', 'armchair', 'side_table', 'book_pile', 'globe', 'plant_left', 'plant_right', 'gramophone', 'coat_stand', 'trunks', 'umbrella_stand', 'map_basket'];
-  const STATION_PROPS = ['timetable', 'sign', 'stall', 'suitcase', 'bench', 'lamp_left', 'lamp_right', 'churn', 'planter_left', 'planter_right'];
   const TOYSHOP_PROPS = ['workbench', 'rocking_horse', 'blocks', 'toy_chest', 'sewing_basket', 'train', 'tea_party', 'pram', 'dress_form', 'geranium', 'parcels', 'scrap_basket'];
   // IT.item names and their variants (ART.md, items contract), and the IT.icon names. '' is the plain image, written without a suffix.
   const ITEMS = { watch: ['front', 'back', 'side'], doll: ['', 'foot'], camera: [], key: [], shoes: [], book: [], letter: [], musicbox: ['closed', 'open'], parcel: [], suitcase: [] };
   const ICONS = ['bag', 'look', 'talk', 'hand', 'lantern', 'clock', 'heart', 'note', 'sound-on', 'sound-off'];
 
-  PARTS.rooms = () => { shop(); station(); toyshop(); itemsAndIcons(); };
+  PARTS.rooms = () => { shop(); toyshop(); itemsAndIcons(); };
 
   const view = (S, t, state) => ({ x: 0, y: 0, w: S.w, h: S.h, t, state });
   // Each prop alone, sorted by its base line like drawSorted (a character on the same line stands in front).
@@ -53,19 +52,6 @@
     // the customer's side of the counter: the floor in front of its base line, and the doorway
     const [fx, fy, fw, fh] = S.floor, top = baseLine(props[SHOP_PROPS.indexOf('counter')])[2] + 1;
     png('places/shop/walk.png', walk(W, H, [[fx, top, fw, fy + fh - top], S.door], props, [], [S.anchors.door, S.anchors.customer]));
-  }
-
-  // The old station as Night 1 plays it (main.js, Try Night 1): dusk at tod 0.6, lamps lit.
-  function station() {
-    const S = INTERIORS.createStation(), { w: W, h: H } = S, state = { tod: 0.6, lamps: 1 }, A = S.anchors;
-    const part = p => (g, t) => S.draw(g, view(S, t, { ...state, part: p }), []);
-    const items = propItems(S, STATION_PROPS, state), named = n => items.find(it => it.name === n);
-    place('station', 'dusk', { size: [W, H], bg: S.bg, below: layer(W, H, part('below')), above: layer(W, H, part('above')), items, anchors: A, hotspots: S.hotspots, paths: S.paths });
-    // the platform, running on at the left into the road to the village; nobody walks behind the mender's stall or Helen's
-    // bench. The courier reads the plaque and the timetable from their walking line.
-    const [fx, fy, fw, fh] = S.floor, y = A.courierStart[1];
-    png('places/station/walk.png', walk(W, H, [[fx - HALF, fy, fw + HALF, fh]], items, [named('stall'), named('bench')],
-      [A.courierStart, A.menderCustomer, A.travellerCustomer, A.benchCustomer, [A.plaque[0], y], [A.timetable[0], y]]));
   }
 
   // Nora's toy shop at dusk (Night 2). Nora stands behind her workbench, where nobody else walks.

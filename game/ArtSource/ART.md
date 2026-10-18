@@ -18,7 +18,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 3. **Bright and light.** The mood is a sunny afternoon in a cozy village: high value, fresh saturation, never neon, never muddy.
    - No dark overlays or multiply washes.
    - Shadows are hue-shifted toward violet or teal, never grey or black.
-   - Dusk variants stay light and pastel: peach, rose, lilac sky with warm lamps. They must not become a dark night.
+   - The dusk and night grades stay light and pastel: peach, rose, lilac sky with warm lamps. They must not become a dark night.
 4. **Palette.** Use the ramps in `PX.PAL`. You may add up to about 12 extra colours per module, derived by hue-shifting existing ramps. Each object should use 3–5 colours per material.
 5. **Readable form.**
    - Light comes from the top-left: highlights on top and left edges, shade on bottom and right.
@@ -29,7 +29,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
    - Adult ant: about 32 tall including antennae, about 22 without. Child: about 24.
    - Door: about 26 tall. Cottage front wall: 30–36 tall. Roof depth: 30–44. Trees: 48–100 tall.
    - Cobblestones: 5–9 px. Flowers: 2–4 px clusters. Lantern head: about 6x8.
-7. **View.** Angled top-down (3/4), like the village in `world.js`: ground seen from above, walls facing the viewer, roofs seen from above and in front. Characters are side-facing (right, flipped for left).
+7. **View.** Angled top-down (3/4), like Bellwood in `bellwood.js`: ground seen from above, walls facing the viewer, roofs seen from above and in front. Characters are side-facing (right, flipped for left).
 8. **Alive.**
    - Every scene has gentle, continuous motion: water, foliage sway, smoke, critters, flicker, drifting motes.
    - Stepped sprite animation runs at 6–12 fps. Anything moving across the scene snaps to integer pixels each frame.
@@ -40,14 +40,14 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 
 Quality bar, as the user put it: "the color more bright and light, make the environment looks alive", not blurry, not AI slop.
 
-## Scene contract (world.js, interiors.js, toyshop.js)
+## Scene contract (bellwood.js, interiors.js, toyshop.js)
 
 ```js
 const scene = createX(opts);
 scene.w, scene.h                 // world size in art px
 scene.bg                         // colour for any area outside the world (hex)
 scene.anchors = { name: [x, y] } // actor feet positions and points of interest
-scene.paths   = { name: [[x,y],...] }    // walkable polylines (the village)
+scene.paths   = { name: [[x,y],...] }    // walkable polylines (the outdoor world)
 scene.hotspots = { name: [x, y, w, h] }  // clickable rects (the station, the toy shop)
 scene.draw(ctx, view, actors)
 ```
@@ -56,6 +56,8 @@ scene.draw(ctx, view, actors)
 - `view` is `{ x, y, w, h, t, state }`. The first four are integers: the visible world rect.
 - `actors` is an array of `{ x, y, draw(ctx) }`. `y` is the feet line. Interleave actors with your props by `y`, so a character walks behind a lamp post but in front of the bench back, for example. Draw ground layers first and canopies or roof overhangs last.
 - The page owns the camera. Your scene must look complete wherever the camera is inside it.
+- **Exporter opt-in.** A scene the game depth-sorts also gives `scene.bake = { items: [{ name, x, y, box, animated, light, day, foot, base }], ...terrain tests }` and honours `view.state.part`: `'below'` draws only the ground, `'item'` only the entry `view.state.item`, `'above'` only the air over everyone. `light` entries show at dusk and night only and are never graded; `day` entries (butterflies) show in the morning and at midday only.
+- **Time of day.** Draw at midday. The game grades the finished picture per phase with `KIT.GRADES`: `out = in * mul + add + shade * (1 - luma)` on sRGB 0-255. Lights are drawn as separate entries over the graded picture.
 
 ## Character contract (chars.js, `window.CH`)
 
@@ -75,8 +77,8 @@ scene.draw(ctx, view, actors)
 
 ## The world: Bellwood
 
-Bellwood is a small, lush village of ants: cottages with timber frames, terracotta and slate roofs, a stream with a wooden bridge and rope rails, a small waterfall, stone walls with moss, cobble paths on warm sand, flowers everywhere, lanterns on posts, banners, a market stall with a striped awning, barrels, crates, chickens and a cat.
+Bellwood is one seamless outdoor world (`bellwood.js`, 1536x1152) of the GDD's four zones: the West (the old station frozen at 10:17, Helen's tea stall on the platform, the forge, and Marlow's shop in the banyan roots), the Centre (the square with its walnut fountain, the hall, the bakery and Mia's stalls, between two rivers), the East (Nora's and the stilt house, the chamomile garden, Satria's home, the bus stop, and Leo's lookout on the hill) and the South (Theo's studio and the lighthouse on the cliff, the beach, the salt store and the jetty). It is a small, lush village of ants: cottages with timber frames, terracotta and slate roofs, a stream with a wooden bridge and rope rails, a small waterfall, stone walls with moss, cobble paths on warm sand, flowers everywhere, lanterns on posts, banners, a market stall with a striped awning, barrels, crates, chickens and a cat.
 
-At the top of the lane, Marlow's shop appears for seven nights. It has a teal roof, a green striped awning, and seven small lanterns across its front.
+Marlow's shop is the root gap of the great banyan by the station. Seven lanterns hang in its branches, and one goes out for each night resolved.
 
-Behind the scissors sign on the square is Nora's toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.
+Behind the scissors sign on Nora's house in the East is her toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.

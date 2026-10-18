@@ -102,18 +102,25 @@
   }
 
   /* Write one place variant to places/<place>/<variant>/: place.json, below.png, above.png, atlas.png.
-     spec: { size: [W, H], bg, below: layer(), above: layer() | null, items: [{ name, y, track }],
-             anchors, paths, hotspots, extra } (items whose track is null are skipped). */
+     spec: { size: [W, H], bg, below: layer(), above: layer() | null, items: [{ name, y, track, light, day }],
+             anchors, paths, hotspots, extra } (items whose track is null are skipped). A light item shows only at dusk
+     and night and is never graded; a day item shows only in the morning and at midday.
+     A frame drawn more than once anywhere in the place (calm water, a tile of a repeating pattern) is packed once. */
   function place(placeName, variant, spec) {
-    const dir = `places/${placeName}/${variant}`, imgs = [];
+    const dir = `places/${placeName}/${variant}`, imgs = [], seen = new Map();
     const ref = tr => {
-      const first = imgs.length; imgs.push(...tr.frames);
-      return { at: tr.at, size: tr.size, frames: tr.frames.map((_, i) => first + i), seq: rle(tr.seq) };
+      const frames = tr.frames.map(im => {
+        const k = `${im.width}x${im.height}:${key(new Uint32Array(im.data.buffer), im.width, 0, 0, im.width, im.height)}`;
+        let i = seen.get(k);
+        if (i === undefined) { i = imgs.length; seen.set(k, i); imgs.push(im); }
+        return i;
+      });
+      return { at: tr.at, size: tr.size, frames, seq: rle(tr.seq) };
     };
     const below = spec.below.tiles.map(ref);
     const above = spec.above ? spec.above.tiles.map(ref) : [];
-    const items = spec.items.filter(it => it.track).map(it => ({ name: it.name, y: Math.round(it.y), ...ref(it.track) }));
-    const { canvas: atlas, pos } = pack(imgs);
+    const items = spec.items.filter(it => it.track).map(it => ({ name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}), ...ref(it.track) }));
+    const { canvas: atlas, pos } = pack(imgs, spec.atlasWidth);
     const fix = tr => { tr.frames = tr.frames.map(i => pos[i]); return tr; };
     [...below, ...above, ...items].forEach(fix);
     png(`${dir}/atlas.png`, atlas);

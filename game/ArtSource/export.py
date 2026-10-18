@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Export this folder's code-drawn art and synthesized sound into game/Assets/Resources/Art/.
 
-Usage: python3 export.py [--force] [part ...]    parts: village, rooms, cast, sound (default: all)
+Usage: python3 export.py [--force] [part ...]    parts: world, rooms, cast, sound (default: all)
 
 Renders export.html?only=<part> in headless Google Chrome and writes the files it returns: PNG and JSON as they
 are, and WAV audio encoded to OGG Vorbis with oggenc. Chrome is driven over the DevTools pipe, so a part may be
@@ -20,7 +20,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 ART = HERE.parent / "Assets" / "Resources" / "Art"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-PARTS = ["village", "rooms", "cast", "sound"]
+PARTS = ["world", "rooms", "cast", "sound"]
 
 
 def run(url: str) -> tuple[str, str]:
