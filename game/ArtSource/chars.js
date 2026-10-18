@@ -409,8 +409,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -426,13 +426,14 @@
     if (id === 'marlow') s.push('wave');
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer');
-    if (id === 'bram' || id === 'sam') s.push('look');
+    if (id === 'bram' || id === 'sam' || id === 'leo') s.push('look');
     if (CAST[id].load) s.push('carry', 'carryWalk', 'lift');
     if (CAST[id].polish) s.push('polish');
     if (id === 'sam' || id === 'baker') s.push('sweep');
     if (id === 'pip') s.push('run');
     if (id === 'nora') s.push('weave');
-    if (id === 'gardener') s.push('water');
+    if (id === 'gardener') s.push('water', 'tend');
+    if (id === 'leo') s.push('peer');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -567,6 +568,14 @@
       case 'water':   // the watering can held out low by its handle, tipped over the flowers, the water falling
         armN = [[2, 3], [6, 3]]; armF = [[2, 3], [4, 4]];
         r.hy += 1; r.can = f;
+        break;
+      case 'tend':   // bent over the rows, the hands working the soil round a plant in turn
+        r.dx = 1; r.hx += 2; r.hy += 4;
+        armN = [[3, 5], [[6, 9], [7, 8], [6, 9], [5, 8]][f]]; armF = [[4, 5], [[9, 8], [9, 9], [8, 8], [9, 9]][f]];
+        break;
+      case 'peer':   // an eye to the telescope's eyepiece, a hand steadying its tube
+        r.hx += 1; r.eye = f ? 'closed' : 'squint';
+        armN = [[3, 0], [7, -3]]; armF = [[2, 2], [5, 1]];
         break;
       case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
         armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];

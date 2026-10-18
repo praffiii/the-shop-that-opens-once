@@ -205,11 +205,23 @@ namespace Shop
                 People = new[]
                 {
                     // Morning: Nenek Nora weaves at the loom out on her deck, the Gardener waters the chamomile rows, and Leo
-                    // runs laps of the lane.
+                    // runs laps of the lane. Midday: Nora still weaves, the Gardener tends the rows behind his glasshouse,
+                    // Leo looks out from his lookout. Dusk: Nora sits on her steps, the Gardener rests on the orchard bench,
+                    // Leo watches the far road through the telescope.
                     new Person
                     {
                         Id = "nora", At = V(260, 401), Floor = 16, Label = "Nenek Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Morning },
                         Line = "Sit a while if you like, child. The loom goes at its own pace, and so do I.",
+                    },
+                    new Person
+                    {
+                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Nenek Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Midday },
+                        Line = "My mother taught me this pattern, and her mother before her. The thread remembers what we forget.",
+                    },
+                    new Person
+                    {
+                        Id = "nora", At = V(323, 422), Seat = 8, Label = "Nenek Nora", Spot = V(-23, 24), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Evenings are the best part. The river talks, and I listen. Sit, if your legs are tired.",
                     },
                     new Person
                     {
@@ -224,6 +236,16 @@ namespace Shop
                     },
                     new Person
                     {
+                        Id = "gardener", At = V(790, 604), Label = "Gardener", Spot = V(18, 0), Pose = "tend", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Tomatoes under glass, cabbages out here. Everything mends at its own pace. People too.",
+                    },
+                    new Person
+                    {
+                        Id = "gardener", At = V(513, 447), Seat = 8, Label = "Gardener", Spot = V(36, 8), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "The watering's done. Now I sit, and the orchard grows without my help.",
+                    },
+                    new Person
+                    {
                         Id = "leo", Label = "Leo", Spot = V(0, 12), Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
@@ -231,6 +253,16 @@ namespace Shop
                             new Stop { At = V(900, 482), Facing = -1, Wait = 2f, Run = true },
                         },
                         Line = "Lap nine! Still the fastest legs in Bellwood. Ask anyone. Well, anyone old enough to remember.",
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(856, 236), Label = "Leo", Spot = V(-20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Up here I can see every road in the valley. Every road a runner could take.",
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
                     },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
