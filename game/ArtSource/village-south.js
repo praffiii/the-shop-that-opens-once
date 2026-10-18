@@ -1,7 +1,8 @@
 'use strict';
 /* The South of Bellwood, the windy coast: sand, sea blue, salt white, sun-bleached wood and grey rock. The jetty
    (a walkable deck plus the posts that stand on it), fishing boats that bob, the fog lighthouse, the salt store,
-   Arlo's home by the jetty, Theo's studio on the cliff, the rope bridge's remains, sea stacks, and beach props. */
+   Arlo's home by the jetty and Theo's studio on the cliff (in 3D, VIL.house), the rope bridge's remains, sea stacks,
+   and beach props. */
 (() => {
   const V = VIL, { fill, px, disc, inked } = V, P = PX.PAL, { hash, Buf } = KIT, rng = PX.rng;
   // Sun-bleached wood and Arlo's weathered blue planks, light to dark.
@@ -25,63 +26,6 @@
   const fish = (b, x, y, k = 0, vert = false) => stamp(b, ['a..aaaa.', '.abbbbeb', 'a..cccc.'], x, y, { a: FISH[k][1], b: FISH[k][0], c: 'white', e: 'ink' }, vert);
   // Flat marks (foam) under an inked sprite, never outlined.
   const over = (base, top, dx = 0, dy = 0) => { for (let y = 0; y < top.h; y++) for (let x = 0; x < top.w; x++) { const v = top.d[y * top.w + x]; if (v) base.set(x + dx, y + dy, v); } return base; };
-
-  /* ---------- building parts ---------- */
-  // Shingle rows like VIL.house: lit top edges, dark hems and joints, gable ends, a ridge cap. keep(x, y) clips.
-  function roof(b, x0, w, top, H, R, seed, keep = () => true) {
-    for (let y = top; y < top + H; y++) {
-      const f = (y - top) / H, inset = Math.round((1 - f) * 3), ry = y - top - 5;
-      for (let x = inset; x < w - inset; x++) {
-        if (!keep(x0 + x, y)) continue;
-        const row = Math.floor(ry / 6), sx = (x + (row & 1) * 4) % 8, sy = ry % 6, k = hash(Math.floor((x + (row & 1) * 4) / 8), row, seed);
-        let c = sy === 0 ? (sx === 0 ? R[2] : R[f < 0.4 ? 0 : 1]) : sy === 5 || sx === 0 ? R[3] : sy === 4 ? R[f < 0.4 ? 1 : 2] : k < 0.2 || (f > 0.6 && k < 0.5) ? R[2] : R[1];
-        if (sy === 1 && sx === 1 && k > 0.5) c = R[0];
-        if (x - inset < 2 || w - inset - x <= 2) c = x - inset === 0 || w - inset - x === 1 ? R[4] : R[3];
-        if (ry < 0) c = [R[3], R[0], R[0], R[1], R[2]][ry + 5];
-        px(b, x0 + x, y, c);
-      }
-    }
-  }
-  const fascia = (b, x, y, w, R) => { fill(b, x, y - 3, w, 3, R[3]); fill(b, x, y - 3, w, 1, R[2]); fill(b, x, y, w, 1, R[4]); };
-  const footing = (b, x, y, w) => { for (let i = x; i < x + w; i += 6) { fill(b, i, y, Math.min(6, x + w - i), 4, 'stone2'); fill(b, i, y, Math.min(6, x + w - i), 1, 'stone1'); fill(b, i + 5, y, 1, 4, 'stone3'); } };
-  // Vertical boards: flat, dark seams, a board or two a shade off, nails top and bottom.
-  function boards(b, x, y, w, h, R, seed, step = 6) {
-    fill(b, x, y, w, h, R[1]);
-    for (let i = x, k = 0; i < x + w; i += step, k++) {
-      if (hash(k, 3, seed) < 0.22) fill(b, i, y, step - 1, h, R[2]);
-      fill(b, i + step - 1, y, 1, h, R[3]); px(b, i + 2, y + 6, R[3]); px(b, i + 2, y + h - 4, R[3]);
-    }
-  }
-  // Clapboards: each board a lit top edge and a dark lap under it, butt joints staggered.
-  function clap(b, x, y, w, h, R, seed) {
-    for (let j = y, k = 0; j < y + h; j += 5, k++) {
-      fill(b, x, j, w, 5, R[1]); fill(b, x, j, w, 1, R[0]); fill(b, x, j + 4, w, 1, R[3]);
-      for (let i = x + 6 + ((hash(k, 1, seed) * 28) | 0); i < x + w - 3; i += 31) fill(b, i, j + 1, 1, 3, R[3]);
-    }
-  }
-  // A window: frame, sky glass with a glint, muntins, a sill. Returns the glass rect in img px.
-  function win(b, x, y, w, h, o = {}) {
-    const fr = o.frame || ['wood2', 'wood4'], cols = o.cols || 2, rows = o.rows || 2;
-    fill(b, x - 2, y - 2, w + 4, h + 4, fr[1]); fill(b, x - 2, y - 2, w + 4, 1, fr[0]);
-    fill(b, x, y, w, h, 'sky3'); fill(b, x, y, w, 2, 'sky2'); fill(b, x, y + h - 3, w, 3, 'sky4');
-    for (let k = 1; k < cols; k++) fill(b, x + Math.round(k * w / cols) - 1, y, 2, h, fr[1]);
-    for (let k = 1; k < rows; k++) fill(b, x, y + Math.round(k * h / rows) - 1, w, 2, fr[1]);
-    px(b, x + 1, y + 1, 'white'); px(b, x + 2, y + 1, 'white'); px(b, x + 1, y + 2, 'white');
-    if (o.sill !== false) { fill(b, x - 3, y + h + 2, w + 6, 3, fr[1]); fill(b, x - 3, y + h + 2, w + 6, 1, fr[0]); }
-    if (o.shutters) for (const sx of [x - 9, x + w + 2]) { fill(b, sx, y - 2, 7, h + 4, o.shutters[1]); fill(b, sx, y - 2, 1, h + 4, o.shutters[0]); fill(b, sx + 2, y + 1, 3, 1, o.shutters[3]); fill(b, sx + 2, y + Math.round(h / 2), 3, 1, o.shutters[3]); fill(b, sx + 2, y + h - 2, 3, 1, o.shutters[3]); fill(b, sx + 6, y - 2, 1, h + 4, o.shutters[3]); }
-    return [x + 1, y + 1, w, h];
-  }
-  // A planked door standing on y0 with its frame and a stone step; R is the paint ramp.
-  function door(b, x, y0, w, h, R) {
-    const y = y0 - h;
-    fill(b, x - 2, y - 3, w + 4, h + 3, 'wood4'); fill(b, x - 2, y - 3, w + 4, 1, 'wood2');
-    fill(b, x, y, w, h, R[1]); fill(b, x, y, 2, h, R[0]);
-    for (let i = x + 4; i < x + w; i += 5) fill(b, i, y, 1, h, R[3]);
-    fill(b, x, y, w, 2, R[3]); fill(b, x, y + 8, w, 2, R[2]); fill(b, x, y + h - 10, w, 2, R[2]);
-    fill(b, x + w - 5, y + Math.round(h / 2), 2, 2, 'brass1'); px(b, x + w - 5, y + Math.round(h / 2), 'brass0');
-    fill(b, x - 4, y0, w + 8, 4, 'stone1'); fill(b, x - 4, y0 + 3, w + 8, 1, 'stone3');
-  }
-  const chimney = (b, x, y) => { fill(b, x, y, 10, 16, 'stone2'); fill(b, x, y, 10, 2, 'stone1'); fill(b, x + 7, y + 2, 3, 14, 'stone3'); fill(b, x + 1, y - 1, 8, 2, 'stone4'); fill(b, x, y + 7, 10, 1, 'stone3'); };
 
   /* ---------- small things ---------- */
   // Salt heaped into a cone: lit white on the left, cool blue shade on the right, a few crystal glints.
@@ -377,142 +321,93 @@
     return { img: out.canvas(), ax: cx + 1, ay: h, base: [-32, 32], foot: 22, door: 0, lit, lamp: [cx + 1, 22 + 8] };
   }
 
-  /* saltStore(): the salt store, 146 wide: a sun-bleached board shed under a sea-green roof with a louvred vent on the
-     ridge, cross-braced double doors with a salt sign, salt heaped and bagged along the front, a balance scale. */
+  /* ---------- the coast's buildings, in 3D (VIL.house) ---------- */
+  const sprite = (W, H, paint) => ({ img: inked(W, H, paint).canvas(), ax: (W >> 1) + 1, ay: H + 1 });
+  const card = (s, x, back) => ({ img: s.img, ax: s.ax, ay: s.ay, x, back, up: 0 });
+
+  /* The salt store: a shed of sun-bleached boards under a sea-green roof with a louvred vent on its ridge, cross-braced
+     double doors under a board with a heap of salt painted on it, salt crusting the foot of the walls; salt heaped and
+     bagged along the front, a balance scale by the door. */
   function saltStore() {
-    const ww = 136, wallH = 46, roofH = 54, over = 5, up = 10, w = ww + over * 2, h = up + roofH + wallH + 4;
-    const top = up, eave = top + roofH, wx = over, wy = eave - 3, wb = h - 4, R = ramp('roofG');
-    const dx = wx + 56, dw = 26, dh = 38, lit = [];
-    const out = inked(w, h, b => {
-      boards(b, wx, wy, ww, wb - wy, BW, 3);
-      fill(b, wx, wy, 3, wb - wy, BW[2]); fill(b, wx, wy, 1, wb - wy, BW[1]); fill(b, wx + ww - 4, wy, 4, wb - wy, BW[3]);
-      footing(b, wx - 1, wb, ww + 2);
-      lit.push(win(b, wx + 16, wy + 16, 16, 13, { shutters: R.slice(1), frame: [BW[2], BW[4]] }));
-      // double doors, cross-braced, on strap hinges
-      fill(b, dx - 3, wb - dh - 3, dw + 6, dh + 3, BW[4]); fill(b, dx - 3, wb - dh - 3, dw + 6, 1, BW[2]);
-      for (const x of [dx, dx + dw / 2]) {
-        fill(b, x, wb - dh, dw / 2, dh, BW[1]); for (let i = x + 4; i < x + dw / 2; i += 4) fill(b, i, wb - dh, 1, dh, BW[2]);
-        fill(b, x, wb - dh, dw / 2, 2, BW[2]); fill(b, x, wb - 3, dw / 2, 2, BW[2]); line(b, x + 1, wb - 4, x + dw / 2 - 2, wb - dh + 2, BW[3]); line(b, x + 2, wb - 4, x + dw / 2 - 1, wb - dh + 2, BW[0]);
-      }
-      fill(b, dx + dw / 2 - 1, wb - dh, 1, dh, BW[4]); for (const y of [wb - dh + 6, wb - 9]) { fill(b, dx, y, 5, 2, 'iron3'); fill(b, dx + dw - 5, y, 5, 2, 'iron3'); }
-      fill(b, dx + dw / 2 - 3, wb - 20, 2, 3, 'iron2'); fill(b, dx + dw / 2 + 1, wb - 20, 2, 3, 'iron2');
-      fill(b, dx - 4, wb, dw + 8, 4, 'stone1'); fill(b, dx - 4, wb + 3, dw + 8, 1, 'stone3');
-      // the sign: a board with a heap of salt painted on it
-      const sx = dx - 3, sy = wb - dh - 14;
-      fill(b, sx, sy, dw + 6, 10, 'wood3'); fill(b, sx + 1, sy + 1, dw + 4, 8, BL[3]); fill(b, sx + 1, sy + 1, dw + 4, 1, BL[2]);
-      saltHeap(b, sx + 16, sy + 8, 6, 5, 2); for (const k of [7, 25]) { px(b, sx + k, sy + 4, 'white'); px(b, sx + k - 1, sy + 5, 'white'); px(b, sx + k + 1, sy + 5, 'white'); px(b, sx + k, sy + 6, 'white'); }
-      // salt crusting the foot of the walls
-      for (let x = wx; x < wx + ww; x += 1) if (hash(x >> 1, 4, 3) < 0.4) fill(b, x, wb - 1 - ((hash(x, 5, 3) * 3) | 0), 1, 2, 'stone0');
-      // roof, eave shadow, the vent on the ridge
-      roof(b, 0, w, top, roofH, R, 4); fascia(b, 0, eave, w, R); fill(b, wx, eave + 1, ww, 3, BW[3]);
-      const vx = Math.round(w / 2) - 9; fill(b, vx, top - 7, 18, 11, BW[1]); fill(b, vx, top - 7, 2, 11, BW[0]); fill(b, vx + 15, top - 7, 3, 11, BW[3]);
-      for (let y = top - 5; y < top + 3; y += 3) fill(b, vx + 2, y, 13, 1, BW[4]);
-      fill(b, vx - 2, top - 10, 22, 4, R[2]); fill(b, vx - 2, top - 10, 22, 1, R[0]); fill(b, vx - 2, top - 7, 22, 1, R[4]);
-      // the goods: heaps on the left, sacks stacked by the door, the scale on the right
-      saltHeap(b, wx + 13, wb + 3, 11, 13, 1); saltHeap(b, wx + 33, wb + 3, 8, 9, 2);
-      line(b, wx + 40, wb + 1, wx + 47, wb - 30, 'wood3'); line(b, wx + 39, wb + 1, wx + 46, wb - 30, 'wood1');
-      fill(b, wx + 34, wb, 12, 2, 'wood3'); fill(b, wx + 34, wb, 12, 1, 'wood2'); for (let x = wx + 34; x < wx + 46; x += 3) px(b, x, wb + 2, 'wood4');
-      sack(b, dx + dw + 3, wb + 3); sack(b, dx + dw + 15, wb + 3, 11, 13); sack(b, dx + dw + 8, wb - 9, 12, 13);
-      const kx = wx + 121; // balance scale on its post
-      fill(b, kx, wb - 26, 3, 29, 'wood3'); fill(b, kx, wb - 26, 1, 29, 'wood1'); fill(b, kx - 4, wb + 1, 11, 2, 'wood4');
-      fill(b, kx - 9, wb - 27, 21, 2, 'brass2'); fill(b, kx - 9, wb - 27, 21, 1, 'brass1'); disc(b, kx + 1, wb - 28, 2, 2, 'brass1');
-      for (const [px0, salt] of [[kx - 8, true], [kx + 10, false]]) {
-        line(b, px0, wb - 25, px0 - 4, wb - 15, 'iron3'); line(b, px0, wb - 25, px0 + 4, wb - 15, 'iron3');
-        fill(b, px0 - 5, wb - 15, 11, 3, 'brass2'); fill(b, px0 - 5, wb - 15, 11, 1, 'brass1'); fill(b, px0 - 4, wb - 13, 9, 1, 'brass3');
-        if (salt) saltHeap(b, px0, wb - 15, 4, 4, 5); else { fill(b, px0 - 2, wb - 18, 4, 3, 'iron2'); fill(b, px0 - 2, wb - 18, 4, 1, 'iron1'); }
+    const R = ramp('roofG');
+    const heaps = sprite(44, 16, b => { saltHeap(b, 12, 16, 11, 13, 1); saltHeap(b, 32, 16, 8, 9, 2); });
+    const sacks = sprite(28, 28, b => { sack(b, 0, 28); sack(b, 12, 28, 11, 13); sack(b, 5, 16, 12, 13); });
+    const scale = sprite(24, 32, b => {
+      const kx = 10;
+      fill(b, kx, 4, 3, 28, 'wood3'); fill(b, kx, 4, 1, 28, 'wood1'); fill(b, kx - 4, 30, 11, 2, 'wood4');
+      fill(b, kx - 9, 3, 21, 2, 'brass2'); fill(b, kx - 9, 3, 21, 1, 'brass1'); disc(b, kx + 1, 2, 2, 2, 'brass1');
+      for (const [x, salt] of [[kx - 7, true], [kx + 9, false]]) {
+        line(b, x, 5, x - 3, 14, 'iron3'); line(b, x, 5, x + 3, 14, 'iron3');
+        fill(b, x - 4, 14, 9, 3, 'brass2'); fill(b, x - 4, 14, 9, 1, 'brass1');
+        if (salt) saltHeap(b, x, 14, 3, 4, 5); else { fill(b, x - 2, 11, 4, 3, 'iron2'); fill(b, x - 2, 11, 4, 1, 'iron1'); }
       }
     });
-    return { img: out.canvas(), ax: Math.round(w / 2) + 1, ay: wb + 1, base: [-w / 2 + over, w / 2 - over], foot: wallH - 2, door: dx + dw / 2 + 1 - (Math.round(w / 2) + 1), lit };
+    return V.house({
+      w: 136, d: 56, wall: 46, rise: 34, kind: 'plank', ramp: BW, trim: [BW[0], BW[1], BW[3]], roof: R, seed: 51,
+      wins: [[16, 14, 16, 13, { shut: R.slice(1, 4), frame: [BW[1], BW[2], BW[4]] }], [104, 14, 16, 13, { shut: R.slice(1, 4), frame: [BW[1], BW[2], BW[4]] }]],
+      side: [[20, 14, 14, 12, { frame: [BW[1], BW[2], BW[4]] }]],
+      door: [55, 26, 38, { double: true, paint: BW.slice(1) }],
+      front(b, w, h) {
+        // the sign over the doors: a blue board with a heap of salt painted on it, salt crust along the foot
+        const sx = 52, sy = h - 52;
+        fill(b, sx, sy, 32, 10, 'wood3'); fill(b, sx + 1, sy + 1, 30, 8, BL[3]); fill(b, sx + 1, sy + 1, 30, 1, BL[2]); saltHeap(b, sx + 16, sy + 8, 6, 5, 2);
+        for (const k of [6, 26]) { px(b, sx + k, sy + 4, 'white'); px(b, sx + k - 1, sy + 5, 'white'); px(b, sx + k + 1, sy + 5, 'white'); px(b, sx + k, sy + 6, 'white'); }
+        for (let x = 0; x < w; x++) if (hash(x >> 1, 4, 3) < 0.4) fill(b, x, h - 5 - ((hash(x, 5, 3) * 3) | 0), 1, 2, 'stone0');
+      },
+      extra(m, g, { B0 }) {
+        // the louvred vent on the ridge, under its own little roof
+        MODEL.gable(m, { x0: -10, x1: 10, back0: B0 + 20, d: 16, wall: 10, rise: 6, up0: g.R - 4, ov: 2, board: (b, w, h) => fill(b, 0, 0, w, h, BW[3]), roof: (b, w, h) => { fill(b, 0, 0, w, h, R[2]); fill(b, 0, 0, w, 1, R[0]); },
+          front(b, w, h) { fill(b, 0, 0, w, h, BW[1]); for (let y = 2; y < h; y += 3) fill(b, 2, y, w - 4, 1, BW[4]); }, left: (b, w, h) => fill(b, 0, 0, w, h, BW[2]), right: (b, w, h) => fill(b, 0, 0, w, h, BW[3]) });
+      },
+      cards: [card(heaps, -44, -8), card(sacks, 34, -8), card(scale, 58, -4)],
+    });
   }
 
-  /* arloHome(): Arlo the fisherman's home by the jetty, 160 wide: weathered blue clapboards peeling to bare wood, a
-     terracotta roof with a chimney, a porthole and a shuttered window, a net hung to dry under the eave with its floats,
-     a ring buoy on the wall, an oar by the door, a fish-drying rack and a mooring buoy beside the house. */
+  /* Arlo the fisherman's home by the jetty: weathered blue clapboards peeling to bare wood under a terracotta roof and
+     a stone chimney, a brass porthole and a shuttered window, a net hung to dry under the eave with its floats, a ring
+     buoy on the wall, an oar by the door. */
   function arloHome() {
-    const ww = 120, wallH = 46, roofH = 54, over = 5, ex = 34, up = 8, w = ww + over * 2 + ex, h = up + roofH + wallH + 4;
-    const top = up, eave = top + roofH, wx = over, wy = eave - 3, wb = h - 4, R = ramp('roofR'), dx = wx + 54, lit = [];
-    const out = inked(w, h, b => {
-      clap(b, wx, wy, ww, wb - wy, BL, 2);
-      fill(b, wx, wy, 3, wb - wy, BW[1]); fill(b, wx, wy, 1, wb - wy, BW[0]); fill(b, wx + ww - 3, wy, 3, wb - wy, BW[3]);
-      footing(b, wx - 1, wb, ww + 2);
-      // porthole, door, ring buoy, shuttered window
-      const pcx = wx + 42, pcy = wy + 20;
-      disc(b, pcx, pcy, 8, 8, 'brass3'); disc(b, pcx, pcy, 7, 7, 'brass2'); disc(b, pcx - 1, pcy - 1, 6, 6, 'brass1'); disc(b, pcx, pcy, 5, 5, 'sky3'); disc(b, pcx - 1, pcy - 1, 3, 3, 'sky2'); px(b, pcx - 3, pcy - 3, 'white'); px(b, pcx - 2, pcy - 4, 'white');
-      for (const [x, y] of [[0, -7], [7, 0], [0, 7], [-7, 0]]) px(b, pcx + x, pcy + y, 'brass3');
-      lit.push([pcx - 4, pcy - 4, 11, 11]);
-      door(b, dx, wb, 22, 36, ramp('roofB').map((k, i) => i ? k : 'roofB0'));
-      lifebuoy(b, wx + 88, wy + 18, 6);
-      lit.push(win(b, wx + 100, wy + 14, 14, 15, { shutters: BW, frame: [BW[1], BW[4]] }));
-      // the oar leaning by the door
-      line(b, dx - 6, wb + 2, dx - 2, wb - 34, 'wood3'); line(b, dx - 7, wb + 2, dx - 3, wb - 34, 'wood1');
-      fill(b, dx - 9, wb - 6, 5, 9, 'wood2'); fill(b, dx - 9, wb - 6, 2, 9, 'wood1'); fill(b, dx - 9, wb + 2, 5, 1, 'wood4');
-      // roof and chimney
-      roof(b, 0, ww + over * 2, top, roofH, R, 6); fascia(b, 0, eave, ww + over * 2, R); fill(b, wx, eave + 1, ww, 3, BL[3]);
-      chimney(b, 98, top - 7);
-      // the net hung from two hooks under the eave, sagging between them, floats along its head
-      const nx = wx + 4, nw = 26;
-      for (let x = nx; x < nx + nw; x++) {
-        const sag = Math.round(3 * Math.sin((x - nx) / nw * Math.PI)), bot = wy + 30 + sag + ((x * 7) % 3 === 0 ? 1 : 0);
-        for (let y = wy + 4 + sag; y < bot; y++) if ((x + y) % 3 === 0 || (x - y) % 3 === 0 || y === bot - 1) px(b, x, y, (x - y) % 3 === 0 ? NET[2] : NET[1]);
-        if ((x - nx) % 6 === 2) for (let y = wy + 8 + sag; y < bot - 1; y++) if (y % 2) px(b, x, y, NET[3]);
-      }
-      for (let k = 0; k < 4; k++) float(b, nx + 2 + k * 7, wy + 3 + Math.round(3 * Math.sin((k * 7 + 3) / nw * Math.PI)));
-      fill(b, nx, wy + 2, 2, 2, 'iron3'); fill(b, nx + nw - 2, wy + 2, 2, 2, 'iron3');
-      // drying rack and a mooring buoy at the side
-      rackOn(b, ww + over * 2 + 2, wb + 3);
-      const bx = ww + over * 2 + 8, by = wb + 3; disc(b, bx, by - 5, 5, 5, 'red'); fill(b, bx - 5, by - 6, 11, 3, 'white'); disc(b, bx - 2, by - 8, 1, 1, 'rose'); fill(b, bx - 1, by - 12, 2, 3, 'iron3');
+    return V.house({
+      w: 120, d: 48, wall: 46, rise: 34, kind: 'clap', ramp: BL, trim: [BW[0], BW[1], BW[3]], roof: ramp('roofR'), seed: 52, chimney: [38, 24],
+      wins: [[100, 14, 14, 15, { shut: BW.slice(0, 3), frame: [BW[1], BW[2], BW[4]] }]], side: [[18, 14, 14, 14, { frame: [BW[1], BW[2], BW[4]] }]],
+      door: [54, 22, 36, { paint: ['roofB0', 'roofB1', 'roofB2', 'roofB3'] }],
+      front(b, w, h, top) {
+        for (const [x, y, pw] of [[30, top + 34, 9], [84, top + 8, 7], [10, top + 40, 6]]) { fill(b, x, y, pw, 3, BW[1]); fill(b, x, y, pw, 1, BW[0]); px(b, x + pw, y + 1, BL[3]); }
+        const pcx = 42, pcy = top + 20;
+        disc(b, pcx, pcy, 8, 8, 'brass3'); disc(b, pcx, pcy, 7, 7, 'brass2'); disc(b, pcx - 1, pcy - 1, 6, 6, 'brass1'); disc(b, pcx, pcy, 5, 5, 'sky3'); disc(b, pcx - 1, pcy - 1, 3, 3, 'sky2'); px(b, pcx - 3, pcy - 3, 'white');
+        lifebuoy(b, 88, top + 20, 6);
+        // the net hung from two hooks under the eave, sagging between them, floats along its head
+        const nx = 6, nw = 24;
+        for (let x = nx; x < nx + nw; x++) {
+          const sag = Math.round(3 * Math.sin((x - nx) / nw * Math.PI)), bot = top + 28 + sag + ((x * 7) % 3 === 0 ? 1 : 0);
+          for (let y = top + 3 + sag; y < bot; y++) if ((x + y) % 3 === 0 || (x - y) % 3 === 0 || y === bot - 1) px(b, x, y, (x - y) % 3 === 0 ? NET[2] : NET[1]);
+        }
+        for (let k = 0; k < 4; k++) float(b, nx + 2 + k * 6, top + 2 + Math.round(3 * Math.sin((k * 6 + 3) / nw * Math.PI)));
+        // the oar leaning by the door
+        line(b, 48, h - 2, 52, h - 38, 'wood3'); line(b, 47, h - 2, 51, h - 38, 'wood1'); fill(b, 45, h - 10, 5, 9, 'wood2'); fill(b, 45, h - 10, 2, 9, 'wood1');
+      },
     });
-    return { img: out.canvas(), ax: Math.round((ww + over * 2) / 2) + 1, ay: wb + 1, base: [-(ww / 2), ww / 2 + over + ex - 2], foot: wallH - 2, door: dx + 11 + 1 - (Math.round((ww + over * 2) / 2) + 1), lit, smoke: [[98 + 5 + 1, top - 7]] };
   }
 
-  /* theoStudio(): Theo's photo studio and darkroom on the cliff top, 156 wide: a tidy timber-framed cream house under a
-     slate roof; a front gable holds the big studio window (lit); the darkroom end has a blacked-out window and a little
-     red lamp; a box camera hangs as the sign by the door; wind-bent shrubs lean away from the sea.
-     red: the darkroom lamp's centre in img px (a red glow at dusk and night). */
+  /* Theo's photo studio and darkroom on the cliff top: a tidy cream house framed in dark timber under a slate roof,
+     its gable to the sea; the big many-paned studio window, the darkroom's blacked-out window with its little red lamp,
+     a box camera hung out as the sign. */
   function theoStudio() {
-    const ww = 136, wallH = 50, roofH = 56, over = 5, side = 10, w = ww + over * 2 + side * 2, h = roofH + wallH + 4 + 6;
-    const top = 6, eave = top + roofH, x0 = side, wx = x0 + over, wy = eave - 3, wb = h - 4, R = ramp('roofB'), RD = [R[1], R[2], R[3], R[4], R[4]];
-    const gx0 = x0, gx1 = wx + 54, gc = (gx0 + gx1) / 2, half = (gx1 - gx0) / 2, AH = 22, yb = x => Math.round(eave - 2 - AH * (1 - Math.abs(x + 0.5 - gc) / half));
-    const dx = wx + 82, lit = [];
-    const out = inked(w, h, b => {
-      // walls: cream plaster in a dark timber frame
-      fill(b, wx, wy, ww, wb - wy, 'wall1'); fill(b, wx + ww - 6, wy, 6, wb - wy, 'wall2');
-      for (const x of [wx, wx + 54, wx + ww - 4]) { fill(b, x, wy, 4, wb - wy, 'wood3'); fill(b, x, wy, 1, wb - wy, 'wood2'); fill(b, x + 3, wy, 1, wb - wy, 'wood4'); }
-      fill(b, wx, wb - 14, ww, 3, 'wood3'); fill(b, wx, wb - 14, ww, 1, 'wood2');
-      for (const [ax, bx2] of [[wx + 58, wx + 74], [wx + ww - 4, wx + ww - 20]]) { line(b, ax, wy + 4, bx2, wb - 15, 'wood3'); line(b, ax + (bx2 > ax ? 1 : -1), wy + 4, bx2 + (bx2 > ax ? 1 : -1), wb - 15, 'wood4'); }
-      footing(b, wx - 1, wb, ww + 2);
-      // the side roof, then the front gable over it: its triangle of wall, its two slopes, the bargeboards
-      roof(b, x0, ww + over * 2, top, roofH, R, 8); fascia(b, x0, eave, ww + over * 2, R); fill(b, wx, eave + 1, ww, 3, 'wall3');
-      for (let x = gx0; x < gx1; x++) fill(b, x, yb(x), 1, eave + 1 - yb(x), 'wall0');
-      for (let x = gx0 + 6; x < gx1 - 6; x += 5) for (let y = yb(x) + 3; y < eave; y++) px(b, x, y, 'wall2');
-      roof(b, gx0, gx1 - gx0, top, roofH, R, 9, (x, y) => x < gc && y < yb(x));
-      roof(b, gx0, gx1 - gx0, top, roofH, RD, 9, (x, y) => x >= gc && y < yb(x));
-      fill(b, Math.round(gc) - 2, top, 4, yb(gc) - top, R[1]); fill(b, Math.round(gc) - 2, top, 1, yb(gc) - top, R[0]); fill(b, Math.round(gc) + 1, top, 1, yb(gc) - top, R[3]);
-      for (let x = gx0 - 1; x <= gx1; x++) { const y = yb(Math.min(gx1 - 1, Math.max(gx0, x))); fill(b, x, y, 1, 3, 'wood3'); px(b, x, y, 'wood2'); px(b, x, y + 3, 'wood4'); }
-      fill(b, gx0 + 2, eave - 1, gx1 - gx0 - 4, 3, 'wall3');
-      // the studio window: tall, many-paned, up into the gable
-      lit.push(win(b, wx + 12, eave - 10, 32, 30, { cols: 4, rows: 3, frame: ['wood2', 'wood4'] }));
-      disc(b, gc, yb(gc) + 9, 3, 3, 'wood4'); disc(b, gc, yb(gc) + 9, 2, 2, 'sky3'); px(b, gc - 1, yb(gc) + 8, 'white');
-      // door with a transom, the camera sign on its bracket
-      door(b, dx, wb, 22, 36, ramp('roofG'));
-      lit.push(win(b, dx, wb - 46, 22, 6, { cols: 3, rows: 1, sill: false }));
-      fill(b, dx - 20, wb - 44, 14, 2, 'iron3'); px(b, dx - 20, wb - 45, 'iron3'); fill(b, dx - 8, wb - 46, 2, 6, 'iron3');
-      const cx = dx - 21, cy = wb - 39;
-      fill(b, cx + 3, cy - 3, 1, 3, 'iron3'); fill(b, cx + 10, cy - 3, 1, 3, 'iron3');
-      fill(b, cx, cy, 14, 11, 'wood3'); fill(b, cx, cy, 14, 2, 'wood2'); fill(b, cx, cy, 2, 11, 'wood2'); fill(b, cx, cy + 9, 14, 2, 'wood4'); fill(b, cx + 2, cy - 2, 5, 2, 'brass2');
-      disc(b, cx + 8, cy + 5, 3, 3, 'brass2'); disc(b, cx + 8, cy + 5, 2, 2, 'iron4'); px(b, cx + 7, cy + 4, 'white'); px(b, cx + 11, cy + 2, 'red');
-      // darkroom end: a blacked-out window and the little red lamp
-      fill(b, wx + 116, wy + 14, 12, 14, 'wood4'); fill(b, wx + 118, wy + 16, 8, 10, '#2a1b2e'); fill(b, wx + 118, wy + 16, 8, 1, '#3d2a40'); fill(b, wx + 115, wy + 28, 14, 2, 'wood3');
-      fill(b, wx + 120, wy + 8, 4, 2, 'iron3'); fill(b, wx + 120, wy + 10, 4, 3, 'red'); px(b, wx + 120, wy + 10, 'rose'); fill(b, wx + 120, wy + 13, 4, 1, 'iron4');
-      // a pot by the door, wind-bent shrubs at the corners
-      fill(b, dx + 27, wb - 3, 8, 6, 'roofR2'); fill(b, dx + 27, wb - 3, 8, 1, 'roofR1'); fill(b, dx + 28, wb + 2, 6, 1, 'roofR3');
-      V.foliage(b, (x, y) => ((x - dx - 31) / 6) ** 2 + ((y - wb + 7) / 5) ** 2 <= 1, [dx + 25, wb - 12, dx + 37, wb - 2], V.LEAF.green, 3, { cw: 6, ch: 5, dx: 4, dy: 3 });
-      for (const [sx, s, rx, ry] of [[x0 + 2, 1, 13, 13], [w - 12, 2, 10, 10]]) {
-        const lean = (x, y) => (((x - sx) + (y - (wb - ry)) * 0.6) / rx) ** 2 + ((y - (wb + 3 - ry)) / ry) ** 2 <= 1;
-        V.foliage(b, lean, [sx - rx, wb + 3 - 2 * ry, sx + rx + Math.round(ry * 0.6), wb + 3], V.LEAF.deep, s * 13, { cw: 8, ch: 6, dx: 5, dy: 4 });
-      }
+    const camera = (b, w, h) => {
+      fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 2, 'wood2'); fill(b, 0, h - 2, w, 2, 'wood4');
+      disc(b, (w >> 1) + 1, h >> 1, 3, 3, 'brass2'); disc(b, (w >> 1) + 1, h >> 1, 2, 2, 'iron4'); px(b, w >> 1, (h >> 1) - 1, 'white'); px(b, w - 3, 2, 'red');
+    };
+    return V.house({
+      w: 136, d: 52, wall: 52, rise: 46, ridge: 'back', kind: 'plaster', ramp: ['wall0', 'wall1', 'wall2', 'wall3'], roof: 'roofB', seed: 53, timber: [36, 0, 54, 133],
+      wins: [[10, 2, 36, 30, { frame: ['wood2', 'wood3', 'wood4'] }]], side: [[18, 12, 14, 14]],
+      door: [70, 22, 36, { paint: ['roofG1', 'roofG2', 'roofG3', 'roofG4'] }], chimney: [44, 30],
+      front(b, w, h, top) {
+        // the darkroom: a blacked-out window, and the little red lamp over it
+        fill(b, 108, top + 12, 16, 18, 'wood4'); fill(b, 110, top + 14, 12, 14, '#2a1b2e'); fill(b, 110, top + 14, 12, 1, '#3d2a40'); fill(b, 107, top + 30, 18, 2, 'wood3');
+        fill(b, 114, top + 4, 4, 2, 'iron3'); fill(b, 114, top + 6, 4, 3, 'red'); px(b, 114, top + 6, 'rose');
+      },
+      extra(m, g, { X0, B0, PH }) { V.hangSign(m, X0 + 64, B0, PH + 38, 14, 11, camera); },
     });
-    return { img: out.canvas(), ax: Math.round(w / 2) + 1, ay: wb + 1, base: [-(ww / 2) - over, ww / 2 + over], foot: wallH - 2, door: dx + 11 + 1 - (Math.round(w / 2) + 1), lit, red: [wx + 122 + 1, wy + 11 + 1] };
   }
 
   /* ropeBridgeRemains(): what is left of the old rope bridge, 62 x 50: two leaning posts, frayed ropes hanging from

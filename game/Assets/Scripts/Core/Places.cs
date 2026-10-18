@@ -35,7 +35,7 @@ namespace Shop
                 {
                     West("to_grove", 690, "Into the trees", "grove/from_station"),
                     East("to_square", 960, 686, "To the square", "square/from_station"),
-                    new Hotspot { Id = "station_clock", At = V(530, 160), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 190) },
+                    new Hotspot { Id = "station_clock", At = V(530, 225), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 135) },
                     new Hotspot { Id = "info_board", At = V(740, 368), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
             },

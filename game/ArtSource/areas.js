@@ -42,14 +42,15 @@
     });
     for (const [pts, hw] of roads) each((tx, ty, x, y) => { if (near(pts, hw, x, y) && mat[ty][tx] !== '_') mat[ty][tx] = mat[ty][tx] === '~' ? '=' : 'd'; });
     if (def.paving) each((tx, ty, x, y) => { if (def.paving(x, y)) mat[ty][tx] = 'p'; });
-    // Stairs: where a road drops off a level, a flight of steps cut into the face, one tile wider than the road on
-    // each side and spanning every row the drop takes across it.
+    // Stairs: where a road drops off a level, a flight of steps as wide as the road, spanning every row the drop takes
+    // across it and one more tile cut back into the level above, so each step has a tread to stand on.
     const drops = [];
     each((tx, ty) => { if (ty > 0 && ty + 1 < TH && mat[ty][tx] === 'd' && lev[ty][tx] < lev[ty - 1][tx]) drops.push([tx, ty]); });
     const groups = [];
     for (const d of drops) { const g = groups.find(g => g.some(([x, y]) => Math.abs(x - d[0]) <= 2 && Math.abs(y - d[1]) <= 2)); g ? g.push(d) : groups.push([d]); }
     for (const g of groups) {
-      const x0 = Math.min(...g.map(d => d[0])) - 1, x1 = Math.max(...g.map(d => d[0])) + 1, y0 = Math.min(...g.map(d => d[1])), y1 = Math.max(...g.map(d => d[1])) + 1;
+      // (a path one tile wide gets a tile either side, room for an ant's feet between the cheeks)
+      const one = g.every(d => d[0] === g[0][0]) ? 1 : 0, x0 = Math.min(...g.map(d => d[0])) - one, x1 = Math.max(...g.map(d => d[0])) + one, y0 = Math.min(...g.map(d => d[1])) - 1, y1 = Math.max(...g.map(d => d[1])) + 1;
       for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) mat[ty][tx] = 'h';
     }
     return { rows: mat.map(r => r.join('')), lev, TW, TH };
@@ -351,7 +352,7 @@
   // The station: the line comes out of the ridge's tunnel and curves down past the platform; a siding runs to the yard.
   const RIDGE = wavy(136, 10, 53);
   const STATION_RAILS = [[[80, 190], [86, 260], [140, 350], [250, 408], [400, 418], [940, 418]], [[420, 418], [500, 428], [560, 466], [620, 476], [940, 476]]].map(p => smooth(p, 4));
-  const PLATFORM = [300, 326, 780, 390];
+  const PLATFORM = [300, 326, 780, 390], YARD = wavy(536, 4, 60); // the platform; the foot of the yard's embankment
   // The square: the hall and its neighbours shoulder to shoulder up on a terrace, the round paved square below it.
   const TERRACE = wavy(420, 6, 40), PLAZA = [640, 645, 200, 170]; // the plaza: a rounded square, its middle and half sizes
   // The east: the river down its west side, Leo's hill in the north-east corner.
@@ -400,34 +401,59 @@
       glow: [[300, 290, 200, 60], [500, 440, 110, 90]],
     },
 
-    /* The old station: Helen and the mender live either side of it, a train waits at the platform, the forge and Bram's
-       carriage stand in the yard by the road. West to the grove, east to the square. */
+    /* The old station, built like an Octopath town: up on the yard's embankment the station hall with its clock tower
+       and the homes of Helen and the mender either side of it, the signal box by the line and a cottage at the end; the
+       platform before them with the train, Helen's tea stall and its lamps; stairs down by the gate to the road, where
+       the engine shed, Bram's carriage, a cottage, the forge and the gate stand shoulder to shoulder. West to the grove,
+       east to the square. */
     station: {
       w: 960, h: 768, seed: 7, bg: '#2f6a37', start: 'start',
-      level: (x, y) => y < RIDGE(x) ? 1 : 0,
+      level: (x, y) => y < RIDGE(x) ? 2 : y < YARD(x) ? 1 : 0,
       roads: [[[[-20, 690], [300, 684], [600, 694], [980, 686]], 22], [[[800, 360], [812, 450], [818, 690]], 16]],
       rails: STATION_RAILS, gap: 40,
       paving: (x, y) => x >= PLATFORM[0] && x < PLATFORM[2] && y >= PLATFORM[1] && y < PLATFORM[3],
-      clear: [[540, 360, 330, 90], [600, 560, 380, 120]],
+      clear: [[540, 360, 400, 90], [520, 620, 460, 100]],
       species: mix(P => [[0.45, P.pine], [0.75, P.pineDeep], [1, P.oakDeep]]),
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
-        at('way_grove', V.waysign('GROVE', -1), 44, 662); at('way_square', V.waysign('SQUARE', 1), 916, 658);
+        at('way_grove', V.waysign('GROVE', -1), 20, 712); at('way_square', V.waysign('SQUARE', 1), 936, 664);
+        // up on the embankment behind the platform: the station, Helen's cottage beside it, trees and a garden round them
+        at('helen_house', V.helenHouse(), 336, 306, { lane: [[336, 340]] });
         at('station', V.station(), 530, 326);
+        at('oak_n', V.oak(6), 214, 318); at('fruit_n', V.fruitTree(2), 724, 300); at('blossom_m', V.blossom(7), 790, 322, { sway: 2 });
+        [[250, 344, 'rose'], [690, 340, 'yellow'], [760, 346, 'white']].forEach(([x, y, c], i) => at('garden_' + i, V.flowerClump(i + 40, c), x, y, { walk: true }));
+        at('tunnel', V.tunnelPortal(), 80, 186, { walk: true });
+        // the platform: the train, Helen's tea stall, the notice board, benches, lamps and the luggage
         at('tea_stall', V.teaStall(), 400, 372);
         at('info_board', V.noticeBoard(), 740, 368);
-        at('helen_house', V.helenHouse(), 330, 300, { lane: [[330, 340]] });
-        at('mender_house', V.menderHouse(), 730, 300, { lane: [[704, 340]] });
-        at('tunnel', V.tunnelPortal(), 80, 186, { walk: true });
+        at('bench_p0', V.bench(), 460, 352); at('bench_p1', V.bench(), 604, 352);
+        [[316, 386], [500, 386], [680, 386], [772, 386]].forEach(([x, y], i) => at('lamp_p' + i, V.lamp(), x, y));
+        at('crates_p', V.crateStack(2), 322, 352); at('barrel_p', V.barrel(), 652, 346);
         at('locomotive', V.locomotive(), 640, 424); at('wagon_0', V.wagon(1), 532, 424); at('wagon_1', V.wagon(2), 890, 482);
         at('water_tower', V.waterTower(), 900, 404);
-        at('forge', V.forge(), 600, 630, { lane: [[584, 690]] });
-        at('bram_home', V.bramHome(), 330, 626, { lane: [[361, 690]] });
+        // the goods yard between the line and the road, kept low so it never stands before the platform: sleepers,
+        // crates, sacks and barrels, hedges along the top of the embankment
+        [[160, 470], [214, 486], [580, 506]].forEach(([x, y], i) => at('sleepers_' + i, V.sleepers(), x, y));
+        at('crates_g0', V.crateStack(3), 380, 500); at('crates_g1', V.crateStack(4), 680, 506); at('sacks_g', V.sacks(), 420, 508);
+        [[552, 520], [700, 520]].forEach(([x, y], i) => at('barrel_g' + i, V.barrel(), x, y));
+        [[290, 526], [470, 530], [760, 528]].forEach(([x, y], i) => at('hedge_y' + i, V.hedge(48), x, y));
+        // down by the road
+        at('bram_home', V.bramHome(), 172, 626, { lane: [[203, 690]] });
+        // between them a garden: an old oak, a bench, a well
+        at('oak_s', V.oak(5), 290, 628); at('bench_s', V.bench2(3), 340, 662); at('well_s', V.wellRoofed('roofG'), 388, 640);
+        at('blossom_n', V.blossom(5), 852, 318, { sway: 2 }); at('blossom_e', V.blossom(6), 906, 640, { sway: 2 });
+        // Mender's forge, and Mender's house beside it
+        at('forge', V.forge(), 520, 630, { lane: [[504, 690]] });
+        at('mender_house', V.menderHouse(), 708, 630, { lane: [[708, 690]] });
         at('gate', V.gateArch('BELLWOOD'), 816, 600, { walk: true });
-        [[150, 560], [700, 560]].forEach(([x, y], i) => at('boulder_' + i, V.boulder(i + 1), x, y));
+        at('crates_y', V.crateStack(1), 236, 668); at('cart_y', V.cart(), 770, 664); at('logs_y', V.logPile(), 436, 666);
+        [[250, 712], [520, 716], [760, 712]].forEach(([x, y], i) => at('lamp_r' + i, V.lamp(), x, y));
+        [[390, 668, 'yellow'], [496, 668, 'rose'], [868, 668, 'white'], [40, 720, 'lilac'], [960 - 30, 724, 'yellow']]
+          .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 20, c), x, y, { walk: true }));
+        [[110, 560], [640, 548]].forEach(([x, y], i) => at('boulder_' + i, V.boulder(i + 1), x, y));
       },
       anchors: { start: [530, 360], from_grove: [40, 690], from_square: [920, 686] },
-      glow: [[200, 560, 140, 70]],
+      glow: [[200, 740, 140, 30]],
     },
 
     /* The square, built like an Octopath town: on the terrace the hall with the bakery and three homes shoulder to
@@ -458,10 +484,12 @@
         at('home_corner', V.townHome('corner'), 976, 392);
         [300, 500, 760, 960].forEach((x, i) => at('terrace_fence_' + i, V.pickets(6), x, 418));
         // round the paved square, the street's walls either side of it
-        at('home_stone', V.townHome('stone'), 175, 596, { lane: [[175, 620]] });
+        at('home_stone', V.townHome('stone'), 140, 596, { lane: [[140, 620]] });
         at('post_office', V.postOffice(), 310, 596, { lane: [[310, 620]] });
-        at('home_mia', V.townHome('mia'), 970, 596, { lane: [[970, 620]] });
-        at('home_honey', V.townHome('honey'), 1100, 596, { lane: [[1100, 620]] });
+        at('home_mia', V.townHome('mia'), 950, 596, { lane: [[950, 620]] });
+        at('home_honey', V.townHome('honey'), 1110, 596, { lane: [[1110, 620]] });
+        // the gaps between the neighbours: a flower bed and a barrel
+        at('gap_w', V.flowerClump(31, 'rose'), 216, 590, { walk: true }); at('gap_e', V.flowerClump(32, 'yellow'), 1030, 590, { walk: true }); at('gap_barrel', V.barrel(), 1040, 572);
         at('fountain', V.fountain(), 640, 640);
         [['veg', 520, 560], ['fruit', 760, 560], ['flowers', 520, 730], ['bread', 760, 730]].forEach(([k, x, y]) => at('stall_' + k, V.stall(k), x, y));
         at('bench_w', V.bench(), 590, 770); at('bench_e', V.bench(), 690, 770);
@@ -496,8 +524,9 @@
       glow: [[640, 960, 260, 40]],
     },
 
-    /* The east: a bridge over the river, stilt houses along the road, chamomile fields, the playground, the gardener
-       and the aphid pen, Satria below Leo's hill and Leo's lookout on top. West to the square. */
+    /* The east: a bridge over the river, Nora's stilt house on its bank, the chamomile fields and the orchard, Satria's
+       home below Leo's hill and Leo's lookout on top; the playground, the aphid pen and the Gardener's glasshouse and
+       home along the lane. West to the square. */
     east: {
       w: 1024, h: 832, seed: 23, bg: '#2f7a3a', start: 'from_square',
       level: (x, y) => x > 640 && y < HILL(x) ? 1 : 0,
@@ -510,46 +539,66 @@
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
         at('way_square', V.waysign('SQUARE', -1), 44, 444);
-        at('stilt_nora', V.stiltHouse('nora'), 330, 430);
-        at('stilt_a', V.stiltHouse('a'), 520, 430);
-        at('satria_home', V.satriaHome(), 900, 420);
-        at('leo_hut', V.leoHut(), 840, 200, { lane: [[824, 250], [790, 270], [790, 360], [740, 480]] });
-        at('stilt_b', V.stiltHouse('b'), 300, 690, { lane: [[300, 740]] });
-        at('home_seeds', V.centreHome('corner'), 480, 690, { lane: [[538, 740]] });
-        at('playground', V.playground(), 730, 600); at('swing', V.swing(), 800, 598);
-        at('aphid_pen', V.aphidPen(), 760, 700);
-        at('gardener_home', V.gardenerHome(), 900, 690, { lane: [[927, 740]] });
-        [[700, 400], [730, 420], [990, 640]].forEach(([x, y], i) => at('birch_' + i, V.birch(i + 1), x, y, { sway: 2 }));
-        [[620, 400, 'apple'], [980, 560, 'orange']].forEach(([x, y, f], i) => at('fruit_tree_' + i, V.fruitTree(i + 1, f), x, y, { sway: 1 }));
+        // north of the road: Nora's stilt house on the river bank, the orchard, Satria's home in its quiet corner under
+        // the hill, Leo's lookout on top
+        at('nora_house', V.noraHouse(), 316, 440, { lane: [[316, 470]] });
+        [[440, 392, 'apple'], [520, 404, 'apple'], [600, 388, 'orange']].forEach(([x, y, f], i) => at('fruit_tree_' + i, V.fruitTree(i + 1, f), x, y, { sway: 1 }));
+        at('orchard_bench', V.bench2(4), 520, 446); at('orchard_crates', V.crateStack(5), 452, 446);
+        [[690, 400], [722, 424]].forEach(([x, y], i) => at('birch_' + i, V.birch(i + 1), x, y, { sway: 2 }));
+        at('satria_home', V.satriaHome(), 860, 440, { lane: [[860, 476]] });
+        at('clothesline', V.clothesline(), 950, 444);
+        [['cabbage', 452], ['carrot', 462]].forEach(([k, y], i) => at('satria_veg_' + i, V.vegRow(k, 40), 770, y, { walk: true }));
+        at('leo_hut', V.leoHut(), 830, 200, { lane: [[814, 250], [790, 270], [790, 360], [740, 480]] });
+        // south of the road: the willow and the playground by the river, the aphid pen, the Gardener's glasshouse and home
         at('willow_0', V.willow(1), 236, 570, { sway: 2 });
+        at('playground', V.playground(), 360, 610); at('swing', V.swing(), 440, 606);
+        at('aphid_pen', V.aphidPen(), 520, 700);
+        at('glasshouse', V.glasshouse(), 760, 690);
+        at('gardener_home', V.gardenerHome(), 900, 690, { lane: [[900, 740]] });
+        [['cabbage', 610], ['carrot', 626], ['cabbage', 642]].forEach(([k, y], i) => at('garden_veg_' + i, V.vegRow(k, 56), 760, y, { walk: true }));
+        at('fruit_tree_3', V.fruitTree(4, 'orange'), 990, 600, { sway: 1 }); at('birch_2', V.birch(3), 990, 650, { sway: 2 });
+        at('gardener_sacks', V.sacks(2), 830, 706); at('gardener_logs', V.logPile(), 300, 716);
+        [[300, 520, 'yellow'], [560, 540, 'white'], [640, 640, 'lilac'], [420, 760, 'rose'], [960, 760, 'yellow']]
+          .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 50, c), x, y, { walk: true }));
       },
       anchors: { from_square: [40, 470] },
       glow: [[380, 190, 150, 90], [176, 620, 60, 120]],
       dragonflies: [[176, 300], [196, 640]],
     },
 
-    /* The coast: Theo's studio up on the bluff with the rope bridge's remains, stairs down to the beach, the salt
-       store and Arlo's home, the jetty and the boats, the lighthouse out on the point. North up to the square. */
+    /* The coast: Theo's studio up on the bluff with the rope bridge's remains and a bench over the sea, stairs down to
+       the beach street with the salt store and Arlo's home, fish racks and nets between them; the jetty and the boats on
+       the sand, the lighthouse out on the point. North up to the square. */
     coast: {
       w: 960, h: 800, seed: 31, bg: '#3f86b4', start: 'from_square',
       level: (x, y) => y < BLUFF(x) ? 1 : 0,
       water: (x, y) => y > SHORE(x) ? '_' : null,
       sand: (x, y) => y > SHORE(x) - 190 + 14 * Math.sin(x / 33),
-      roads: [[[[480, -20], [480, 180], [470, 300], [470, 430]], 20]],
+      roads: [[[[480, -20], [480, 180], [470, 300], [470, 462]], 20], [[[120, 462], [860, 462]], 10]],
       gap: 40,
       clear: [[480, 330, 480, 80]],
       species: mix(P => [[0.7, P.pine], [1, P.oak]]),
       jetty: [500, 760, 150],
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
-        at('way_square', V.waysign('SQUARE', 0), 514, 46);
-        at('theo_studio', V.theoStudio(), 250, 200, { lane: [[360, 196], [480, 190]] });
-        at('rope_bridge', V.ropeBridgeRemains(), 80, 214);
-        at('salt_store', V.saltStore(), 220, 430);
-        at('arlo_home', V.arloHome(), 740, 430);
-        at('lighthouse', { ...V.lighthouse(), door: undefined }, 900, 650);   // seen, not entered
         const B = V.beachProps;
-        at('fish_rack', B.fishRack(), 680, 520); at('nets', B.nets(), 650, 560, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
+        at('way_square', V.waysign('SQUARE', 0), 514, 46);
+        // up on the bluff: Theo's studio, what is left of the rope bridge, a bench to watch the sea from
+        at('theo_studio', V.theoStudio(), 250, 204, { lane: [[360, 214], [480, 196]] });
+        at('rope_bridge', V.ropeBridgeRemains(), 80, 214);
+        at('bluff_bench', V.bench2(5), 640, 200); at('bluff_pine', V.oak(7), 760, 180);
+        [[370, 186, 'yellow'], [580, 210, 'white'], [700, 214, 'lilac'], [860, 196, 'yellow']].forEach(([x, y, c], i) => at('bluff_flowers_' + i, V.flowerClump(i + 60, c), x, y, { walk: true }));
+        // the beach street: the salt store and Arlo's home, the day's work between them
+        at('salt_store', V.saltStore(), 236, 446, { lane: [[236, 462]] });
+        at('arlo_home', V.arloHome(), 720, 446, { lane: [[720, 462]] });
+        at('crates_salt', V.crateStack(6), 354, 440); at('barrel_salt', V.barrel(), 380, 446);
+        at('fish_rack_0', B.fishRack(), 580, 444); at('nets_0', B.nets(), 620, 448, { walk: true });
+        at('lighthouse', { ...V.lighthouse(), door: undefined }, 900, 650);   // seen, not entered
+        at('fish_rack', B.fishRack(), 820, 520);
+        // the sand: a rowboat pulled up, nets and crates of the catch, driftwood, rocks
+        at('beached_boat', V.rowboat(), 330, 556, { walk: true }); at('nets_1', B.nets(), 400, 540, { walk: true });
+        at('crates_beach', V.crateStack(7), 520, 530); at('bucket_beach', V.bucket(), 548, 540); at('driftwood_1', B.driftwood(), 740, 560, { walk: true });
+        [[130, 520], [880, 470], [560, 600]].forEach(([x, y], i) => at('beach_rock_' + i, V.boulder(i + 4), x, y)); at('nets', B.nets(), 650, 560, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
         [[180, 560, 'scallop'], [350, 600, 'spiral'], [620, 592, 'clam'], [780, 600, 'scallop'], [110, 600, 'clam']].forEach(([x, y, k], i) => at('shell_' + i, B.shell(k), x, y, { walk: true }));
         [[140, 740], [760, 772], [300, 790]].forEach(([x, y], i) => at('sea_rock_' + i, V.rockStack(i + 1), x, y, { walk: true }));
         at('boat_0', V.boat(1), 590, 740, { walk: true }); at('boat_1', V.boat(2), 380, 770, { walk: true }); at('rowboat', V.rowboat(), 430, 680, { walk: true });

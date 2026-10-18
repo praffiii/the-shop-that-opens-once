@@ -155,84 +155,6 @@
     px(b, cx, cy, 'brass3');
   }
 
-  /* ---------------- the station ---------------- */
-  /* The old station: a long stone hall under a hipped slate roof, a timber-framed front gable over the arched
-     entrance, the BELLWOOD board, and the clock tower behind with its verdigris spire. clock: the face's centre. */
-  function station() {
-    const W = 244, H = 206, cx = 122, wy = 146, wb = 200, lit = [];
-    const out = inked(W, H, b => {
-      // the clock tower
-      const tx = cx - 18, tw = 36;
-      stones(b, tx, 22, tw, 78, 3); quoins(b, tx, 22, 100, 1); quoins(b, tx + tw, 22, 100, -1);
-      fill(b, tx - 1, 56, tw + 2, 2, 'stone1'); fill(b, tx - 1, 58, tw + 2, 1, 'stone4');
-      tiles(b, 4, 20, y => { const hw = Math.round(2 + (y - 4) * 1.25); return [cx - hw, cx + hw + 1]; }, VERD.map(c => P[c]), 9, 6, 4, [P.roofG1, P.roofG4]);
-      fill(b, tx - 4, 19, tw + 8, 3, 'roofG3'); fill(b, tx - 4, 19, tw + 8, 1, 'roofG1'); fill(b, tx - 4, 21, tw + 8, 1, 'roofG4');
-      fill(b, cx, 0, 1, 4, 'brass3'); fill(b, cx - 1, 1, 3, 2, 'brass2'); px(b, cx - 1, 1, 'brass0');
-      moss(b, tx - 3, 22, 12, 5, 2); moss(b, tx + tw - 6, 22, 9, 6, 2);
-      clock(b, cx, 39, 13);
-      // the hipped slate roof
-      const hip = y => Math.round((wy - y) * 0.42);
-      tiles(b, 92, wy - 3, y => [2 + hip(y), W - 2 - hip(y)], SLATE, 5, 8, 6, [SLATE[0], SLATE[3]]);
-      ridge(b, 2 + hip(92), W - 2 - hip(92), 88, SLATE);
-      for (const [x, y] of [[34, 134], [58, 122], [196, 130], [214, 138]]) patch(b, x, y, 4, 1);
-      fill(b, 50, 98, 10, 16, 'stone2'); fill(b, 50, 98, 2, 16, 'stone1'); fill(b, 57, 98, 3, 16, 'stone3'); fill(b, 49, 96, 12, 3, 'stone1'); fill(b, 49, 98, 12, 1, 'stone4'); fill(b, 52, 96, 6, 1, 'stone4');
-      moss(b, 49, 96, 7, 7, 1);
-      // the walls
-      stones(b, 10, wy, W - 20, wb - wy, 7);
-      quoins(b, 10, wy, wb, 1); quoins(b, W - 10, wy, wb, -1);
-      quoins(b, cx - 36, wy, wb, 1); quoins(b, cx + 36, wy, wb, -1);
-      fascia(b, 1, wy - 3, W - 2, [9, 'stone3']);
-      // the front gable: a tiled triangle round a timber-framed gable end with a round window
-      const go = y => Math.round(2 + (y - 70) * 0.5), gi = y => Math.round((y - 86) * 0.5);
-      tiles(b, 70, wy - 3, y => [cx - go(y), cx + go(y) + 1], SLATE, 6, 8, 6, [SLATE[0], SLATE[3]]);
-      ridge(b, cx - 3, cx + 4, 66, SLATE);
-      for (let y = 86; y < wy - 3; y++) {
-        const i = gi(y); fill(b, cx - i, y, 2 * i + 1, 1, 'wall1');
-        px(b, cx - i - 1, y, 'wood4'); px(b, cx - i - 2, y, 'wood3'); px(b, cx + i + 1, y, 'wood4'); px(b, cx + i + 2, y, 'wood5');
-      }
-      fill(b, cx - gi(124), 124, 2 * gi(124) + 1, 3, 'wood4'); fill(b, cx - gi(124), 124, 2 * gi(124) + 1, 1, 'wood3');
-      for (let x = cx - 24; x <= cx + 24; x += 8) fill(b, x - 1, 127, 3, wy - 130, 'wood4');
-      fill(b, cx - 1, 88, 3, 8, 'wood4');
-      line(b, cx - 2, 108, cx - 12, 123, 'wood4'); line(b, cx - 1, 108, cx - 11, 123, 'wood4'); line(b, cx + 2, 108, cx + 12, 123, 'wood4'); line(b, cx + 1, 108, cx + 11, 123, 'wood4');
-      disc(b, cx, 106, 7, 7, 'wood4'); disc(b, cx, 106, 5, 5, 'sky3'); fill(b, cx - 5, 109, 11, 2, 'sky4'); fill(b, cx, 101, 1, 11, 'wood4'); fill(b, cx - 5, 106, 11, 1, 'wood4'); px(b, cx - 3, 103, 'white'); px(b, cx - 2, 102, 'white');
-      lit.push([cx - 4, 102, 9, 9]);
-      // the name board over the door
-      const nw = PX.textWidth('BELLWOOD'), nx = cx - (nw >> 1) - 4;
-      fill(b, nx, 149, nw + 8, 10, 'wood4'); fill(b, nx + 1, 150, nw + 6, 8, 'wood5'); fill(b, nx + 1, 150, nw + 6, 1, 'wood3');
-      text(b, 'BELLWOOD', nx + 4, 152, 'brass1');
-      // the arched double door in a ring of voussoirs, a fanlight over it
-      const dw = 26, dh = 36, dx = cx - 13, dy = wb - dh;
-      arch(b, dx - 4, dy - 4, dw + 8, dh + 4, 'stone1'); arch(b, dx - 3, dy - 3, dw + 6, dh + 3, 'stone2');
-      for (let k = 1; k < 6; k++) { const a = Math.PI * k / 6; line(b, cx - Math.round(Math.cos(a) * 14), dy + 13 - Math.round(Math.sin(a) * 14), cx - Math.round(Math.cos(a) * 17), dy + 13 - Math.round(Math.sin(a) * 17), 'stone3'); }
-      fill(b, cx - 2, dy - 5, 5, 5, 'stone0'); fill(b, cx + 2, dy - 5, 1, 5, 'stone2');
-      door(b, dx, dy, dw, dh, { arch: true, c: ['wood2', 'wood3', 'wood4', 'wood5'], straps: true });
-      arch(b, dx, dy, dw, 12, 'sky3'); fill(b, dx, dy + 9, dw, 3, 'sky4'); fill(b, dx, dy + 12, dw, 2, 'wood5');
-      for (const k of [-6, 0, 6]) line(b, cx, dy + 11, cx + k * 2, dy + 1, 'wood4');
-      px(b, dx + 6, dy + 4, 'white'); px(b, dx + 7, dy + 3, 'white');
-      fill(b, cx - 1, dy + 14, 2, dh - 14, 'wood5'); px(b, cx - 3, dy + 22, 'brass1'); px(b, cx + 2, dy + 22, 'brass1');
-      lit.push([dx + 3, dy + 2, dw - 6, 8]);
-      // wall lamps beside the door
-      for (const x of [cx - 26, cx + 25]) {
-        fill(b, x - 1, 160, 3, 1, 'iron3'); fill(b, x, 161, 1, 2, 'iron3');
-        fill(b, x - 2, 163, 5, 8, 'iron4'); fill(b, x - 3, 162, 7, 1, 'iron3'); fill(b, x - 1, 164, 3, 5, 'sky2'); px(b, x - 1, 164, 'white'); fill(b, x - 1, 171, 3, 1, 'iron3');
-        lit.push([x - 1, 164, 3, 5]);
-      }
-      // tall arched windows in stone surrounds, benches under them
-      for (const x of [28, 58, W - 42, W - 72]) { win(b, x, 160, 14, 24, lit, { arch: true, surround: 'stone1' }); fill(b, x + 5, 155, 4, 3, 'stone0'); }
-      bench(b, 33, 190); bench(b, W - 65, 190);
-      // footing and steps
-      for (let x = 8; x < W - 8; x += 12) { fill(b, x, wb, 12, H - wb, 'stone2'); fill(b, x, wb, 12, 1, 'stone1'); fill(b, x + 11, wb, 1, H - wb, 'stone3'); }
-      fill(b, 8, H - 1, W - 16, 1, 'stone4');
-      fill(b, dx - 8, wb, dw + 16, H - wb, 'stone1'); fill(b, dx - 8, wb, dw + 16, 1, 'stone0'); fill(b, dx - 8, wb + 3, dw + 16, 1, 'stone3'); fill(b, dx - 8, H - 1, dw + 16, 1, 'stone4');
-      // time's marks: moss on the footing, ivy up the old corner
-      moss(b, 10, wb, 26, 11, 2); moss(b, 92, wb, 8, 12, 1); moss(b, 160, wb, 18, 13, 2); moss(b, 212, wb, 22, 14, 2);
-      for (const [x, y] of [[14, 192], [228, 186], [80, 196], [170, 194]]) patch(b, x, y, 3, 1);
-      ivy(b, 12, wb - 1, wy + 6, 4); ivy(b, W - 13, wb - 1, wy + 22, 9);
-      moss(b, 2, wy - 4, 30, 15, 4); moss(b, 186, wy - 4, 24, 16, 4); moss(b, cx - 40, wy - 4, 10, 17, 3);
-    });
-    return { img: out.canvas(), ax: cx + 1, ay: H, base: [-114, 114], body: [wy + 1, 89], foot: 50, door: 0, lit: toImg(lit), clock: [cx + 1, 40] };
-  }
-
   /* A stone platform edge, w long: two courses of flagstones, a pale coping, and the kerb face dropping to the
      tracks. No ink along its back edge, so it joins the paving behind it. Feet: its left end, at the kerb's foot. */
   function platform(w = 96) {
@@ -744,130 +666,6 @@
   }
 
   /* ---------------- homes ---------------- */
-  /* Helen's cottage: a thatched loaf of a roof with an eyebrow dormer, cream walls framed in dark timber, a rose
-     door under a rose trellis, rose shutters and window boxes. */
-  function helenHouse() {
-    const W = 140, H = 126, wy = 74, wb = 120, lit = [];
-    const out = inked(W, H, b => {
-      fill(b, 106, 0, 12, 26, 'stone2'); fill(b, 106, 0, 3, 26, 'stone1'); fill(b, 115, 0, 3, 26, 'stone3'); fill(b, 105, 0, 14, 3, 'stone1'); fill(b, 105, 2, 14, 1, 'stone4');
-      for (let y = 6; y < 26; y += 5) fill(b, 106, y, 12, 1, 'stone3');
-      // the walls: cream plaster in a dark timber frame
-      fill(b, 10, wy, 120, wb - wy, 'wall1');
-      for (const x of [10, 44, 96, 127]) fill(b, x, wy, 3, wb - wy, 'wood4');
-      fill(b, 10, 96, 120, 3, 'wood4'); fill(b, 10, 96, 120, 1, 'wood3');
-      for (const [x0, x1] of [[13, 44], [99, 127]]) { line(b, x0, wb - 1, x1 - 1, 99, 'wood4'); line(b, x0 + 1, wb - 1, x1, 99, 'wood4'); }
-      fill(b, 126, wy, 1, wb - wy, 'wall2');
-      // windows with rose shutters and window boxes
-      for (const x of [22, 104]) {
-        win(b, x, 80, 14, 13, lit, { sill: false });
-        for (const s of [x - 8, x + 16]) { fill(b, s, 78, 6, 17, ROSE[3]); fill(b, s, 78, 6, 1, ROSE[2]); for (let y = 81; y < 94; y += 3) fill(b, s + 1, y, 4, 1, ROSE[4]); fill(b, s + 5, 78, 1, 17, ROSE[4]); }
-        fill(b, x - 3, 100, 20, 5, 'wood3'); fill(b, x - 3, 100, 20, 1, 'wood2'); fill(b, x - 3, 104, 20, 1, 'wood4');
-        for (let k = 0; k < 20; k += 3) { px(b, x - 2 + k, 98, k % 2 ? ROSE[2] : 'white'); px(b, x - 3 + k, 99, MOSS[2]); px(b, x - 1 + k, 99, MOSS[1]); }
-      }
-      // the rose door under a trellis of climbing roses
-      const dx = 59, dy = wb - 36;
-      door(b, dx, dy, 22, 36, { arch: true, c: [ROSE[2], ROSE[3], ROSE[4], ROSE[5]], frame: 'wood4' });
-      disc(b, dx + 11, dy + 9, 3, 3, 'wood4'); disc(b, dx + 11, dy + 9, 2, 2, 'sky3'); px(b, dx + 10, dy + 8, 'white'); lit.push([dx + 9, dy + 7, 5, 5]);
-      for (let j = 0; j < 44; j++) {
-        const y = wb - 1 - j, i = j > 34 ? archIn(30, 44 - j) : 0;
-        for (const x of [dx - 4 + i, dx + 25 - i]) { px(b, x, y, MOSS[3]); if ((j + (x > dx ? 2 : 0)) % 4 === 0) { px(b, x - 1, y, MOSS[2]); px(b, x + 1, y - 1, MOSS[1]); } if ((j * 7 + x) % 11 === 0) { fill(b, x - 1, y - 1, 2, 2, 'rose'); px(b, x - 1, y - 1, ROSE[1]); } }
-      }
-      for (let x = dx; x < dx + 22; x++) { const y = wb - 44 + (x === dx || x === dx + 21 ? 1 : 0); px(b, x, y, MOSS[3]); if (x % 4 === 1) { fill(b, x, y - 1, 2, 2, 'rose'); px(b, x, y - 1, ROSE[1]); } }
-      // the thatch: courses of straw bundles on a rounded loaf, a thick rolled lip at the eave
-      const roofTop = 12, eave = 80, TH = ['dirt0', 'dirt1', 'dirt2', 'dirt3', 'dirt4'];
-      const span = y => { const r = 24, t = y - roofTop, i = t < r ? Math.round(r - Math.sqrt(r * r - (r - t) * (r - t))) : y > eave - 3 ? y - (eave - 3) : 0; return [2 + i, W - 2 - i]; };
-      for (let y = roofTop; y < eave - 7; y++) {
-        const [l, r] = span(y), c = Math.floor((y - roofTop) / 7), sy = (y - roofTop) % 7;
-        for (let x = l; x < r; x++) {
-          const sx = (x + (c & 1) * 3) % 6, end = Math.min(x - l, r - 1 - x);
-          let t = sy < 2 ? 1 : sy < 5 ? 2 : 3;
-          if (sy >= 2 && sy < 5 && sx === 2) t = 3;
-          if (sy === 6 && (sx === 0 || sx === 5)) t = 4;
-          if (sy === 0 && sx === 3 && c > 0) t = 0;
-          if (end < 5) t = Math.min(4, t + 1);
-          px(b, x, y, end === 0 ? 'dirt4' : TH[t]);
-        }
-      }
-      for (let y = eave - 7; y < eave; y++) {
-        const [l, r] = span(y), k = y - eave + 7;
-        for (let x = l; x < r; x++) px(b, x, y, x === l || x === r - 1 ? 'dirt4' : k === 0 ? 'dirt4' : k < 3 ? (k === 1 ? 'dirt0' : 'dirt1') : k < 5 ? ((x % 3) ? 'dirt2' : 'dirt3') : k === 5 ? 'dirt3' : 'dirt4');
-      }
-      for (let y = roofTop - 4; y < roofTop + 4; y++) { const l = 26 - (y - roofTop + 4), w = W - 2 * l; if (w > 0) fill(b, l, y, w, 1, y === roofTop - 4 ? 'dirt2' : y > roofTop + 1 ? 'dirt4' : 'dirt3'); }
-      for (let x = 24; x < W - 24; x += 6) { px(b, x, roofTop - 1, 'dirt1'); px(b, x + 1, roofTop - 2, 'dirt1'); px(b, x + 2, roofTop - 1, 'dirt1'); px(b, x + 3, roofTop, 'dirt4'); }
-      // the eyebrow dormer: the thatch swells up and over a little window
-      const ex = 70;
-      for (let x = ex - 22; x < ex + 22; x++) {
-        const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - ex) / 22) ** 2)) * 9), top = 47 - h;
-        for (let y = top; y < 48; y++) px(b, x, y, y === top ? 'dirt4' : y === top + 1 ? 'dirt0' : y < top + 4 ? 'dirt1' : y > 45 ? 'dirt4' : (x % 3 ? 'dirt2' : 'dirt3'));
-      }
-      fill(b, ex - 10, 48, 20, 10, 'wood4'); fill(b, ex - 9, 48, 18, 9, 'sky3'); fill(b, ex - 9, 54, 18, 3, 'sky4'); fill(b, ex - 1, 48, 2, 9, 'wood4'); px(b, ex - 8, 49, 'white'); px(b, ex - 7, 49, 'white');
-      fill(b, ex - 11, 58, 22, 2, 'wood3'); fill(b, ex - 11, 59, 22, 1, 'wood4'); lit.push([ex - 9, 48, 18, 9]);
-      fill(b, 10, eave, 120, 3, 'wall3');
-      // footing, step, pots
-      for (let x = 9; x < W - 9; x += 10) { fill(b, x, wb, 10, H - wb, 'stone2'); fill(b, x, wb, 10, 1, 'stone1'); fill(b, x + 9, wb, 1, H - wb, 'stone3'); }
-      fill(b, 9, H - 1, W - 18, 1, 'stone4');
-      fill(b, dx - 4, wb, 30, H - wb, 'stone1'); fill(b, dx - 4, wb, 30, 1, 'stone0'); fill(b, dx - 4, H - 1, 30, 1, 'stone3');
-      potPlant(b, 44, wb + 4, 3, ROSE[3]); potPlant(b, 88, wb + 4, 4, 'white');
-    });
-    return { img: out.canvas(), ax: 71, ay: H, base: [-62, 62], body: [81, 13], foot: 44, door: 0, lit: toImg(lit), smoke: [[113, 1]] };
-  }
-
-  /* Mender's house: rough grey stone under a patched corrugated-iron roof, a great stone chimney up its side, an
-     iron-strapped door under an iron hood, a barred window, a gear for a weathervane, an old cog against the wall. */
-  function menderHouse() {
-    const W = 140, H = 128, wy = 72, wb = 122, lit = [];
-    const out = inked(W, H, b => {
-      // gear weathervane
-      fill(b, 40, 4, 1, 14, 'iron3'); disc(b, 40, 6, 4, 4, 'brass3'); disc(b, 40, 6, 3, 3, 'brass2'); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; px(b, 40 + Math.round(Math.cos(a) * 5), 6 + Math.round(Math.sin(a) * 5), 'brass3'); } px(b, 40, 6, 'iron4'); px(b, 38, 4, 'brass0');
-      // the roof: corrugated sheets, rust and grey, overlapping in two courses
-      for (let y = 18; y < wy - 2; y++) {
-        const course = y < 44 ? 0 : 1, sy = course ? y - 44 : y - 18;
-        for (let x = 0; x < 118; x++) {
-          const panel = ((x + course * 8) / 16) | 0, grey = hash(panel, course, 5) < 0.35, R4 = grey ? ['iron1', 'iron2', 'iron2', 'iron3'] : [RUST[0], RUST[1], RUST[1], RUST[2]];
-          let c = R4[x % 4];
-          if (sy === 0) c = grey ? 'iron0' : RUST[0]; else if (sy === 1 && course) c = grey ? 'iron4' : RUST[3];
-          if ((x + course * 8) % 16 === 0) c = grey ? 'iron3' : RUST[2];
-          px(b, x, y, c);
-        }
-      }
-      fill(b, 0, 14, 118, 4, 'iron2'); fill(b, 0, 14, 118, 1, 'iron0'); fill(b, 0, 17, 118, 1, 'iron4'); for (let x = 6; x < 118; x += 12) px(b, x, 15, 'iron4');
-      fill(b, 0, 14, 1, wy - 14, 'iron4'); fill(b, 117, 14, 1, wy - 14, 'iron4');
-      patch(b, 30, 62, 4, 1); patch(b, 86, 36, 3, 1); moss(b, 52, 14, 14, 7, 2);
-      // walls of rough stone, the gutter and downpipe
-      stones(b, 6, wy, 106, wb - wy, 8, ROUGH, 8);
-      quoins(b, 6, wy, wb, 1);
-      fill(b, 6, wy, 106, 2, 'r3');
-      fill(b, 0, wy - 3, 118, 3, 'iron2'); fill(b, 0, wy - 3, 118, 1, 'iron1'); fill(b, 0, wy - 1, 118, 1, 'iron4');
-      fill(b, 9, wy, 3, wb - wy - 2, 'iron3'); fill(b, 9, wy, 1, wb - wy - 2, 'iron2'); for (let y = wy + 8; y < wb; y += 14) fill(b, 8, y, 5, 1, 'iron4'); fill(b, 8, wb - 3, 6, 2, 'iron3');
-      for (const x of [30, 60, 98]) { fill(b, x, wy + 2, 1, 6 + (x % 5), RUST[2]); px(b, x, wy + 8 + (x % 5), RUST[3]); }
-      // the door under an iron hood
-      door(b, 32, wb - 38, 24, 38, { straps: true, c: ['wood2', 'wood3', 'wood4', 'wood5'] });
-      for (let y = wb - 34; y < wb - 4; y += 6) for (let x = 36; x < 54; x += 6) px(b, x, y, 'iron1');
-      fill(b, 27, wb - 46, 34, 3, 'iron2'); fill(b, 27, wb - 46, 34, 1, 'iron0'); fill(b, 27, wb - 44, 34, 1, 'iron4');
-      for (const x of [28, 58]) line(b, x, wb - 43, x + (x < 40 ? 3 : -3), wb - 40, 'iron3');
-      // barred window with iron shutters
-      win(b, 74, 84, 16, 16, lit, { frame: 'iron4', sill: 'r1' });
-      for (const x of [78, 82, 86]) fill(b, x, 84, 1, 16, 'iron3'); fill(b, 74, 91, 16, 1, 'iron3');
-      for (const s of [66, 92]) { fill(b, s, 82, 6, 20, RUST[1]); fill(b, s, 82, 6, 1, RUST[0]); fill(b, s + 5, 82, 1, 20, RUST[3]); for (let y = 86; y < 100; y += 5) fill(b, s, y, 6, 1, RUST[2]); px(b, s + 1, 84, 'iron1'); px(b, s + 1, 98, 'iron1'); }
-      // the chimney stack, wider at the shoulder
-      stones(b, 116, 2, 16, 64, 9, ROUGH, 8); stones(b, 110, 66, 26, wb - 66, 10, ROUGH, 8);
-      for (let y = 60; y < 66; y++) fill(b, 116 - (y - 60), y, 16 + 2 * (y - 60), 1, y === 60 ? 'r1' : 'r2');
-      fill(b, 114, 0, 20, 4, 'r1'); fill(b, 114, 0, 20, 1, 'r0'); fill(b, 114, 3, 20, 1, 'r4');
-      fill(b, 110, 66, 2, wb - 66, 'r1'); fill(b, 134, 66, 2, wb - 66, 'r4');
-      moss(b, 114, 0, 7, 3, 2); moss(b, 110, 66, 6, 4, 2);
-      // footing, step, an old cog against the wall, firewood
-      for (let x = 4; x < W - 4; x += 12) { fill(b, x, wb, 12, H - wb, 'r2'); fill(b, x, wb, 12, 1, 'r1'); fill(b, x + 11, wb, 1, H - wb, 'r3'); }
-      fill(b, 4, H - 1, W - 8, 1, 'r4');
-      fill(b, 26, wb, 36, H - wb, 'stone1'); fill(b, 26, wb, 36, 1, 'stone0'); fill(b, 26, H - 1, 36, 1, 'stone3');
-      for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; fill(b, 100 + Math.round(Math.cos(a) * 10) - 1, 112 + Math.round(Math.sin(a) * 10) - 1, 3, 3, RUST[2]); }
-      disc(b, 100, 112, 9, 9, RUST[1]); disc(b, 99, 111, 7, 7, RUST[0]); disc(b, 100, 112, 5, 5, RUST[2]); disc(b, 100, 112, 3, 3, RUST[3]); disc(b, 100, 112, 1, 1, 'iron4');
-      fill(b, 63, 106, 22, 16, 'wood4');
-      for (let r = 0; r < 3; r++) for (let x = 64 + (r & 1) * 2; x < 82; x += 6) { const y = 107 + r * 5; disc(b, x + 2, y + 2, 2, 2, 'wood1'); px(b, x + 2, y + 2, 'wood2'); px(b, x + 1, y + 1, 'wood0'); }
-      moss(b, 6, wb, 14, 8, 2); moss(b, 112, wb, 16, 9, 2);
-    });
-    return { img: out.canvas(), ax: 71, ay: H, base: [-66, 66], body: [wy + 1, 19], foot: 46, door: -26, lit: toImg(lit), smoke: [[125, 1]] };
-  }
-
   /* Kapten Bram's home: an old railway carriage on sleepers, its clerestory roof grown green, a stovepipe, curtained
      windows, a tin canopy over the door, a little porch with steps, a rail and plants. */
   function bramHome() {
@@ -917,5 +715,89 @@
     return { img: out.canvas(), ax: 76, ay: H, base: [-75, 73], foot: 30, door: 31, lit: toImg(lit), smoke: [[105, 2]] };
   }
 
-  Object.assign(VIL, { station, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, closedCard, lantern, helenHouse, menderHouse, bramHome });
+
+  /* ---------------- the station and the homes, in 3D (VIL.house) ---------------- */
+  const THATCH = ['#f6e2a6', '#dfbd73', '#bb9350', '#8f6b3a', '#674b2a'], IRON = ['iron0', 'iron1', 'iron2', 'iron3', 'iron4'];
+  // The West's walls: rough grey stone in courses, long-and-short corner stones, moss along the foot.
+  const stoneWall = seed => (b, w, h, top) => { stones(b, 0, 0, w, h, seed); quoins(b, 0, top, h, 1); quoins(b, w, top, h, -1); moss(b, 1, h - 5, Math.min(18, w - 2), seed + 1, 2); };
+
+  // A cog: a brass ring with eight teeth and a dark hub.
+  function gear(b, cx, cy) {
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; fill(b, cx + Math.round(Math.cos(a) * 5) - 1, cy + Math.round(Math.sin(a) * 5) - 1, 2, 2, 'brass2'); }
+    disc(b, cx, cy, 4, 4, 'brass2'); disc(b, cx - 1, cy - 1, 2, 2, 'brass1'); disc(b, cx, cy, 1, 1, 'wood5');
+  }
+
+  /* The old station: a long stone hall under slate with tall arched windows, and standing out over its arched double
+     door the clock tower, the clock stopped at 10:17 and the BELLWOOD board under it; ivy where time has sat. */
+  function station() {
+    return V.house({
+      w: 220, d: 64, wall: 58, rise: 40, roof: SLATE, seed: 7, paint: stoneWall(7),
+      wins: [[14, 14, 14, 26], [42, 14, 14, 26], [164, 14, 14, 26], [192, 14, 14, 26]].map(r => [...r, { arch: true }]),
+      side: [[22, 14, 14, 26, { arch: true }]],
+      door: [0, 26, 38, { double: true, arch: true, paint: ['wood2', 'wood3', 'wood4', 'wood5'] }],
+      bay: {
+        w: 60, out: 12, rise: 28, wall: 104,
+        front(b, w, h, top) {
+          clock(b, w >> 1, top + 20, 13);
+          const nw = PX.textWidth('BELLWOOD'), nx = (w >> 1) - (nw >> 1) - 4, ny = h - 54;
+          fill(b, nx, ny, nw + 8, 10, 'wood4'); fill(b, nx + 1, ny + 1, nw + 6, 8, 'wood5'); fill(b, nx + 1, ny + 1, nw + 6, 1, 'wood3'); text(b, 'BELLWOOD', nx + 4, ny + 3, 'brass1');
+          ivy(b, 3, h - 3, top + 40, 4);
+        },
+      },
+      front(b, w, h, top) { ivy(b, 5, h - 3, top + 8, 9); ivy(b, w - 6, h - 3, top + 22, 3); for (const [x, y] of [[30, top + 46], [190, top + 50]]) patch(b, x, y, 3, 1); },
+      chimney: [84, 30],
+    });
+  }
+  /* Helen's cottage: cream walls framed in dark timber under a straw-gold roof, a rose door under a rose trellis, rose
+     shutters and window boxes. */
+  function helenHouse() {
+    return V.house({
+      w: 104, d: 48, wall: 54, rise: 38, kind: 'plaster', roof: THATCH, seed: 21, timber: [22, 0, 50, 101],
+      wins: [[12, 30, 14, 14, { shut: ROSE.slice(2), box: ['rose', 'yellow'] }], [78, 30, 14, 14, { shut: ROSE.slice(2), box: ['rose', 'yellow'] }], [14, 6, 12, 10], [78, 6, 12, 10]],
+      door: [41, 22, 34, { paint: ROSE.slice(3), arch: true }],
+      chimney: [32, 26],
+      front(b, w, h) {
+        // the rose trellis round the door: a climbing stem with leaves and blooms
+        for (let k = 0; k < 44; k++) {
+          const a = Math.PI * k / 43, x = Math.round(52 + Math.cos(a) * 17), y = Math.round(h - 18 - Math.sin(a) * 24);
+          px(b, x, y, MOSS[3]); if (k % 3 === 0) { px(b, x - 1, y, MOSS[2]); px(b, x + 1, y - 1, MOSS[1]); }
+          if (k % 5 === 2) { disc(b, x, y - 1, 1, 1, ROSE[1]); px(b, x, y - 2, ROSE[0]); }
+        }
+      },
+    });
+  }
+  /* Mender's house: rough grey stone under a patched iron roof, a great stone chimney, an iron-strapped door, barred
+     windows, a gear hung for a sign. */
+  function menderHouse() {
+    return V.house({
+      w: 104, d: 48, wall: 50, rise: 30, roof: IRON, seed: 22, paint: stoneWall(22),
+      wins: [[14, 14, 16, 16], [74, 14, 16, 16]],
+      door: [41, 22, 34, { paint: ['wood2', 'wood3', 'wood4', 'wood5'] }],
+      chimney: [-34, 20],
+      front(b, w, h, top) { for (const x0 of [14, 74]) for (const x of [x0 + 4, x0 + 8, x0 + 12]) fill(b, x, top + 14, 1, 16, 'iron3'); },
+      extra(m, g, { X0, B0, PH }) { V.hangSign(m, X0 + 34, B0, PH + 30, 14, 14, (b, w, h) => { fill(b, 0, 0, w, h, 'wood4'); gear(b, w >> 1, h >> 1); }); },
+    });
+  }
+  // A stack of old sleepers, tarred and sun-bleached, crossed in layers.
+  function sleepers() {
+    const W = 40, H = 22;
+    const out = inked(W, H, b => {
+      for (let r = 0; r < 4; r++) {
+        const y = H - 6 - r * 5;
+        if (r & 1) for (const x of [3, 15, 27]) { fill(b, x, y, 10, 5, 'wood4'); fill(b, x, y, 10, 1, 'wood3'); fill(b, x + 9, y, 1, 5, 'wood5'); }
+        else { fill(b, 2, y, 36, 5, 'wood4'); fill(b, 2, y, 36, 1, 'wood3'); fill(b, 2, y + 4, 36, 1, 'wood5'); for (const x of [12, 24]) fill(b, x, y + 1, 1, 3, 'wood5'); }
+      }
+    });
+    return { img: out.canvas(), ax: W >> 1, ay: H, base: [-19, 19], foot: 8 };
+  }
+  /* A stone cottage by the yard, under slate, its window boxes bright (bloom: their flowers). */
+  function stoneCottage(seed = 25, bloom = 'yellow') {
+    return V.house({
+      w: 92, d: 44, wall: 48, rise: 32, roof: SLATE, seed, paint: stoneWall(seed),
+      wins: [[12, 14, 14, 16, { box: [bloom, 'white'] }], [66, 14, 14, 16, { box: [bloom, 'white'] }]],
+      door: [35, 22, 34, { paint: VERD.slice(1) }], chimney: [26, 22],
+    });
+  }
+
+  Object.assign(VIL, { station, sleepers, stoneCottage, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, closedCard, lantern, helenHouse, menderHouse, bramHome });
 })();

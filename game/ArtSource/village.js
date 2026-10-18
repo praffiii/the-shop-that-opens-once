@@ -77,6 +77,26 @@
     const L = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? lv[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))] : lv[y * W + x]);
     const MA = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 255 : mat[y * W + x]);
 
+    // Steps: down each column of stairs, the drop from the level above to the one below is cut into steps of RISE px.
+    // Each takes an equal share of the rows: a flat tread, then its riser standing upright, one px down per row.
+    // drop[i]: how far a stair pixel's surface is below the top of its flight; tread[i]: 1 tread, 2 its lit front
+    // edge, 3 riser, 4 the riser's foot (0: not a step).
+    const RISE = 4, drop = new Int16Array(W * H), tread = new Uint8Array(W * H);
+    for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) {
+      if (mat[y * W + x] !== M.h) continue;
+      let y1 = y; while (y1 + 1 < H && mat[(y1 + 1) * W + x] === M.h) y1++;
+      const n = y1 - y + 1, D = Math.max(0, FACE * (L(x, y - 1) - L(x, y1 + 1))), S = Math.ceil(D / RISE);
+      for (let s = 0; s < S; s++) {
+        const a = Math.round((s * n) / S), e = Math.round(((s + 1) * n) / S), r = Math.min(RISE, D - s * RISE, e - a - 1);
+        for (let j = a; j < e; j++) {
+          const i = (y + j) * W + x, up = j - (e - r);
+          drop[i] = s * RISE + Math.max(0, up + 1);
+          tread[i] = up < 0 ? (up === -1 ? 2 : 1) : up === r - 1 ? 4 : 3;
+        }
+      }
+      y = y1;
+    }
+
     // Faces: walking down each column, a drop in level hangs a face under the edge (FACE per level, BANK into water).
     // face[i] = rows below the edge + 1 (0: not a face); faceH[i] = that face's full height.
     const face = new Uint8Array(W * H), faceH = new Uint8Array(W * H), faceFrom = new Int8Array(W * H);
@@ -141,12 +161,12 @@
         const shore = [[1, 0], [-1, 0], [0, 1]].some(([dx, dy]) => L(x + dx, y + dy) >= 0 && !face[Math.max(0, Math.min(H - 1, y + dy)) * W + Math.max(0, Math.min(W - 1, x + dx))]);
         if (shore) c = WA[0];
         else { let sd = 0; while (sd < 7 && MA(x, y - sd - 1) !== M.s && MA(x - sd - 1, y) !== M.s && MA(x + sd + 1, y) !== M.s) sd++; if (sd < 7) c = sd < 2 ? WA[1] : sd < 5 ? WA[2] : c; }
-      } else if (m === M.h) {                               // stairs: treads every 6 px between stone cheeks
+      } else if (m === M.h) {                               // stairs: lit treads, shaded risers, between stone cheeks
         let l = x, r = x;
         while (l > 0 && MA(l - 1, y) === M.h) l--; while (r < W - 1 && MA(r + 1, y) === M.h) r++;
-        const k = y % 6;
-        c = k === 0 ? RK[0] : k < 3 ? RK[1] : k === 5 ? RK[4] : RK[3];
-        if (x - l < 3 || r - x < 3) c = x - l === 0 || r - x === 0 ? INK : RK[2];
+        const k = tread[i], cheek = x - l < 3 || r - x < 3;
+        c = k === 2 ? RK[0] : k === 1 ? (hash(x >> 3, y, seed + 23) < 0.15 ? RK[2] : RK[1]) : k === 4 ? RK[4] : RK[3];
+        if (cheek) c = x - l === 0 || r - x === 0 ? INK : k === 2 ? RK[1] : k >= 3 ? RK[3] : RK[2];
       } else if (m === M.p) {                               // paving: big flagstones of mixed widths, soft joints, a kerb at the front
         const row = Math.floor(y / 10), sw = 13 + ((hash(row, 3, seed) * 7) | 0), sx = (x + row * 7) % sw, sy = y % 10;
         const stone = hash(Math.floor((x + row * 7) / sw), row, seed);
@@ -218,15 +238,15 @@
     }
 
     // Height of each pixel's surface in px above level 0, for the game's 3D view: a level is FACE px above the one below,
-    // water lies BANK below level 0, a face drops one px per row from its top edge, and stairs ramp from the level
-    // above them to the level below.
+    // water lies BANK below level 0, a face drops one px per row from its top edge, and stairs step down from the level
+    // above them to the level below (their risers stand upright, like a face).
     const height = new Int16Array(W * H);
     for (let i = 0; i < W * H; i++) height[i] = face[i] ? FACE * faceFrom[i] - (face[i] - 1) : lv[i] < 0 ? -BANK : FACE * lv[i];
     for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) {
       if (mat[y * W + x] !== M.h) continue;
       let y1 = y; while (y1 + 1 < H && mat[(y1 + 1) * W + x] === M.h) y1++;
-      const top = height[Math.max(0, y - 1) * W + x], bot = height[Math.min(H - 1, y1 + 1) * W + x];
-      for (let j = y; j <= y1; j++) height[j * W + x] = Math.round(top + ((bot - top) * (j - y + 1)) / (y1 - y + 2));
+      const top = height[Math.max(0, y - 1) * W + x];
+      for (let j = y; j <= y1; j++) height[j * W + x] = top - drop[j * W + x];
       y = y1;
     }
 
@@ -237,7 +257,7 @@
       level: (x, y) => L(x | 0, y | 0),
       mat: (x, y) => 'gdpwhs'[MA(x | 0, y | 0)],
       height: (x, y) => height[(y | 0) * W + (x | 0)],
-      vertical: (x, y) => face[(y | 0) * W + (x | 0)] > 0,
+      vertical: (x, y) => { const i = (y | 0) * W + (x | 0); return face[i] > 0 || tread[i] >= 3; },
       forest: (x, y) => floor[(y | 0) * W + (x | 0)] === 1,
       // Feet may not stand in water, on a face, or at a level's side edge.
       blocked: (x, y) => { x |= 0; y |= 0; if (x < 0 || y < 0 || x >= W || y >= H) return true; const i = y * W + x; return stairs(x, y) ? false : lv[i] < 0 && tile(x / T | 0, y / T | 0) !== '=' || face[i] > 0; },
