@@ -13,6 +13,9 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [04](04-dunia-bellwood.md) | 2026-10-18 | Dunia Bellwood: empat zona dalam satu peta | `m2-world` |
 | [05](05-desa-gaya-rpg.md) | 2026-10-18 | Bellwood digambar ulang: desa gaya RPG yang hidup | |
 | [06](06-hd2d-dan-area.md) | 2026-10-18 | Tampilan HD-2D, hutan beringin tersembunyi, dan lima area kecil | |
+| [07](07-bangunan-3d-dan-kurir.md) | 2026-10-18 | Bangunan 3D, toko yang ditelan akar, dan kurir yang berbalik | |
+| [08](08-kamera-octopath-dan-tepi-berkabut.md) | 2026-10-18 | Kamera ala Octopath dan tepi area yang berkabut | |
+| [09](09-tepi-area-ditutup-hutan.md) | 2026-10-18 | Tepi area ditutup hutan, gerbang pohon, dan pagar semak | |
 
 ## Format setiap entri
 
