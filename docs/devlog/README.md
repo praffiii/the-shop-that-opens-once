@@ -21,6 +21,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [12](12-penduduk-hidup-pagi-di-stasiun.md) | 2026-10-18 | Penduduk yang hidup: pagi di stasiun, dan stasiun sebagai satu tempat | |
 | [13](13-siang-dan-sore-di-stasiun.md) | 2026-10-18 | Siang dan sore di stasiun: rutinitas penduduk sepanjang hari | |
 | [14](14-pagi-di-alun-alun.md) | 2026-10-18 | Pagi di alun-alun: Baker, Mia, Pip, dan Sam dari GDD | |
+| [15](15-siang-dan-sore-di-alun-alun.md) | 2026-10-18 | Siang dan sore di alun-alun: gosip, istirahat Pip, dan pulang sebelum gelap | |
 
 ## Format setiap entri
 
