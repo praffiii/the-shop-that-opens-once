@@ -202,11 +202,14 @@
         { z: 'hat', at: [1, -2], rows: ['PP.PP', 'PPQPP'], key: { P: 'pink', Q: 'rose' } },
       ],
     },
-    theo: { sleeve: ['wood1', 'wood2'],
-      torso: { rows: ['.gGGGH.', '1gGGHH2', '11GHH22', '111HH22', '1111H22', '1112223', '.12233.', '..333..'],
-               key: { 1: 'wood1', 2: 'wood2', 3: 'wood3', g: 'stone1', G: 'stone2', H: 'stone3' } },
+    // Theo, the cliff photographer (GDD 6.6): tall and calm, a dark-brown photographer's vest with many pockets, a
+    // magnifying lens for his eye, his camera on its strap (put away while he shoots with it).
+    theo: { sleeve: ['wood2', 'wood3'],
+      torso: { rows: ['.gGGGH.', '1gGGHH2', '1pGHH22', '1p1HHp2', '11p1Hp2', '1pp22p3', '.12233.', '..333..'],
+               key: { 1: 'wood3', 2: 'wood4', 3: 'wood5', p: 'wood2', g: 'stone1', G: 'stone2', H: 'stone3' } },
       parts: [
-        { z: 'body', at: [4, 3], rows: ['1122', '2tt3', '2333'], key: { 1: 'iron1', 2: 'iron2', 3: 'iron3', t: 'water2' } },
+        { z: 'body', at: [4, 3], off: ['photo'], rows: ['1122', '2tt3', '2333'], key: { 1: 'iron1', 2: 'iron2', 3: 'iron3', t: 'water2' } },
+        { z: 'face', ol: false, at: [8, 3], rows: ['oo', 'tO', 'wO', 'oo'], key: { o: 'brass1', O: 'brass2', t: 'water1', w: 'white' } },
         { z: 'hat', at: [-2, -2], rows: ['.....3......', '..2222222...', '.222222222..', '12222222233.'], key: { 1: 'roofB2', 2: 'roofB3', 3: 'roofB4' } },
       ],
     },
@@ -279,6 +282,16 @@
         { z: 'body', ol: false, at: [3, 1], rows: ['c..', '.c.', '.c.', '.ww', '.wW'], key: { c: 'stone1', w: 'brass1', W: 'brass2' } },
         { z: 'face', ol: false, at: [5, 7], rows: ['.sss', 'ss.s'], key: { s: 'stone0' } },
         { z: 'hat', at: [0, -3], rows: ['..NNNNNN...', '.NNNNNNNn..', 'NNNNNNNNnn.', 'yyyyyyByyy.', '....kkkkkkkk'], key: { N: 'navy1', n: 'navy2', y: 'brass1', B: 'brass0', k: 'ink' } },
+      ],
+    },
+    // Nelayan Arlo, the fisherman at the jetty (GDD 6.12): sturdy, in a navy knitted wool jumper, olive waders and tall
+    // rubber boots, a mustard knitted cap.
+    arlo: { sleeve: ['water4', 'water5'],
+      torso: { rows: ['.kNNNN.', 'kNnNnNN', 'kNnNnNN', 'NNnNnNn', 'NNnNnNn', 'NnNnNnn', '.oooOO.', '..OOO..'],
+               key: { k: 'water4', N: 'water5', n: 'water6', o: 'moss2', O: 'moss3' } },
+      villager: true, shoe: 'boot',
+      parts: [
+        { z: 'hat', at: [-1, -2], rows: ['...11111...', '.112222222.', '12222222223', '33333333333'], key: { 1: 'brass1', 2: 'brass2', 3: 'brass3' } },
       ],
     },
     // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
@@ -397,6 +410,27 @@
         for (let x = 12; x < 29; x += 3) dot(g, x, 15 + d, 'dirt3');
       },
     },
+    // Theo: the many-pocketed vest open on the grey shirt, the camera on his chest, the magnifier, the beret
+    theo: {
+      cloth: ['wood2', 'wood3', 'wood4'],
+      chest(g, d, back) {
+        if (back) return;
+        rect(g, 19, 24 + d, 3, 7, 'stone1'); rect(g, 17, 28 + d, 2, 2, 'wood2'); rect(g, 22, 28 + d, 2, 2, 'wood2');
+        rect(g, 18, 25 + d, 5, 3, 'iron2'); rect(g, 19, 26 + d, 2, 2, 'iron4'); dot(g, 19, 26 + d, 'water2');
+      },
+      face(x, d) { rect(x, 21, 16 + d, 4, 1, 'brass1'); rect(x, 21, 20 + d, 4, 1, 'brass1'); rect(x, 21, 17 + d, 1, 3, 'brass1'); rect(x, 24, 17 + d, 1, 3, 'brass1'); },
+      hat(g, d, back) { dome(g, d, 'roofB2', 'roofB3'); rect(g, 13, 15 + d, 15, 1, 'roofB4'); rect(g, 19, 9 + d, 2, 2, 'roofB4'); },
+    },
+    // Arlo: the navy knitted jumper, ribbed, the olive waders' bib and straps, the mustard knitted cap
+    arlo: {
+      cloth: ['water4', 'water5', 'water6'],
+      chest(g, d, back) {
+        for (let x = 17; x < 24; x += 2) rect(g, x, 24 + d, 1, 4, 'water6');
+        if (!back) rect(g, 18, 28 + d, 5, 3, 'moss2');
+        for (const sx of [17, 23]) rect(g, sx, 24 + d, 1, 5, 'moss3');
+      },
+      hat(g, d) { dome(g, d, 'brass1', 'brass2'); rect(g, 14, 13 + d, 13, 3, 'brass3'); for (let x = 15; x < 27; x += 2) dot(g, x, 14 + d, 'brass2'); },
+    },
     // the porter: a brown waistcoat open on the cream shirt, the tweed flat cap
     porter: {
       cloth: ['wood1', 'wood2', 'wood3'],
@@ -409,8 +443,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -434,6 +468,8 @@
     if (id === 'nora') s.push('weave');
     if (id === 'gardener') s.push('water', 'tend');
     if (id === 'leo') s.push('peer');
+    if (id === 'theo') s.push('photo', 'look');
+    if (id === 'arlo') s.push('fish', 'tend', 'sit');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -577,6 +613,14 @@
         r.hx += 1; r.eye = f ? 'closed' : 'squint';
         armN = [[3, 0], [7, -3]]; armF = [[2, 2], [5, 1]];
         break;
+      case 'photo':   // the camera up to the eye in both hands; the shutter goes on the second frame
+        armN = [[3, -1], [6, -4]]; armF = [[3, 0], [7, -3]];
+        r.camera = f;
+        break;
+      case 'fish':   // the rod held out over the water, its tip nodding, the line drifting
+        armN = [[3, 1], [7, -1]]; armF = [[3, 2], [6, 0]];
+        r.rod = f;
+        break;
       case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
         armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];
         r.polish = true;
@@ -625,6 +669,7 @@
     const kn = l.knee || knee(l.hip, l.foot, L.leg);
     line(x, l.hip[0], l.hip[1], kn[0], kn[1], c);
     line(x, kn[0], kn[1], l.foot[0], l.foot[1], c);
+    if (shoe === 'boot') { rect(x, l.foot[0] - 1, l.foot[1] - 5, 2, 6, l.far ? 'moss3' : 'moss2'); rect(x, l.foot[0], l.foot[1], 2, 1, 'ink'); }
     if (shoe === 'wrap') rect(x, l.foot[0] - 1, l.foot[1] - 3, 3, 2, l.far ? 'cream2' : 'cream0');   // cloth wrapped round the ankle
     if (shoe === 'sneaker') { rect(x, l.foot[0] - 1, l.foot[1] - 1, 4, 2, 'ink'); rect(x, l.foot[0], l.foot[1] - 1, 2, 1, l.far ? 'stone1' : 'white'); }
     else if (!l.far) dot(x, l.foot[0] + 1, l.foot[1], c);
@@ -669,7 +714,7 @@
     const [c, x] = canvas(40, 40);
     const hx = L.head[0] + r.dx + r.hx, hy = L.head[1] + r.dy + r.hy;
     const tx0 = L.torso[0] + r.dx + (ch.torso.dx || 0), ty0 = L.torso[1] + r.dy + (ch.torso.dy || 0);
-    const layer = (z) => { for (const p of P.extra) if (p.z === z) {
+    const layer = (z) => { for (const p of P.extra) if (p.z === z && !(p.off && p.off.includes(pose))) {
       const base = (z === 'body' || z === 'neck') ? [tx0, ty0] : [hx, hy];
       put(x, p.img, base[0] + p.at[0], base[1] + p.at[1], p.ol !== false);
     } };
@@ -722,6 +767,16 @@
       });
       if (r.pot.pour) for (let k = 1; k <= 4; k++) dot(x, hx2 + 8, hy2 + k, 'wood2');
     }
+    if (r.camera !== undefined) {   // the camera held to the eye, its lens toward what is shot
+      const [cx2, cy2] = hand;
+      plated(x, g => { rect(g, cx2 - 2, cy2 - 3, 6, 4, 'iron2'); rect(g, cx2 - 2, cy2 - 3, 6, 1, 'iron1'); rect(g, cx2 + 4, cy2 - 2, 2, 2, 'iron3'); });
+      dot(x, cx2 + 5, cy2 - 2, r.camera ? 'white' : 'water2');
+    }
+    if (r.rod !== undefined) {   // the rod from the hand out and up to its tip, the line from the tip down to the water
+      const [rx, ry] = hand, tx = rx + 12, ty = ry - 13 + (r.rod & 1);
+      line(x, rx, ry, tx, ty, 'wood3'); dot(x, rx - 1, ry + 1, 'wood4');
+      for (let y = ty + 1; y < 39; y++) dot(x, tx + (((y + r.rod) >> 3) & 1), y, 'stone0');
+    }
     if (r.can !== undefined) {   // the can's handle in the hand, its body below, its spout and rose down toward the ground
       const [cx2, cy2] = hand;
       plated(x, g => {
@@ -764,6 +819,7 @@
     [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => {
       line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink');
       if (ch.shoe === 'wrap') rect(x, fx - 1, G - l - 3, 3, 2, 'cream0');
+      if (ch.shoe === 'boot') rect(x, fx - 1, G - l - 5, 3, 6, 'moss2');
     });
     // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the load to the chest
     const arms = () => [-1, 1].forEach(s => {
@@ -932,8 +988,12 @@
           hairShade(P, ['wood2', 'wood3', 'wood4']));
         line(g, P.cx - 2, P.cy - 11, P.cx - 10, P.cy + 1, 'wood4'); line(g, P.cx + 3, P.cy - 11, P.cx + 7, P.cy - 7, 'wood4');
       }); plate(x, g => { rect(g, P.cx + 1, P.cy - 12, 5, 2, 'yellow'); dot(g, P.cx + 1, P.cy - 12, 'light0'); dot(g, P.cx + 5, P.cy - 11, 'brass2'); }); } },
-    theo: { cloth: ['wood1', 'wood2', 'wood3'],
-      bust(g) { region(g, (x, y) => inE(x, y, 25, 35, 11, 3), (x, y) => band(x, 20, 31, ['stone1', 'stone2', 'stone3'])); rect(g, 19, 37, 5, 10, 'stone2'); rect(g, 19, 37, 2, 10, 'stone1'); rect(g, 19, 46, 5, 1, 'stone3');
+    theo: { cloth: ['wood2', 'wood3', 'wood4'],
+      face(x, P) {   // the magnifying lens over the near eye, its brass tube standing out
+        region(x, (x, y) => inE(x, y, P.ex + 3, P.ey + 4, 5, 5) && !inE(x, y, P.ex + 3, P.ey + 4, 3, 4), () => 'brass1');
+        rect(x, P.ex + 8, P.ey + 2, 2, 5, 'brass2'); dot(x, P.ex + 8, P.ey + 2, 'brass0');
+      },
+      bust(g) { for (const [px2, py2] of [[12, 40], [15, 44]]) { rect(g, px2, py2, 5, 3, 'wood4'); rect(g, px2, py2, 5, 1, 'wood2'); } region(g, (x, y) => inE(x, y, 25, 35, 11, 3), (x, y) => band(x, 20, 31, ['stone1', 'stone2', 'stone3'])); rect(g, 19, 37, 5, 10, 'stone2'); rect(g, 19, 37, 2, 10, 'stone1'); rect(g, 19, 46, 5, 1, 'stone3');
         line(g, 31, 34, 35, 40, 'ink2'); rect(g, 30, 40, 9, 6, 'iron3'); rect(g, 30, 40, 9, 2, 'iron2'); rect(g, 33, 42, 4, 4, 'iron4'); rect(g, 34, 43, 2, 2, 'water2'); dot(g, 34, 43, 'white'); rect(g, 31, 39, 2, 1, 'iron1'); },
       hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 3, P.cy - 9, 14, 5) && y <= P.cy - 6, (x, y) => band((x - P.cx) + (y - P.cy) * 2, -24, -4, ['roofB2', 'roofB3', 'roofB4'])); rect(g, P.cx - 2, P.cy - 16, 2, 2, 'roofB4'); }); } },
     leo: { cloth: ['roofB0', 'roofB1', 'roofB2'],
@@ -965,6 +1025,14 @@
         region(g, (x, y) => inE(x, y, P.cx, P.cy - 7, 14, 8) && y <= P.cy - 6, (x, y) => band((x - P.cx) + (y - P.cy), -22, -4, ['navy0', 'navy1', 'navy2']));
         rect(g, P.cx - 14, P.cy - 6, 28, 2, 'brass1'); rect(g, P.cx - 2, P.cy - 10, 3, 3, 'brass0'); dot(g, P.cx - 1, P.cy - 9, 'brass2');
         rect(g, P.cx + 6, P.cy - 4, 12, 2, 'ink');
+      }); } },
+    arlo: { cloth: ['water4', 'water5', 'water6'],
+      bust(g) { for (let x = 11; x < 40; x += 3) line(g, x, 38, x, 47, 'water6'); region(g, (x, y) => inE(x, y, 25, 35, 9, 2), () => 'water4');
+        rect(g, 20, 41, 14, 7, 'moss2'); rect(g, 20, 41, 14, 1, 'moss1'); line(g, 21, 41, 18, 35, 'moss3'); line(g, 32, 41, 33, 35, 'moss3'); dot(g, 22, 43, 'brass1'); dot(g, 31, 43, 'brass1'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 14, 8) && y <= P.cy - 4, (x, y) => band((x - P.cx) + (y - P.cy), -22, -6, ['brass1', 'brass2', 'brass3']));
+        rect(g, P.cx - 15, P.cy - 7, 29, 4, 'brass3'); for (let x = P.cx - 14; x < P.cx + 14; x += 2) dot(g, x, P.cy - 6, 'brass2');
+        rect(g, P.cx - 3, P.cy - 17, 4, 2, 'brass2');
       }); } },
     porter: { cloth: ['wood1', 'wood2', 'wood3'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },

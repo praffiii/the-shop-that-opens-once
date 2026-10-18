@@ -282,6 +282,42 @@ namespace Shop
             {
                 Id = "coast",
                 Variants = new[] { "day" },
+                People = new[]
+                {
+                    // Theo photographs the sea from the bluff in the morning, waits out the flat noon light at his studio door,
+                    // and shoots the sunset by the rope bridge's remains. Arlo fishes off the jetty, mends his net on the
+                    // street at midday, and sits at the jetty's end at dusk.
+                    new Person
+                    {
+                        Id = "theo", At = V(400, 228), Label = "Theo", Spot = V(-18, 4), Pose = "photo", Facing = 1, Phases = new[] { Phase.Morning },
+                        Line = "The light off the sea is honest at this hour. It doesn't flatter anyone.",
+                    },
+                    new Person
+                    {
+                        Id = "theo", At = V(278, 216), Label = "Theo", Spot = V(-16, 2), Pose = "look", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Too bright. Everything goes flat at noon. I'll wait for the light to come back.",
+                    },
+                    new Person
+                    {
+                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "Sunsets are easy to photograph. That's why I keep trying to get one right.",
+                    },
+                    new Person
+                    {
+                        Id = "arlo", At = V(514, 754), Label = "Arlo", Spot = V(-16, -6), Pose = "fish", Facing = 1, Phases = new[] { Phase.Morning },
+                        Line = "Tide's turning. Fish bite when the water changes its mind. Sit quiet and you'll see.",
+                    },
+                    new Person
+                    {
+                        Id = "arlo", At = V(606, 452), Label = "Arlo", Spot = V(-18, 6), Pose = "tend", Facing = 1, Phases = new[] { Phase.Midday },
+                        Line = "Every knot's a promise to the next storm. I keep my promises.",
+                    },
+                    new Person
+                    {
+                        Id = "arlo", At = V(506, 759), Label = "Arlo", Spot = V(-8, -10), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "End of the day, the sea goes quiet. Best time to think, if you've got thinking to do.",
+                    },
+                },
                 Hotspots = new[] { North("to_square", 480, "Up to the square", "square/from_coast") },
             },
             ["grove"] = new PlaceDef
