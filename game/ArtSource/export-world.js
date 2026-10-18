@@ -4,29 +4,51 @@
    decals, and every depth-sorted thing is an item. The world is drawn once, at midday; the game grades it for the time of day with
    KIT.GRADES (grades.json). */
 (() => {
-  PARTS.world = () => {
-    const S = WORLD.create(), W = S.w, H = S.h;
+  PARTS.world = () => bake('world', WORLD.create());
+  // Each outdoor area (areas.js) is its own place.
+  PARTS.areas = () => AREA.ids.forEach(id => bake(id, AREA.build(id)));
+
+  function bake(id, S) {
+    const W = S.w, H = S.h;
     const clips = Object.fromEntries(Object.entries(S.clips).map(([k, c]) => [k, Object.assign(BAKE.item(c.draw, [0, 0, c.w, c.h], { n: c.animated ? BAKE.N : 1 }) || {}, c.sway ? { sway: c.sway } : {})]));
     for (const [k, c] of Object.entries(clips)) if (!c.frames) throw new Error(`clip "${k}" draws nothing`);
     // A clip's track is cropped to what it drew; shift each decal by that crop.
     const decal = ([k, x, y, o]) => [k, x + clips[k].at[0], y + clips[k].at[1], o];
     const items = S.items.map(it => ({ ...it, track: BAKE.item(it.draw, it.box, { n: it.animated ? BAKE.N : 1 }) }));
-    BAKE.place('world', 'day', {
+    BAKE.place(id, 'day', {
       size: [W, H], bg: S.bg, below: BAKE.still(W, H, g => g.drawImage(S.ground, 0, 0)), above: null,
       clips, decals: { below: S.decals.below.map(decal) }, items, anchors: S.anchors, paths: S.paths,
     });
     BAKE.json('grades.json', KIT.GRADES);
+    BAKE.png(`places/${id}/height.png`, heightMap(S));
     const walk = walkMask(S, items);
-    BAKE.png('places/world/walk.png', walk.canvas);
-    if (walk.missing.length) throw new Error('world walk mask: not walkable or not connected: ' + walk.missing.join(', '));
-  };
+    BAKE.png(`places/${id}/walk.png`, walk.canvas);
+    if (walk.missing.length) throw new Error(`${id} walk mask: not walkable or not connected: ` + walk.missing.join(', '));
+  }
+
+  /* Height map for the game's 3D view (Core/Relief.cs): red is each pixel's surface height in px above level 0, plus
+     64; green is 255 on a cliff or bank face, which stands upright. A deck (a bridge, the jetty) is flat at the height
+     of the land it joins, over the water and the banks under it. */
+  function heightMap(S) {
+    const W = S.w, H = S.h, h = new Int16Array(W * H), up = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { h[y * W + x] = S.height(x, y); up[y * W + x] = S.vertical(x, y); }
+    for (const [x0, y0, x1, y1] of S.decks) {
+      let top = -99;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (!up[y * W + x]) top = Math.max(top, h[y * W + x]);
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { h[y * W + x] = top; up[y * W + x] = 0; }
+    }
+    const [canvas, g] = BAKE.canvas(W, H), im = g.createImageData(W, H), px = new Uint32Array(im.data.buffer);
+    for (let i = 0; i < W * H; i++) px[i] = (0xff000000 | (up[i] ? 0xff00 : 0) | Math.max(0, Math.min(255, h[i] + 64))) >>> 0;
+    g.putImageData(im, 0, 0);
+    return canvas;
+  }
 
   /* Walk mask: opaque white where a character's feet may stand, opaque black elsewhere. Solid is what the world calls
      blocked (water, rock faces, the woods, the platform's edge) plus each item's footprint: for a building or prop
      with a base, the span of its walls from its base back `foot` rows; otherwise its lowest `foot` drawn rows. Lights
      and items marked walk (fireflies, smoke, bugs) never block. Solids grow by the room an ant's feet need: 8 px
      sideways and 3 px in front and behind, where depth sorting already keeps its body in front of or behind the prop.
-     Only what the start can reach is kept, and every path and anchor must be in it. */
+     Only what the start (S.start, else the anchor named start) can reach is kept, and every path and anchor must be in it. */
   function walkMask(S, items) {
     const W = S.w, H = S.h, A = S.anchors;
     const solid = new Uint8Array(W * H), at = (x, y) => y * W + x, inside = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
@@ -48,7 +70,7 @@
     }
     const open = (x, y) => y >= RY && y < H - RY && x >= RX && x < W - RX && !blocked[at(x, y)];
     // Keep the region reachable from the start (4-connected flood fill).
-    const walk = new Uint8Array(W * H), stack = [A.start];
+    const walk = new Uint8Array(W * H), stack = [A[S.start || 'start']];
     while (stack.length) {
       const [x, y] = stack.pop();
       if (!inside(x, y) || walk[at(x, y)] || !open(x, y)) continue;

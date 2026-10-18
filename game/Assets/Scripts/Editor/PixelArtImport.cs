@@ -5,7 +5,7 @@ namespace Shop.Editor
 {
     /// <summary>
     /// Imports the exported art as it was drawn: no filtering, no mipmaps, no compression, no resizing.
-    /// Walk masks stay readable, so WalkMap can read their pixels.
+    /// Walk masks and height maps stay readable, so WalkMap and Relief can read their pixels.
     /// </summary>
     sealed class PixelArtImport : AssetPostprocessor
     {
@@ -21,7 +21,7 @@ namespace Shop.Editor
             t.textureCompression = TextureImporterCompression.Uncompressed;
             t.alphaIsTransparency = true;
             t.maxTextureSize = 8192;
-            t.isReadable = assetPath.EndsWith("/walk.png");
+            t.isReadable = assetPath.EndsWith("/walk.png") || assetPath.EndsWith("/height.png");
         }
     }
 }

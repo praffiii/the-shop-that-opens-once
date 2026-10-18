@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace Shop
@@ -9,21 +11,29 @@ namespace Shop
     /// Runs the game: the title, the current chapter's story, moving between places, and the screen UI.
     /// While any story step runs, the courier can't move; the controls come back when all are done.
     ///
-    /// The world and the UI are drawn into a small screen canvas, at least <see cref="Base"/>, then scaled up by
-    /// the largest whole number that fits the window, so pixels stay square and crisp.
+    /// The world is drawn in 3D at the window's full resolution, through a camera tilted 45 degrees down (as the art is
+    /// drawn) in a narrow perspective, with depth of field, bloom and a vignette: the HD-2D look. The UI is drawn into
+    /// a small screen canvas, at least <see cref="Base"/>, then scaled up over the world by the largest whole number
+    /// that fits the window, so its pixels stay square and crisp.
     /// </summary>
     public sealed class Main : MonoBehaviour
     {
-        /// <summary>Each world pixel covers this many screen-canvas pixels; the UI keeps the finer ones.</summary>
+        /// <summary>Each world pixel covers this many screen-canvas pixels (at the camera's focus); the UI keeps the finer ones.</summary>
         public const int Zoom = 2;
+        /// <summary>The view camera: its tilt down and its vertical field of view, in degrees.</summary>
+        const float Pitch = 45f, Fov = 20f;
+        /// <summary>The depth of field: a long lens, wide open, keeps the courier's ground sharp and softens what is nearer and farther.</summary>
+        const float FocalLength = 300f, Aperture = 4f;
+        const int UiLayer = 5;
         /// <summary>The least canvas the screen shows (the world is Base / Zoom).</summary>
         static readonly Vector2 Base = new(640, 360);
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
         const float Glide = 220f;
         /// <summary>Following the courier: how far ahead of its walk the camera leads (world px), how softly it catches up (seconds), and from how far it jumps instead (a new place, a teleport).</summary>
         const float Lead = 28f, Follow = 0.2f, SnapFrom = 160f;
-        /// <summary>Where the title screen looks: Marlow's door in the banyan's roots, down in its dell.</summary>
-        static readonly Vector2 TitleView = new(650, 1860);
+        /// <summary>Where the title screen looks: Marlow's door in the banyan's roots, in its grove.</summary>
+        const string TitlePlace = "grove";
+        static readonly Vector2 TitleView = new(300, 236);
         const float FadeSeconds = 0.4f;
 
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
@@ -39,7 +49,10 @@ namespace Shop
         /// <summary>The mouse on the screen canvas, from its bottom-left, as the UI camera sees it.</summary>
         public static Vector2 UiPoint { get; private set; }
 
+        /// <summary>Draws the UI into the screen canvas.</summary>
         public Camera Camera { get; private set; }
+        /// <summary>Draws the world.</summary>
+        public Camera View { get; private set; }
         public Place Place { get; private set; }
         public Chapter Story { get; private set; }
         public Talk Talk { get; private set; }
@@ -47,14 +60,15 @@ namespace Shop
         public Bag Bag { get; private set; }
         public Card Cards { get; private set; }
 
-        Camera present;
         RawImage screen;
+        DepthOfField focus;
         RenderTexture canvas;
         Image logo, curtain;
         Ant courier;
         int held, factor;
         Vector2Int window;
         Vector2 offset, cam, camVelocity, lead, lastFeet;
+        float camHeight, camClimb; // the ground height the camera looks at (art px), and how fast it is changing
         Vector2? look; // a world point the camera shows instead of the courier
         bool gliding;
 
@@ -91,25 +105,39 @@ namespace Shop
 
         public static Awaitable Wait(float seconds) => Awaitable.WaitForSecondsAsync(seconds, Instance.destroyCancellationToken);
 
-        /// <summary>A world point (art px) on the screen canvas (canvas px from the top-left).</summary>
-        public static Vector2 ToCanvas(Vector2 world) => (world - Instance.cam) * Zoom + Size / 2;
+        /// <summary>A world point (art px, on the ground drawn there) on the screen canvas (canvas px from the top-left).</summary>
+        public static Vector2 ToCanvas(Vector2 world)
+        {
+            var m = Instance;
+            var art = m.Place.World;
+            var s = m.View.WorldToScreenPoint(art.transform.TransformPoint(Art.World(world, art.Relief.Height((int)world.x, (int)world.y))));
+            return new Vector2((s.x - m.offset.x) / m.factor, Size.y - (s.y - m.offset.y) / m.factor);
+        }
 
         void Awake()
         {
             Instance = this;
-            Camera = NewCamera("Camera");
+            View = NewCamera("View");
+            View.fieldOfView = Fov;
+            View.nearClipPlane = 0.5f;
+            View.farClipPlane = 200f;
+            View.cullingMask = ~(1 << UiLayer);
+            View.allowHDR = true;
+            View.gameObject.AddComponent<AudioListener>();
+            View.GetUniversalAdditionalCameraData().renderPostProcessing = true;
+            focus = Effects();
+            Camera = NewCamera("Ui");
             Camera.orthographic = true;
-            Camera.gameObject.AddComponent<AudioListener>();
-            present = NewCamera("Present");
-            present.cullingMask = 0;
-            present.depth = 1;
+            Camera.cullingMask = 1 << UiLayer;
+            Camera.backgroundColor = Color.clear;
+            Camera.transform.localPosition = new Vector3(0, 0, -1000); // away from the world
 
             var ui = new GameObject("Screen", typeof(RectTransform)).AddComponent<Canvas>();
+            ui.gameObject.layer = UiLayer;
             ui.transform.SetParent(transform, false);
             ui.renderMode = RenderMode.ScreenSpaceCamera;
             ui.worldCamera = Camera;
             ui.planeDistance = 5;
-            ui.sortingOrder = BakedArt.Above + 500;
             ui.referencePixelsPerUnit = 1;
             ui.pixelPerfect = true;
             var t = ui.transform;
@@ -130,6 +158,7 @@ namespace Shop
             screen = new GameObject("Canvas", typeof(RectTransform)).AddComponent<RawImage>();
             screen.transform.SetParent(shown.transform, false);
             screen.raycastTarget = false;
+            screen.material = new Material(Resources.Load<Shader>("Shaders/Present"));
             screen.rectTransform.anchorMin = screen.rectTransform.anchorMax = screen.rectTransform.pivot = Vector2.zero;
 
             Sound.Create(transform);
@@ -155,12 +184,33 @@ namespace Shop
         {
             var c = new GameObject(camName).AddComponent<Camera>();
             c.transform.SetParent(transform, false);
-            c.transform.localPosition = new Vector3(0, 0, -10);
             c.clearFlags = CameraClearFlags.SolidColor;
             c.backgroundColor = Color.black;
             c.nearClipPlane = 0.1f;
             c.farClipPlane = 100f;
             return c;
+        }
+
+        // The HD-2D look over the view: depth of field (its focus follows the camera), bloom on the lights, a soft vignette.
+        DepthOfField Effects()
+        {
+            var volume = new GameObject("Effects").AddComponent<Volume>();
+            volume.transform.SetParent(transform, false);
+            volume.isGlobal = true;
+            var profile = volume.sharedProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+            var dof = profile.Add<DepthOfField>();
+            dof.mode.Override(DepthOfFieldMode.Bokeh);
+            dof.focalLength.Override(FocalLength);
+            dof.aperture.Override(Aperture);
+            dof.focusDistance.Override(10f);
+            var bloom = profile.Add<Bloom>();
+            bloom.threshold.Override(1.05f);
+            bloom.intensity.Override(0.9f);
+            bloom.scatter.Override(0.75f);
+            var vignette = profile.Add<Vignette>();
+            vignette.intensity.Override(0.22f);
+            vignette.smoothness.Override(0.6f);
+            return dof;
         }
 
         async Awaitable Title()
@@ -169,7 +219,7 @@ namespace Shop
             held = 0;
             Talk.Close();
             if (Place) await Fade(true);
-            Swap("world", "");
+            Swap(TitlePlace, "");
             await Fade(false);
             Look.SetSprite(logo, Art.Sprite(Art.Texture("ui/title")), Zoom); // the title is world art: world-sized pixels
             Look.Move(logo.rectTransform, new Vector2((Size.x - logo.rectTransform.sizeDelta.x) / 2, 24));
@@ -273,7 +323,7 @@ namespace Shop
             }
             Hud.Place = Place;
             Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
-            Camera.backgroundColor = present.backgroundColor = Grade.Of(Place.World.Bg);
+            View.backgroundColor = Grade.Of(Place.World.Bg);
             look = null;
             gliding = false;
             FrameCamera(0f);
@@ -342,7 +392,7 @@ namespace Shop
             var p = (Controls.PointerScreen - offset) / factor;
             UiPoint = p;
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
-            Controls.MouseWorld = cam + (Controls.MouseCanvas - Size / 2) / Zoom;
+            if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
             var input = !(Cards.Handle() || Bag.Handle() || Talk.Handle());
             if (input && Hud.Handle())
@@ -391,7 +441,7 @@ namespace Shop
             }
             canvas = new RenderTexture(w, h, 24) { name = "Screen canvas", filterMode = FilterMode.Point };
             Camera.targetTexture = canvas;
-            Camera.orthographicSize = h / (2f * Zoom);
+            Camera.orthographicSize = h / 2f;
             screen.texture = canvas;
             screen.rectTransform.sizeDelta = new Vector2(w, h) * factor;
             offset = new Vector2((window.x - w * factor) / 2, (window.y - h * factor) / 2);
@@ -400,13 +450,15 @@ namespace Shop
         }
 
         // Follows the courier softly, a little ahead of where it walks (or looks where it was asked, or at the title
-        // view), kept inside the place. A place smaller than the screen is centred. The camera stays on whole world pixels.
+        // view), kept inside the place. A place smaller than the screen is centred. The view camera looks down at 45
+        // degrees at that point on the ground, from as far as shows Zoom canvas px per art px there, and focuses on it.
         void FrameCamera(float delta)
         {
             var view = Size / Zoom;
             var size = (Vector2)Place.World.Size;
             var following = look == null && Place.Player;
             var target = look ?? (Place.Player ? courier.Feet : TitleView);
+            var height = Place.World.Relief.Under(Place.Player ? courier.Feet : target);
             if (following)
             {
                 var step = courier.Feet - lastFeet;
@@ -424,15 +476,42 @@ namespace Shop
             {
                 cam = Vector2.MoveTowards(cam, c, Glide * delta);
                 gliding = cam != c;
+                camHeight = Mathf.SmoothDamp(camHeight, height, ref camClimb, Follow, Mathf.Infinity, delta);
             }
             else if (following && delta > 0f && Vector2.Distance(cam, c) < SnapFrom)
+            {
                 cam = Vector2.SmoothDamp(cam, c, ref camVelocity, Follow, Mathf.Infinity, delta);
+                camHeight = Mathf.SmoothDamp(camHeight, height, ref camClimb, Follow, Mathf.Infinity, delta);
+            }
             else
             {
                 cam = c;
+                camHeight = height;
                 camVelocity = lead = Vector2.zero;
+                camClimb = 0f;
             }
-            Camera.transform.localPosition = Art.World(new Vector2(Mathf.Round(cam.x), Mathf.Round(cam.y)), -10);
+            var turn = Quaternion.Euler(Pitch, 0, 0);
+            var distance = Screen.height / (2f * factor * Zoom) * Place.Scale.x / Mathf.Tan(Fov * Mathf.Deg2Rad / 2);
+            var at = Place.transform.TransformPoint(Art.World(cam, camHeight));
+            View.transform.SetPositionAndRotation(at - turn * Vector3.forward * distance, turn);
+            focus.focusDistance.Override(distance);
+        }
+
+        // The art point under a screen point: walks the mouse's ray down to the ground, reading the height where it lands.
+        Vector2 Pick(Vector2 screen)
+        {
+            var ray = View.ScreenPointToRay(screen);
+            var toArt = Place.World.transform.worldToLocalMatrix;
+            Vector3 from = toArt.MultiplyPoint(ray.origin), dir = toArt.MultiplyVector(ray.direction);
+            float h = camHeight;
+            var p = cam;
+            for (var i = 0; i < 4 && dir.y < 0; i++)
+            {
+                var hit = from + dir * ((h - from.y) / dir.y);
+                p = new Vector2(hit.x, -hit.z - h);
+                h = Place.World.Relief.Height(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y));
+            }
+            return p;
         }
 
         // Covers the screen in warm cream (or uncovers it) in four soft steps.

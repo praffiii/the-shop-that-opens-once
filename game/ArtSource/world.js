@@ -358,6 +358,7 @@
     const G = V.ground(rows, { seed: 7, level: (tx, ty) => lev[Math.min(TH - 1, Math.max(0, ty))][Math.min(TW - 1, Math.max(0, tx))] });
     const S = { w: W, h: H, bg: '#2f7a3a', clips: {}, decals: { below: [] }, items: [], shadows: [], anchors: {}, paths: {}, bridges: [], decks: [] };
     S.canopy = new Uint8Array(W * H);
+    S.height = G.height; S.vertical = G.vertical;
     S.blocked = (x, y) => !S.decks.some(([x0, y0, x1, y1]) => x >= x0 && x < x1 && y >= y0 && y < y1) && (G.blocked(x, y) || G.forest(x, y) || S.canopy[(y | 0) * W + (x | 0)] === 1);
     railway(G.buf);
     dress(S, G);

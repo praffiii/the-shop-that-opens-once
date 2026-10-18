@@ -12,6 +12,12 @@ namespace Shop
     {
         /// <summary>How close the courier must be to use a hotspot with the interact key.</summary>
         public const float Reach = 20f;
+        /// <summary>
+        /// A place is built in art px and shown at this scale: 64 px to a unit, so the camera stands a few units away
+        /// and its lens blurs what is nearer and farther as a miniature's would; heights and depths stretched by the
+        /// square root of 2, so the 45 degree camera (Main) shows art pixels square.
+        /// </summary>
+        public static readonly Vector3 Scale = new Vector3(1, Mathf.Sqrt(2), Mathf.Sqrt(2)) / 64;
 
         public event Action<Hotspot> Used;
 
@@ -43,9 +49,11 @@ namespace Shop
         {
             var place = new GameObject(def.Id).AddComponent<Place>();
             place.transform.SetParent(parent, false);
+            place.transform.localScale = Scale;
             place.Def = def;
             Grade.Apply(Game.Phase, def.Indoors);
             place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform);
+            Shader.SetGlobalMatrix("_ArtFromWorld", place.World.transform.worldToLocalMatrix);
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {

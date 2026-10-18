@@ -27,11 +27,21 @@ namespace Shop
                 },
                 Hotspots = new[]
                 {
-                    new Hotspot { Id = "shop_door", At = V(650, 1930), Label = "Marlow's shop", Area = R(-12, -42, 24, 44), Spot = V(0, 16), ExitTo = "shop/door" },
+                    new Hotspot { Id = "grove_path", At = V(650, 1930), Label = "Into the trees", Area = R(-12, -42, 24, 44), Spot = V(0, 16), ExitTo = "grove/from_station" },
                     new Hotspot { Id = "station_clock", At = V(760, 994), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 190) },
                     new Hotspot { Id = "info_board", At = V(1030, 1196), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
-                Spawns = new() { ["start"] = V(760, 1192), ["from_shop"] = V(650, 1950) },
+                Spawns = new() { ["start"] = V(760, 1192), ["from_grove"] = V(650, 1950) },
+            },
+            ["grove"] = new PlaceDef
+            {
+                Id = "grove",
+                Variants = new[] { "day" },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "shop_door", At = V(300, 236), Label = "A small door", Area = R(-10, -30, 20, 32), Spot = V(0, 14), ExitTo = "shop/door" },
+                    new Hotspot { Id = "to_station", At = V(636, 500), Label = "To the station", Area = R(-12, -24, 16, 48), Spot = V(-6, 0), ExitTo = "world/from_grove" },
+                },
             },
             ["shop"] = new PlaceDef
             {
@@ -47,7 +57,7 @@ namespace Shop
                 },
                 Hotspots = new[]
                 {
-                    new Hotspot { Id = "door", At = V(180, 234), Label = "Back outside", Area = R(-14, -6, 28, 10), Spot = V(0, 0), ExitTo = "world/from_shop" },
+                    new Hotspot { Id = "door", At = V(180, 234), Label = "Back outside", Area = R(-14, -6, 28, 10), Spot = V(0, 0), ExitTo = "grove/from_shop" },
                     new Hotspot { Id = "lanterns", At = V(180, 41), Label = "Lanterns", Area = R(-160, -14, 320, 26), Spot = V(-70, 159) },
                     new Hotspot { Id = "clock", At = V(180, 74), Label = "Clock", Area = R(-19, -19, 38, 38), Spot = V(-2, 122) },
                 },

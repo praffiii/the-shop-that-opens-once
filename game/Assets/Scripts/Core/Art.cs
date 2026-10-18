@@ -7,7 +7,7 @@ namespace Shop
     /// <summary>
     /// Loads the art that ArtSource/export.py writes into Assets/Resources/Art. Paths are relative to Art/
     /// and have no extension. Art positions are in art pixels with y pointing down, as drawn;
-    /// <see cref="World"/> turns them into Unity units (1 unit = 1 art pixel, y up).
+    /// <see cref="World"/> turns them into a place's 3D space (1 unit = 1 art pixel, y up, z away from the camera).
     /// </summary>
     public static class Art
     {
@@ -72,13 +72,20 @@ namespace Shop
         /// <summary>The whole texture as a sprite, pivoted on its top-left corner.</summary>
         public static Sprite Sprite(Texture2D tex) => Sprite(tex, new RectInt(0, 0, tex.width, tex.height));
 
-        /// <summary>The unlit pixel material (Shaders/Pixel) showing <paramref name="tex"/>; a <paramref name="light"/> is never graded.</summary>
+        /// <summary>The unlit pixel material (Shaders/Pixel) showing <paramref name="tex"/>, cut out; a <paramref name="light"/> is blended over the art and never graded.</summary>
         public static Material Material(Texture tex, bool light = false)
         {
             if (!materials.TryGetValue((tex, light), out var mat))
             {
                 mat = materials[(tex, light)] = new Material(Resources.Load<Shader>("Shaders/Pixel")) { mainTexture = tex };
-                mat.SetFloat("_Light", light ? 1 : 0);
+                if (light)
+                {
+                    mat.SetFloat("_Light", 1);
+                    mat.SetFloat("_Src", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    mat.SetFloat("_Dst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    mat.SetFloat("_ZWrite", 0);
+                    mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                }
             }
             return mat;
         }
@@ -86,7 +93,27 @@ namespace Shop
         /// <summary>The pixel material for sprite renderers, which supply their own texture.</summary>
         public static Material SpriteMaterial => spriteMaterial ??= new Material(Resources.Load<Shader>("Shaders/Pixel"));
 
-        public static Vector3 World(Vector2 p, float z = 0f) => new(p.x, -p.y, z);
+        /// <summary>
+        /// Art point <paramref name="p"/> on a surface <paramref name="h"/> px high, in its place's 3D space: the art is
+        /// drawn top-down at 45 degrees, so a point h px up lies h px further back. Raising h moves a thing toward the
+        /// camera along its line of sight, without moving it on the screen.
+        /// </summary>
+        public static Vector3 World(Vector2 p, float h) => new(p.x, h, -(p.y + h));
+
+        /// <summary>An offset of <paramref name="p"/> art px (y down) within something standing.</summary>
+        public static Vector3 Card(Vector2 p) => new(p.x, -p.y, 0f);
+
+        /// <summary>
+        /// How high a point <paramref name="up"/> art px up something standing is lifted from its feet. Standing things
+        /// face the camera: they lean back 45 degrees, so each px up goes half a px up and half a px back. They stay as
+        /// drawn on the screen, every part of them as far from the camera as their feet (sharp together in the depth
+        /// of field), and tall ones never loom toward the camera.
+        /// </summary>
+        public static float Lean(float up) => up / 2;
+
+        /// <summary>How a standing thing's own frame (x right, y up its art) turns and squeezes to lean as <see cref="Lean"/> does.</summary>
+        public static readonly Quaternion Leaning = Quaternion.Euler(45, 0, 0);
+        public static readonly Vector3 LeaningScale = new(1, Mathf.Sqrt(0.5f), 1);
 
         public static Color Color(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : UnityEngine.Color.magenta;
 

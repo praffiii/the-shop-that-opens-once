@@ -14,6 +14,8 @@ namespace Shop
         /// <summary>Walking pace in art px per second.</summary>
         public const float Speed = 56f, RunSpeed = 104f;
         static readonly string[] Walks = { "walk", "carryWalk", "run" }; // poses whose frames advance with distance, not time
+        /// <summary>How far toward the camera (art px) an ant stands from its feet line, and its hand from its body.</summary>
+        const float Nudge = 0.3f;
         static JObject cast;
 
         /// <summary>A foot touched the ground while walking.</summary>
@@ -54,6 +56,8 @@ namespace Shop
         {
             var ant = new GameObject(id).AddComponent<Ant>();
             ant.transform.SetParent(parent, false);
+            ant.transform.localRotation = Art.Leaning;
+            ant.transform.localScale = Art.LeaningScale;
             ant.body = Part("body", ant.transform);
             ant.hand = Part("hand", ant.transform);
             ant.SetId(id);
@@ -221,15 +225,15 @@ namespace Shop
             var handAt = Art.Point(p["hand"][frame]);
             hand.enabled = held != null;
             hand.sprite = held;
-            hand.transform.localPosition = Art.World(new Vector2(handAt.x * facing, handAt.y));
+            hand.transform.localPosition = Art.Card(new Vector2(handAt.x * facing, handAt.y)) + Vector3.back * Nudge;
             Place();
         }
 
+        // Stands on the ground of the place it is in, a little toward the camera from things on the same feet line.
         void Place()
         {
-            transform.localPosition = Art.World(feet);
-            body.sortingOrder = BakedArt.Order(feet.y, 1);
-            hand.sortingOrder = BakedArt.Order(feet.y, 2);
+            var world = transform.parent ? transform.parent.GetComponent<BakedArt>() : null;
+            transform.localPosition = Art.World(feet, (world ? world.Relief.Under(feet) : 0) + Nudge);
         }
 
         void Refresh()

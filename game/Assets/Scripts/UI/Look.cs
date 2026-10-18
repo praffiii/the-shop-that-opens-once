@@ -50,6 +50,7 @@ namespace Shop
         {
             var rt = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
             rt.SetParent(parent, false);
+            rt.gameObject.layer = parent.gameObject.layer; // the UI camera draws only the UI layer
             Place(rt, rect);
             return rt;
         }
