@@ -24,6 +24,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [15](15-siang-dan-sore-di-alun-alun.md) | 2026-10-18 | Siang dan sore di alun-alun: gosip, istirahat Pip, dan pulang sebelum gelap | |
 | [16](16-pagi-di-area-timur.md) | 2026-10-19 | Pagi di area timur: Nora, Gardener, dan Leo dari GDD | |
 | [17](17-siang-dan-sore-di-area-timur.md) | 2026-10-19 | Siang dan sore di area timur: Nora di tangganya, Gardener di bangku, Leo di teleskop | |
+| [18](18-sehari-di-pesisir.md) | 2026-10-19 | Sehari di pesisir: Theo dan Nelayan Arlo dari GDD | |
 
 ## Format setiap entri
 
