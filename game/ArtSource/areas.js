@@ -361,6 +361,7 @@
   const RIVER = smooth([[140, -360], [150, -20], [182, 200], [160, 400], [190, 620], [170, 852], [176, 940]]);
   const HILL = wavy(300, 8, 37);
   // The coast: a terrace along the north, then grass, the beach and the sea; the land runs out to a point in the east.
+  const SALT = [[162, 512], [226, 512]];   // the coast's salt pans: their top left corners, each 56 by 28
   const BLUFF = wavy(230, 7, 45), SHORE = x => 610 + 20 * Math.sin(x / 70) + Math.max(0, x - 800) * 0.8;
 
   const AREAS = {
@@ -604,13 +605,23 @@
         at('fish_rack_0', B.fishRack(), 580, 444); at('nets_0', B.nets(), 620, 448, { walk: true });
         at('lighthouse', { ...V.lighthouse(), door: undefined }, 900, 650);   // seen, not entered
         at('fish_rack', B.fishRack(), 820, 520);
-        // the sand: a rowboat pulled up just out of the water, nets and crates of the catch, driftwood, rocks
+        // the sand: a rowboat pulled up just out of the water, the catch landed at the jetty's foot, salt raked up in the pans, nets,
+        // crates, driftwood, rocks
         at('beached_boat', V.rowboat(true), 230, 598, { walk: true }); at('nets_1', B.nets(), 400, 540, { walk: true });
+        at('catch_crates', B.catchCrates(), 462, 604); at('salt_heaps', B.saltHeaps(), 270, 534, { walk: true });
         at('crates_beach', V.crateStack(7), 520, 530); at('bucket_beach', V.bucket(), 548, 540); at('driftwood_1', B.driftwood(), 740, 560, { walk: true });
         [[130, 520], [880, 470], [560, 600]].forEach(([x, y], i) => at('beach_rock_' + i, V.boulder(i + 4), x, y)); at('nets', B.nets(), 650, 560, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
         [[180, 560, 'scallop'], [350, 600, 'spiral'], [620, 592, 'clam'], [780, 600, 'scallop'], [110, 600, 'clam']].forEach(([x, y, k], i) => at('shell_' + i, B.shell(k), x, y, { walk: true }));
         [[140, 740], [760, 772], [300, 790]].forEach(([x, y], i) => at('sea_rock_' + i, V.rockStack(i + 1), x, y, { walk: true }));
         at('boat_0', V.boat(1), 590, 740, { walk: true }); at('boat_1', V.boat(2), 380, 770, { walk: true }); at('rowboat', V.rowboat(), 430, 680, { walk: true });
+      },
+      // the salt works on the sand: two shallow pans, a rim of packed wet sand round beds raked into rows of salt
+      dress(S, G) {
+        const b = G.buf, C = c => KIT.u32(V.col(c));
+        for (const [x0, y0] of SALT) for (let y = 0; y < 28; y++) for (let x = 0; x < 56; x++) {
+          const rim = x < 2 || x > 53 || y < 2 || y > 25;
+          b.set(x0 + x + MX, y0 + y + MT, C(rim ? (y > 25 ? 'dirt4' : 'dirt3') : y % 3 === 0 ? 'stone1' : KIT.hash(x, y, x0) < 0.85 ? 'white' : 'stone0'));
+        }
       },
       anchors: { from_square: [480, 44] },
       glow: [[250, 300, 160, 50]],

@@ -524,8 +524,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -558,7 +558,7 @@
     if (id === 'farmhand') s.push('sit');
     if (id === 'herder') s.push('tend');
     if (id === 'fisher') s.push('sit');
-    if (id === 'salter') s.push('tend', 'sweep');
+    if (id === 'salter') s.push('rake', 'sweep');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -679,10 +679,10 @@
         r.dy = [0, 0, -1, 0][f]; r.hy -= 1; r.hx -= 1; r.eye = f === 3 ? 'blink' : 'up';
         armN = [[-1, 3], [-3, 4]]; armF = [[-1, 3], [-2, 4]];
         break;
-      case 'sweep': {   // the broom held low in both hands, swept forward and back across the ground
+      case 'sweep': case 'rake': {   // the broom (or the salt rake) held low in both hands, pushed forward and back across the ground
         const k = [0, 1, 2, 1][f];
         armN = [[2, 3], [4 + k, 6]]; armF = [[3, 2], [6 + k, 4]];
-        r.broom = { tip: [k * 2 - 1, 0], dust: f === 2 };
+        r.broom = { tip: [k * 2 - 1, 0], dust: f === 2, rake: pose === 'rake' };
         break;
       }
       case 'weave':   // at the loom before her: the shuttle passed through the warp, then the beater pulled home
@@ -835,8 +835,12 @@
     }
     if (r.broom) {   // the handle through both hands, up past the shoulder and down to the bristles on the ground
       const [bx, by] = [hand[0] + 6 + r.broom.tip[0], 37];
-      plated(x, g => { line(g, hand[0] - 3, hand[1] - 6, bx, by - 2, 'wood2'); rect(g, bx - 1, by - 3, 5, 3, 'brass2'); rect(g, bx - 1, by - 3, 5, 1, 'wood3'); });
-      if (r.broom.dust) { dot(x, bx + 5, by - 1, 'stone1'); dot(x, bx + 6, by - 3, 'stone0'); }
+      plated(x, g => {
+        line(g, hand[0] - 3, hand[1] - 6, bx, by - 2, 'wood2');
+        if (r.broom.rake) { rect(g, bx - 3, by - 2, 8, 2, 'wood3'); rect(g, bx - 3, by - 2, 8, 1, 'wood2'); }   // the flat wooden head of a salt rake
+        else { rect(g, bx - 1, by - 3, 5, 3, 'brass2'); rect(g, bx - 1, by - 3, 5, 1, 'wood3'); }
+      });
+      if (r.broom.dust) { dot(x, bx + 5, by - 1, r.broom.rake ? 'white' : 'stone1'); dot(x, bx + 6, by - 3, 'stone0'); }
     }
     if (r.polish) {   // what is polished, in the far hand, under the cloth
       const [px2, py2] = r.arms[0].pts[r.arms[0].pts.length - 1];

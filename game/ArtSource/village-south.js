@@ -467,10 +467,20 @@
     return { img: out.canvas(), ax: 17, ay: 31, base: [-14, 14], foot: 4, shadow: [14, 3] };
   }
   /* nets(): a heap of net with cork floats and a coil of rope beside it, 30 x 13. */
+  /* saltHeaps(): salt raked up into two heaps at the end of a pan. */
+  function saltHeaps() {
+    const out = inked(30, 14, b => { saltHeap(b, 9, 14, 8, 10, 1); saltHeap(b, 22, 14, 6, 7, 2); });
+    return { img: out.canvas(), ax: 16, ay: 15 };
+  }
+  /* catchCrates(): the day's catch landed at the jetty's foot, two crates of fish and a third on top. */
+  function catchCrates() {
+    const out = inked(34, 24, b => { fishCrate(b, 0, 24); fishCrate(b, 17, 24); fishCrate(b, 9, 13); });
+    return { img: out.canvas(), ax: 18, ay: 25 };
+  }
   function nets() {
     const out = inked(30, 13, b => { netHeap(b, 11, 13, 11, 6, 4); coil(b, 24, 11, 5); });
     return { img: out.canvas(), ax: 16, ay: 14, shadow: [14, 3] };
   }
 
-  Object.assign(VIL, { jetty, boat, rowboat, lighthouse, saltStore, arloHome, theoStudio, ropeBridgeRemains, rockStack, beachProps: { shell, driftwood, fishRack, nets } });
+  Object.assign(VIL, { jetty, boat, rowboat, lighthouse, saltStore, arloHome, theoStudio, ropeBridgeRemains, rockStack, beachProps: { shell, driftwood, fishRack, nets, saltHeaps, catchCrates } });
 })();
