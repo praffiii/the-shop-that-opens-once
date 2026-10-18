@@ -30,6 +30,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [21](21-semut-latar-di-area-timur.md) | 2026-10-19 | Semut latar di area timur: buruh kebun dan penggembala kutu daun | |
 | [22](22-semut-latar-di-pesisir.md) | 2026-10-19 | Semut latar di pesisir: nelayan dan pekerja garam | |
 | [23](23-puncak-tebing-pesisir-bisa-dilewati.md) | 2026-10-19 | Puncak tebing pesisir bisa dilewati; hutan kecil tanpa semut latar | |
+| [24](24-pip-berbalik-dan-sarung-tangan-bram.md) | 2026-10-19 | Pip berbalik menghadap kamera; sarung tangan putih Kapten Bram | |
 
 ## Format setiap entri
 
