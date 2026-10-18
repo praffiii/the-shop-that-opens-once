@@ -379,7 +379,7 @@
   const HAS = {};
   for (const id of IDS) {
     const s = ['idle', 'walk'];
-    if (!CAST[id].villager) s.push('talk');
+    s.push('talk');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
     if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
@@ -387,10 +387,11 @@
     if (id === 'marlow') s.push('wave');
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer');
-    if (id === 'bram') s.push('look');
+    if (id === 'bram' || id === 'sam') s.push('look');
     if (CAST[id].load) s.push('carry', 'carryWalk', 'lift');
     if (CAST[id].polish) s.push('polish');
-    if (id === 'sam') s.push('sweep');
+    if (id === 'sam' || id === 'baker') s.push('sweep');
+    if (id === 'pip') s.push('run');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }

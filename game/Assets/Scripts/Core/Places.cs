@@ -115,6 +115,9 @@ namespace Shop
                     // Morning: the Baker carries trays of loaves down from the bakery to the bread stall, Mia carries
                     // crates from home to set out her vegetable stall, Pip runs letters from the shut post office's
                     // steps to the neighbours' doors, and Sam sweeps outside the hall's door.
+                    // Midday: the Baker trades gossip at Mia's stall, Sam reads the notice board (Pip is at the east's
+                    // playground). Dusk: the Baker sweeps before the bakery, Mia and Pip are at their door before
+                    // dark, and Sam locks the hall.
                     new Person
                     {
                         Id = "baker", Label = "Baker", Spot = V(0, 12), Phases = new[] { Phase.Morning },
@@ -152,6 +155,41 @@ namespace Shop
                         Id = "sam", At = V(614, 404), Label = "Sam", Spot = V(-18, -4), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Morning },
                         Line = "Steps first, then the ledgers. Everything in its order, or nothing can ever be found again.",
                     },
+                    new Person
+                    {
+                        Id = "baker", At = V(588, 570), Label = "Baker", Spot = V(10, 14), Pose = "talk", Facing = -1, Phases = new[] { Phase.Midday },
+                        Line = "Mia's carrots, my rolls, and a bit of news for both. That's a fair trade in Bellwood.",
+                    },
+                    new Person
+                    {
+                        Id = "mia", At = V(562, 568), Label = "Mia", Spot = V(-6, 16), Pose = "talk", Facing = 1, Phases = new[] { Phase.Midday },
+                        Line = "Two cabbages for one of his rolls. He thinks he's winning. He isn't.",
+                    },
+                    new Person
+                    {
+                        Id = "sam", At = V(838, 572), Label = "Sam", Spot = V(-18, 4), Pose = "look", Facing = 1, Phases = new[] { Phase.Midday },
+                        Line = "Three notices pinned out of line. I've written to the hall about it. I am the hall, but procedure is procedure.",
+                    },
+                    new Person
+                    {
+                        Id = "baker", At = V(470, 404), Label = "Baker", Spot = V(18, -4), Pose = "sweep", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "Last crumbs swept, last loaf sold. Tomorrow the oven's lit before the birds are up.",
+                    },
+                    new Person
+                    {
+                        Id = "mia", At = V(1000, 630), Label = "Mia", Spot = V(-18, 8), Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Home before dark, that's our rule. Pip knows why.",
+                    },
+                    new Person
+                    {
+                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "Mum says we go in before the sky goes grey. I don't mind. Much.",
+                    },
+                    new Person
+                    {
+                        Id = "sam", At = V(648, 402), Label = "Sam", Spot = V(-22, 2), Away = true, Phases = new[] { Phase.Dusk },
+                        Line = "Doors locked, lamps out, ledgers shelved. A day properly closed.",
+                    },
                 },
                 Hotspots = new[]
                 {
@@ -164,6 +202,20 @@ namespace Shop
             {
                 Id = "east",
                 Variants = new[] { "day" },
+                People = new[]
+                {
+                    // Midday: Pip on his break at the playground, dashing between the slide and the swing.
+                    new Person
+                    {
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Phases = new[] { Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(360, 628), Facing = 1, Wait = 3f, Run = true },
+                            new Stop { At = V(474, 622), Facing = -1, Wait = 4f, Run = true },
+                        },
+                        Line = "I'm not playing, I'm on my break! Couriers get breaks, don't they?",
+                    },
+                },
                 Hotspots = new[] { West("to_square", 470, "To the square", "square/from_east") },
             },
             ["coast"] = new PlaceDef

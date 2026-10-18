@@ -22,10 +22,9 @@ namespace Shop
             (v.def, v.ant, v.walk) = (def, ant, walk);
             if (def.Round == null)
             {
-                ant.Pose = def.Pose;
-                ant.Facing = def.Facing;
-                ant.Seat = def.Seat;
                 ant.Feet = def.At;
+                ant.Seat = def.Seat;
+                v.Hold();
                 return;
             }
             ant.Feet = def.Round[0].At;
@@ -47,12 +46,16 @@ namespace Shop
         {
             talking = false;
             if (ant.Pose != listening) return;
-            if (def.Round == null)
-            {
-                ant.Pose = def.Pose;
-                ant.Facing = def.Facing;
-            }
+            if (def.Round == null) Hold();
             else Go();
+        }
+
+        // Keeps their activity where they stand.
+        void Hold()
+        {
+            ant.Pose = def.Pose;
+            ant.Facing = def.Facing;
+            if (def.Away) ant.FaceAway();
         }
 
         void Update()
@@ -67,6 +70,7 @@ namespace Shop
             else if ((wait -= Time.deltaTime) <= 0)
             {
                 ant.Carrying = def.Round[at].Carry;
+                ant.Running = def.Round[at].Run;
                 at = (at + 1) % def.Round.Length;
                 Go();
             }
@@ -88,7 +92,7 @@ namespace Shop
         void Keep()
         {
             var stop = def.Round[at];
-            ant.Carrying = false;
+            ant.Carrying = ant.Running = false;
             ant.Pose = stop.Pose;
             if (stop.Facing != 0) ant.FaceTo(ant.Feet.x + stop.Facing * 8);
             wait = stop.Wait;

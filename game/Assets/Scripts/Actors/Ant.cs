@@ -205,6 +205,9 @@ namespace Shop
             }
         }
 
+        /// <summary>Turns its back to the camera.</summary>
+        public void FaceAway() => Turn(Heading.Back);
+
         public void FaceTo(float x)
         {
             heading = Heading.Side;

@@ -39,6 +39,8 @@ namespace Shop
         public Rect Area = new(-10, -30, 20, 30);
         public Vector2 Spot = new(24, 0);
         public int Facing = 1;
+        /// <summary>They stand with their back to the camera, at a door, say.</summary>
+        public bool Away;
         /// <summary>What they are doing where they stand (brew, hammer...).</summary>
         public string Pose = "idle";
         /// <summary>How high the seat they sit on is, in art px (a bench's is 9).</summary>
@@ -64,6 +66,8 @@ namespace Shop
         public float Wait = 4f;
         /// <summary>They carry their load on the walk from here to the next stop.</summary>
         public bool Carry;
+        /// <summary>They run on the walk from here to the next stop.</summary>
+        public bool Run;
     }
 
     /// <summary>A place to explore: its art, the people in it, its hotspots and where the courier can arrive.</summary>
