@@ -94,8 +94,8 @@ Bellwood is five small outdoor areas, one per part of town, joined by exits at t
 them, as top-down RPGs build a town (decision of 2026-10-18; the one seamless map is retired). Each is about 15 s to
 walk across. The Station (the old station frozen at 10:17, Helen's tea stall on the platform, the train, the forge and
 Bram's carriage) leads west into the Grove (a narrow path between ancient trees to Marlow's shop, grown into one of
-them) and east to the Square (the hall on its terrace, the fountain, the bakery, Mia's stalls, the post
-office). The Square leads east to the East (a bridge over the river, the stilt houses with Nora's, the chamomile
+them) and east to the Square (the hall, the bakery and three homes shoulder to shoulder on a terrace, stairs down to the
+paved plaza with the fountain and Mia's stalls, the post office and the homes along the streets below). The Square leads east to the East (a bridge over the river, the stilt houses with Nora's, the chamomile
 fields, Satria's home and Leo's lookout on the hill) and down the bluff stairs to the Coast (Theo's studio, the beach,
 the salt store, Arlo's home, the jetty and the lighthouse). Forest fills each area's edges as a solid mass with paths
 cut through it; grey rock cliffs step the land between levels. Only ants live here, and the only animals are bugs.
@@ -111,7 +111,11 @@ name of the next area, its lantern lit after dark.
 
 The game draws them in an HD-2D 3D view: the ground follows each area's height map, so cliffs stand up; trees, props
 and characters are upright cards; and buildings are being rebuilt as 3D models (`model.js`: walls, roof slopes,
-gables, eave boards and chimneys, each face a picture drawn in code), so far the forge and Marlow's shop. A model
+gables, eave boards and chimneys, each face a picture drawn in code): the forge, Marlow's shop and the square's houses.
+The Centre's houses come from one kit, `house()` in `village-centre.js`: a stone plinth with steps up to the door,
+walls set back under a deep-eaved gable roof (`MODEL.gable`'s `up0`, `thick` and `shade`, the eaves' shadow on the
+walls), windows with flower boxes, a lantern by the door that is a lit face (so it glows and lights the ground at
+night), a chimney, and optionally a gabled bay over the door, a sign hung out on an arm and a striped awning. A model
 maker returns `{ model, base, depth, door, cards, smoke }`: cards are sprites that stand in or hang on it
 (`[x, back, up]` in texels), and `areas.js` places it with `placeModel`. The camera looks down 35 degrees, a texel
 back is `MODEL.DEEP` rows up, and the scene has a strong tilt-shift blur and bloom. The camera stands back to show

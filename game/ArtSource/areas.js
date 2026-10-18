@@ -352,8 +352,8 @@
   const RIDGE = wavy(136, 10, 53);
   const STATION_RAILS = [[[80, 190], [86, 260], [140, 350], [250, 408], [400, 418], [940, 418]], [[420, 418], [500, 428], [560, 466], [620, 476], [940, 476]]].map(p => smooth(p, 4));
   const PLATFORM = [300, 326, 780, 390];
-  // The square: the hall and its neighbours up on a terrace, the round paved square below it.
-  const TERRACE = wavy(270, 6, 40), PLAZA = [480, 440, 160];
+  // The square: the hall and its neighbours shoulder to shoulder up on a terrace, the round paved square below it.
+  const TERRACE = wavy(420, 6, 40), PLAZA = [640, 645, 200, 170]; // the plaza: a rounded square, its middle and half sizes
   // The east: the river down its west side, Leo's hill in the north-east corner.
   const RIVER = smooth([[140, -360], [150, -20], [182, 200], [160, 400], [190, 620], [170, 852], [176, 940]]);
   const HILL = wavy(300, 8, 37);
@@ -430,37 +430,70 @@
       glow: [[200, 560, 140, 70]],
     },
 
-    /* The square: the hall, the bakery and a home up on the terrace, the fountain in the paved round below with
-       stalls, benches and lamps round it, the post office and homes on its sides. West to the station, east to the
-       east, south down to the coast. */
+    /* The square, built like an Octopath town: on the terrace the hall with the bakery and three homes shoulder to
+       shoulder along a walk, stairs down to the paved round with the fountain, stalls, benches and lamps; the post
+       office and Mia's home with their neighbours either side of it; the homes of Sam and the weaver along a lane below,
+       gardens, a well and the vegetable patch between. West to the station,
+       east to the east, south down to the coast. */
     square: {
-      w: 960, h: 800, seed: 12, bg: '#2f7a3a', start: 'from_station',
+      w: 1280, h: 1040, seed: 12, bg: '#2f7a3a', start: 'from_station',
       level: (x, y) => y < TERRACE(x) ? 1 : 0,
-      roads: [[[[-20, 470], [980, 470]], 22], [[[480, 600], [480, 820]], 20], [[[208, 740], [760, 740]], 12]],
+      roads: [
+        [[[-20, 640], [1300, 640]], 22], [[[640, 800], [640, 1060]], 20], [[[300, 924], [980, 924]], 12],
+        // the walk along the terrace and the stairs down from it
+        [[[250, 398], [1030, 398]], 9], [[[640, 398], [640, 490]], 14], [[[420, 398], [424, 620]], 10], [[[876, 398], [870, 620]], 10],
+      ],
       gap: 40,
-      paving: (x, y) => Math.hypot(x - PLAZA[0], y - PLAZA[1]) <= PLAZA[2],
-      clear: [[480, 450, 360, 220], [480, 690, 380, 110]],
+      paving: (x, y) => ((x - PLAZA[0]) / PLAZA[2]) ** 4 + ((y - PLAZA[1]) / PLAZA[3]) ** 4 <= 1,
+      clear: [[640, 620, 600, 300], [640, 900, 520, 110]],
       species: mix(P => [[0.6, P.oak], [0.77, P.oakDeep], [0.98, P.pine], [1, P.autumn]]),
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
-        at('way_station', V.waysign('STATION', -1), 44, 442); at('way_east', V.waysign('EAST', 1), 916, 442); at('way_coast', V.waysign('COAST', 0), 514, 784);
-        at('hall', V.hall(), 480, 226, { lane: [[480, 300]] });
-        at('bakery', V.bakery(), 190, 236, { lane: [[236, 320], [330, 380]] });
-        at('home_brick', V.centreHome('brick'), 780, 236, { lane: [[770, 320], [640, 380]] });
-        at('fountain', V.fountain(), 480, 450);
-        [['veg', 360, 380], ['fruit', 600, 380], ['flowers', 360, 560], ['bread', 600, 560]].forEach(([k, x, y]) => at('stall_' + k, V.stall(k), x, y));
-        at('bench_w', V.bench(), 420, 512); at('bench_e', V.bench(), 540, 512);
-        [[330, 320], [630, 320], [320, 590], [640, 590]].forEach(([x, y], i) => at('lamp_' + i, V.lamp(), x, y));
-        at('notice_square', V.noticeBoard(), 690, 420);
-        at('post_office', V.postOffice(true), 150, 420);
-        at('home_mia', V.centreHome('mia'), 820, 420);
-        at('home_weaver', V.centreHome('plaster'), 220, 700);
-        at('home_sam', V.centreHome('sam'), 760, 700);
-        at('bus_stop', V.busStop(), 880, 444);
-        [[90, 570], [870, 570], [330, 650], [640, 650]].forEach(([x, y], i) => at('blossom_' + i, V.blossom(i + 1), x, y, { sway: 2 }));
+        at('way_station', V.waysign('STATION', -1), 44, 612); at('way_east', V.waysign('EAST', 1), 1236, 612); at('way_coast', V.waysign('COAST', 0), 674, 1024);
+        // on the terrace, shoulder to shoulder
+        at('home_cream', V.townHome('cream'), 290, 392);
+        at('bakery', V.bakery(), 438, 392);
+        at('hall', V.hall(), 640, 392);
+        at('home_brick', V.townHome('brick'), 836, 392);
+        at('home_corner', V.townHome('corner'), 976, 392);
+        [300, 500, 760, 960].forEach((x, i) => at('terrace_fence_' + i, V.pickets(6), x, 418));
+        // round the paved square, the street's walls either side of it
+        at('home_stone', V.townHome('stone'), 175, 596, { lane: [[175, 620]] });
+        at('post_office', V.postOffice(), 310, 596, { lane: [[310, 620]] });
+        at('home_mia', V.townHome('mia'), 970, 596, { lane: [[970, 620]] });
+        at('home_honey', V.townHome('honey'), 1100, 596, { lane: [[1100, 620]] });
+        at('fountain', V.fountain(), 640, 640);
+        [['veg', 520, 560], ['fruit', 760, 560], ['flowers', 520, 730], ['bread', 760, 730]].forEach(([k, x, y]) => at('stall_' + k, V.stall(k), x, y));
+        at('bench_w', V.bench(), 590, 770); at('bench_e', V.bench(), 690, 770);
+        [[466, 520], [814, 520], [466, 790], [814, 790], [560, 936], [720, 936]].forEach(([x, y], i) => at('lamp_' + i, V.lamp(), x, y));
+        at('notice_square', V.noticeBoard(), 866, 560);
+        at('bus_stop', V.busStop(), 1200, 676);
+        at('cart', V.cart(), 250, 676); at('crates', V.crateStack(2), 1196, 600); at('barrel', V.barrel(), 1218, 610);
+        [[452, 474, 'rose'], [828, 474, 'yellow'], [452, 818, 'lilac'], [828, 818, 'pink']].forEach(([x, y, c], i) => at('bed_' + i, V.flowerClump(i + 1, c), x, y, { walk: true }));
+        // the lawns below the road: the well and the vegetable patch on the west, a bench under an oak on the east
+        at('well', V.wellRoofed('roofR'), 330, 760);
+        [['cabbage', 742], ['carrot', 770]].forEach(([k, y], i) => at('veg_' + i, V.vegRow(k, 64), 110, y, { walk: true }));
+        at('veg_fence', V.pickets(8), 140, 800);
+        at('oak', V.oak(2), 1130, 790); at('bench_oak', V.bench2(2), 1050, 760); at('logs', V.logPile(), 980, 860);
+        [[580, 850], [668, 850]].forEach(([x, y], i) => at('hedge_' + i, V.hedge(40), x, y));
+        // along the lane below
+        at('home_weaver', V.townHome('weaver'), 470, 900, { lane: [[470, 924]] });
+        at('home_sam', V.townHome('sam'), 830, 900, { lane: [[830, 924]] });
+        [[200, 860], [380, 860], [930, 700], [1240, 860]].forEach(([x, y], i) => at('blossom_' + i, V.blossom(i + 1), x, y, { sway: 2 }));
+        at('oak_w', V.oak(3), 70, 800);
+        [[150, 690, 'yellow'], [420, 690, 'white'], [220, 760, 'rose'], [60, 880, 'lilac'], [880, 760, 'yellow'], [1000, 690, 'white'], [1220, 760, 'pink'], [540, 880, 'rose'], [740, 880, 'blue']]
+          .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 10, c), x, y, { walk: true }));
       },
-      anchors: { from_station: [40, 470], from_east: [920, 470], from_coast: [480, 756] },
-      glow: [[480, 680, 200, 60]],
+      // the plaza's paving: a kerb of darker setts round its edge and a ring of them round the fountain
+      dress(S, G) {
+        const b = G.buf, K = ['stone2', 'stone3'].map(c => KIT.u32(V.col(c))), [x0, y0, hx, hy] = PLAZA, cx = x0 + MX, cy = y0 + MT;
+        for (let y = cy - hy; y <= cy + hy; y++) for (let x = cx - hx; x <= cx + hx; x++) {
+          const e = ((x - cx) / hx) ** 4 + ((y - cy) / hy) ** 4, r = Math.hypot(x - cx, (y - cy) * 1.3);
+          if (G.mat(x, y) === 'p' && (e > 0.8 || (r > 62 && r < 72))) b.set(x, y, K[(x + 2 * y) % 7 === 0 ? 1 : 0]);
+        }
+      },
+      anchors: { from_station: [40, 640], from_east: [1240, 640], from_coast: [640, 996] },
+      glow: [[640, 960, 260, 40]],
     },
 
     /* The east: a bridge over the river, stilt houses along the road, chamomile fields, the playground, the gardener

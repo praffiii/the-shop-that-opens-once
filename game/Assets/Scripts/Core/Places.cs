@@ -45,9 +45,9 @@ namespace Shop
                 Variants = new[] { "day" },
                 Hotspots = new[]
                 {
-                    West("to_station", 470, "To the station", "station/from_square"),
-                    East("to_east", 960, 470, "To the east", "east/from_square"),
-                    South("to_coast", 480, 800, "Down to the coast", "coast/from_square"),
+                    West("to_station", 640, "To the station", "station/from_square"),
+                    East("to_east", 1280, 640, "To the east", "east/from_square"),
+                    South("to_coast", 640, 1040, "Down to the coast", "coast/from_square"),
                 },
             },
             ["east"] = new PlaceDef

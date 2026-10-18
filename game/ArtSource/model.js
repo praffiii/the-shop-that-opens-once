@@ -90,21 +90,24 @@
        roof(b, w, h, which): a slope ('front', or 'left' and 'right'), its ridge along the top and eave along the
          bottom, rows parallel to them;
        board(b, w, h): the boards along its eaves and verges, 3 texels deep.
+     The walls stand up0 texels up (on a plinth); the boards are thick texels deep; shade rows under the roof line are
+     darkened on every wall, the shadow of the eaves.
      Returns the points the roof's slope passes through: roofAt(x, back), the height of the roof over a point. */
   function gable(m, o) {
-    const { x0, x1, back0 = 0, d, wall, rise, ov = 4, ridge } = o, w = x1 - x0, B = 3;
-    const along = ridge === 'x', half = along ? d / 2 : w / 2, k = rise / half, R = wall + rise, E = wall - ov * k;
+    const { x0, x1, back0 = 0, d, wall, rise, ov = 4, ridge, up0: U = 0, thick: B = 3, shade = 0 } = o, w = x1 - x0;
+    const along = ridge === 'x', half = along ? d / 2 : w / 2, k = rise / half, R = U + wall + rise, E = U + wall - ov * k;
     const cut = span => (b, bw, bh) => {
       for (let u = 0; u < bw; u++) {
         const top = Math.round(bh - (wall + rise * Math.max(0, 1 - Math.abs(u + 0.5 - span / 2) / (span / 2))));
         for (let v = 0; v < Math.min(bh, top); v++) b.set(u, v, 0);
       }
     };
-    const then = (f, g) => (b, bw, bh, lit) => { f(b, bw, bh, lit); g(b, bw, bh); };
+    const then = (f, g) => (b, bw, bh, lit) => { f(b, bw, bh, lit); g(b, bw, bh); eaves(b, shade); };
+    const H = wall + rise, flat = f => then(f, () => {});
     if (along) {
-      m.front(x0, back0, 0, w, wall, o.front);
-      m.side(x0, -1, back0, 0, d, R, then(o.left, cut(d)));
-      m.side(x1, 1, back0, 0, d, R, then(o.right, cut(d)));
+      m.front(x0, back0, U, w, wall, flat(o.front));
+      m.side(x0, -1, back0, U, d, H, then(o.left, cut(d)));
+      m.side(x1, 1, back0, U, d, H, then(o.right, cut(d)));
       const rb = back0 + d / 2, fl = [x0 - ov, E, back0 - ov], fr = [x1 + ov, E, back0 - ov];
       m.quad((b, bw, bh) => o.roof(b, bw, bh, 'front'), [x0 - ov, R, rb], [x1 + ov, R, rb], fr, fl);
       m.quad(o.board, fl, fr, [fr[0], E - B, fr[2]], [fl[0], E - B, fl[2]]);
@@ -112,9 +115,9 @@
       m.quad(o.board, fr, [x1 + ov, R, rb], [x1 + ov, R - B, rb], [x1 + ov, E - B, fr[2]]);
     } else {
       const xm = (x0 + x1) / 2, f = back0 - ov, k2 = back0 + d + ov;
-      m.front(x0, back0, 0, w, R, then(o.front, cut(w)));
-      m.side(x0, -1, back0, 0, d, wall, o.left);
-      m.side(x1, 1, back0, 0, d, wall, o.right);
+      m.front(x0, back0, U, w, H, then(o.front, cut(w)));
+      m.side(x0, -1, back0, U, d, wall, flat(o.left));
+      m.side(x1, 1, back0, U, d, wall, flat(o.right));
       m.quad((b, bw, bh) => o.roof(b, bw, bh, 'left'), [xm, R, k2], [xm, R, f], [x0 - ov, E, f], [x0 - ov, E, k2]);
       m.quad((b, bw, bh) => o.roof(b, bw, bh, 'right'), [xm, R, f], [xm, R, k2], [x1 + ov, E, k2], [x1 + ov, E, f]);
       m.quad(o.board, [x0 - ov, E, f], [xm, R, f], [xm, R - B, f], [x0 - ov, E - B, f]);
@@ -123,6 +126,19 @@
       m.quad(o.board, [x1 + ov, E, f], [x1 + ov, E, k2], [x1 + ov, E - B, k2], [x1 + ov, E - B, f]);
     }
     return { R, E, roofAt: (x, back) => R - k * (along ? Math.abs(back - back0 - d / 2) : Math.abs(x - (x0 + x1) / 2)) };
+  }
+
+  // The shadow of the eaves: in each column, the n texels under the top of the picture a step darker, the last row
+  // every other texel, so the shadow's edge is soft.
+  function eaves(b, n) {
+    for (let x = 0; x < b.w; x++) {
+      let y = 0; while (y < b.h && !b.get(x, y)) y++;
+      for (let j = 0; j < n && y + j < b.h; j++) {
+        if (j === n - 1 && (x + y) & 1) continue;
+        const i = (y + j) * b.w + x, c = b.d[i];
+        b.d[i] = (c & 0xff000000) | (((c >> 16 & 0xff) * 0.7) << 16) | (((c >> 8 & 0xff) * 0.7) << 8) | ((c & 0xff) * 0.7);
+      }
+    }
   }
 
   // Where a model point lands on the screen, flat, for a model whose front line stands at (x, y): one texel up or back

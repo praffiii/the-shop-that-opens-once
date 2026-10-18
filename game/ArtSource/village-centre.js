@@ -237,129 +237,225 @@
     return { img: frames[0], frames, fps: 6, ax: cx + 1, ay: h + 1, base: [-rx, rx], foot: ry * 2 };
   }
 
-  /* ---------------- Sam's hall ---------------- */
-  /* The village hall on the north of the square: a slate hip roof with a bell cupola, cream walls with stone quoins,
-     tall arched windows, a columned portico with a clock in its pediment, banners, on a stone plinth with steps up the
-     middle. door: the double doors. */
-  function hall() {
-    const W = 244, H = 182, lit = [], cx = 122, ey = 98, wb = 148, wx = 10, ww = 224;
-    const out = inked(W, H, b => {
-      // the cupola on the ridge: a white bell house with an arched opening, its own little roof and a vane
-      fill(b, cx - 9, 24, 19, 20, 'wall0'); fill(b, cx - 9, 24, 2, 20, 'white'); fill(b, cx + 7, 24, 3, 20, 'wall2');
-      fill(b, cx - 4, 28, 9, 12, X.soot); arch(b, cx - 4, 28, 9, 'wall0'); disc(b, cx, 34, 3, 3, 'brass2'); fill(b, cx - 3, 36, 7, 2, 'brass3'); px(b, cx - 1, 32, 'brass0');
-      gable(b, cx, 14, 13, 26, 4, 'roofB', null, 3);
-      fill(b, cx, 3, 1, 10, 'iron3'); stamp(b, cx - 6, 2, ['.1.......1.', '11111111111', '.1.......11'], { 1: 'iron3' }); fill(b, cx - 1, 7, 3, 2, 'brass1'); px(b, cx - 1, 7, 'brass0');
-      roof(b, 2, 40, W - 4, ey - 40, 'roofB', { hip: 26, seed: 4 });
-      wall(b, wx, ey, ww, wb - ey, 'plaster');
-      quoins(b, wx, ey + 1, wb - ey, false); quoins(b, wx + ww, ey + 1, wb - ey, true);
-      eaveShade(b, wx, ey + 1, ww, 'plaster');
-      for (const x of [22, 62, 164, 204]) lit.push(win(b, x, 110, 18, 28, { arch: true, frame: TRIM, box: ['rose', 'yellow'] }));
-      // banners: swallowtail pennants hung from iron rods
-      for (const x of [45, 185]) { fill(b, x - 1, 104, 14, 2, 'iron3'); const keep = saved(b, x, 106, 12, 26); fill(b, x, 106, 12, 26, 'red'); fill(b, x, 106, 2, 26, X.redL); fill(b, x + 10, 106, 2, 26, X.redD); for (let j = 0; j < 5; j++) for (let i = 5 - j; i < 7 + j; i++) keep(x + i, 127 + j); stamp(b, x + 3, 112, ['..11..', '.1221.', '.1221.', '122221', '.3..3.', '..33..'], { 1: 'yellow', 2: 'light1', 3: X.yelD }); fill(b, x + 1, 108, 10, 1, 'yellow'); fill(b, x + 1, 122, 10, 1, 'yellow'); }
-      // the portico: a shaded recess, double doors, four columns under an entablature and the clock pediment
-      fill(b, 84, 104, 76, wb - 104, 'wall3'); fill(b, 84, 104, 76, 3, 'wall4');
-      lit.push(door(b, 110, 110, 24, 38, { double: true, arch: true, paint: GREEN, glass: true, step: false }));
-      for (const x of [88, 102, 135, 149]) { fill(b, x, 106, 7, wb - 106, 'stone1'); fill(b, x, 106, 2, wb - 106, 'stone0'); fill(b, x + 5, 106, 2, wb - 106, 'stone2'); fill(b, x + 3, 110, 1, wb - 114, 'stone2'); fill(b, x - 1, 104, 9, 3, 'stone0'); fill(b, x - 1, 106, 9, 1, 'stone2'); fill(b, x - 1, wb - 3, 9, 3, 'stone2'); fill(b, x - 1, wb - 3, 9, 1, 'stone1'); }
-      fill(b, 80, 94, 84, 10, 'stone1'); fill(b, 80, 94, 84, 1, 'stone0'); fill(b, 80, 102, 84, 2, 'stone3'); fill(b, 82, 96, 80, 5, 'wall0');
-      write(b, 'VILLAGE HALL', cx - (PX.textWidth('VILLAGE HALL') >> 1), 96, 'roofB3');
-      gable(b, cx, 62, 44, 94, 6, 'roofB', (x, y) => px(b, x, y, y > 91 ? 'stone2' : 'wall0'), 5);
-      disc(b, cx, 79, 9, 9, 'brass3'); disc(b, cx, 79, 8, 8, 'brass1'); disc(b, cx, 79, 6, 6, 'cream0'); px(b, cx - 3, 76, 'white');
-      for (const [dx, dy] of [[0, -5], [5, 0], [0, 5], [-5, 0]]) px(b, cx + dx, 79 + dy, 'iron4');
-      fill(b, cx, 75, 1, 5, 'iron4'); fill(b, cx, 79, 4, 1, 'iron4'); px(b, cx, 79, 'red');
-      // the plinth, the steps and two flower urns on it
-      wall(b, 4, wb, W - 8, H - wb, 'stone', 7); fill(b, 4, wb, W - 8, 2, 'stone0'); fill(b, 4, wb + 2, W - 8, 1, 'stone3');
-      for (let k = 0; k < 5; k++) { const sx = 82 - k * 5, sw = 80 + k * 10, sy = wb + k * 7; fill(b, sx, sy, sw, 7, 'stone2'); fill(b, sx, sy, sw, 2, 'stone0'); fill(b, sx, sy + 2, sw, 1, 'stone1'); fill(b, sx, sy + 6, sw, 1, 'stone3'); fill(b, sx, sy, 1, 7, 'stone3'); fill(b, sx + sw - 1, sy, 1, 7, 'stone4'); }
-      for (const x of [5, 225]) { fill(b, x + 2, wb - 6, 10, 6, 'stone1'); fill(b, x + 2, wb - 6, 10, 1, 'stone0'); fill(b, x + 9, wb - 6, 3, 6, 'stone2'); fill(b, x, wb - 9, 14, 3, 'stone0'); pot(b, x + 1, wb - 20, 'red', 'yellow', x); }
+  /* ---------------- houses in 3D ---------------- */
+  /* A Centre house built in 3D (model.js), as Octopath builds its towns: on a stone plinth with steps up to the door,
+     its walls set back behind the steps under a tiled gable roof whose deep eaves shade the top of the walls, windows
+     with flower boxes, a lantern by the door that glows after dark, a chimney. o:
+       w, d, wall, rise: the walls' width, depth and height and the roof's rise (texels); ridge: 'x' (the eaves face the
+         camera) or 'back' (a gable does); kind: the walls (WALLS); roof: the tiles' ramp ('roofR', 'roofB', 'roofG');
+       wins: [[x, y, w, h, win()'s options]] on the front, y down from the eaves; side: the same on both side walls,
+         x from the front; door: [x, w, h, door()'s options] on the front, x from its left;
+       bay: { w, out, rise, wins, front } a gabled bay standing out from the middle of the front, the door in it;
+       timber: [floor beam y, ...post x] a half-timber frame over the front; front(b, w, h, top, lit) paints more on it
+         (top: the eaves' row; the bay's own front has bay.front);
+       chimney: [x, back] where it rises through the roof, back from the walls' front; seed;
+       extra(m, g, at): more of the model (g: the roof; at: { X0, X1, B0, F, cx } the walls, their front, the bay's
+         front and the door's middle); cards.
+     Returns the VIL model contract. */
+  const PL = 6, SET = 15, OV = 10; // the plinth's height; how far back the walls stand (the steps before them); the eaves' overhang
+  const tiled = (R, seed) => (b, w, h) => { for (let v = 0; v < h; v++) for (let u = 0; u < w; u++) px(b, u, v, v < 4 ? R + [3, 0, 1, 2][v] : tile(R, u, v - 4, 0, v / h, seed)); };
+  const boards = (b, w, h) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); fill(b, 0, h - 1, w, 1, 'wood4'); };
+  const ironBox = (b, w, h) => { fill(b, 0, 0, w, h, 'iron3'); fill(b, 0, 0, w, 1, 'iron2'); };
+  const glassAt = (lit, r) => r && lit.push([r[0] - 1, r[1] - 1, r[2], r[3]]);
+  function house(o) {
+    const { w, d, wall: WALL, rise, ridge = 'x', kind = 'plaster', roof: R = 'roofR', seed = 1, bay } = o;
+    const m = MODEL.make(), X0 = -Math.round(w / 2), X1 = X0 + w, out = bay ? bay.out : 0, F = SET, B0 = SET + out, C = WALLS[kind], smoke = [];
+    // F: the front of the walls (the bay's, if there is one); B0: the front of the house's own walls
+    const [dx, dw, dh, dopt = {}] = o.door, cx = bay ? 0 : X0 + dx + dw / 2;
+    // a wall picture: its walls, flecks in plaster, corner stones, the footing and its windows
+    const face = (b, bw, bh, wins, lit) => {
+      const top = bh - WALL;
+      wall(b, 0, 0, bw, bh, kind, seed);
+      if (kind !== 'brick' && kind !== 'stone') {
+        for (let y = top; y < bh; y++) for (let x = 0; x < bw; x++) if (hash(x, y, seed) < 0.03) px(b, x, y, C[2]);
+        quoins(b, 0, top, WALL, false); quoins(b, bw, top, WALL, true);
+      }
+      footing(b, 0, bh - 4, bw);
+      for (const [x, y, ww, wh, wo = {}] of wins) glassAt(lit, win(b, x, top + y, ww, wh, wo));
+      return top;
+    };
+    const attic = (b, bw, top, r, lit) => glassAt(lit, win(b, (bw >> 1) - 5, top - Math.round(r * 0.6), 10, 10, { arch: true, sill: false, panes: 0 }));
+    const theDoor = (b, bw, bh, x, lit) => glassAt(lit, door(b, x, bh - dh, dw, dh, { step: false, ...dopt }));
+    const front = (b, bw, bh, lit) => {
+      const top = face(b, bw, bh, o.wins || [], lit);
+      if (ridge === 'back') attic(b, bw, top, rise, lit);
+      if (o.timber) { const [fy, ...xs] = o.timber; timber(b, 0, top, bw, fy + 3, xs, [0, xs.length - 2]); fill(b, 0, top + fy, bw, 3, 'wood4'); fill(b, 0, top + fy, bw, 1, 'wood3'); }
+      if (o.front) o.front(b, bw, bh, top, lit);
+      if (!bay) theDoor(b, bw, bh, dx, lit);
+    };
+    const side = (b, bw, bh, lit) => face(b, bw, bh, o.side || [], lit), plain = (b, bw, bh, lit) => face(b, bw, bh, [], lit);
+    const roof = tiled(R, seed), opts = { ov: OV, up0: PL, thick: 4, shade: 6, board: boards, roof };
+    const g = MODEL.gable(m, { x0: X0, x1: X1, back0: B0, d, wall: WALL, rise, ridge, front, left: side, right: side, ...opts });
+    if (bay) MODEL.gable(m, {
+      x0: -bay.w / 2, x1: bay.w / 2, back0: F, d: out + Math.round(d / 2), wall: WALL, rise: bay.rise, ridge: 'back', left: plain, right: plain, ...opts,
+      front(b, bw, bh, lit) { const top = face(b, bw, bh, bay.wins || [], lit); attic(b, bw, top, bay.rise, lit); if (bay.front) bay.front(b, bw, bh, top, lit); theDoor(b, bw, bh, (bw - dw) >> 1, lit); },
     });
-    return pack(out, W, H, [wx, ww], 60, { lit, door: cx, cupola: [cx + 1, 35] });
+    // the plinth, and three steps up to the door
+    const stone = (b, bw, bh, lit, which) => {
+      if (which !== 'top') return wall(b, 0, 0, bw, bh, 'stone', seed + 3);
+      fill(b, 0, 0, bw, bh, 'stone1'); for (let x = 9; x < bw; x += 10) fill(b, x, 0, 1, bh, 'stone2'); fill(b, 0, bh - 1, bw, 1, 'stone0');
+    };
+    m.box(X0 - 3, X1 + 3, F - 3, B0 + d + 3, 0, PL, stone);
+    const sw = dw / 2 + 5;
+    for (let k = 0; k < 3; k++) m.box(cx - sw, cx + sw, F - 3 - 3 * (3 - k), F - 3, 2 * k, 2 * k + 2, stone);
+    // the lantern by the door, on a short iron arm
+    const lx = cx + dw / 2 + 8, lu = PL + dh - 3;
+    m.box(lx - 3, lx + 3, F - 5, F - 1, lu - 9, lu, (b, bw, bh, lit, which) => {
+      fill(b, 0, 0, bw, bh, 'iron4'); if (which === 'top') return;
+      fill(b, 1, 2, bw - 2, bh - 4, 'sky3'); fill(b, 1, bh - 3, bw - 2, 1, 'sky4'); lit.push([1, 2, bw - 2, bh - 4]);
+    });
+    m.box(lx - 1, lx + 1, F - 3, F, lu, lu + 2, ironBox);
+    if (o.chimney) {
+      const [hx, hb] = o.chimney, c0 = B0 + hb, low = Math.min(...[[hx - 5, c0], [hx + 5, c0], [hx - 5, c0 + 10], [hx + 5, c0 + 10]].map(([x, k]) => g.roofAt(x, k)));
+      m.box(hx - 5, hx + 5, c0, c0 + 10, low - 2, g.R + 12, (b, bw, bh, lit, which) => {
+        if (which === 'top') { fill(b, 0, 0, bw, bh, 'stone1'); fill(b, 2, 2, bw - 4, bh - 4, X.soot); return; }
+        wall(b, 0, 0, bw, bh, 'brick', seed + 5); fill(b, 0, 0, bw, 3, 'stone1'); fill(b, 0, 0, bw, 1, 'stone0');
+      });
+      smoke.push([hx, g.R + 12, c0 + 5]);
+    }
+    if (o.extra) o.extra(m, g, { X0, X1, B0, F, cx });
+    return { model: m, base: [X0 - 3, X1 + 3], depth: B0 + d + 3, door: cx, w: w + 2 * OV, ay: Math.round((B0 + d) * MODEL.DEEP + g.R), smoke, cards: o.cards };
+  }
+  // A sign hung out over the street on an iron arm from a wall (its front back texels back), its board w x h up
+  // texels up, its picture painted by paint(b, w, h).
+  function hangSign(m, x, back, up, w, h, paint) {
+    m.box(x - 1, x + 1, back - 12, back, up + h, up + h + 2, ironBox);
+    m.box(x - w / 2, x + w / 2, back - 11, back - 9, up, up + h, (b, bw, bh, lit, which) => which === 'front' ? paint(b, bw, bh) : boards(b, bw, bh));
+  }
+  // A striped awning out from a wall (its front back texels back) over x0..x1: its top edge up texels up, out texels
+  // out and 8 down, and a scalloped valance.
+  function awning3d(m, x0, x1, back, up, out, A, B) {
+    const S = u => STRIPE[(Math.floor(u / 6) & 1) ? B : A];
+    m.quad((b, bw, bh) => { for (let v = 0; v < bh; v++) for (let u = 0; u < bw; u++) px(b, u, v, S(u)[v < 2 ? 2 : v < 4 ? 0 : 1]); }, [x0, up, back], [x1, up, back], [x1, up - 8, back - out], [x0, up - 8, back - out]);
+    m.front(x0, back - out, up - 14, x1 - x0, 6, (b, bw, bh) => { for (let u = 0; u < bw; u++) { const e = u % 6 === 0 || u % 6 === 5; for (let v = 0; v < (e ? bh - 1 : bh); v++) px(b, u, v, v === 0 || v === bh - 1 ? S(u)[2] : S(u)[1]); } });
+  }
+  // A card standing in or on a model (placeModel in areas.js).
+  const card = (img, x, back, o = {}) => ({ img: img.canvas(), ax: img.w >> 1, ay: img.h - 1, x, back, up: 0, ...o });
+
+  /* ---------------- Sam's hall ---------------- */
+  /* The village hall at the head of the square: a long slate roof with a bell cupola on its ridge, cream walls with
+     stone quoins, tall arched windows with flower boxes, red banners, and in the middle a gabled bay with the clock in
+     its pediment and the double doors, under the VILLAGE HALL board. door: the double doors. */
+  function hall() {
+    const H = house({
+      w: 208, d: 60, wall: 66, rise: 40, kind: 'plaster', roof: 'roofB', seed: 4,
+      wins: [[14, 20, 18, 30], [50, 20, 18, 30], [140, 20, 18, 30], [176, 20, 18, 30]].map(r => [...r, { arch: true, frame: TRIM, box: ['rose', 'yellow'] }]),
+      side: [[22, 20, 16, 28, { arch: true, frame: TRIM }]],
+      door: [0, 26, 42, { double: true, arch: true, paint: GREEN, glass: true }],
+      bay: {
+        w: 64, out: 10, rise: 34,
+        front(b, w, h, top) {
+          fill(b, 4, top + 4, w - 8, 9, 'stone1'); fill(b, 4, top + 4, w - 8, 1, 'stone0'); fill(b, 5, top + 6, w - 10, 5, 'wall0');
+          write(b, 'VILLAGE HALL', (w >> 1) - (PX.textWidth('VILLAGE HALL') >> 1), top + 6, 'roofB3');
+          const cx = w >> 1, cy = top - 14;
+          disc(b, cx, cy, 9, 9, 'brass3'); disc(b, cx, cy, 8, 8, 'brass1'); disc(b, cx, cy, 6, 6, 'cream0'); px(b, cx - 3, cy - 3, 'white');
+          for (const [i, j] of [[0, -5], [5, 0], [0, 5], [-5, 0]]) px(b, cx + i, cy + j, 'iron4');
+          fill(b, cx, cy - 4, 1, 5, 'iron4'); fill(b, cx, cy, 4, 1, 'iron4'); px(b, cx, cy, 'red');
+        },
+      },
+      front(b, w, h, top) {
+        for (const bx of [34, w - 46]) { // the banners either side of the bay, swallowtail pennants from iron rods
+          const keep = saved(b, bx, top + 8, 12, 30);
+          fill(b, bx - 1, top + 6, 14, 2, 'iron3'); fill(b, bx, top + 8, 12, 30, 'red'); fill(b, bx, top + 8, 2, 30, X.redL); fill(b, bx + 10, top + 8, 2, 30, X.redD);
+          for (let j = 0; j < 5; j++) for (let i = 5 - j; i < 7 + j; i++) keep(bx + i, top + 33 + j);
+          stamp(b, bx + 3, top + 15, ['..11..', '.1221.', '.1221.', '122221', '.3..3.', '..33..'], { 1: 'yellow', 2: 'light1', 3: X.yelD });
+        }
+      },
+      extra(m, g, { B0 }) {
+        // the cupola on the ridge: a white bell house under its own little roof
+        MODEL.gable(m, { x0: -9, x1: 9, back0: B0 + 22, d: 16, wall: 16, rise: 9, ridge: 'back', up0: g.R - 6, ov: 3, board: boards, roof: tiled('roofB', 3),
+          front(b, w, h) { fill(b, 0, 0, w, h, 'wall0'); fill(b, 0, 0, 2, h, 'white'); fill(b, 5, h - 13, 8, 11, X.soot); arch(b, 5, h - 13, 8, 'wall0'); disc(b, 9, h - 7, 2, 2, 'brass2'); },
+          left: (b, w, h) => fill(b, 0, 0, w, h, 'wall1'), right: (b, w, h) => fill(b, 0, 0, w, h, 'wall2') });
+        // two columns before the bay, holding up its eaves
+        const col = (b, w, h) => { fill(b, 0, 0, w, h, 'stone1'); fill(b, 0, 0, 1, h, 'stone0'); fill(b, w - 1, 0, 1, h, 'stone2'); fill(b, 0, 0, w, 2, 'stone0'); };
+        for (const x of [-38, 33]) m.box(x, x + 5, SET - 3, SET, PL, PL + 66, col);
+      },
+    });
+    return H;
   }
 
   /* ---------------- Baker's bakery ---------------- */
-  /* Two storeys: a brick shop below with a green shopfront, a lit bread window under a striped awning, a loaf sign on a
-     bracket; Baker's home above in half-timber, a dormer in the roof, a brick chimney (smoke). A bread rack and flour
-     sacks stand outside. */
+  /* Two storeys under a teal gable: the shop below in red brick with a green shopfront, the bread window lit under a
+     striped awning, a glazed door, the loaf sign hung out on its arm; Baker's home above in half-timber; the oven's
+     chimney (smoke). Flour sacks and the bread rack stand by the door. */
   function bakery() {
-    const W = 182, H = 146, lit = [], smoke = [], wx = 22, ww = 132, ey = 60, mid = 96, wb = H - 4;
-    const out = inked(W, H, b => {
-      smoke.push(chimney(b, wx + 104, 2, 34));
-      roof(b, wx - 6, 14, ww + 12, ey - 14, 'roofG', { seed: 6 });
-      // the dormer: a little gabled window in the roof
-      fill(b, wx + 24, 30, 22, 18, 'wall1'); fill(b, wx + 42, 30, 4, 18, 'wall2'); lit.push(win(b, wx + 28, 33, 14, 11));
-      gable(b, wx + 35, 20, 14, 31, 8, 'roofG', null, 2);
-      // upstairs: Baker's home in half-timber
-      wall(b, wx, ey, ww, mid - ey, 'plaster'); eaveShade(b, wx, ey + 1, ww, 'plaster');
-      timber(b, wx, ey + 2, ww, mid - ey - 2, [wx, wx + 43, wx + 86, wx + ww - 3], [0, 2]);
-      for (const x of [wx + 15, wx + 58, wx + 101]) lit.push(win(b, x, ey + 10, 14, 14, { box: ['rose', 'white'] }));
-      fill(b, wx - 2, mid, ww + 4, 5, 'wood3'); fill(b, wx - 2, mid, ww + 4, 1, 'wood1'); fill(b, wx - 2, mid + 4, ww + 4, 1, 'wood4');
-      // downstairs: the shop, a green front with a name board, the bread window under its awning, a glazed door
-      wall(b, wx, mid + 5, ww, wb - mid - 5, 'brick', 3); fill(b, wx, mid + 5, ww, 2, 'roofR4');
-      fill(b, wx + 4, mid + 7, 98, wb - mid - 7, 'cap3'); fill(b, wx + 5, mid + 8, 96, wb - mid - 8, 'cap2'); fill(b, wx + 5, mid + 8, 1, wb - mid - 8, 'cap1');
-      fill(b, wx + 8, mid + 9, 54, 9, 'cream0'); fill(b, wx + 8, mid + 17, 54, 1, 'cream2'); write(b, 'BAKERY', wx + 35 - (PX.textWidth('BAKERY') >> 1), mid + 11, 'wood4');
-      const gx = wx + 9, gy = mid + 30, gw = 52, gh = wb - mid - 36;
-      lit.push(win(b, gx, gy, gw, gh, { frame: GREEN, panes: 0 }));
-      fill(b, gx, gy + 8, gw, 2, 'wood3'); fill(b, gx, gy + gh - 3, gw, 3, 'wood3');
-      for (let i = 0; i < 6; i++) { loaf(b, gx + 2 + i * 8, gy + 4); roll(b, gx + 3 + i * 8, gy + gh - 6); }
-      baguette(b, gx + 6, gy + 12, 14); baguette(b, gx + 30, gy + 13, 16);
-      awning(b, gx - 3, mid + 20, gw + 6, 4, 'red', 'white');
-      lit.push(door(b, wx + 70, wb - 36, 22, 36, { paint: GREEN, glass: true }));
-      // the loaf sign out past the left corner
-      const [h1, h2] = bracket(b, wx, mid + 10, -20);
-      for (const hx of [h1, h2]) fill(b, hx, mid + 12, 1, 4, 'iron3');
-      stamp(b, wx - 19, mid + 15, ['...0011111122...', '.001121112111223', '0111211121112123', '1111111111111123', '1111111111111233', '.22333333333333.'], { 0: 'wood0', 1: 'wood1', 2: 'wood2', 3: 'wood3' });
-      // a chalkboard by the pier, flour sacks on the left, the bread rack on the right
-      const cb = wx + 108;
-      line(b, cb + 1, wb - 18, cb - 1, wb + 3, 'wood3', 2); line(b, cb + 11, wb - 18, cb + 13, wb + 3, 'wood3', 2);
-      fill(b, cb, wb - 18, 13, 14, 'wood3'); fill(b, cb + 1, wb - 17, 11, 12, X.chalk); loaf(b, cb + 3, wb - 15); for (const y of [wb - 10, wb - 8]) fill(b, cb + 2, y, 8 - (y & 1) * 3, 1, 'cream1');
-      sack(b, 0, wb - 12, { mark: WHEAT, markC: X.yelD }); sack(b, 11, wb - 12, { mark: WHEAT, markC: X.yelD }); sack(b, 5, wb - 8, { mark: WHEAT, markC: X.yelD });
-      const rx0 = wx + ww + 1;
-      post(b, rx0, wb - 28, 32); post(b, rx0 + 23, wb - 28, 32);
-      for (const ry of [wb - 24, wb - 12, wb]) { fill(b, rx0, ry, 26, 3, 'wood2'); fill(b, rx0, ry, 26, 1, 'wood1'); fill(b, rx0, ry + 2, 26, 1, 'wood4'); }
-      for (let i = 0; i < 3; i++) { loaf(b, rx0 + 2 + i * 7, wb - 28); roll(b, rx0 + 3 + i * 7, wb - 15); }
-      baguette(b, rx0 + 3, wb - 4, 20);
-      footing(b, wx, wb, ww);
+    const W = 124, rack = inked(26, 32, b => {
+      post(b, 0, 0, 32); post(b, 23, 0, 32);
+      for (const ry of [4, 16, 28]) { fill(b, 0, ry, 26, 3, 'wood2'); fill(b, 0, ry, 26, 1, 'wood1'); fill(b, 0, ry + 2, 26, 1, 'wood4'); }
+      for (let i = 0; i < 3; i++) { loaf(b, 2 + i * 7, 0); roll(b, 3 + i * 7, 13); }
+      baguette(b, 3, 24, 20);
     });
-    return pack(out, W, H, [wx, ww], 48, { lit, smoke, door: wx + 81 });
+    const sacks = inked(22, 18, b => { sack(b, 0, 4, { mark: WHEAT, markC: X.yelD }); sack(b, 11, 4, { mark: WHEAT, markC: X.yelD }); sack(b, 5, 0, { open: 'cream0' }); });
+    return house({
+      w: W, d: 56, wall: 70, rise: 44, ridge: 'back', kind: 'plaster', roof: 'roofG', seed: 6,
+      wins: [[14, 10, 14, 14, { box: ['rose', 'white'] }], [W - 28, 10, 14, 14, { box: ['rose', 'white'] }]],
+      side: [[18, 10, 12, 14, { box: ['rose', 'white'] }]],
+      timber: [30, 0, 40, 81, W - 3],
+      door: [W - 34, 22, 36, { paint: GREEN, glass: true }],
+      chimney: [36, 30],
+      front(b, w, h, top, lit) {
+        const sy = top + 33;
+        wall(b, 0, sy, w, h - sy - 4, 'brick', 3); fill(b, 0, sy, w, 2, 'roofR4');
+        fill(b, 4, sy + 3, 78, h - sy - 7, 'cap3'); fill(b, 5, sy + 4, 76, h - sy - 8, 'cap2'); fill(b, 5, sy + 4, 1, h - sy - 8, 'cap1');
+        fill(b, 10, sy + 3, 64, 9, 'cream0'); fill(b, 10, sy + 11, 64, 1, 'cream2'); write(b, 'BAKERY', 42 - (PX.textWidth('BAKERY') >> 1), sy + 5, 'wood4');
+        const gx = 10, gy = sy + 15, gw = 62, gh = h - gy - 7;
+        glassAt(lit, win(b, gx, gy, gw, gh, { frame: GREEN, panes: 0 }));
+        fill(b, gx, gy + 7, gw, 2, 'wood3'); fill(b, gx, gy + gh - 3, gw, 3, 'wood3');
+        for (let i = 0; i < 7; i++) { loaf(b, gx + 2 + i * 8, gy + 3); roll(b, gx + 3 + i * 8, gy + gh - 6); }
+        baguette(b, gx + 8, gy + 11, 16); baguette(b, gx + 36, gy + 12, 18);
+        footing(b, 0, h - 4, w);
+      },
+      extra(m, g, { X0, B0 }) {
+        awning3d(m, X0 + 6, X0 + 80, B0, PL + 26, 10, 'red', 'white');
+        hangSign(m, X0 - 2, B0, PL + 50, 18, 8, (b, w, h) => { fill(b, 0, 0, w, h, 'wood4'); stamp(b, 1, 1, ['..0011111122..', '0011211121112.', '11112111211123', '11111111111123', '.223333333333.'], { 0: 'wood0', 1: 'wood1', 2: 'wood2', 3: 'wood3' }); });
+      },
+      cards: [card(sacks, -W / 2 - 4, 4), card(rack, W / 2 + 8, 6)],
+    });
   }
 
   /* ---------------- the post office ---------------- */
-  /* Slate roof, a front gable over the door with a round window. open=false: closed since the storm, windows and door
-     boarded, tiles torn off, the sign fallen and leaning on the wall, weeds. open=true: reopened, the sign back up,
-     window boxes, a red post box. door only when open. */
-  function postOffice(open = true) {
-    const W = 156, H = 116, lit = [], wx = 12, ww = 132, ey = 62, wb = H - 4, cx = 78;
-    const plank = (b, x0, y0, x1, y1) => { line(b, x0, y0, x1, y1, 'wood2', 3); line(b, x0, y0, x1, y1, 'wood1'); line(b, x0, y0 + 3, x1, y1 + 3, 'wood4'); px(b, x0 + 2, y0 + 1, 'iron3'); px(b, x1 - 2, y1 + 1, 'iron3'); };
-    const out = inked(W, H, b => {
-      roof(b, wx - 6, 12, ww + 12, ey - 12, 'roofB', { seed: 9 });
-      if (!open) for (const [tx, ty] of [[30, 26], [38, 32], [114, 40]]) { fill(b, tx, ty, 9, 6, 'wood4'); fill(b, tx, ty + 2, 9, 1, 'wood2'); fill(b, tx + 4, ty, 1, 6, 'wood3'); }
-      wall(b, wx, ey, ww, wb - ey, 'plaster'); eaveShade(b, wx, ey + 1, ww, 'plaster');
-      post(b, wx, ey, wb - ey); post(b, wx + ww - 3, ey, wb - ey);
-      gable(b, cx, 26, 30, ey + 2, 16, 'roofB', (x, y) => px(b, x, y, x > cx + 22 ? 'wall2' : 'wall1'), 2);
-      disc(b, cx, 46, 6, 6, 'roofB3'); disc(b, cx, 46, 5, 5, open ? 'sky3' : X.dust); if (open) { px(b, cx - 2, 43, 'white'); lit.push([cx - 3 + 1, 44 + 1, 7, 5]); } fill(b, cx - 5, 46, 11, 1, 'roofB3'); fill(b, cx, 41, 1, 11, 'roofB3');
-      for (const x of [26, 112]) { const g = win(b, x, ey + 14, 18, 20, { frame: BLUE, shut: open ? BLUE : null, dark: !open, box: open ? ['red', 'yellow'] : null }); if (open) lit.push(g); }
-      const dg = door(b, cx - 11, wb - 36, 22, 36, { paint: BLUE, glass: open });
-      if (open) {
-        lit.push(dg);
-        fill(b, cx - 18, ey + 2, 37, 10, 'roofB4'); fill(b, cx - 17, ey + 3, 35, 8, 'cream0'); fill(b, cx - 17, ey + 10, 35, 1, 'cream2');
-        write(b, 'POST', cx - 13, ey + 5, 'red'); stamp(b, cx + 4, ey + 4, ['1111111', '1211121', '1122211', '1111111'], { 1: 'white', 2: 'roofB2' }); fill(b, cx + 4, ey + 8, 7, 1, 'cream2');
-        // the post box and a stack of parcels
-        const mx = wx + ww - 2; fill(b, mx, wb - 22, 12, 22, 'red'); fill(b, mx, wb - 22, 3, 22, X.redL); fill(b, mx + 9, wb - 22, 3, 22, X.redD); disc(b, mx + 5, wb - 23, 6, 3, 'red'); disc(b, mx + 4, wb - 24, 4, 1, X.redL); fill(b, mx + 2, wb - 17, 8, 2, X.soot); fill(b, mx + 2, wb - 10, 8, 3, 'yellow'); fill(b, mx - 1, wb - 2, 14, 2, X.redD);
-        for (const [px0, py0, pw, ph] of [[0, wb - 10, 14, 10], [2, wb - 18, 11, 8]]) { fill(b, px0, py0, pw, ph, 'wood1'); fill(b, px0, py0, pw, 2, 'wood0'); fill(b, px0 + pw - 2, py0, 2, ph, 'wood2'); fill(b, px0 + (pw >> 1), py0, 1, ph, 'red'); fill(b, px0, py0 + (ph >> 1), pw, 1, 'red'); }
-      } else {
-        for (const x of [26, 112]) { plank(b, x - 4, ey + 15, x + 21, ey + 31); plank(b, x - 4, ey + 30, x + 21, ey + 17); }
-        plank(b, cx - 15, wb - 30, cx + 14, wb - 10); plank(b, cx - 15, wb - 12, cx + 14, wb - 28); plank(b, cx - 15, wb - 21, cx + 14, wb - 21);
-        fill(b, cx - 12, ey + 4, 2, 2, 'iron3'); fill(b, cx + 11, ey + 4, 2, 2, 'iron3'); fill(b, cx - 18, ey + 3, 37, 1, 'wall3');
-        // the fallen sign, leaning on the wall at a slant
-        const s = new KIT.Buf(37, 10);
-        fill(s, 0, 0, 37, 10, 'roofB4'); fill(s, 1, 1, 35, 8, 'cream1'); fill(s, 1, 8, 35, 1, 'cream2'); write(s, 'POST', 4, 3, X.redD); fill(s, 25, 2, 8, 1, 'cream2'); px(s, 30, 6, 'wood3');
-        for (let x = 0; x < 37; x++) for (let y = 0; y < 10; y++) { const v = s.get(x, y); if (v) b.set(wx + ww - 44 + x, wb - 16 + y - Math.round(x * 0.3) + 6, v); }
-        chip(b, wx + 10, ey + 6); chip(b, wx + 96, ey + 40);
-        for (const x of [wx + 2, wx + 40, wx + 100, wx + ww - 10]) stamp(b, x, wb - 4, ['.1..1.', '.21.2.', '2232.2'], { 1: 'g1', 2: 'g3', 3: 'g4' });
-        stamp(b, 4, wb - 3, ['.21..12', '2132213'], { 1: X.oraL, 2: X.oraD, 3: 'wood3' });
-      }
-      footing(b, wx, wb, ww);
+  /* A slate-blue roof over cream plaster, blue shutters and flower boxes, and over the door a gabled bay with a round
+     window and the POST board. The red post box and a stack of parcels stand outside. */
+  function postOffice() {
+    const W = 132, box = inked(12, 24, b => {
+      fill(b, 0, 2, 12, 22, 'red'); fill(b, 0, 2, 3, 22, X.redL); fill(b, 9, 2, 3, 22, X.redD); disc(b, 5, 2, 6, 2, 'red'); disc(b, 4, 1, 4, 1, X.redL);
+      fill(b, 2, 7, 8, 2, X.soot); fill(b, 2, 14, 8, 3, 'yellow'); fill(b, 0, 22, 12, 2, X.redD);
     });
-    return pack(out, W, H, [wx, ww], 48, { lit, door: open ? cx : undefined });
+    const parcels = inked(14, 18, b => {
+      for (const [x, y, w, h] of [[0, 8, 14, 10], [2, 0, 11, 8]]) { fill(b, x, y, w, h, 'wood1'); fill(b, x, y, w, 2, 'wood0'); fill(b, x + w - 2, y, 2, h, 'wood2'); fill(b, x + (w >> 1), y, 1, h, 'red'); fill(b, x, y + (h >> 1), w, 1, 'red'); }
+    });
+    return house({
+      w: W, d: 52, wall: 56, rise: 34, kind: 'plaster', roof: 'roofB', seed: 9,
+      wins: [[14, 16, 18, 20], [W - 32, 16, 18, 20]].map(r => [...r, { frame: BLUE, shut: BLUE, box: ['red', 'yellow'] }]),
+      side: [[18, 16, 14, 16, { frame: BLUE }]],
+      door: [0, 22, 36, { paint: BLUE, glass: true }],
+      bay: {
+        w: 50, out: 8, rise: 26,
+        front(b, w, h, top) {
+          const cx = w >> 1;
+          fill(b, cx - 18, top + 3, 37, 10, 'roofB4'); fill(b, cx - 17, top + 4, 35, 8, 'cream0'); fill(b, cx - 17, top + 11, 35, 1, 'cream2');
+          write(b, 'POST', cx - 13, top + 6, 'red'); stamp(b, cx + 4, top + 5, ['1111111', '1211121', '1122211', '1111111'], { 1: 'white', 2: 'roofB2' });
+        },
+      },
+      chimney: [-40, 34],
+      cards: [card(box, W / 2 - 6, -2), card(parcels, -W / 2 + 10, -2)],
+    });
   }
+
+  /* ---------------- the square's homes ---------------- */
+  // Each its own walls and roof: brick under red tiles, Mia's butter plaster with green shutters, the weaver's
+  // half-timber, Sam's stone under slate, and four neighbours.
+  const TOWN = {
+    brick: { w: 112, d: 50, wall: 54, rise: 40, ridge: 'back', kind: 'brick', roof: 'roofR', seed: 11, wins: [[14, 14, 16, 18, { frame: TRIM, box: ['red', 'white'] }], [82, 14, 16, 18, { frame: TRIM, box: ['red', 'white'] }]], door: [44, 22, 34, { paint: GREEN }], chimney: [30, 28] },
+    mia: { w: 104, d: 48, wall: 52, rise: 34, kind: 'butter', roof: 'roofR', seed: 12, wins: [[12, 14, 16, 18, { shut: GREEN, box: ['rose', 'yellow'] }], [76, 14, 16, 18, { shut: GREEN, box: ['rose', 'yellow'] }]], door: [41, 22, 34, { paint: GREEN, glass: true }], chimney: [-30, 26] },
+    weaver: { w: 116, d: 50, wall: 60, rise: 36, kind: 'plaster', roof: 'roofG', seed: 13, timber: [26, 0, 38, 76, 113], wins: [[12, 6, 14, 14, { box: ['lilac', 'white'] }], [90, 6, 14, 14, { box: ['lilac', 'white'] }], [12, 34, 14, 16], [90, 34, 14, 16]], door: [47, 22, 34, { paint: WOOD }], chimney: [36, 24] },
+    sam: { w: 108, d: 52, wall: 54, rise: 40, ridge: 'back', kind: 'stone', roof: 'roofB', seed: 14, wins: [[14, 14, 16, 18, { box: ['yellow', 'white'] }], [78, 14, 16, 18, { box: ['yellow', 'white'] }]], door: [43, 22, 34, { paint: BLUE, arch: true }], chimney: [-30, 30] },
+    cream: { w: 100, d: 46, wall: 50, rise: 36, ridge: 'back', kind: 'white', roof: 'roofR', seed: 15, wins: [[12, 14, 14, 16, { frame: GREEN, box: ['red', 'yellow'] }], [74, 14, 14, 16, { frame: GREEN, box: ['red', 'yellow'] }]], door: [39, 22, 32, { paint: RED }] },
+    corner: { w: 96, d: 46, wall: 50, rise: 30, kind: 'plaster', roof: 'roofG', seed: 16, wins: [[10, 14, 14, 16, { shut: BLUE, box: ['rose', 'white'] }], [72, 14, 14, 16, { shut: BLUE, box: ['rose', 'white'] }]], door: [37, 22, 32, { paint: BLUE }], chimney: [26, 24] },
+    stone: { w: 100, d: 46, wall: 52, rise: 32, kind: 'stone', roof: 'roofR', seed: 17, wins: [[12, 14, 14, 16, { box: ['red', 'yellow'] }], [74, 14, 14, 16, { box: ['red', 'yellow'] }]], door: [39, 22, 34, { paint: GREEN, arch: true }], chimney: [-28, 24] },
+    honey: { w: 96, d: 46, wall: 50, rise: 36, ridge: 'back', kind: 'butter', roof: 'roofG', seed: 18, wins: [[11, 14, 14, 16, { frame: TRIM, shut: RED, box: ['white', 'rose'] }], [71, 14, 14, 16, { frame: TRIM, shut: RED, box: ['white', 'rose'] }]], door: [37, 22, 32, { paint: WOOD, glass: true }], chimney: [24, 26] },
+  };
+  const townHome = kind => house(TOWN[kind]);
 
   /* ---------------- market stalls ---------------- */
   // Goods, each a few pixels, lit from the upper left.
@@ -597,5 +693,5 @@
     return pack(out, H0.w, H0.h, g[0], g[2], { lit, smoke, door: g[1] });
   }
 
-  Object.assign(VIL, { fountain, hall, bakery, postOffice, stall, noticeBoard, bunting, bench, lamp, centreHome });
+  Object.assign(VIL, { fountain, hall, bakery, postOffice, townHome, stall, noticeBoard, bunting, bench, lamp, centreHome });
 })();
