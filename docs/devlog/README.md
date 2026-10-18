@@ -29,6 +29,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [20](20-semut-latar-di-alun-alun.md) | 2026-10-19 | Semut latar di alun-alun: pembeli dan penjual bunga | |
 | [21](21-semut-latar-di-area-timur.md) | 2026-10-19 | Semut latar di area timur: buruh kebun dan penggembala kutu daun | |
 | [22](22-semut-latar-di-pesisir.md) | 2026-10-19 | Semut latar di pesisir: nelayan dan pekerja garam | |
+| [23](23-puncak-tebing-pesisir-bisa-dilewati.md) | 2026-10-19 | Puncak tebing pesisir bisa dilewati; hutan kecil tanpa semut latar | |
 
 ## Format setiap entri
 
