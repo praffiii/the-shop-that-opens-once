@@ -86,56 +86,107 @@
     return { at: [bx + x0, by + y0], size: [w, h], frames: shots.map(u32 => crop(u32, bw, x0, y0, w, h)), seq };
   }
 
-  // Shelf-pack images (canvases or ImageData) into one atlas. Returns { canvas, pos: [[x, y], ...] }.
-  function pack(imgs, maxW = 2048, pad = 1) {
-    const order = imgs.map((_, i) => i).sort((a, b) => imgs[b].height - imgs[a].height || imgs[b].width - imgs[a].width);
-    const pos = new Array(imgs.length);
-    let x = 0, y = 0, rowH = 0, W = 1;
-    for (const i of order) {
-      const { width: w, height: h } = imgs[i];
-      if (x > 0 && x + w > maxW) { x = 0; y += rowH + pad; rowH = 0; }
-      pos[i] = [x, y]; x += w + pad; rowH = Math.max(rowH, h); W = Math.max(W, x - pad);
+  /* Atlases. Tracks are packed whole: all of a track's frames land in the same atlas, so one material draws it.
+     A frame drawn more than once in an atlas (calm water, a repeating tile) is packed once. Atlases are at most
+     MAX_W x MAX_H, inside what every WebGL device takes; a place that needs more gets more atlases. */
+  const MAX_W = 2048, MAX_H = 2048, PAD = 1;
+  function atlases(tracks) {
+    const sheets = [], fkey = im => `${im.width}x${im.height}:${key(new Uint32Array(im.data.buffer), im.width, 0, 0, im.width, im.height)}`;
+    let cur = null;
+    const open = () => (cur = { imgs: [], pos: [], seen: new Map(), x: 0, y: 0, rowH: 0, w: 1, h: 1 }, sheets.push(cur), cur);
+    // Try to place a track's new frames on sheet a; returns their positions or null when they do not fit.
+    function fit(a, frames) {
+      let { x, y, rowH } = a; const pos = [], fresh = new Map();
+      for (const im of frames) {
+        const k = fkey(im);
+        if (a.seen.has(k) || fresh.has(k)) { pos.push(null); continue; }
+        if (x > 0 && x + im.width > MAX_W) { x = 0; y += rowH + PAD; rowH = 0; }
+        if (y + im.height > MAX_H || im.width > MAX_W) return null;
+        pos.push([x, y]); fresh.set(k, [x, y]); x += im.width + PAD; rowH = Math.max(rowH, im.height);
+      }
+      return { pos, x, y, rowH };
     }
-    const [c, g] = canvas(W, y + rowH);
-    imgs.forEach((im, i) => (im instanceof ImageData ? g.putImageData(im, pos[i][0], pos[i][1]) : g.drawImage(im, pos[i][0], pos[i][1])));
-    return { canvas: c, pos };
+    // Tallest first keeps the shelves tight; the result keeps the callers' order.
+    const order = tracks.map((_, i) => i).sort((a, b) => Math.max(...tracks[b].frames.map(f => f.height)) - Math.max(...tracks[a].frames.map(f => f.height)));
+    const placed = new Array(tracks.length);
+    for (const i of order) {
+      const frames = tracks[i].frames;
+      let a = cur || open(), r = fit(a, frames);
+      if (!r) { a = open(); r = fit(a, frames); if (!r) throw new Error(`a track of ${frames.length} frames does not fit one ${MAX_W}x${MAX_H} atlas`); }
+      const at = frames.map((im, k) => {
+        const fk = fkey(im);
+        if (a.seen.has(fk)) return a.seen.get(fk);
+        const p = r.pos[k] || a.seen.get(fk); a.seen.set(fk, p); a.imgs.push([im, p]);
+        a.w = Math.max(a.w, p[0] + im.width); a.h = Math.max(a.h, p[1] + im.height); return p;
+      });
+      Object.assign(a, { x: r.x, y: r.y, rowH: r.rowH });
+      placed[i] = { atlas: sheets.indexOf(a), frames: at };
+    }
+    const canvases = sheets.map(a => {
+      const [c, g] = canvas(a.w, a.h);
+      for (const [im, [x, y]] of a.imgs) im instanceof ImageData ? g.putImageData(im, x, y) : g.drawImage(im, x, y);
+      return c;
+    });
+    return { canvases, placed };
   }
 
-  /* Write one place variant to places/<place>/<variant>/: place.json, below.png, above.png, atlas.png.
-     spec: { size: [W, H], bg, below: layer(), above: layer() | null, items: [{ name, y, track, light, day }],
-             anchors, paths, hotspots, extra } (items whose track is null are skipped). A light item shows only at dusk
-     and night and is never graded; a day item shows only in the morning and at midday.
-     A frame drawn more than once anywhere in the place (calm water, a tile of a repeating pattern) is packed once. */
+  // A static layer drawn once (no animated tiles): the ground of a big place, whose motion lives in clips.
+  function still(W, H, render) {
+    const [c, g] = canvas(W, H); render(g, 0);
+    return { base: c, tiles: [] };
+  }
+
+  // Cut a layer image into CHUNK x CHUNK images, skipping the empty ones. Returns [{ image, at }].
+  const CHUNK = 1024;
+  function chunks(dir, name, img) {
+    const out = [], g = img.getContext('2d');
+    for (let y = 0; y < img.height; y += CHUNK) for (let x = 0; x < img.width; x += CHUNK) {
+      const w = Math.min(CHUNK, img.width - x), h = Math.min(CHUNK, img.height - y), d = g.getImageData(x, y, w, h);
+      if (!new Uint32Array(d.data.buffer).some(v => v >>> 24)) continue;
+      const [c, cg] = canvas(w, h); cg.putImageData(d, 0, 0);
+      const file = `${name}_${x / CHUNK}_${y / CHUNK}.png`; png(`${dir}/${file}`, c); out.push({ image: file, at: [x, y] });
+    }
+    return out;
+  }
+
+  /* Write one place variant to places/<place>/<variant>/: place.json, the layer chunks and the atlases.
+     spec: { size: [W, H], bg, below: layer() | still(), above: layer() | still() | null,
+             clips: { name: track }, decals: { below: [[clip, x, y, offset]], above: [...] },
+             items: [{ name, y, track, light, day }], anchors, paths, hotspots, extra }
+     A clip is a small loop drawn once and placed many times as decals; a decal's offset (in samples) staggers it.
+     A layer's animated tiles become one-off clips. Items whose track is null are skipped. A light item shows only at
+     dusk and night and is never graded; a day item shows only in the morning and at midday. */
   function place(placeName, variant, spec) {
-    const dir = `places/${placeName}/${variant}`, imgs = [], seen = new Map();
-    const ref = tr => {
-      const frames = tr.frames.map(im => {
-        const k = `${im.width}x${im.height}:${key(new Uint32Array(im.data.buffer), im.width, 0, 0, im.width, im.height)}`;
-        let i = seen.get(k);
-        if (i === undefined) { i = imgs.length; seen.set(k, i); imgs.push(im); }
-        return i;
-      });
-      return { at: tr.at, size: tr.size, frames, seq: rle(tr.seq) };
+    const dir = `places/${placeName}/${variant}`, clipNames = Object.keys(spec.clips || {}), tracks = [];
+    const clipIx = new Map(), addTrack = tr => (tracks.push(tr), tracks.length - 1);
+    for (const n of clipNames) clipIx.set(n, addTrack(spec.clips[n]));
+    const layerDecals = l => (l ? l.tiles.map(tr => [addTrack(tr), tr.at[0], tr.at[1], 0]) : []);
+    const named = (list = []) => list.map(([n, x, y, o]) => { if (!clipIx.has(n)) throw new Error(`no clip "${n}"`); return [clipIx.get(n), x, y, o | 0]; });
+    const decals = {
+      below: [...layerDecals(spec.below), ...named(spec.decals && spec.decals.below)],
+      above: [...layerDecals(spec.above), ...named(spec.decals && spec.decals.above)],
     };
-    const below = spec.below.tiles.map(ref);
-    const above = spec.above ? spec.above.tiles.map(ref) : [];
-    const items = spec.items.filter(it => it.track).map(it => ({ name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}), ...ref(it.track) }));
-    const { canvas: atlas, pos } = pack(imgs, spec.atlasWidth);
-    const fix = tr => { tr.frames = tr.frames.map(i => pos[i]); return tr; };
-    [...below, ...above, ...items].forEach(fix);
-    png(`${dir}/atlas.png`, atlas);
-    png(`${dir}/below.png`, spec.below.base);
-    if (spec.above) png(`${dir}/above.png`, spec.above.base);
+    const items = spec.items.filter(it => it.track).map(it => ({ it, t: addTrack(it.track) }));
+    const { canvases, placed } = atlases(tracks);
+    canvases.forEach((c, i) => png(`${dir}/atlas_${i}.png`, c));
+    // Clips are the tracks decals use, numbered in order of first use.
+    const used = new Map(), clips = [];
+    const clipOf = t => { if (!used.has(t)) { used.set(t, clips.length); clips.push({ atlas: placed[t].atlas, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq) }); } return used.get(t); };
+    const dec = list => list.map(([t, x, y, o]) => [clipOf(t), x, y, o]);
     json(`${dir}/place.json`, {
-      size: spec.size, bg: spec.bg, fps: FPS, loop: N,
-      below: { image: 'below.png', tiles: below },
-      above: spec.above ? { image: 'above.png', tiles: above } : null,
-      items,
+      size: spec.size, bg: spec.bg, fps: FPS, loop: N, atlases: canvases.length,
+      below: { chunks: chunks(dir, 'below', spec.below.base), decals: dec(decals.below) },
+      above: spec.above ? { chunks: chunks(dir, 'above', spec.above.base), decals: dec(decals.above) } : null,
+      clips,
+      items: items.map(({ it, t }) => ({
+        name: it.name, y: Math.round(it.y), ...(it.light ? { light: true } : {}), ...(it.day ? { day: true } : {}),
+        atlas: placed[t].atlas, at: tracks[t].at, size: tracks[t].size, frames: placed[t].frames, seq: rle(tracks[t].seq),
+      })),
       anchors: spec.anchors || {}, paths: spec.paths || {}, hotspots: spec.hotspots || {},
       ...(spec.extra || {}),
     });
   }
 
-  window.BAKE = { FPS, SECONDS, N, out, canvas, png, json, layer, item, pack, place, rle, times };
+  window.BAKE = { FPS, SECONDS, N, out, canvas, png, json, layer, still, item, place, rle, times };
   window.PARTS = {};
 })();

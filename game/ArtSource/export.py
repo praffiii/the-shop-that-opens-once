@@ -102,6 +102,12 @@ def export(part: str, force: bool) -> None:
         else:
             path.write_text(data)
         written += 1
+    # A rebaked place variant replaces its folder's art: chunks and atlases it no longer writes are removed.
+    for folder in {(ART / rel).parent for rel in files if rel.endswith("/place.json")}:
+        for old in folder.iterdir():
+            name = old.name.removesuffix(".meta")
+            if name.endswith((".png", ".json")) and str((folder / name).relative_to(ART)) not in files:
+                old.unlink()
     print(f"{part}: wrote {written} of {len(files)} files")
 
 

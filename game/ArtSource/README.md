@@ -28,8 +28,12 @@ python3 ArtSource/export.py --force    # also rewrite the walk masks
 
 What it writes, under `Assets/Resources/Art/`:
 
-- `places/<place>/<variant>/`: `below.png` (the ground), `atlas.png` (every animated or depth-sorted piece),
-  `above.png` (what is drawn over everyone) and `place.json` (where each piece goes, its frames, anchors and hotspots).
+- `places/<place>/<variant>/`: the ground (`below_<col>_<row>.png`) and what is drawn over everyone
+  (`above_<col>_<row>.png`), cut into 1024 px chunks with empty chunks left out; `atlas_<n>.png`, up to 2048 px
+  each, holding every animated or depth-sorted piece (all frames of one piece share an atlas); and `place.json`.
+  `place.json` lists the chunks, the clips (small loops such as ripples or swaying grass, drawn once), the decals
+  that place a clip many times with a timing offset, the items with their atlas, and the anchors, paths and hotspots.
+  A rebake removes the chunks and atlases its variant no longer writes.
 - `places/<place>/walk.png`: where feet may go, white on black. It is written when missing; `--force` overwrites it.
   The world's mask is built from its own data (water, cliffs, buildings' walls, props' footprints), and the export
   fails if any path or anchor is not walkable and connected.
