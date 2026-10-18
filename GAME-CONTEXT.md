@@ -7,8 +7,9 @@ Last updated: 2026-10-18.
 **Status:** building the full game in Unity, on the new design in the UTS GDD. The following exist:
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
 - the earlier concept proposal and the feasibility report
-- the Unity project in `game/`, still an empty Universal 2D project
-- the art pipeline in `game/ArtSource/`, decided but not set up yet
+- the Unity project in `game/` with the foundation built: the Godot core ported to C# (places, walking, talk, the bag, keepsakes, saving, sound), a systems-test chapter that is not part of the story, and a playthrough test that passes
+- the art pipeline in `game/ArtSource/`, set up and exporting into `game/Assets/Resources/Art/`. The art is still the Godot set; the maps are not redrawn yet.
+- the dev log of each step, in Bahasa Indonesia, in `docs/devlog/`
 - the web presentation, frozen. It still tells the earlier story.
 - the Godot MVP (Nights 1 and 2 of the earlier story), archived in `archive/godot-mvp/`
 
@@ -47,9 +48,15 @@ Every fact carries a source tag:
 
 **Assets: made from scratch, no AI**
 - `[Decision]` Art, sound and every other asset are made from scratch, the way the Godot build made them: pixel art drawn in code and exported to images, and music and sound synthesized in code. No AI-generated art, audio or assets. The GDD's AI-assisted pipeline (Midjourney, FLUX, Suno in section 13.3) was written for the formal report only. (2026-09-26, reaffirmed 2026-10-18)
-- `[Decision]` The art and sound source lives with the game in `game/ArtSource/`: the presentation's drawing and sound code (`px.js`, `chars.js`, `world.js`, `interiors.js`, `toyshop.js`, `audio.js`, `ART.md`) copied in as the starting point, plus the Godot exporter adapted for Unity. It renders in headless Chrome to PNG, JSON and OGG in `game/Assets/Art/`. New art is drawn there in the same style. (2026-10-18)
+- `[Decision]` The art and sound source lives with the game in `game/ArtSource/`: the presentation's drawing and sound code (`px.js`, `chars.js`, `world.js`, `interiors.js`, `toyshop.js`, `audio.js`, `ART.md`) copied in as the starting point, plus the Godot exporter adapted for Unity. It renders in headless Chrome to PNG, JSON and OGG in `game/Assets/Resources/Art/`. New art is drawn there in the same style. (2026-10-18)
 - `[Decision]` The presentation is frozen: it stays as it is, live on Vercel, and is no longer updated. Its art set the style. (2026-10-18)
-- `[Decision]` The GDD's figures, such as its zone and interior maps, illustrate the report and are not art references. (2026-10-18)
+- `[Decision]` Reuse the drawn parts and redraw the maps. The ants, portraits, keepsakes, UI, sound and the drawing toolkit carry over. The four zones and nine interiors are redrawn in code. The three characters the GDD adds are drawn new. (2026-10-18)
+- `[Decision]` The GDD's zone and interior maps are a layout guide only: what is where and how places connect. They are redrawn in our own style, never traced or used as art. (2026-10-18)
+
+**Tools and process**
+- `[Decision]` The game is built in code, as the Godot build was. One scene (`Main.unity`) holds an object with `Main`, which builds the cameras, UI and places. Places are C# data (`Places.cs`); each chapter's story is a C# class. The world and UI draw into a small canvas that is scaled up by a whole number. (2026-10-18)
+- `[Decision]` Unity MCP: the free community server CoplayDev/unity-mcp, pinned to v10.3.0, set up in `.mcp.json` and in the project's packages. Unity's official MCP needs a Unity AI subscription. (2026-10-18)
+- `[Decision]` Every step of the work gets a dev log entry in Bahasa Indonesia in `docs/devlog/`, with its goal, what was built, the decisions, the problems, screenshots, how it was checked, and its commits. Each milestone gets a git tag. The project is a course assignment, and the log records its progress. (2026-10-18)
 
 **Characters and art**
 - `[Decision]` Every character is an ant: chunky, expressive reddish-brown ants as drawn in `presentation/chars.js`. (2026-09-13, reaffirmed 2026-09-26)
@@ -264,6 +271,9 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 | `docs/feasibility-report.pdf` | The feasibility report `[Report]` |
 | `docs/concept-proposal.pdf` | The earlier concept proposal `[Proposal]` |
 | `game/` | The Unity 6.6 project |
+| `game/ArtSource/` | The art and sound, drawn and synthesized in code, and the exporter |
+| `docs/devlog/` | The dev log, one entry per step, in Bahasa Indonesia |
+| `.mcp.json` | The Unity MCP server for Claude Code |
 | `presentation/` | The web presentation, frozen, live at https://the-shop-that-opens-once.vercel.app. It still tells the earlier story. |
 | `archive/godot-mvp/` | The Godot 4 MVP, archived and untouched |
 
@@ -280,12 +290,13 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **Leo:** lives on a hilltop (Night 5), but the four zones have no hill, and 8.2 places Leo in the East garden.
 - **Day 7 vs Day 8:** 8.2 puts the contract climax on Day 7; everywhere else it is the morning of Day 8.
 - **Engine:** the GDD still weighs Godot 4 and Unity. The user chose Unity.
+- **Where Marlow's shop is:** the text puts it in the banyan roots by the station (West zone), but the Centre zone map's legend lists "Toko Marlow".
 - **Typos:** the title appears as "The Shop That Once Opens" in 4.3, and table 6.1 numbers Mender 9 before Leo 8.
 
 **Between the GDD and decisions or the repo**
 - **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
 - **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
-- **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17.
+- **The 18:17 motif is gone.** The GDD moves the frozen time to 10:17, the storm's night. The presentation's title lettering, shop clock and story still use 18:17, and so does the art carried over from Godot (the title, the shop clock, the station timetable and the KEEPER A. TATE plaque, and the watch's A.T.). It is redrawn with the maps.
 - **The presentation** is frozen with the earlier story (Arthur Tate, Elise, Sam as a child, a dusk shop) and 15 ants, not 18. That is expected.
 
 ## Open questions
