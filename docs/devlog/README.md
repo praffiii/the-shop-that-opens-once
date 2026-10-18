@@ -16,6 +16,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [07](07-bangunan-3d-dan-kurir.md) | 2026-10-18 | Bangunan 3D, toko yang ditelan akar, dan kurir yang berbalik | |
 | [08](08-kamera-octopath-dan-tepi-berkabut.md) | 2026-10-18 | Kamera ala Octopath dan tepi area yang berkabut | |
 | [09](09-tepi-area-ditutup-hutan.md) | 2026-10-18 | Tepi area ditutup hutan, gerbang pohon, dan pagar semak | |
+| [10](10-alun-alun-dan-bangunan-3d.md) | 2026-10-18 | Alun-alun dan bangunan 3D ala Octopath | |
 
 ## Format setiap entri
 
