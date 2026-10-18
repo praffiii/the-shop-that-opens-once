@@ -210,11 +210,13 @@
     j.parts.forEach((q, i) => { const ox = x + q.x - q.ax, oy = y + q.y - q.ay; S.items.push({ name: 'jetty_' + i, y: y + q.y, box: [ox, oy, q.img.width, q.img.height], walk: true, draw: g => g.drawImage(q.img, ox, oy) }); });
   }
 
-  /* ---------- fields: chamomile in rows behind a picket fence, painted on the ground ---------- */
+  /* ---------- fields: chamomile in rows behind a picket fence, painted on the ground; the fence is open in the
+     middle, a gate onto the path between the rows ---------- */
   function fields(S, [x, y]) {
     const g = S.ground.getContext('2d');
     for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) g.drawImage(V.chamomile(112, 48, r * 2 + c + 1).img, x + c * 124, y + r * 58);
-    for (let k = 0, f = V.fieldFence(10); k < 5; k++) { const ox = x - 4 + k * f.step - f.ax, oy = y + 180 - f.ay; S.items.push({ name: 'field_fence_' + k, y: y + 180, box: [ox, oy, f.img.width, f.img.height], foot: 3, draw: gg => gg.drawImage(f.img, ox, oy) }); }
+    const f = V.fieldFence(10);
+    for (const k of [0, 1, 3, 4]) { const ox = x - 4 + k * f.step - f.ax, oy = y + 180 - f.ay; S.items.push({ name: 'field_fence_' + k, y: y + 180, box: [ox, oy, f.img.width, f.img.height], foot: 3, draw: gg => gg.drawImage(f.img, ox, oy) }); }
   }
 
   /* A sprite stands with its feet at (x, y). A building blocks its base, glows at night (its window glass as light

@@ -11,7 +11,7 @@
   const XC = {
     moss0: '#d6e38c', moss1: '#a8c25c', moss2: '#7c9b45', moss3: '#58733a',   // Marlow's waistcoat
     slate0: '#c6d2f2', slate1: '#97a9da', slate2: '#6f81b9',                  // Helen's cardigan
-    dusty0: '#ffd2da', dusty1: '#f2a6b6', dusty2: '#cf7d94',                  // Nora's headscarf
+    plum0: '#b48ad6', plum1: '#8a5fb8', plum2: '#633f8f',                       // Nora's knitted wool shawl
     lilac2: '#9d84de', pink0: '#ffd4ea',
     navy0: '#8197d1', navy1: '#5a6ba8', navy2: '#3f4c82',                       // Kapten Bram's driver's jacket
   };
@@ -169,13 +169,17 @@
           key: { 1: 'wood1', 2: 'wood3', 3: 'wood4', w: 'cream1' } },
       ],
     },
-    nora: { sleeve: ['lilac', 'lilac2'],
+    // Nenek Nora, the village's old weaver (GDD 6.5): small and frail, a thick knitted wool shawl in deep plum drawn up
+    // over her head, thick reading glasses on a thread.
+    nora: { sleeve: ['plum1', 'plum2'],
       torso: { rows: ['.llwwv.', 'lllwwvv', 'llLwvvv', 'lLLwvvu', 'lLLvuuu', 'LLLvuvu', 'LLLvvvv', 'LLLvvvu', '.LLvvu.'],
-               key: { l: 'lilac', L: 'lilac2', w: 'cream0', v: 'cream1', u: 'cream2' } },
-      lash: true,
+               key: { l: 'plum1', L: 'plum2', w: 'cream0', v: 'cream1', u: 'cream2' } },
+      lash: true, stoop: 1,
       parts: [
-        { z: 'hat', at: [-2, -1], rows: ['....11111...', '..111222222.', '.11222222222', '.12222223333', '.1222333....', '.1223.......', '12223.......', '2223........', '.33.........'],
-          key: { 1: 'dusty0', 2: 'dusty1', 3: 'dusty2' } },
+        { z: 'face', ol: false, at: [4, 3], rows: ['.oooo.', 'o....o', 'o....o', 'o....o', '.oooo.'], key: { o: 'wood4' } },
+        { z: 'hat', at: [-2, -1], rows: ['....11111...', '..111222222.', '.11222122222', '.12222223333', '.1222333....', '.1223.......', '12123.......', '2223........', '.33.........'],
+          key: { 1: 'plum0', 2: 'plum1', 3: 'plum2' } },
+        { z: 'hat', ol: false, at: [4, 5], rows: ['c.', 'c.', '.c', '.c', '.c'], key: { c: 'cream2' } },
       ],
     },
     mia: { sleeve: ['roofG1', 'roofG2'],
@@ -206,10 +210,12 @@
         { z: 'hat', at: [-2, -2], rows: ['.....3......', '..2222222...', '.222222222..', '12222222233.'], key: { 1: 'roofB2', 2: 'roofB3', 3: 'roofB4' } },
       ],
     },
-    leo: { sleeve: ['brass1', 'brass2'],
-      torso: { rows: ['.gyyyw.', 'gGyyyyw', 'gGyyyyw', 'gGyyyYw', 'gGyyYYw', 'gGyYYYw', '.GYYYY.', '..ZZZ..'],
-               key: { y: 'brass1', Y: 'brass2', Z: 'brass3', g: 'cap2', G: 'cap3', w: 'white' } },
-      shoe: 'sneaker',
+    // Leo, Bellwood's old sprinter (GDD 6.8): still built like an athlete, in a worn striped track jacket, cloth wrapped
+    // round his ankles.
+    leo: { sleeve: ['roofB1', 'roofB2'],
+      torso: { rows: ['.bwbbs.', 'bbwbbbs', 'bbwbfbs', 'Bbwbbbs', 'BBwbbBs', 'BBwBfBs', '.BwBBB.', '..ZZZ..'],
+               key: { b: 'roofB1', B: 'roofB2', f: 'roofB0', Z: 'roofB3', w: 'white', s: 'stone1' } },
+      shoe: 'wrap',
       parts: [
         { z: 'hat', at: [0, 1], rows: ['wwwwwwwwww', 'rrrrrrrrrr'], key: { w: 'white', r: 'red' } },
       ],
@@ -233,13 +239,16 @@
         { z: 'hat', at: [0, -5], rows: ['.wwwwww.', 'wwwwwwws', 'wwwwwwss', '.wwwwss.', '.ssssss.'], key: { w: 'white', s: 'stone1' } },
       ],
     },
-    gardener: { sleeve: ['orange', 'light4'],
-      torso: { rows: ['.ooo2o.', 'oooo22o', 'ooo2112', 'oo21112', 'o221112', '2221113', '.22133.', '..233..'],
-               key: { o: 'orange', 1: 'roofB1', 2: 'roofB2', 3: 'roofB3' } },
+    // The Gardener, who keeps the village's flower fields (GDD 6.11): grass-green cotton, a seed pouch at the hip, a
+    // finely woven straw hat.
+    gardener: { sleeve: ['grass2', 'grass3'],
+      torso: { rows: ['.ggggG.', 'gggggGG', 'ggggGGG', 'gggGGGH', 'ggGGGGH', 'GGGGGHH', '.GGGHH.', '..HHH..'],
+               key: { g: 'grass2', G: 'grass3', H: 'grass4' } },
       villager: true,
       parts: [
-        { z: 'hat', at: [-3, -2], rows: ['.....11111.....', '....1222222....', '...rrrrrrrr....', '112222222222223'],
-          key: { 1: 'brass0', 2: 'dirt1', 3: 'dirt2', r: 'red' } },
+        { z: 'body', at: [-2, 4], rows: ['.t.', 'ppp', 'pPp', 'PPP'], key: { t: 'wood3', p: 'dirt2', P: 'dirt3' } },
+        { z: 'hat', at: [-3, -2], rows: ['.....12121.....', '....1212121....', '...gggggggg....', '112121212121213'],
+          key: { 1: 'dirt1', 2: 'dirt2', 3: 'dirt3', g: 'grass4' } },
       ],
     },
     kid: { kid: true, sleeve: ['white', 'stone1', true],
@@ -358,6 +367,36 @@
       cloth: ['moss0', 'moss1', 'moss2'],
       chest(g, d, back) { rect(g, 17, 23 + d, 7, 1, 'white'); if (!back) { rect(g, 19, 24 + d, 3, 6, 'white'); dot(g, 20, 26 + d, 'stone2'); dot(g, 20, 28 + d, 'stone2'); } },
     },
+    // Nora: the plum shawl over her head and down her shoulders, the cream dress under it, her glasses on their thread
+    nora: {
+      cloth: ['plum0', 'plum1', 'plum2'],
+      chest(g, d, back) { if (!back) rect(g, 19, 24 + d, 3, 7, 'cream0'); },
+      face(x, d) {
+        for (const ex of [16, 22]) { rect(x, ex - 1, 16 + d, 4, 1, 'wood4'); rect(x, ex - 1, 20 + d, 4, 1, 'wood4'); rect(x, ex - 1, 17 + d, 1, 3, 'wood4'); rect(x, ex + 2, 17 + d, 1, 3, 'wood4'); }
+        line(x, 15, 19 + d, 16, 24 + d, 'cream2');
+      },
+      hat(g, d, back) {
+        dome(g, d, 'plum0', 'plum1');
+        rect(g, 14, 15 + d, 2, 4, 'plum1'); rect(g, 25, 15 + d, 2, 4, 'plum2');
+        if (back) rect(g, 15, 15 + d, 11, 6, 'plum1'); else dot(g, 18, 12 + d, 'cream0');
+      },
+    },
+    // Leo: the worn track jacket, a stripe down each side and the zip down the front, his headband
+    leo: {
+      cloth: ['roofB0', 'roofB1', 'roofB2'],
+      chest(g, d, back) { for (const sx of [17, 23]) rect(g, sx, 24 + d, 1, 7, 'white'); if (!back) rect(g, 20, 23 + d, 1, 8, 'stone1'); },
+      hat(g, d) { rect(g, 15, 14 + d, 11, 1, 'white'); rect(g, 15, 15 + d, 11, 1, 'red'); },
+    },
+    // the Gardener: grass-green cotton, the seed pouch at the hip, the woven straw hat with its green band
+    gardener: {
+      cloth: ['grass1', 'grass2', 'grass3'],
+      chest(g, d, back) { if (!back) { dot(g, 20, 25 + d, 'grass4'); dot(g, 20, 28 + d, 'grass4'); } rect(g, back ? 16 : 23, 29 + d, 3, 3, 'dirt2'); },
+      hat(g, d) {
+        ellipse(g, 20, 15 + d, 10, 1, 'dirt2'); rect(g, 11, 14 + d, 19, 1, 'dirt1');
+        ellipse(g, 20, 11 + d, 5, 3, 'dirt1'); rect(g, 15, 12 + d, 11, 2, 'dirt2'); rect(g, 15, 13 + d, 11, 1, 'grass4');
+        for (let x = 12; x < 29; x += 3) dot(g, x, 15 + d, 'dirt3');
+      },
+    },
     // the porter: a brown waistcoat open on the cream shirt, the tweed flat cap
     porter: {
       cloth: ['wood1', 'wood2', 'wood3'],
@@ -370,8 +409,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -392,6 +431,8 @@
     if (CAST[id].polish) s.push('polish');
     if (id === 'sam' || id === 'baker') s.push('sweep');
     if (id === 'pip') s.push('run');
+    if (id === 'nora') s.push('weave');
+    if (id === 'gardener') s.push('water');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -518,6 +559,15 @@
         r.broom = { tip: [k * 2 - 1, 0], dust: f === 2 };
         break;
       }
+      case 'weave':   // at the loom before her: the shuttle passed through the warp, then the beater pulled home
+        armN = [[[3, 1], [8, 0]], [[3, 0], [9, -2]], [[3, 1], [8, 0]], [[2, 2], [6, 2]]][f];
+        armF = f === 3 ? [[2, 2], [5, 2]] : [[3, 1], [7, 1]];
+        r.hy += 1; if (f === 1) r.eye = 'squint';
+        break;
+      case 'water':   // the watering can held out low by its handle, tipped over the flowers, the water falling
+        armN = [[2, 3], [6, 3]]; armF = [[2, 3], [4, 4]];
+        r.hy += 1; r.can = f;
+        break;
       case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
         armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];
         r.polish = true;
@@ -566,6 +616,7 @@
     const kn = l.knee || knee(l.hip, l.foot, L.leg);
     line(x, l.hip[0], l.hip[1], kn[0], kn[1], c);
     line(x, kn[0], kn[1], l.foot[0], l.foot[1], c);
+    if (shoe === 'wrap') rect(x, l.foot[0] - 1, l.foot[1] - 3, 3, 2, l.far ? 'cream2' : 'cream0');   // cloth wrapped round the ankle
     if (shoe === 'sneaker') { rect(x, l.foot[0] - 1, l.foot[1] - 1, 4, 2, 'ink'); rect(x, l.foot[0], l.foot[1] - 1, 2, 1, l.far ? 'stone1' : 'white'); }
     else if (!l.far) dot(x, l.foot[0] + 1, l.foot[1], c);
   }
@@ -662,6 +713,14 @@
       });
       if (r.pot.pour) for (let k = 1; k <= 4; k++) dot(x, hx2 + 8, hy2 + k, 'wood2');
     }
+    if (r.can !== undefined) {   // the can's handle in the hand, its body below, its spout and rose down toward the ground
+      const [cx2, cy2] = hand;
+      plated(x, g => {
+        rect(g, cx2 - 1, cy2 + 2, 7, 5, 'iron1'); rect(g, cx2 - 1, cy2 + 2, 7, 1, 'iron0'); rect(g, cx2 + 4, cy2 + 3, 2, 4, 'iron2');
+        line(g, cx2, cy2, cx2 + 4, cy2 + 2, 'iron2'); line(g, cx2 + 6, cy2 + 5, cx2 + 9, cy2 + 6, 'iron2'); rect(g, cx2 + 9, cy2 + 6, 2, 2, 'iron0');
+      });
+      for (const [ox, oy] of [[11, 9], [12, 11], [10, 12]]) { const y = cy2 + oy + (r.can * 2 + ox) % 4; if (y < 38) dot(x, cx2 + ox, y, ox === 12 ? 'water2' : 'water1'); }
+    }
     if (r.tear) { dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 4, 'water1'); dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 5, 'white'); }
     return c;
   }
@@ -693,7 +752,10 @@
       plated(x, gx => { ellipse(gx, 20, 29 + d, 5, 2, 'ant2'); rect(gx, 16, 30 + d, 9, 1, 'ant3'); });
       if (T.behind) plated(x, gx => T.behind(gx, d));
     }
-    [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => { line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink'); });
+    [[18, 17, g.lift[0]], [22, 23, g.lift[1]]].forEach(([hx, fx, l]) => {
+      line(x, hx, 31 + d, fx, G - l, 'ink'); dot(x, fx + (fx < 20 ? -1 : 1), G - l, 'ink');
+      if (ch.shoe === 'wrap') rect(x, fx - 1, G - l - 3, 3, 2, 'cream0');
+    });
     // the arms hang at the sides and swing (a hand forward is a pixel lower), or hold the load to the chest
     const arms = () => [-1, 1].forEach(s => {
       const sh = [20 + s * 4, 25 + d], hand = carry ? [20 + s * 4, 28 + d] : [20 + s * 6, 30 + d + (s * g.sw > 0 ? 1 : 0) - (s * g.sw < -1 ? 1 : 0)];
@@ -836,18 +898,23 @@
         rect(g, 13, 2, 19, 9, 'wood3'); rect(g, 13, 2, 5, 9, 'wood2'); rect(g, 29, 2, 3, 9, 'wood4'); rect(g, 19, 2, 5, 2, 'wood4'); // crown with a dent
         rect(g, 13, 8, 19, 2, 'cream1'); rect(g, 13, 9, 19, 1, 'cream2'); rect(g, 29, 8, 2, 2, 'cream2');                       // band
       }); } },
-    nora: { cloth: ['lilac', 'lilac', 'lilac2'], lash: true,
+    nora: { cloth: ['plum0', 'plum1', 'plum2'], lash: true,
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 22 && x <= 37 && y >= 36, (x, y) => band(x, 34, 99, ['cream0', 'cream1', 'cream1']));
         rect(g, 22, 36, 16, 1, 'cream2'); rect(g, 25, 42, 8, 5, 'cream2'); rect(g, 25, 42, 8, 1, 'cream1'); dot(g, 30, 41, 'cap2'); dot(g, 30, 40, 'rose');
          },
       hat(x, P) { plate(x, g => {
         region(g, (x, y) => (inE(x, y, P.cx - 1, P.cy - 2, 14, 12) && (y <= P.cy - 5 || (x <= P.cx - 5 && y <= P.cy + 5))),
-          (x, y) => ((y > P.cy - 7 && x > P.cx - 7) || (x > P.cx - 7 && x <= P.cx - 5 && y > P.cy - 7) ? 'dusty0' : band((x - P.cx) + (y - P.cy), -12, -2, ['dusty0', 'dusty1', 'dusty2'])));
+          (x, y) => ((y > P.cy - 7 && x > P.cx - 7) || (x > P.cx - 7 && x <= P.cx - 5 && y > P.cy - 7) ? 'plum0' : band((x - P.cx) + (y - P.cy), -12, -2, ['plum0', 'plum1', 'plum2'])));
         for (const [dx, dy] of [[-8, -8], [-3, -11], [2, -8], [-10, -2]]) rect(g, P.cx + dx, P.cy + dy, 2, 2, 'cream0');
-        region(g, (x, y) => inE(x, y, P.cx - 14, P.cy + 4, 3, 3), (x, y) => (x + y < P.cx + P.cy - 11 ? 'dusty0' : 'dusty1'));
-        region(g, (x, y) => y > P.cy + 5 && y < P.cy + 13 && x >= P.cx - 18 + ((y - P.cy - 5) >> 1) && x <= P.cx - 16, () => 'dusty2');
-        region(g, (x, y) => y > P.cy + 6 && y < P.cy + 12 && x >= P.cx - 14 && x <= P.cx - 12 - ((y - P.cy - 6) >> 1), () => 'dusty1');
-      }); } },
+        region(g, (x, y) => inE(x, y, P.cx - 14, P.cy + 4, 3, 3), (x, y) => (x + y < P.cx + P.cy - 11 ? 'plum0' : 'plum1'));
+        region(g, (x, y) => y > P.cy + 5 && y < P.cy + 13 && x >= P.cx - 18 + ((y - P.cy - 5) >> 1) && x <= P.cx - 16, () => 'plum2');
+        region(g, (x, y) => y > P.cy + 6 && y < P.cy + 12 && x >= P.cx - 14 && x <= P.cx - 12 - ((y - P.cy - 6) >> 1), () => 'plum1');
+      }); },
+      face(x, P) {   // thick reading glasses, the thread they hang on running back under the shawl
+        region(x, (x, y) => inE(x, y, P.ex + 3, P.ey + 4, 5, 5) && !inE(x, y, P.ex + 3, P.ey + 4, 3, 4), () => 'wood4');
+        region(x, (x, y) => inE(x, y, P.ex + 11, P.ey + 4, 2, 5) && !inE(x, y, P.ex + 11, P.ey + 4, 1, 4), () => 'wood4');
+        line(x, P.ex + 8, P.ey + 3, P.ex + 9, P.ey + 3, 'wood4'); line(x, P.ex - 2, P.ey + 4, P.cx - 12, P.cy + 6, 'cream2');
+      } },
     mia: { cloth: ['roofG0', 'roofG1', 'roofG2'], lash: true,
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 26 && x <= 33, (x, y) => (x > 31 ? 'cream1' : 'cream0')); line(g, 26, 33, 25, 47, 'roofG3'); dot(g, 24, 39, 'cream0'); dot(g, 24, 44, 'cream0');
         for (let k = 0; k < 3; k++) line(g, 14 + k, 34, 31 + k, 47, ['red', 'yellow', 'red'][k]); },   // the woven sling
@@ -860,9 +927,9 @@
       bust(g) { region(g, (x, y) => inE(x, y, 25, 35, 11, 3), (x, y) => band(x, 20, 31, ['stone1', 'stone2', 'stone3'])); rect(g, 19, 37, 5, 10, 'stone2'); rect(g, 19, 37, 2, 10, 'stone1'); rect(g, 19, 46, 5, 1, 'stone3');
         line(g, 31, 34, 35, 40, 'ink2'); rect(g, 30, 40, 9, 6, 'iron3'); rect(g, 30, 40, 9, 2, 'iron2'); rect(g, 33, 42, 4, 4, 'iron4'); rect(g, 34, 43, 2, 2, 'water2'); dot(g, 34, 43, 'white'); rect(g, 31, 39, 2, 1, 'iron1'); },
       hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 3, P.cy - 9, 14, 5) && y <= P.cy - 6, (x, y) => band((x - P.cx) + (y - P.cy) * 2, -24, -4, ['roofB2', 'roofB3', 'roofB4'])); rect(g, P.cx - 2, P.cy - 16, 2, 2, 'roofB4'); }); } },
-    leo: { cloth: ['brass1', 'brass1', 'brass2'],
-      bust(g) { rect(g, 10, 38, 4, 10, 'cap2'); rect(g, 10, 38, 1, 10, 'cap1'); rect(g, 36, 38, 3, 10, 'cap3'); rect(g, 29, 33, 2, 15, 'white'); dot(g, 29, 38, 'iron1');
-        region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'cap1' : 'cap2')); },
+    leo: { cloth: ['roofB0', 'roofB1', 'roofB2'],
+      bust(g) { for (const sx of [11, 14]) line(g, sx, 37, sx - 1, 47, 'white'); line(g, 37, 37, 38, 47, 'white'); rect(g, 29, 34, 1, 14, 'stone1'); dot(g, 29, 38, 'iron1');
+        region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'roofB2' : 'roofB3')); for (const [fx, fy] of [[20, 41], [33, 44], [24, 46]]) rect(g, fx, fy, 2, 1, 'roofB0'); },
       hat(x, P) {
         plate(x, g => { rect(g, P.cx - 5, P.cy - 13, 3, 3, 'stone1'); rect(g, P.cx - 2, P.cy - 14, 3, 4, 'stone0'); rect(g, P.cx + 1, P.cy - 13, 3, 3, 'stone1'); });
         plate(x, g => { region(g, (x, y) => inE(x, y, P.cx, P.cy, 14, 12) && y >= P.cy - 8 && y <= P.cy - 4, (x, y) => (y === P.cy - 8 ? 'stone0' : y >= P.cy - 5 ? 'red' : 'white')); }); } },
@@ -873,10 +940,10 @@
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 20 && x <= 37 && y >= 35, (x, y) => (x > 34 ? 'stone1' : 'white')); line(g, 21, 36, 20, 38, 'stone1'); line(g, 36, 36, 37, 38, 'stone1'); },
       hat(x, P) { plate(x, g => { region(g, (x, y) => (inE(x, y, P.cx - 2, P.cy - 16, 11, 7) && y <= P.cy - 11) || (y > P.cy - 12 && y <= P.cy - 8 && Math.abs(x - P.cx + 2) <= 11),
         (x, y) => (y > P.cy - 12 ? (y === P.cy - 8 ? 'stone2' : 'stone1') : band(x - P.cx + (y - P.cy), -24, -8, ['white', 'white', 'stone0']))); line(g, P.cx - 5, P.cy - 20, P.cx - 5, P.cy - 13, 'stone1'); line(g, P.cx + 2, P.cy - 20, P.cx + 2, P.cy - 13, 'stone1'); }); } },
-    gardener: { cloth: ['orange', 'orange', 'light4'],
-      bust(g) { region(g, (x, y) => inBust(x, y) && x >= 19 && x <= 36 && y >= 38, (x, y) => band(x, 24, 33, ['roofB1', 'roofB2', 'roofB3'])); line(g, 21, 36, 21, 38, 'roofB2'); line(g, 34, 36, 34, 38, 'roofB2'); dot(g, 21, 39, 'brass1'); dot(g, 34, 39, 'brass1'); rect(g, 25, 41, 6, 4, 'roofB2'); },
-      hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, 23, 13, 22, 3), (x, y) => (y < 13 ? 'dirt1' : 'dirt2')); region(g, (x, y) => inE(x, y, 22, 8, 9, 6) && y <= 11, (x, y) => band(x + y, 26, 34, ['brass0', 'dirt1', 'dirt2']));
-        rect(g, 13, 9, 19, 2, 'red'); for (let i = 4; i < 42; i += 4) dot(g, i, 13, 'dirt3'); }); } },
+    gardener: { cloth: ['grass1', 'grass2', 'grass3'],
+      bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'grass1' : 'grass3')); line(g, 33, 34, 19, 47, 'wood3'); dot(g, 28, 40, 'grass4'); dot(g, 28, 44, 'grass4'); },
+      hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, 23, 13, 22, 3), (x, y) => (y < 13 ? 'dirt1' : 'dirt2')); region(g, (x, y) => inE(x, y, 22, 8, 9, 6) && y <= 11, (x, y) => band(x + y, 26, 34, ['dirt0', 'dirt1', 'dirt2']));
+        rect(g, 13, 9, 19, 2, 'grass4'); for (let i = 4; i < 42; i += 3) dot(g, i, 12 + (i & 1), 'dirt3'); for (let i = 15; i < 30; i += 3) dot(g, i, 6 + (i & 1) * 2, 'dirt2'); }); } },
     kid: { cloth: ['white', 'white', 'stone1'], kid: true,
       bust(g) { for (let y = 38; y < 48; y += 4) region(g, (x, yy) => inBust(x, yy) && yy >= y && yy < y + 2, (x) => (x > 31 ? 'roofB2' : 'blue')); },
       hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 6, 13, 7) && y <= P.cy - 5, (x, y) => band((x - P.cx) + (y - P.cy) * 1.5, -20, -4, ['roofR0', 'red', 'roofR3']));

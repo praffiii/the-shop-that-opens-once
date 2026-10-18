@@ -204,6 +204,34 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
+                    // Morning: Nenek Nora weaves at the loom out on her deck, the Gardener waters the chamomile rows, and Leo
+                    // runs laps of the lane.
+                    new Person
+                    {
+                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Nenek Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Morning },
+                        Line = "Sit a while if you like, child. The loom goes at its own pace, and so do I.",
+                    },
+                    new Person
+                    {
+                        Id = "gardener", Label = "Gardener", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(378, 153), Pose = "water", Facing = -1, Wait = 5f },
+                            new Stop { At = V(378, 211), Pose = "water", Facing = 1, Wait = 5f },
+                            new Stop { At = V(378, 268), Pose = "water", Facing = -1, Wait = 5f },
+                        },
+                        Line = "Chamomile won't be hurried. Water, wait, and one morning it simply opens.",
+                    },
+                    new Person
+                    {
+                        Id = "leo", Label = "Leo", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
+                            new Stop { At = V(900, 482), Facing = -1, Wait = 2f, Run = true },
+                        },
+                        Line = "Lap nine! Still the fastest legs in Bellwood. Ask anyone. Well, anyone old enough to remember.",
+                    },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {

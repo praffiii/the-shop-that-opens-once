@@ -48,10 +48,18 @@
 
   /* Nenek Nora's stilt house, the toy maker's, by the river: pastel blue clapboard on a plank deck high on stilts, a
      coral door up a flight of plank steps, the big scissors sign by it, bunting of fabric scraps under the eave, flower
-     boxes, a stone chimney. */
+     boxes, a stone chimney. Out on the deck her loom, a plum shawl half woven on it. */
   function noraHouse() {
+    const loom = inked(20, 26, b => {
+      for (let x = 4; x < 16; x += 2) fill(b, x, 3, 1, 10, 'cream1');                          // the warp
+      for (let y = 13; y < 22; y++) fill(b, 3, y, 14, 1, ['#8a5fb8', '#8a5fb8', '#633f8f', 'rose', '#8a5fb8', '#8a5fb8', 'yellow', '#633f8f', '#8a5fb8'][y - 13]);
+      for (let y = 14; y < 22; y += 2) for (let x = 4 + (y & 2); x < 16; x += 4) px(b, x, y, '#b48ad6'); // its knit catching the light
+      for (const x of [1, 17]) { fill(b, x, 0, 2, 26, 'wood3'); fill(b, x, 0, 1, 26, 'wood2'); }   // the posts
+      for (const [y, h] of [[1, 2], [11, 2], [22, 2]]) { fill(b, 1, y, 18, h, 'wood2'); fill(b, 1, y, 18, 1, 'wood1'); } // the beams and the beater
+    });
     return V.house({
-      w: 136, d: 50, wall: 46, rise: 32, kind: 'clap', ramp: BLUE, trim: TRIM, roof: ramp('roofR'), seed: 41, stilts: 16,
+      w: 136, d: 50, wall: 46, rise: 32, kind: 'clap', ramp: BLUE, trim: TRIM, roof: ramp('roofR'), seed: 41, stilts: 16, porch: 12,
+      cards: [{ img: loom.canvas(), ax: 10, ay: 26, x: -38, back: 34, up: 16 }],
       wins: [[14, 12, 16, 16, { box: ['rose', 'yellow'] }], [106, 12, 16, 16, { box: ['rose', 'yellow'] }]], side: [[16, 12, 14, 14]],
       door: [57, 22, 36, { paint: PEACH, arch: true }], chimney: [44, 24],
       front(b, w, h) { bunting(b, 3, 2, 52, 2, 6, 0); bunting(b, 84, 2, w - 4, 2, 6, 3); scissorsSign(b, 82, h - 40); },

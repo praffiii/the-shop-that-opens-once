@@ -251,6 +251,7 @@
          camera) or 'back' (a gable does); kind: the walls (WALLS), ramp: their colours if not the kind's own, trim: the
          corner boards' of clapboard and planks; roof: the tiles' ramp ('roofR', 'roofB', 'roofG', or 5 colours);
        plinth: its height (texels, even; 6 if not given) or stilts: the height of the stilts a deck stands on;
+         porch: how much further the plinth or deck reaches out before the walls (texels), a veranda;
        paint(b, w, h, top): paints the walls' pictures instead of kind (a part of town's own stone, say);
        wins: [[x, y, w, h, win()'s options]] on the front, y down from the eaves; side: the same on both side walls,
          x from the front; door: [x, w, h, door()'s options] on the front, x from its left;
@@ -271,7 +272,7 @@
     const { w, d, wall: WALL, rise, ridge = 'x', kind = 'plaster', ramp: C = WALLS[kind], trim: T = TRIM, roof: R = 'roofR', seed = 1, bay, stilts } = o;
     // PH: what the walls stand on, n steps up to it, 2 texels each; F: the front of the walls (the bay's, if there is
     // one), behind the steps; B0: the front of the house's own walls
-    const PH = stilts || o.plinth || 6, n = PH / 2, F = 3 * n + 6, m = MODEL.make(), X0 = -Math.round(w / 2), X1 = X0 + w, out = bay ? bay.out : 0, B0 = F + out, smoke = [];
+    const PH = stilts || o.plinth || 6, n = PH / 2, P = o.porch || 0, F = 3 * n + 6 + P, m = MODEL.make(), X0 = -Math.round(w / 2), X1 = X0 + w, out = bay ? bay.out : 0, B0 = F + out, smoke = [];
     const [dx, dw, dh, dopt = {}] = o.door, cx = bay ? 0 : X0 + dx + dw / 2;
     // a wall picture: its walls, flecks in plaster, corner stones, the footing and its windows
     const face = (b, bw, bh, wins, lit, high = WALL) => {
@@ -314,11 +315,11 @@
     };
     const post = (b, bw, bh) => { fill(b, 0, 0, bw, bh, 'wood3'); fill(b, 0, 0, 1, bh, 'wood2'); fill(b, bw - 1, 0, 1, bh, 'wood4'); };
     if (stilts) {
-      m.box(X0 - 4, X1 + 4, F - 4, B0 + d + 3, PH - 3, PH, planks);
-      for (let x = X0 - 2, k = 0; x <= X1 + 2; x += (X1 - X0 + 4) / Math.max(1, Math.round((X1 - X0) / 36)), k++) for (const z of [F - 3, B0 + d]) m.box(x - 2, x + 1, z, z + 3, 0, PH - 3, post);
-    } else m.box(X0 - 3, X1 + 3, F - 3, B0 + d + 3, 0, PH, stone);
+      m.box(X0 - 4, X1 + 4, F - P - 4, B0 + d + 3, PH - 3, PH, planks);
+      for (let x = X0 - 2, k = 0; x <= X1 + 2; x += (X1 - X0 + 4) / Math.max(1, Math.round((X1 - X0) / 36)), k++) for (const z of [F - P - 3, B0 + d]) m.box(x - 2, x + 1, z, z + 3, 0, PH - 3, post);
+    } else m.box(X0 - 3, X1 + 3, F - P - 3, B0 + d + 3, 0, PH, stone);
     const sw = dw / 2 + 5;
-    for (let k = 0; k < n; k++) m.box(cx - sw, cx + sw, F - 3 - 3 * (n - k), F - 3, 2 * k, 2 * k + 2, stilts ? planks : stone);
+    for (let k = 0; k < n; k++) m.box(cx - sw, cx + sw, F - P - 3 - 3 * (n - k), F - P - 3, 2 * k, 2 * k + 2, stilts ? planks : stone);
     // the lantern by the door, on a short iron arm
     const lx = cx + dw / 2 + 8, lu = PH + dh - 3;
     m.box(lx - 3, lx + 3, F - 5, F - 1, lu - 9, lu, (b, bw, bh, lit, which) => {

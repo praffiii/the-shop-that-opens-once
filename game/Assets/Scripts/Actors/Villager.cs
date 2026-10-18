@@ -24,6 +24,7 @@ namespace Shop
             {
                 ant.Feet = def.At;
                 ant.Seat = def.Seat;
+                ant.Floor = def.Floor;
                 v.Hold();
                 return;
             }

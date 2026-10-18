@@ -45,6 +45,8 @@ namespace Shop
         public string Pose = "idle";
         /// <summary>How high the seat they sit on is, in art px (a bench's is 9).</summary>
         public float Seat;
+        /// <summary>How high the floor they stand on is, in art px (a deck's); At is where its picture shows them.</summary>
+        public float Floor;
         /// <summary>The chapters they are there; null means every chapter.</summary>
         public int[] Chapters;
         /// <summary>The times of day they are there; null means at any time.</summary>
