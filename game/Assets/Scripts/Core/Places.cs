@@ -336,6 +336,46 @@ namespace Shop
                         Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Phases = new[] { Phase.Dusk },
                         Line = "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
                     },
+                    // A farmhand gathers the windfall apples under the orchard's trees and empties the basket into the crates;
+                    // the aphid herder tends the pen and carries a pail of honeydew up the lane to Nora's steps. At dusk the
+                    // farmhand sits by the Gardener on the orchard bench and the herder shuts up the pen.
+                    new Person
+                    {
+                        Id = "farmhand", Label = "Farmhand", Spot = V(0, 14), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(452, 404), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
+                            new Stop { At = V(534, 414), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
+                            new Stop { At = V(484, 452), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Line = "The wind does half my picking. I just come along after and say thank you.",
+                    },
+                    new Person
+                    {
+                        Id = "herder", Label = "Aphid herder", Spot = V(0, 14), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(500, 714), Pose = "tend", Facing = 1, Wait = 5f },
+                            new Stop { At = V(548, 714), Pose = "tend", Facing = -1, Wait = 5f, Carry = true },
+                            new Stop { At = V(330, 478), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Line = "Fresh honeydew for Nenek Nora. She says it keeps her fingers quick at the loom.",
+                    },
+                    new Person
+                    {
+                        Id = "farmhand", At = V(541, 447), Seat = 8, Label = "Farmhand", Spot = V(20, 8), Pose = "sit", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Line = "Twelve crates today. The Gardener says eleven. We'll argue it out till dark.",
+                    },
+                    new Person
+                    {
+                        Id = "herder", Label = "Aphid herder", Spot = V(0, 14), Phases = new[] { Phase.Dusk },
+                        Round = new[]
+                        {
+                            new Stop { At = V(500, 714), Pose = "tend", Facing = 1, Wait = 5f },
+                            new Stop { At = V(548, 714), Pose = "tend", Facing = -1, Wait = 5f },
+                        },
+                        Line = "Counting them in for the night. They wander, the little ones, same as children.",
+                    },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {

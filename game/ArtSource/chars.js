@@ -335,6 +335,26 @@
         { z: 'hat', ol: false, at: [-1, -2], rows: ['..pgygwgp..', '.gpgygwgpg.', 'g.........g'], key: { g: 'leaf3', y: 'yellow', w: 'white', p: 'rose' } },
       ],
     },
+    // Two in the east: a farmhand in a khaki work shirt, sleeves rolled, a yellow kerchief tied over the head, a basket
+    // of apples; the aphid herder in a grey smock with a red neckerchief and a brown wide-brimmed hat, a pail of honeydew.
+    farmhand: { sleeve: ['dirt2', 'dirt3', true],
+      torso: { rows: ['.kkkkK.', 'kkkkKKk', 'kkkKKoK', 'kkKKKKK', 'kKKKKoK', 'KKKKKMM', '.KKMMM.', '..MMM..'],
+               key: { k: 'dirt2', K: 'dirt3', M: 'dirt4', o: 'wood4' } },
+      villager: true,
+      load: { rows: ['..TTTT..', '.TrRrRT.', '.rRrRrr.', 'WWWWWWWW', 'WwWwWwWW', '.wWwWww.'], key: { T: 'wood3', r: 'red', R: 'roofR3', W: 'wood2', w: 'wood3' } },
+      parts: [
+        { z: 'hat', at: [-1, -1], rows: ['...11111...', '.112222222.', '12222222223', '3.2........'], key: { 1: 'brass0', 2: 'brass1', 3: 'brass2' } },
+      ],
+    },
+    herder: { sleeve: ['stone2', 'stone3'],
+      torso: { rows: ['.sssrR.', 'sssrrRs', 'ssSSrSs', 'sSSSSSs', 'sSSSSSS', 'SSSSSSS', '.SSTTT.', '..TTT..'],
+               key: { s: 'stone2', S: 'stone3', T: 'stone4', r: 'red', R: 'roofR3' } },
+      villager: true,
+      load: { rows: ['.i....i.', '..iiii..', 'IhhhhhhI', 'IIIIIIII', 'IiIIIIiI', '.IIIIII.'], key: { i: 'iron1', I: 'iron2', h: 'light3' } },
+      parts: [
+        { z: 'hat', at: [-3, -2], rows: ['.....11111.....', '....1222222....', '...33333333....', '111222222222223'], key: { 1: 'wood3', 2: 'wood4', 3: 'wood5' } },
+      ],
+    },
     // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
     porter: { sleeve: ['cream0', 'cream2', true],
       torso: { rows: ['.wwwLL.', 'wwwLLLM', 'wwLLLoM', 'wLLLLLM', 'wLLLLoM', 'LLLLLMM', '.LLMMM.', '..MMM..'],
@@ -515,6 +535,8 @@
     if (id === 'neighbour_a') s.push('look');
     if (id === 'shopper') s.push('look', 'sit');
     if (id === 'florist') s.push('water');
+    if (id === 'farmhand') s.push('sit');
+    if (id === 'herder') s.push('tend');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -1102,6 +1124,19 @@
       bust(g) { region(g, (x, y) => inBust(x, y) && y >= 39 && x >= 17 && x <= 37, (x, y) => (x > 33 ? 'rose' : 'pink')); for (const bx of [19, 35]) line(g, bx, 34, bx, 39, 'pink'); },
       hat(x, P) { plate(x, g => {
         for (let k = -12; k <= 12; k += 3) { const y = P.cy - 9 + Math.round((k / 12) ** 2 * 6); rect(g, P.cx + k - 1, y, 3, 2, 'leaf3'); dot(g, P.cx + k, y, ['rose', 'yellow', 'white'][(k + 12) / 3 % 3]); }
+      }); } },
+    farmhand: { cloth: ['dirt1', 'dirt2', 'dirt3'],
+      bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'dirt1' : 'dirt3')); dot(g, 28, 40, 'wood4'); dot(g, 28, 44, 'wood4'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 2, 14, 11) && y <= P.cy - 5, hairShade(P, ['brass0', 'brass1', 'brass2']));
+        line(g, P.cx - 13, P.cy - 4, P.cx - 17, P.cy + 2, 'brass2'); line(g, P.cx - 12, P.cy - 4, P.cx - 14, P.cy + 3, 'brass1');
+      }); } },
+    herder: { cloth: ['stone1', 'stone2', 'stone3'],
+      bust(g) { region(g, (x, y) => inBust(x, y) && y >= 34 && y <= 34 + (8 - Math.abs(x - 28)) / 1.2, (x) => (x > 29 ? 'roofR3' : 'red')); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx, P.cy - 5, 22, 3), (x, y) => (y < P.cy - 5 ? 'wood3' : 'wood4'));
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 10, 10, 6) && y <= P.cy - 7, (x, y) => band(x + y, P.cx + P.cy - 16, P.cx + P.cy - 6, ['wood3', 'wood4', 'wood5']));
+        rect(g, P.cx - 10, P.cy - 9, 20, 2, 'wood5');
       }); } },
     porter: { cloth: ['wood1', 'wood2', 'wood3'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },
