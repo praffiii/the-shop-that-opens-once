@@ -44,6 +44,7 @@ namespace Shop
             var place = new GameObject(def.Id).AddComponent<Place>();
             place.transform.SetParent(parent, false);
             place.Def = def;
+            Grade.Apply(Game.Phase, def.Indoors);
             place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform);
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)

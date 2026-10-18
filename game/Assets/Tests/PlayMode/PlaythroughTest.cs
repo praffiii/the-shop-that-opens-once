@@ -44,7 +44,7 @@ namespace Shop.Tests
 
         static async Awaitable Play(Main main)
         {
-            await Until(() => Exploring(main, "village"));
+            await Until(() => Exploring(main, "world"));
             await main.Place.WalkAndUse("shop_door");
             await Until(() => Exploring(main, "shop"));
             CollectionAssert.Contains(Game.Bag, "watch", "Marlow hands over the watch");
@@ -56,9 +56,7 @@ namespace Shop.Tests
             Assert.AreEqual(2, Game.Notes.Count, "Each side with something to notice adds a note");
 
             await main.Place.WalkAndUse("door");
-            await Until(() => Exploring(main, "village"));
-            await main.Place.WalkAndUse("station_road");
-            await Until(() => Exploring(main, "station"));
+            await Until(() => Exploring(main, "world"));
             main.Talk.Picks.Enqueue("Show the watch");
             Assert.IsTrue(await main.Place.WalkAndUse("helen"), "The courier can walk up to Helen");
             await Until(() => Game.SavedChapter() == 1 && main.Story == null);

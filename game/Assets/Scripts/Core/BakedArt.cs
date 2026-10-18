@@ -7,7 +7,8 @@ namespace Shop
     /// <summary>
     /// Draws a place exported by ArtSource/export.py. The ground is drawn under everyone. Each item is depth-sorted
     /// by its feet line with the characters. The air (smoke, leaves, birds) is drawn over all. Everything plays one
-    /// shared loop, so the whole place stays in step.
+    /// shared loop, so the whole place stays in step. Lights (lit windows, lamps, fireflies) are there at dusk and
+    /// night only, and never graded; day items (butterflies) only in the morning and at midday.
     /// </summary>
     public sealed class BakedArt : MonoBehaviour
     {
@@ -20,7 +21,7 @@ namespace Shop
 
         readonly Dictionary<string, Pieces> items = new();
 
-        /// <summary>Sorting order for something whose feet are at art row <paramref name="y"/>: items, then people, then what people hold.</summary>
+        /// <summary>Sorting order for something whose feet are at art row <paramref name="y"/>: items, then people, then what people hold, then lights (a lit window over its own wall).</summary>
         public static int Order(float y, int layer = 0) => Mathf.RoundToInt(y) * 4 + layer;
 
         public static BakedArt Build(string dir, Transform parent)
@@ -36,10 +37,13 @@ namespace Shop
 
             art.Image(dir, data["below"], Below);
             Pieces.Build("below", art.transform, atlas, fps, loop, (JArray)data["below"]["tiles"], Below + 1);
+            var dark = Game.Phase >= Phase.Dusk;
             foreach (JObject it in data["items"])
             {
+                bool light = (bool?)it["light"] ?? false, day = (bool?)it["day"] ?? false;
+                if ((light && !dark) || (day && dark)) continue;
                 var name = (string)it["name"];
-                art.items[name] = Pieces.Build(name, art.transform, atlas, fps, loop, new JArray(it), Order((float)it["y"]));
+                art.items[name] = Pieces.Build(name, art.transform, atlas, fps, loop, new JArray(it), Order((float)it["y"], light ? 3 : 0), light);
             }
             if (data["above"] is JObject above)
             {
@@ -56,7 +60,7 @@ namespace Shop
 
         public void ShowItem(string name, bool visible) => items[name].gameObject.SetActive(visible);
 
-        /// <summary>Like <see cref="ShowItem"/>, for items only some places have.</summary>
+        /// <summary>Like <see cref="ShowItem"/>, for items only some places, or times of day, have.</summary>
         public void ShowItemIfAny(string name, bool visible)
         {
             if (items.TryGetValue(name, out var item)) item.gameObject.SetActive(visible);
@@ -89,7 +93,7 @@ namespace Shop
         float fps;
         int loop, sample = -1;
 
-        public static Pieces Build(string name, Transform parent, Texture2D atlas, float fps, int loop, JArray pieces, int order)
+        public static Pieces Build(string name, Transform parent, Texture2D atlas, float fps, int loop, JArray pieces, int order, bool light = false)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -138,7 +142,7 @@ namespace Shop
             p.mesh.SetTriangles(tris, 0);
             go.AddComponent<MeshFilter>().sharedMesh = p.mesh;
             var mr = go.AddComponent<MeshRenderer>();
-            mr.sharedMaterial = Art.Material(atlas);
+            mr.sharedMaterial = Art.Material(atlas, light);
             mr.sortingOrder = order;
             p.enabled = moving;
             return p;

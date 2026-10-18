@@ -14,7 +14,7 @@ namespace Shop
         static readonly Dictionary<string, Texture2D> textures = new();
         static readonly Dictionary<string, JObject> data = new();
         static readonly Dictionary<(Texture2D, RectInt, Vector2Int, Vector4), Sprite> sprites = new();
-        static readonly Dictionary<Texture, Material> materials = new();
+        static readonly Dictionary<(Texture, bool), Material> materials = new();
         static Material spriteMaterial;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -72,11 +72,14 @@ namespace Shop
         /// <summary>The whole texture as a sprite, pivoted on its top-left corner.</summary>
         public static Sprite Sprite(Texture2D tex) => Sprite(tex, new RectInt(0, 0, tex.width, tex.height));
 
-        /// <summary>The unlit pixel material (Shaders/Pixel) showing <paramref name="tex"/>.</summary>
-        public static Material Material(Texture tex)
+        /// <summary>The unlit pixel material (Shaders/Pixel) showing <paramref name="tex"/>; a <paramref name="light"/> is never graded.</summary>
+        public static Material Material(Texture tex, bool light = false)
         {
-            if (!materials.TryGetValue(tex, out var mat))
-                mat = materials[tex] = new Material(Resources.Load<Shader>("Shaders/Pixel")) { mainTexture = tex };
+            if (!materials.TryGetValue((tex, light), out var mat))
+            {
+                mat = materials[(tex, light)] = new Material(Resources.Load<Shader>("Shaders/Pixel")) { mainTexture = tex };
+                mat.SetFloat("_Light", light ? 1 : 0);
+            }
             return mat;
         }
 

@@ -20,8 +20,8 @@ namespace Shop
         static readonly Vector2 Base = new(640, 360);
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
         const float Glide = 220f;
-        /// <summary>Where the title screen looks: the shop at the top of the lane.</summary>
-        static readonly Vector2 TitleView = new(360, 220);
+        /// <summary>Where the title screen looks: the banyan shop above the old platform.</summary>
+        static readonly Vector2 TitleView = new(334, 380);
         const float FadeSeconds = 0.4f;
 
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
@@ -167,7 +167,7 @@ namespace Shop
             held = 0;
             Talk.Close();
             if (Place) await Fade(true);
-            Swap("village", "");
+            Swap("world", "");
             await Fade(false);
             Look.SetSprite(logo, Art.Sprite(Art.Texture("ui/title")), Zoom); // the title is world art: world-sized pixels
             Look.Move(logo.rectTransform, new Vector2((Size.x - logo.rectTransform.sizeDelta.x) / 2, 24));
@@ -271,7 +271,7 @@ namespace Shop
             }
             Hud.Place = Place;
             Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
-            Camera.backgroundColor = present.backgroundColor = Place.World.Bg;
+            Camera.backgroundColor = present.backgroundColor = Grade.Of(Place.World.Bg);
             look = null;
             gliding = false;
             FrameCamera(0f);
