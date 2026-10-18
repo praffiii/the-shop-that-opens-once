@@ -19,6 +19,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [10](10-alun-alun-dan-bangunan-3d.md) | 2026-10-18 | Alun-alun dan bangunan 3D ala Octopath | |
 | [11](11-stasiun-timur-pantai-3d.md) | 2026-10-18 | Stasiun, timur, dan pantai dengan bangunan 3D, dan tangga sungguhan | |
 | [12](12-penduduk-hidup-pagi-di-stasiun.md) | 2026-10-18 | Penduduk yang hidup: pagi di stasiun, dan stasiun sebagai satu tempat | |
+| [13](13-siang-dan-sore-di-stasiun.md) | 2026-10-18 | Siang dan sore di stasiun: rutinitas penduduk sepanjang hari | |
 
 ## Format setiap entri
 
