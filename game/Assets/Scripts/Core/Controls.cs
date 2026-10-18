@@ -36,6 +36,8 @@ namespace Shop
         public static bool Down => Pressed(Key.S, Key.DownArrow);
         public static bool Left => Pressed(Key.A, Key.LeftArrow);
         public static bool Right => Pressed(Key.D, Key.RightArrow);
+        /// <summary>Shift held: the courier runs.</summary>
+        public static bool Run => Held(Key.LeftShift, Key.RightShift);
 
         /// <summary>The walking direction from WASD or the arrow keys, y down, at most length 1.</summary>
         public static Vector2 Move

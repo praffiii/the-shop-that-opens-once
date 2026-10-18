@@ -252,7 +252,7 @@
     if (!CAST[id].villager) s.push('talk');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
-    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved');
+    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
     if (id === 'helen') s.push('sit', 'moved');
     if (id === 'marlow') s.push('wave');
     if (id === 'leo') s.push('run');
@@ -674,7 +674,7 @@
     POSES,
     poses: id => HAS[id].slice(),
     // px of ground covered per frame by walk / carryWalk / run, so feet don't skate (advance a frame every stride px)
-    stride: (id, pose) => (resolve(id, pose) === 'run' ? 4 : CAST[id].kid ? 2 : 3),
+    stride: (id, pose) => (resolve(id, pose) === 'run' ? (CAST[id].kid ? 4 : 5) : CAST[id].kid ? 2 : 3),
     frames: (id, pose) => POSES[resolve(id, pose)],
     fps: pose => FPS[pose] || 6,
     sprite: sprite40,

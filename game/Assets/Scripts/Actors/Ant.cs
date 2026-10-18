@@ -12,7 +12,7 @@ namespace Shop
     public sealed class Ant : MonoBehaviour
     {
         /// <summary>Walking pace in art px per second.</summary>
-        public const float Speed = 56f;
+        public const float Speed = 56f, RunSpeed = 104f;
         static readonly string[] Walks = { "walk", "carryWalk", "run" }; // poses whose frames advance with distance, not time
         static JObject cast;
 
@@ -125,6 +125,9 @@ namespace Shop
 
         public bool Walking => path.Count > 0;
 
+        /// <summary>Walks at <see cref="RunSpeed"/> with the run pose, by keys or along a path.</summary>
+        public bool Running { get; set; }
+
         /// <summary>Walks through <paramref name="points"/>. True on arrival, false if another walk or <see cref="Stop"/> took over.</summary>
         public async Awaitable<bool> Walk(List<Vector2> points)
         {
@@ -132,7 +135,7 @@ namespace Shop
             if (points.Count == 0) return true;
             path.Clear();
             path.AddRange(points);
-            Pose = "walk";
+            Pose = Running ? "run" : "walk";
             var done = new AwaitableCompletionSource();
             waiting.Add(done);
             await done.Awaitable;
@@ -154,7 +157,7 @@ namespace Shop
             var to = Here() + motion;
             Feet = to;
             exact = to;
-            if (Array.IndexOf(Walks, pose) < 0) Pose = "walk";
+            if (Array.IndexOf(Walks, pose) < 0 || Running != (pose == "run")) Pose = Running ? "run" : "walk";
             step += motion.magnitude;
             var p = Current();
             var stride = (float)p["stride"];
@@ -177,7 +180,7 @@ namespace Shop
             if (path.Count > 0)
             {
                 var to = path[0];
-                MoveBy(Vector2.ClampMagnitude(to - Here(), Speed * Time.deltaTime));
+                MoveBy(Vector2.ClampMagnitude(to - Here(), (Running ? RunSpeed : Speed) * Time.deltaTime));
                 if (Vector2.Distance(exact, to) < 0.001f)
                 {
                     path.RemoveAt(0);

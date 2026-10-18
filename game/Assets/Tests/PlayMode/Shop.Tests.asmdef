@@ -3,6 +3,7 @@
     "rootNamespace": "Shop.Tests",
     "references": [
         "Shop",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

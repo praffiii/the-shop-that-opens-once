@@ -106,6 +106,7 @@ namespace Shop
             if (!Player) return;
             Hover = controls ? HotspotAt(Shop.Controls.MouseWorld) : null;
             Near = controls ? Nearest() : null;
+            Player.Running = controls && input && Shop.Controls.Run;
             if (!controls || !input) return;
             if (Shop.Controls.Click || (Shop.Controls.Interact && Near != null))
             {
@@ -120,7 +121,7 @@ namespace Shop
                     Player.Stop();
                     keys = true;
                 }
-                Player.MoveBy(Walk.Slide(Player.Feet, dir * Ant.Speed * Time.deltaTime) - Player.Feet);
+                Player.MoveBy(Walk.Slide(Player.Feet, dir * (Player.Running ? Ant.RunSpeed : Ant.Speed) * Time.deltaTime) - Player.Feet);
             }
             else if (keys)
             {
