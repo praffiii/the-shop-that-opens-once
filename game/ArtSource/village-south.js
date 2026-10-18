@@ -201,8 +201,9 @@
     });
   }
 
-  /* rowboat(): a bleached rowboat, 40 long, oars shipped along the thwart, a painter rope coiled in the bow. */
-  function rowboat() {
+  /* rowboat(beached): a bleached rowboat, 40 long, oars shipped along the thwart, a painter rope coiled in the bow;
+     beached, it rests still on the sand, with no water round it. */
+  function rowboat(beached) {
     const L = 40, R = [BW[0], BL[1], BL[2], BL[3], BL[4]];
     const H = hull(L, 14, 7, R, 2, (b, g) => {
       const xt = 18, q = g(xt); fill(b, xt, q.yf + 2, 3, q.yn - q.yf - 3, BW[0]); fill(b, xt + 2, q.yf + 2, 1, q.yn - q.yf - 3, BW[3]);
@@ -210,6 +211,7 @@
       for (const [y, d] of [[q.yf + 1, -1], [q.yn - 2, 1]]) { fill(b, 6, y, 26, 1, 'wood2'); px(b, 6, y, 'wood1'); fill(b, 4, y + d, 6, 2, 'wood1'); fill(b, 4, y + d + 1, 6, 1, 'wood3'); }
       coil(b, 31, g(31).cy + 1, 3);
     });
+    if (beached) { const F = new Buf(H.out.w + 6, H.out.h + 3); over(F, H.out, 3, 0); return { img: F.canvas(), ax: Math.round(L / 2) + 4, ay: H.yW + 2 }; }
     return bob(H, L);
   }
 

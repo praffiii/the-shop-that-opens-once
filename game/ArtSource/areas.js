@@ -604,8 +604,8 @@
         at('fish_rack_0', B.fishRack(), 580, 444); at('nets_0', B.nets(), 620, 448, { walk: true });
         at('lighthouse', { ...V.lighthouse(), door: undefined }, 900, 650);   // seen, not entered
         at('fish_rack', B.fishRack(), 820, 520);
-        // the sand: a rowboat pulled up, nets and crates of the catch, driftwood, rocks
-        at('beached_boat', V.rowboat(), 330, 556, { walk: true }); at('nets_1', B.nets(), 400, 540, { walk: true });
+        // the sand: a rowboat pulled up just out of the water, nets and crates of the catch, driftwood, rocks
+        at('beached_boat', V.rowboat(true), 230, 598, { walk: true }); at('nets_1', B.nets(), 400, 540, { walk: true });
         at('crates_beach', V.crateStack(7), 520, 530); at('bucket_beach', V.bucket(), 548, 540); at('driftwood_1', B.driftwood(), 740, 560, { walk: true });
         [[130, 520], [880, 470], [560, 600]].forEach(([x, y], i) => at('beach_rock_' + i, V.boulder(i + 4), x, y)); at('nets', B.nets(), 650, 560, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
         [[180, 560, 'scallop'], [350, 600, 'spiral'], [620, 592, 'clam'], [780, 600, 'scallop'], [110, 600, 'clam']].forEach(([x, y, k], i) => at('shell_' + i, B.shell(k), x, y, { walk: true }));

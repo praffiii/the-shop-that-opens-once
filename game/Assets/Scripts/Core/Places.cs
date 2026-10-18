@@ -429,6 +429,40 @@ namespace Shop
                         Id = "arlo", At = V(506, 759), Label = "Arlo", Spot = V(-8, -10), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
                         Line = "End of the day, the sea goes quiet. Best time to think, if you've got thinking to do.",
                     },
+                    // A fisher carries the catch in crates from the jetty's foot to the fish rack; the salt worker rakes salt on
+                    // the sand and carries the sacks to the salt store. At dusk the fisher sits on the rowboat pulled up on the
+                    // sand and the salt worker sweeps the store's step.
+                    new Person
+                    {
+                        Id = "fisher", Label = "Fisher", Spot = V(0, 14), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(500, 640), Pose = "lift", Facing = 1, Wait = 3f, Carry = true },
+                            new Stop { At = V(820, 536), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Line = "Arlo catches them, I carry them. He says that makes him the brains. I say it makes me the back.",
+                    },
+                    new Person
+                    {
+                        Id = "salter", Label = "Salt worker", Spot = V(0, 14), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(180, 575), Pose = "tend", Facing = 1, Wait = 5f },
+                            new Stop { At = V(222, 578), Pose = "tend", Facing = -1, Wait = 5f, Carry = true },
+                            new Stop { At = V(236, 470), Pose = "lift", Facing = 1, Wait = 3f },
+                        },
+                        Line = "The sea leaves the salt and I fetch it in. A fair arrangement. The sea's never once complained.",
+                    },
+                    new Person
+                    {
+                        Id = "fisher", At = V(230, 592), Seat = 6, Label = "Fisher", Spot = V(0, -14), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Crates washed, rack full. Now I sit and watch the water do nothing for a while.",
+                    },
+                    new Person
+                    {
+                        Id = "salter", At = V(236, 470), Label = "Salt worker", Spot = V(0, 14), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Line = "Salt gets everywhere. Into the step, into the door, into my dreams.",
+                    },
                 },
                 Hotspots = new[] { North("to_square", 480, "Up to the square", "square/from_coast") },
             },

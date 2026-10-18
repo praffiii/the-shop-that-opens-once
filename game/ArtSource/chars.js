@@ -355,6 +355,26 @@
         { z: 'hat', at: [-3, -2], rows: ['.....11111.....', '....1222222....', '...33333333....', '111222222222223'], key: { 1: 'wood3', 2: 'wood4', 3: 'wood5' } },
       ],
     },
+    // Two on the coast: a fisher in a red and white striped jersey and a white cap with a black peak, a crate of the
+    // catch; the salt worker in a cream shirt, sleeves rolled, a teal sarong and a wide conical caping, a sack of salt.
+    fisher: { sleeve: ['white', 'stone1'],
+      torso: { rows: ['.wwwwW.', 'rrrrrRR', 'wwwwwWW', 'rrrrrRR', 'wwwwwWW', 'rrrrRRR', '.wwWWW.', '..RRR..'],
+               key: { w: 'white', W: 'stone1', r: 'red', R: 'roofR3' } },
+      villager: true,
+      load: { rows: ['.s.s.s..', 'sSsSsSs.', 'TTTTTTTT', 'TttttttT', 'TTTTTTTT'], key: { s: 'stone1', S: 'water1', T: 'wood2', t: 'wood3' } },
+      parts: [
+        { z: 'hat', at: [0, -3], rows: ['..wwwwww..', '.wwwwwwWW.', '.kkkkkkkkkkk'], key: { w: 'white', W: 'stone1', k: 'ink' } },
+      ],
+    },
+    salter: { sleeve: ['cream0', 'cream2', true],
+      torso: { rows: ['.cccCC.', 'cccccCC', 'ccccCCC', 'cccCCCC', 'bbbbbbB', 'gggggGG', '.gGGGG.', '..GGG..'],
+               key: { c: 'cream0', C: 'cream1', b: 'wood3', B: 'wood4', g: 'roofG2', G: 'roofG3' } },
+      villager: true,
+      load: { rows: ['..1T1...', '.122221.', '1bbbbbb3', '12222233', '22222233', '.223333.'], key: { 1: 'white', 2: 'stone0', 3: 'stone1', b: 'water3', T: 'wood3' } },
+      parts: [
+        { z: 'hat', at: [-4, -4], rows: ['.......11.......', '.....112223......', '...11222222333...', '1112222222222233333'], key: { 1: 'dirt1', 2: 'dirt2', 3: 'dirt3' } },
+      ],
+    },
     // A porter at the station: a brown waistcoat over a cream shirt, sleeves rolled, a tweed flat cap, a sack to carry.
     porter: { sleeve: ['cream0', 'cream2', true],
       torso: { rows: ['.wwwLL.', 'wwwLLLM', 'wwLLLoM', 'wLLLLLM', 'wLLLLoM', 'LLLLLMM', '.LLMMM.', '..MMM..'],
@@ -537,6 +557,8 @@
     if (id === 'florist') s.push('water');
     if (id === 'farmhand') s.push('sit');
     if (id === 'herder') s.push('tend');
+    if (id === 'fisher') s.push('sit');
+    if (id === 'salter') s.push('tend', 'sweep');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
     HAS[id] = s;
   }
@@ -1137,6 +1159,18 @@
         region(g, (x, y) => inE(x, y, P.cx, P.cy - 5, 22, 3), (x, y) => (y < P.cy - 5 ? 'wood3' : 'wood4'));
         region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 10, 10, 6) && y <= P.cy - 7, (x, y) => band(x + y, P.cx + P.cy - 16, P.cx + P.cy - 6, ['wood3', 'wood4', 'wood5']));
         rect(g, P.cx - 10, P.cy - 9, 20, 2, 'wood5');
+      }); } },
+    fisher: { cloth: ['white', 'white', 'stone1'],
+      bust(g) { for (let y = 36; y < 48; y += 4) region(g, (x, yy) => inBust(x, yy) && yy >= y && yy < y + 2, (x) => (x > 31 ? 'roofR3' : 'red')); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 14, 7) && y <= P.cy - 4, (x, y) => band(x - P.cx + (y - P.cy), -22, -8, ['white', 'stone0', 'stone1']));
+        rect(g, P.cx + 4, P.cy - 5, 13, 2, 'ink');
+      }); } },
+    salter: { cloth: ['cream0', 'cream1', 'cream2'],
+      bust(g) { line(g, 16, 46, 38, 44, 'wood3'); dot(g, 28, 40, 'cream2'); },
+      hat(x, P) { plate(x, g => {
+        region(g, (x, y) => y <= P.cy - 4 && y >= P.cy - 20 && Math.abs(x - P.cx) <= (y - (P.cy - 20)) * 1.6, (x, y) => band(x - P.cx + (y - P.cy) * 0.5, -24, 10, ['dirt1', 'dirt2', 'dirt3']));
+        rect(g, P.cx - 26, P.cy - 4, 52, 1, 'dirt4');
       }); } },
     porter: { cloth: ['wood1', 'wood2', 'wood3'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'cream0'); dot(g, 28, 40, 'brass1'); dot(g, 28, 44, 'brass1'); },
