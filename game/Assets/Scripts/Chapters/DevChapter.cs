@@ -21,9 +21,24 @@ namespace Shop
         {
             if (place != "shop" || Game.Has("met_marlow")) return;
             Game.Mark("met_marlow");
+            // the handover as a cinematic scene: Marlow leaves what he was doing for the counter as the courier comes
+            // up to it, talks on as he fetches the night's box from the cabinet, and the courier opens it
+            await Cinema(true);
+            var coming = Walk("marlow", Anchor("marlow"));
+            var stepping = Walk("courier", Anchor("counter"));
+            await Look(Anchor("counter"));
             await Say("marlow", "You found the shop. Good.");
-            await Say("marlow", "This belongs to someone waiting on the old platform. Take it to them.");
-            await HandOver("watch", 0);
+            await coming;
+            await stepping;
+            var fetching = FetchBox(0);
+            await Say("marlow", "Every night, one box. Tonight, this one.");
+            await fetching;
+            await HandOver();
+            await Say("marlow", "Open it.");
+            await OpenBox(0, "watch");
+            await Say("marlow", "It belongs to someone waiting on the old platform. Take it to them.");
+            await Cinema(false);
+            await Look(null);
             Hint("Press E to look in your bag.");
         }
 

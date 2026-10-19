@@ -64,6 +64,10 @@ namespace Shop
         public string Pose = "idle";
         /// <summary>1 faces right, -1 left, 0 keeps the way they came.</summary>
         public int Facing;
+        /// <summary>They keep turned to the courier while they stay, like a shopkeeper minding their shop.</summary>
+        public bool Watch;
+        /// <summary>They turn their back to the camera, to something behind them (only poses with a back view: idle, walk, run, carry).</summary>
+        public bool Away;
         /// <summary>Seconds they stay.</summary>
         public float Wait = 4f;
         /// <summary>They carry their load on the walk from here to the next stop.</summary>

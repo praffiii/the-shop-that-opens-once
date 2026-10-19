@@ -57,6 +57,37 @@
   /* ---------- the rooms ---------- */
   // Marlow's shop's paint: its shopfront's bottle green, and faded plum.
   const GREEN = ['#8fc3a8', '#5f9680', '#46755f', '#325747', '#213b35'], PLUM = ['#b49ab4', '#8a7196', '#68557a', '#4a3c5c', '#3f3350', '#30263f'];
+  // The seven keepsake boxes, one a night: each wood's light, base and dark, and its clasp.
+  const BOXES = [['wood2', 'wood3', 'wood4', 'brass1'], ['roofR2', 'roofR3', 'roofR4', 'brass1'], ['roofB2', 'roofB3', 'roofB4', 'brass1'],
+    [PLUM[1], PLUM[2], PLUM[3], 'brass1'], ['roofG2', 'roofG3', 'roofG4', 'brass1'], ['wood3', 'wood4', 'wood5', 'cream0'], ['roofR1', 'roofR2', 'roofR3', 'brass0']];
+  /* A box as an item (items/box_<i>_<size>_<variant>): xs closed, in a hand; lg up close, closed, or open as two
+     layers so what is in it can rise from inside: 'open' (the lid standing up, the velvet inside) behind it, 'front'
+     (the body's front) over it. */
+  function boxItem(i, size, variant) {
+    const [l, c, d, k] = BOXES[i];
+    if (size === 'xs') return V.inked(8, 7, b => { fill(b, 0, 0, 8, 3, c); fill(b, 1, 0, 6, 1, l); fill(b, 0, 3, 8, 4, c); fill(b, 0, 3, 8, 1, d); px(b, 3, 3, k); px(b, 4, 3, k); fill(b, 0, 6, 8, 1, d); }).canvas();
+    const W = 56, H = 40;
+    // the body from row y down: a light rim, the carved band of diamonds, brass bands at its ends, the clasp's lock plate
+    const body = (b, y) => {
+      fill(b, 0, y, W, H - y, c); fill(b, 0, y, W, 1, l); fill(b, 0, H - 2, W, 2, d);
+      for (let x = 4; x < W - 4; x++) { const t = (x - 4) % 8, z = t < 4 ? t : 8 - t; px(b, x, y + 8 + z, d); px(b, x, y + 16 - z, d); }
+      for (const x of [0, W - 4]) { fill(b, x, y, 4, H - y, 'brass2'); fill(b, x + 1, y, 1, H - y, 'brass1'); }
+      fill(b, 24, y + 1, 8, 7, 'brass2'); fill(b, 25, y + 1, 6, 1, 'brass1'); fill(b, 27, y + 3, 2, 3, 'wood5');
+    };
+    return V.inked(W, H, b => {
+      if (variant === 'closed') {
+        // the domed lid and its brass band, the clasp hanging over the lock
+        for (let y = 0; y < 16; y++) { const e = y === 0 ? 3 : y === 1 ? 1 : 0; fill(b, e, y, W - 2 * e, 1, y < 4 ? l : y < 12 ? c : d); }
+        for (const x of [0, W - 4]) { fill(b, x, 2, 4, 14, 'brass2'); fill(b, x + 1, 2, 1, 14, 'brass1'); }
+        fill(b, 0, 14, W, 2, 'brass3'); body(b, 16); fill(b, 26, 11, 4, 7, k); px(b, 27, 12, 'white');
+      } else if (variant === 'open') {
+        // the lid stands up behind, its inside lined in plum velvet; inside the box, dark velvet
+        fill(b, 1, 0, W - 2, 16, c); fill(b, 4, 2, W - 8, 13, PLUM[3]); fill(b, 4, 2, W - 8, 1, PLUM[2]); fill(b, 0, 14, W, 2, 'brass3');
+        fill(b, 0, 16, W, 6, l); fill(b, 3, 17, W - 6, 6, PLUM[5]);
+      } else body(b, 20);
+    }).canvas();
+  }
+  const boxItems = () => BOXES.flatMap((_, i) => [['xs', 'closed'], ['lg', 'closed'], ['lg', 'open'], ['lg', 'front']].map(([size, v]) => [`items/box_${i}_${size}_${v}.png`, boxItem(i, size, v)]));
   const ROOMS = {
     // Satria's childhood home (GDD 7.5, LOC-INT-01). Three bays under one roof: the bedroom (west: the bed, the desk
     // where Satria writes the journal each night, Ibu Ratih's treadle sewing machine and her tin of scraps), the
@@ -186,7 +217,8 @@
         [1, 64, 15, 80], [1, 90, 15, 106], [48, 86, 72, 96], [34, 88, 44, 96], [76, 88, 86, 96],
         [208, 0, 226, 12], [258, 18, 271, 60], [258, 72, 271, 106], [214, 52, 240, 62], [236, 74, 254, 86],
         [220, 92, 244, 104], [208, 108, 222, 116]],
-      anchors: { counter: [160, 64], clock: [107, 16] },
+      // the customer's side of the counter, the clock, Marlow's place behind the counter, and before each box
+      anchors: { counter: [160, 64], clock: [107, 16], marlow: [160, 36], ...Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map(i => ['box_' + i, [Math.min(122 + 12 * i, 190), 18]])) },
       // faded plum paper with a gold sprig, over a wainscot painted the shopfront's bottle green
       wall(b, w, h, seed) {
         for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, x % 10 === 0 ? PLUM[4] : hash(x, y, seed) < 0.03 ? PLUM[5] : PLUM[3]);
@@ -290,7 +322,7 @@
           }
         });
         T.card('cabinet_light', sprite(80, 2, b => fill(b, 0, 0, 80, 2, 'light1')), 158, 12, 27, true);
-        const RELIC = [['wood3', 'brass1'], ['roofR3', 'brass1'], ['roofB3', 'brass1'], [PLUM[2], 'brass1'], ['roofG3', 'brass1'], ['wood4', 'cream0'], ['roofR2', 'brass0']];
+        const RELIC = BOXES.map(([, c, , k]) => [c, k]);
         // a box: its body carved in a band of diamonds, brass bands at its ends and its clasp; closed, its lid domed
         // over it; open, the lid stands up behind and the velvet inside is empty
         const body = (b, y, c, k) => {
@@ -463,5 +495,5 @@
     return S;
   }
 
-  window.INSIDE = { ids: Object.keys(ROOMS), build };
+  window.INSIDE = { ids: Object.keys(ROOMS), build, boxItems };
 })();

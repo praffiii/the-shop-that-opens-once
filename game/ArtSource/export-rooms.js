@@ -69,6 +69,7 @@
       for (const size of sizes) for (const v of variants.length ? variants : [undefined]) png(`items/${name}_${size}${v ? '_' + v : ''}.png`, IT.item(name, size, v));
       list[name] = { sizes, variants };
     }
+    for (const [path, img] of INSIDE.boxItems()) png(path, img);
     json('items/items.json', list);
     for (const name of ICONS) png(`icons/${name}.png`, IT.icon(name));
   }

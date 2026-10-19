@@ -25,7 +25,7 @@ namespace Shop
         /// Octopath's does, so the courier is small in a wide view of the place, and comes in close in a room cut open,
         /// whose walls run past the screen's edges.
         /// </summary>
-        int WorldZoom => Place && Place.Def.Open ? 2 : 1;
+        int WorldZoom => (Place && Place.Def.Open ? 2 : 1) + (cinema ? 1 : 0);
         /// <summary>How far past a place's edge (art px) the camera may look, so the courier is never pinned to the screen's edge; there the forest goes on.</summary>
         const float Overscan = 96f;
         /// <summary>The view camera's vertical field of view, in degrees; it looks down at <see cref="Art.Pitch"/>.</summary>
@@ -35,6 +35,8 @@ namespace Shop
         const int UiLayer = 5;
         /// <summary>The least canvas the screen shows (the world is Base / WorldZoom).</summary>
         static readonly Vector2 Base = new(640, 360);
+        /// <summary>A cinematic scene's black bars over the top and bottom of the screen: how tall (canvas px) and how fast they slide in.</summary>
+        const float BarHeight = 30f, BarSeconds = 0.4f;
         /// <summary>In a room cut open the camera looks this far (art px) past the courier toward the back wall, where the room's things stand.</summary>
         const float LookIn = 24f;
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
@@ -71,11 +73,13 @@ namespace Shop
         public Hud Hud { get; private set; }
         public Bag Bag { get; private set; }
         public Card Cards { get; private set; }
+        public Reveal Reveal { get; private set; }
 
         RawImage screen;
         DepthOfField focus;
         RenderTexture canvas;
         Image logo, curtain;
+        Image[] bars;
         Ant courier;
         int held, factor;
         Vector2Int window;
@@ -84,7 +88,7 @@ namespace Shop
         Vector2? look; // a world point the camera shows instead of the courier
         readonly Dictionary<string, Place> kept = new(); // the places built, by id: the one on screen and those through its doors
         (int chapter, Phase phase) keptFor;
-        bool gliding;
+        bool gliding, cinema; // cinema: in a cinematic scene, the camera a step closer
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Reset()
@@ -156,10 +160,18 @@ namespace Shop
             ui.pixelPerfect = true;
             var t = ui.transform;
             logo = Look.Picture("Logo", t);
+            bars = new[] { Look.Picture("Bar", t), Look.Picture("Bar", t) };
+            foreach (var bar in bars)
+            {
+                bar.enabled = true;
+                bar.color = Look.Ink;
+                bar.gameObject.SetActive(false);
+            }
             Talk = Talk.Create(t);
             Hud = Hud.Create(t);
             Bag = Bag.Create(t);
             Cards = Card.Create(t);
+            Reveal = Reveal.Create(t);
             curtain = Look.Picture("Curtain", t);
             curtain.enabled = true;
             curtain.color = Look.Cream;
@@ -320,6 +332,7 @@ namespace Shop
             if (Story == null) return;
             Story.Relabel();
             await Story.Entered(placeId);
+            if (held == 0) Story.Wrap(); // a scene the courier did not walk into (Release wraps those)
         }
 
         /// <summary>Glides the camera to show a world point, or back to the courier with null. Returns once it is there.</summary>
@@ -456,6 +469,7 @@ namespace Shop
             held = Mathf.Max(held - 1, 0);
             if (held > 0) return;
             Talk.Close();
+            Story?.Wrap();
             if (Story != null && Place && Place.Player) Place.Controls = true;
         }
 
@@ -468,7 +482,7 @@ namespace Shop
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
             if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
-            var input = !(Cards.Handle() || Bag.Handle() || Talk.Handle());
+            var input = !(Cards.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle());
             if (input && Hud.Handle())
             {
                 Run(OpenBag());
@@ -526,6 +540,7 @@ namespace Shop
             offset = new Vector2((window.x - w * factor) / 2, (window.y - h * factor) / 2);
             screen.rectTransform.anchoredPosition = offset;
             Look.Place(curtain.rectTransform, new Rect(Vector2.zero, Size));
+            Bars(cinema ? 1f : 0f);
         }
 
         // Follows the courier softly, a little ahead of where it walks (or looks where it was asked, or at the title
@@ -594,6 +609,32 @@ namespace Shop
                 h = Place.World.Relief.Height(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y));
             }
             return p;
+        }
+
+        /// <summary>
+        /// Into a cinematic scene or back out: the black bars slide in over the top and bottom of the screen (or away),
+        /// and the camera cuts a step closer (or back). Out of it, the last line closes first.
+        /// </summary>
+        public async Awaitable Cinema(bool on)
+        {
+            if (!on) Talk.Close();
+            cinema = on;
+            foreach (var bar in bars) bar.gameObject.SetActive(true);
+            for (var t = 0f; t < BarSeconds; t += Time.deltaTime)
+            {
+                Bars(on ? t / BarSeconds : 1 - t / BarSeconds);
+                await Frame();
+            }
+            Bars(on ? 1f : 0f);
+        }
+
+        // The bars at v of their height, easing in and out; hidden at 0.
+        void Bars(float v)
+        {
+            var h = Mathf.Round(BarHeight * Mathf.SmoothStep(0f, 1f, v));
+            Look.Place(bars[0].rectTransform, new Rect(0, 0, Size.x, h));
+            Look.Place(bars[1].rectTransform, new Rect(0, Size.y - h, Size.x, h));
+            foreach (var bar in bars) bar.gameObject.SetActive(h > 0);
         }
 
         // Covers the screen in warm cream (or uncovers it) in four soft steps.

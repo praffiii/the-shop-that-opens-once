@@ -35,7 +35,7 @@
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
     motif: 'Music box: 18:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', music: 'Quiet piano and music box',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -58,6 +58,12 @@
     wrong: (s, t) => [55, 52].forEach((m, i) => s._note(t + i * 0.28, hz(m), { type: 'triangle', lp: 700, vol: 0.08, dec: 0.6, atk: 0.02 })),
     right: (s, t) => [72, 76, 79].forEach((m, i) => s._note(t + i * 0.13, hz(m), { partials: WARM, vol: 0.055, dec: i === 2 ? 1.6 : 1 })),
     whoosh: (s, t) => s._noise(t, { f: 400, f2: 1800, q: 0.7, vol: 0.35, atk: 0.45, dur: 0.85 }),
+    // a brass clasp flicked open, then the wooden lid lifting
+    latch: (s, t) => {
+      s._noise(t, { type: 'highpass', f: 2600, vol: 0.14, dur: 0.02, atk: 0.001 });
+      s._note(t, 1900, { vol: 0.03, dec: 0.05, atk: 0.001 });
+      s._noise(t + 0.12, { f: 340, f2: 620, q: 3, vol: 0.3, atk: 0.06, dur: 0.32 });
+    },
   };
 
   class Sound {

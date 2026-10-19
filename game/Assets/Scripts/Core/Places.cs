@@ -507,7 +507,21 @@ namespace Shop
                 DoorBell = true,
                 People = new[]
                 {
-                    new Person { Id = "marlow", At = V(310, 136), Label = "Marlow", Area = R(-12, -32, 24, 32), Spot = V(0, 28), Facing = -1 },
+                    // Marlow's day in his shop: a cup polished behind the counter, the lanterns looked over, the clock
+                    // checked, a curio taken out of its case, the floor swept, and back to the counter
+                    new Person
+                    {
+                        Id = "marlow", At = V(310, 136), Label = "Marlow", Area = R(-12, -32, 24, 32), Spot = V(0, 28), Facing = -1,
+                        Round = new[]
+                        {
+                            // he minds his shop from behind the counter: polishing a cup with an eye on the courier,
+                            // now and then a glance back at the lanterns, or a look in the ledger at the counter's end
+                            new Stop { At = V(310, 136), Pose = "polish", Watch = true, Wait = 9f },
+                            new Stop { At = V(310, 136), Pose = "idle", Away = true, Wait = 3f },
+                            new Stop { At = V(310, 136), Pose = "polish", Watch = true, Wait = 7f },
+                            new Stop { At = V(276, 136), Pose = "inspect", Facing = -1, Wait = 4f },
+                        },
+                    },
                 },
                 Hotspots = new[]
                 {

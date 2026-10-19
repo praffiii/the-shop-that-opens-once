@@ -6,12 +6,18 @@ namespace Shop
     /// <summary>
     /// One chapter's story, written as plain code. A chapter overrides <see cref="Start"/>, <see cref="Entered"/> and
     /// <see cref="Interact"/>, and uses the helpers below. Every helper that shows something must be awaited.
+    /// Scenes are alive: anyone the story speaks through or moves leaves their activity for the scene and goes back to
+    /// it after (<see cref="Wrap"/>), and a step started without awaiting it plays on through the lines that follow,
+    /// so people walk and act while they talk:
+    /// <code>var fetching = FetchKeepsake("watch", 0); await Say("marlow", "..."); await fetching;</code>
     /// </summary>
     public abstract class Chapter
     {
         protected readonly Main Main;
         /// <summary>Speaker names for the talk box. The courier's lines show only the portrait.</summary>
         readonly Dictionary<string, string> names = new();
+        /// <summary>The villagers taken into the scene, back to their activity once it ends.</summary>
+        readonly HashSet<Villager> cued = new();
 
         protected Chapter(Main main) => Main = main;
 
@@ -47,8 +53,13 @@ namespace Shop
                     h.Label = displayName;
         }
 
-        protected Awaitable Say(string who, string text, string mood = "neutral") =>
-            Main.Talk.Say(names.GetValueOrDefault(who, ""), who, text, mood, Actor(who));
+        /// <summary>Someone's line. The courier turns to whoever speaks, unless walking.</summary>
+        protected Awaitable Say(string who, string text, string mood = "neutral")
+        {
+            var speaker = Actor(who);
+            if (speaker && who != "courier" && Actor("courier") is { Walking: false } courier) courier.FaceTo(speaker.Feet.x);
+            return Main.Talk.Say(names.GetValueOrDefault(who, ""), who, text, mood, speaker);
+        }
 
         /// <summary>Someone's own line when the chapter has nothing for them, under the name on their hotspot.</summary>
         protected Awaitable Chat(string id)
@@ -71,7 +82,21 @@ namespace Shop
 
         protected void Hint(string text) => Main.Hud.Toast(text);
 
-        protected Ant Actor(string id) => Main.Place ? Main.Place.Actor(id) : null;
+        /// <summary>Someone in the current place, taken into the scene: a villager leaves their activity until it ends.</summary>
+        protected Ant Actor(string id)
+        {
+            var ant = Main.Place ? Main.Place.Actor(id) : null;
+            if (ant && ant.TryGetComponent<Villager>(out var villager) && cued.Add(villager)) villager.Cue();
+            return ant;
+        }
+
+        /// <summary>The scene is over: everyone taken into it goes back to their activity (Main calls it).</summary>
+        public void Wrap()
+        {
+            foreach (var villager in cued)
+                if (villager) villager.Done();
+            cued.Clear();
+        }
 
         protected Vector2 Anchor(string name) => Main.Place.World.Anchor(name);
 
@@ -91,16 +116,32 @@ namespace Shop
 
         protected Awaitable Card(params string[] lines) => Main.ShowCard(lines);
 
-        /// <summary>Marlow takes a keepsake from its shelf and hands it to the courier.</summary>
-        protected async Awaitable HandOver(string keepsake, int shelf)
+        /// <summary>Into a cinematic scene (bars over the top and bottom, the camera closer) or back out of it.</summary>
+        protected Awaitable Cinema(bool on) => Main.Cinema(on);
+
+        /// <summary>Marlow fetches the night's box from the cabinet: he goes to it and takes it out of its cubby.</summary>
+        protected async Awaitable FetchBox(int box)
+        {
+            var marlow = Actor("marlow");
+            await Walk("marlow", Anchor($"box_{box}"));
+            marlow.FaceAway();
+            if (Actor("courier") is { Walking: false } courier) courier.FaceTo(marlow.Feet.x);
+            await Wait(0.6f);
+            Main.Place.World.ShowItemIfAny($"keepsake_{box}", false);
+            Game.Mark("keepsake_taken");
+            marlow.Held = Keepsakes.Art($"box_{box}", "xs", "closed");
+            await Wait(0.3f);
+        }
+
+        /// <summary>Marlow brings the box he fetched back to the counter and hands it to the courier, who holds it.</summary>
+        protected async Awaitable HandOver()
         {
             var marlow = Actor("marlow");
             var courier = Actor("courier");
-            var art = Keepsakes.Art(keepsake, "xs");
-            Main.Place.World.ShowItemIfAny($"keepsake_{shelf}", false);
-            Main.Place.World.ShowItemIfAny($"box_open_{shelf}", true);
-            Game.Mark("keepsake_taken");
-            marlow.Held = art;
+            await Walk("marlow", Anchor("marlow"));
+            marlow.FaceTo(courier.Feet.x);
+            courier.FaceTo(marlow.Feet.x);
+            var art = marlow.Held;
             marlow.Pose = "give";
             await Wait(0.7f);
             marlow.Held = null;
@@ -108,10 +149,20 @@ namespace Shop
             courier.Held = art;
             courier.Pose = "receive";
             await Wait(0.7f);
+            courier.Pose = "idle";
+        }
+
+        /// <summary>The courier opens the box up close (<see cref="Shop.Reveal"/>) and the keepsake goes into the bag.</summary>
+        protected async Awaitable OpenBox(int box, string keepsake)
+        {
+            var courier = Actor("courier");
+            courier.Pose = "inspect";
+            await Wait(0.4f);
+            Main.Talk.Close();
+            await Main.Reveal.Show(box, keepsake);
             courier.Held = null;
             courier.Pose = "idle";
             Game.Bag.Add(keepsake);
-            Sfx("motif");
         }
 
         /// <summary>The courier gives a keepsake to its owner, who takes it and keeps holding it.</summary>
@@ -133,7 +184,7 @@ namespace Shop
             Sfx("right");
         }
 
-        /// <summary>The keepsake is home: in Marlow's shop the clock moves on a minute and a lantern goes out.</summary>
+        /// <summary>The keepsake is home: in Marlow's shop the clock moves on a minute, a lantern goes out, and its box is back in the cabinet, open and empty.</summary>
         protected async Awaitable LanternGoesOut()
         {
             await Go("shop", "counter");
@@ -147,6 +198,7 @@ namespace Shop
             Sfx("tick");
             await Wait(0.6f);
             world.ShowItemIfAny($"lantern_{lit}", false);
+            world.ShowItemIfAny($"box_open_{lit}", true);
             Sfx("chime");
             Game.LanternsOut = lit + 1;
             await Wait(0.8f);

@@ -125,7 +125,7 @@
         { z: 'hat', at: [-1, -1], rows: ['..12222223.....', '.12ww222333....', '122wv2233333...', '444444444443333'], key: CAP },
       ],
     },
-    marlow: { sleeve: ['cream0', 'cream2'],
+    marlow: { sleeve: ['cream0', 'cream2'], polish: 'cup',
       torso: { rows: ['.mMMvw.', 'mMMMMvw', 'mMMMnow', 'MMMMnvw', 'MMMnnow', 'MMnnnvv', '.nnNNv.', '..NNN..'],
                key: { m: 'moss0', M: 'moss1', n: 'moss2', N: 'moss3', w: 'cream0', v: 'cream1', o: 'brass1' } },
       bent: 0, stoop: 1,
@@ -427,6 +427,17 @@
         if (!back) for (const ex of [17, 22]) { rect(g, ex - 1, 14 + d, 3, 3, 'brass1'); dot(g, ex, 15 + d, 'water1'); }
       },
     },
+    // Marlow: the moss coat open on the cream shirt, the rose bow tie and the watch chain; the brass monocle, the
+    // bushy white brows and moustache, the white hair round the back of his head
+    marlow: {
+      cloth: ['moss0', 'moss1', 'moss2'],
+      chest(g, d, back) { if (back) return; rect(g, 19, 23 + d, 3, 7, 'cream0'); rect(g, 19, 23 + d, 3, 1, 'rose'); line(g, 20, 27 + d, 23, 28 + d, 'brass2'); },
+      face(x, d) {
+        rect(x, 21, 16 + d, 4, 1, 'brass1'); rect(x, 21, 20 + d, 4, 1, 'brass1'); rect(x, 21, 17 + d, 1, 3, 'brass1'); rect(x, 24, 17 + d, 1, 3, 'brass1');
+        rect(x, 15, 15 + d, 4, 1, 'white'); rect(x, 21, 15 + d, 4, 1, 'white'); rect(x, 17, 21 + d, 7, 1, 'white'); dot(x, 16, 22 + d, 'white'); dot(x, 24, 22 + d, 'white');
+      },
+      hat(g, d, back) { rect(g, 14, 17 + d, 2, 3, 'white'); rect(g, 25, 17 + d, 2, 3, 'white'); if (back) rect(g, 15, 19 + d, 11, 2, 'white'); },
+    },
     // Kapten Bram: the navy uniform with its white collar and brass buttons, the whistle on its chain, the white
     // moustache, the peaked cap with its gold band (his gloves come with his hands)
     bram: {
@@ -549,7 +560,7 @@
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
     if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
     if (id === 'helen') s.push('sit', 'moved', 'brew');
-    if (id === 'marlow') s.push('wave');
+    if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer');
     if (id === 'bram' || id === 'sam' || id === 'leo') s.push('look');
