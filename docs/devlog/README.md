@@ -34,6 +34,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [25](25-rumah-masa-kecil-satria.md) | 2026-10-19 | Rumah masa kecil Satria: interior pertama, pintu yang langsung berganti ala Octopath | |
 | [26](26-toko-marlow.md) | 2026-10-19 | Toko Marlow: interior kedua, lemari tujuh kotak, kamera mendekat di dalam ruangan | |
 | [27](27-adegan-hidup-dan-kotak-marlow.md) | 2026-10-19 | Adegan hidup: penyerahan kotak sebagai adegan sinematik, kotak dibuka dari dekat, Marlow menjaga tokonya | |
+| [28](28-naskah-baru-dan-awal-prolog.md) | 2026-10-20 | Naskah dan bible baru, Jalan Timur, dan awal prolog: dari halte sampai sambutan di alun-alun | |
 
 ## Format setiap entri
 
