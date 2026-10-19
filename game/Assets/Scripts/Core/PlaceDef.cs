@@ -5,7 +5,8 @@ namespace Shop
 {
     /// <summary>
     /// Something the courier can click or walk up to: a person, a sign, a door. Its id is what the chapter
-    /// script receives. With <see cref="ExitTo"/> set, stepping into its area goes to another place instead.
+    /// script receives. With <see cref="ExitTo"/> set, stepping into its area goes to another place instead,
+    /// and with <see cref="Step"/> set it is an unseen spot that tells the story when the courier steps on it.
     /// All positions are in art pixels, y down.
     /// </summary>
     public sealed class Hotspot
@@ -20,6 +21,8 @@ namespace Shop
         public Vector2 Spot = new(0, 8);
         /// <summary>"place/spawn": stepping into the area goes to that place, arriving at that spawn point.</summary>
         public string ExitTo;
+        /// <summary>Stepping into its area tells the story (<see cref="Chapter.Stepped"/>), the first time in the chapter. It has no label, so it is never seen or clicked.</summary>
+        public bool Step;
         /// <summary>The chapters it is there; null means every chapter.</summary>
         public int[] Chapters;
         /// <summary>The person it belongs to, whose feet it follows; null for a fixed hotspot.</summary>

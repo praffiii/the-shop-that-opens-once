@@ -151,8 +151,8 @@
     });
   }
 
-  /* The bus stop at the village edge, ant-made: a big leaf roof on two twig posts, a woven grass back, a split-twig
-     bench, a timetable pinned to the post, and the stop's pole sign (a beetle on a yellow disc). seat: the bench's
+  /* The bus stop at the village edge, ant-made: a big leaf roof on two twig posts, a woven grass back carved with
+     initials and a poster pinned to it, a split-twig bench, a timetable pinned to the post, and the stop's pole sign (a little bus on a yellow disc). seat: the bench's
      sit point from ax. */
   function busStop() {
     const W = 92, G = 64, L = V.LEAF.green;
@@ -161,6 +161,14 @@
       for (let x = 12; x < 56; x++) for (let y = G - 34; y < G - 6; y++) px(b, x, y, (y - G) % 7 === 0 ? 'd2' : x % 2 ? 'g3' : 'g2');
       for (let x = 12; x < 56; x += 2) px(b, x, G - 34, 'g1');
       for (const x of [8, 54]) { fill(b, x, G - 40, 4, 40, 'wood3'); fill(b, x, G - 40, 1, 40, 'wood2'); fill(b, x + 3, G - 40, 1, 40, 'wood4'); for (let y = G - 34; y < G; y += 9) fill(b, x + 1, y, 2, 1, 'wood4'); }
+      // a child's initials scratched into the back long ago, S + L, and a honey-festival poster from ten years back,
+      // its corner torn and the paper wrinkled by the dew
+      [['###', '#..', '###', '..#', '###'], ['...', '.#.', '###', '.#.', '...'], ['#..', '#..', '#..', '#..', '###']]
+        .forEach((g, k) => g.forEach((row, y) => [...row].forEach((c, x) => c === '#' && px(b, 18 + k * 4 + x, G - 25 + y, 'wood4'))));
+      fill(b, 38, G - 32, 13, 14, 'wall0'); fill(b, 38, G - 32, 13, 4, 'orange'); fill(b, 39, G - 31, 11, 1, 'yellow');
+      disc(b, 44, G - 23, 3, 2, 'yellow'); px(b, 43, G - 24, 'white'); fill(b, 44, G - 26, 1, 1, 'brass2');
+      fill(b, 40, G - 20, 9, 1, 'wood3'); for (const [x, y] of [[39, G - 27], [49, G - 22], [41, G - 19]]) px(b, x, y, 'wall2');
+      for (let k = 0; k < 4; k++) fill(b, 51 - 4 + k, G - 32, 4 - k, 1, k % 2 ? 'g3' : 'g2'); px(b, 46, G - 32, 'brass1');
       // the bench: a split twig on two stubs
       fill(b, 12, G - 12, 42, 4, 'wood2'); fill(b, 12, G - 12, 42, 1, 'wood1'); fill(b, 12, G - 9, 42, 1, 'wood4'); for (const x of [16, 46]) fill(b, x, G - 8, 3, 8, 'wood4');
       // the leaf roof: an arched blade, light midrib, veins, a dark underside along the front edge, a curl of stem
@@ -178,10 +186,43 @@
       // the pole sign
       const sx = W - 9; fill(b, sx, G - 44, 2, 44, 'iron2'); fill(b, sx + 1, G - 44, 1, 44, 'iron3'); fill(b, sx - 3, G - 3, 8, 3, 'stone2'); fill(b, sx - 3, G - 3, 8, 1, 'stone1');
       disc(b, sx + 0.5, G - 50, 7, 7, 'red'); disc(b, sx + 0.5, G - 50, 5, 5, 'yellow'); px(b, sx - 3, G - 53, 'light0');
-      fill(b, sx - 1, G - 52, 4, 5, 'ink'); fill(b, sx, G - 54, 2, 2, 'ink'); for (const y of [G - 51, G - 49]) { px(b, sx - 2, y, 'ink'); px(b, sx + 3, y, 'ink'); } px(b, sx, G - 51, 'iron2');
+      fill(b, sx - 3, G - 53, 8, 4, 'roofG2'); fill(b, sx - 3, G - 53, 8, 1, 'wall0'); for (const x of [sx - 2, sx, sx + 2]) px(b, x, G - 52, 'sky2');
+      for (const x of [sx - 2, sx + 3]) px(b, x, G - 49, 'ink');
       fill(b, sx - 5, G - 40, 12, 7, 'blue'); fill(b, sx - 5, G - 40, 12, 1, 'sky2'); fill(b, sx - 3, G - 38, 8, 1, 'white'); fill(b, sx - 3, G - 36, 6, 1, 'white');
     });
     return { img: out.canvas(), ax: 34, ay: G + 1, base: [-26, 22], foot: 10, seat: [0, -12], shadow: [28, 5] };
+  }
+
+  /* The bus stop's bin: a slatted wooden tub bound with a cord, kept clean, a few pine cuttings in it. */
+  function litterBin() {
+    const W = 14, G = 17;
+    const out = inked(W, G + 1, b => {
+      for (const [x, y, c] of [[3, 2, V.LEAF.teal[4]], [6, 0, V.LEAF.teal[3]], [9, 1, V.LEAF.teal[4]], [5, 3, 'wood2']]) { fill(b, x, y, 1, 5, c); px(b, x - 1, y + 1, c); px(b, x + 1, y + 2, c); }
+      fill(b, 1, 5, 12, G - 5, 'wood2');
+      for (let x = 1; x < 13; x += 3) { fill(b, x, 5, 1, G - 5, 'wood3'); px(b, x + 1, 5, 'wood1'); }
+      fill(b, 0, 4, 14, 2, 'wood3'); fill(b, 0, 4, 14, 1, 'wood1'); fill(b, 1, 10, 12, 1, 'wood4'); fill(b, 12, 6, 1, G - 6, 'wood4');
+    });
+    return { img: out.canvas(), ax: 8, ay: G + 1, base: [-6, 6], foot: 4, shadow: [6, 2] };
+  }
+
+  /* Ratih's flower beds, left to grow over in the two years since she died: a bed edged with stones, its chamomile and
+     lavender lost in waist-high grass and weeds. len: its width. */
+  function overgrownBed(seed = 1, len = 56) {
+    const W = len, G = 24, r = PX.rng(seed * 13 + 5);
+    const out = inked(W, G + 1, b => {
+      fill(b, 1, G - 9, W - 2, 8, 'd2'); fill(b, 1, G - 9, W - 2, 1, 'd1');
+      for (let k = 0; k < 40; k++) {
+        const x = 2 + Math.round(r() * (W - 5)), h = 6 + Math.round(r() * 14), c = r() < 0.5 ? 'g2' : r() < 0.5 ? 'g3' : 'g1';
+        for (let i = 0; i < h; i++) px(b, x + Math.round((r() - 0.5) * (i / h) * 2), G - 3 - i, c);
+      }
+      for (let k = 0; k < 9; k++) {
+        const x = 3 + Math.round(r() * (W - 7)), y = G - 8 - Math.round(r() * 10);
+        if (k % 3 === 2) { fill(b, x, y, 1, 4, 'lilac'); px(b, x, y - 1, '#9a7fd8'); }
+        else { px(b, x, y, 'yellow'); for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(b, x + dx, y + dy, 'white'); }
+      }
+      for (let x = 0; x < W; x += 5) { fill(b, x, G - 3, 4, 3, 'stone2'); fill(b, x, G - 3, 4, 1, 'stone1'); px(b, x + 3, G - 1, 'stone3'); }
+    });
+    return { img: out.canvas(), ax: 1, ay: G + 1, base: [0, W], foot: 6 };
   }
 
   /* Pip's twig swing: two crossed-twig A-frames under a bar with a sprouting leaf, thread ropes, a twig seat that sways
@@ -297,5 +338,5 @@
     return { img: frames[0], frames, fps: 2, ax: W / 2 + 1, ay: G + 1, base: [-W / 2, W / 2], foot: G - back, gate: [39 + 1 - (W / 2 + 1), 0] };
   }
 
-  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, swing, playground, chamomile, fieldFence, aphidPen });
+  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, litterBin, overgrownBed, swing, playground, chamomile, fieldFence, aphidPen });
 })();

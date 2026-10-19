@@ -159,6 +159,33 @@ namespace Shop
             }
         }
 
+        /// <summary>Lets go of what it holds: it falls to the ground in front of it and lies there until <see cref="PickUp"/>.</summary>
+        public async Awaitable<GameObject> Drop()
+        {
+            var item = Part("dropped", transform.parent);
+            item.sprite = held;
+            item.transform.localRotation = Art.Leaning;
+            item.transform.localScale = Art.LeaningScale;
+            var world = transform.parent.GetComponent<BakedArt>();
+            var at = feet + new Vector2(facing * 7, 3);
+            Vector3 from = transform.parent.InverseTransformPoint(hand.transform.position), to = Art.World(at, world.Relief.Stand(at, 4) + held.rect.height / 2);
+            Held = null;
+            for (var t = 0f; t < 1f; t += Time.deltaTime / 0.3f)
+            {
+                item.transform.localPosition = Vector3.Lerp(from, to, t * t);
+                await Main.Frame();
+            }
+            item.transform.localPosition = to;
+            return item.gameObject;
+        }
+
+        /// <summary>Picks up something it dropped and holds it again.</summary>
+        public void PickUp(GameObject dropped)
+        {
+            Held = dropped.GetComponent<SpriteRenderer>().sprite;
+            Destroy(dropped);
+        }
+
         public bool Walking => path.Count > 0;
 
         /// <summary>Walks at <see cref="RunSpeed"/> with the run pose, by keys or along a path.</summary>

@@ -259,6 +259,7 @@ namespace Shop
             var saved = Game.SavedChapter();
             if (saved > 0 && Chapters.ContainsKey(saved)) options.Add("Continue");
             if (Application.platform != RuntimePlatform.WebGLPlayer) options.Add("Quit");
+            if (Application.isEditor) options.Add(InProgress); // to try the prologue as it is made; Begin stays the systems test until it is whole
             var pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))];
             logo.gameObject.SetActive(false);
             switch (pick)
@@ -266,13 +267,16 @@ namespace Shop
                 case "Begin": await Begin(0); break;
                 case "Continue": await Begin(saved); break;
                 case "Quit": Application.Quit(); break;
+                case InProgress: await Begin(0, main => new Prologue(main)); break;
             }
         }
 
-        async Awaitable Begin(int chapter)
+        const string InProgress = "Prologue (in progress)";
+
+        async Awaitable Begin(int chapter, Func<Main, Chapter> make = null)
         {
             Game.StartChapter(chapter);
-            Story = Chapters[chapter](this);
+            Story = (make ?? Chapters[chapter])(this);
             Hold();
             await Story.Start();
             Release();
@@ -400,11 +404,19 @@ namespace Shop
         {
             Hold();
             var villager = h.Owner ? h.Owner.GetComponent<Villager>() : null;
-            if (h.ExitTo != null)
+            if (h.ExitTo != null && Story?.Closed(h.Id) is { } why)
+            {
+                // a way the story keeps shut for now: the courier says why and steps back from it
+                await Talk.Say("", "courier", why, "neutral", courier);
+                Talk.Close();
+                await courier.Walk(Place.Walk.Path(courier.Feet, h.GlobalSpot + h.Spot.normalized * 24));
+            }
+            else if (h.ExitTo != null)
             {
                 var to = h.ExitTo.Split('/');
                 await Go(to[0], to[1]);
             }
+            else if (Story != null && h.Step) await Story.Stepped(h.Id);
             else if (Story != null)
             {
                 if (villager) villager.Talk(courier.Feet.x);
@@ -619,6 +631,7 @@ namespace Shop
         {
             if (!on) Talk.Close();
             cinema = on;
+            gliding = true; // the view's middle moves with its size: glide there rather than jump
             foreach (var bar in bars) bar.gameObject.SetActive(true);
             for (var t = 0f; t < BarSeconds; t += Time.deltaTime)
             {

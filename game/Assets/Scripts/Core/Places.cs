@@ -17,6 +17,9 @@ namespace Shop
         static Rect R(float x, float y, float w, float h) => new(x, y, w, h);
         static Vector2 V(float x, float y) => new(x, y);
 
+        // The Prologue's Day 0, and every chapter after it.
+        static readonly int[] DayZero = { 0 }, AfterDayZero = { 1, 2, 3, 4, 5, 6, 7, 8 };
+
         // Exits at an area's edges: a strip along the edge where a road leaves it, walked to just inside the edge.
         static Hotspot West(string id, float y, string label, string to) => new() { Id = id, At = V(0, y), Label = label, Area = R(0, -24, 24, 48), Spot = V(12, 0), ExitTo = to };
         static Hotspot East(string id, float w, float y, string label, string to) => new() { Id = id, At = V(w, y), Label = label, Area = R(-24, -24, 24, 48), Spot = V(-12, 0), ExitTo = to };
@@ -257,6 +260,18 @@ namespace Shop
                         },
                         Line = "Pots in for the night. They'd keep out here, but I sleep better with them indoors.",
                     },
+                    // Day 0's dusk: Helen buying the last loaves at the bread stall and Leo chatting by the bench under the
+                    // oak, there when Satria comes home.
+                    new Person
+                    {
+                        Id = "helen", At = V(760, 752), Label = "Helen", Spot = V(18, 4), Away = true, Chapters = DayZero, Phases = new[] { Phase.Dusk },
+                        Line = "Go on home and rest, Satria. The key's under the geranium pot, same as ever.",
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(1088, 764), Label = "Leo", Spot = V(18, 4), Pose = "talk", Facing = -1, Chapters = DayZero, Phases = new[] { Phase.Dusk },
+                        Line = "Go on, city legs. Your house won't walk to you.",
+                    },
                     new Person
                     {
                         Id = "shopper", At = V(1040, 755), Seat = 8, Label = "Shopper", Spot = V(0, 20), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
@@ -322,7 +337,7 @@ namespace Shop
                         Round = new[]
                         {
                             new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
-                            new Stop { At = V(900, 482), Facing = -1, Wait = 2f, Run = true },
+                            new Stop { At = V(880, 482), Facing = -1, Wait = 2f, Run = true },
                         },
                         Line = "Lap nine! Still the fastest legs in Bellwood. Ask anyone. Well, anyone old enough to remember.",
                     },
@@ -333,7 +348,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Dusk },
                         Line = "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
                     },
                     // A farmhand gathers the windfall apples under the orchard's trees and empties the basket into the crates;
@@ -376,6 +391,12 @@ namespace Shop
                         },
                         Line = "Counting them in for the night. They wander, the little ones, same as children.",
                     },
+                    // Day 0's dusk: Theo at the bridge's rail, there to wave Satria in.
+                    new Person
+                    {
+                        Id = "theo", At = V(186, 456), Label = "Theo", Spot = V(-18, 6), Pose = "look", Facing = 1, Chapters = DayZero, Phases = new[] { Phase.Dusk },
+                        Line = "The sea wind never changes here, Satria. Nor do we, much.",
+                    },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {
@@ -391,7 +412,28 @@ namespace Shop
                 Hotspots = new[]
                 {
                     West("to_square", 470, "To the square", "square/from_east"),
+                    East("to_road", 1024, 740, "To the bus stop", "eastroad/from_east"),
                     new Hotspot { Id = "home_door", At = V(877, 440), Label = "Home", Area = R(-10, -30, 20, 36), Spot = V(0, 10), ExitTo = "satria_home/door" },
+                    new Hotspot { Id = "geranium", At = V(902, 452), Label = "Geranium pot", Area = R(-8, -22, 16, 22), Spot = V(0, 12), Chapters = DayZero },
+                    // Day 0, on Satria's way in: a band across the East west of his home, which every way from the bus stop
+                    // crosses, where he looks back at the house; and the bridge
+                    new Hotspot { Id = "glimpse", At = V(620, 640), Area = R(-8, -260, 16, 452), Step = true, Chapters = DayZero },
+                    new Hotspot { Id = "bridge", At = V(176, 470), Area = R(-6, -24, 12, 48), Step = true, Chapters = DayZero },
+                },
+            },
+            // The road into Bellwood, past the East: the bus stop where Satria arrives. Nobody lives out here.
+            ["eastroad"] = new PlaceDef
+            {
+                Id = "eastroad",
+                Variants = new[] { "day" },
+                // round the bend in the trees past the area's east edge, where the bus pulls up out of sight
+                Spawns = new() { ["off_bus"] = V(1090, 234) },
+                Hotspots = new[]
+                {
+                    West("to_east", 262, "To the east", "east/from_road"),
+                    new Hotspot { Id = "bus_bench", At = V(696, 232), Label = "Bench", Area = R(-20, -14, 36, 14), Spot = V(0, 16) },
+                    new Hotspot { Id = "bus_poster", At = V(711, 232), Label = "Poster", Area = R(-6, -32, 12, 14), Spot = V(0, 16) },
+                    new Hotspot { Id = "bus_bin", At = V(654, 234), Label = "Bin", Area = R(-7, -18, 14, 18), Spot = V(0, 12) },
                 },
             },
             ["coast"] = new PlaceDef

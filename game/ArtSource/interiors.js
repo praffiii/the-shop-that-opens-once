@@ -1666,6 +1666,160 @@
     return c;
   };
 
+  /* ================================================================ SATRIA'S OWN THINGS (the prologue's bag) and what the villagers carry */
+  // Valdo's draft sale contract: a thick manila folder, the agreement's top sheet clipped to it, a red company stamp.
+  SM.contract = () => S(`
+    ..ooooo.......
+    .oaaaaao......
+    oooooooooooooo
+    oaWWWWWWWWWWao
+    oaWkkkkkkWWWao
+    oaWWWWWWWWWWao
+    oaWkkkkkkkWWao
+    oaWkkkkWWWWWao
+    oaWWWWWWWrrWao
+    oaWWWWWWWrrWao
+    obbbbbbbbbbbbo
+    oooooooooooooo`, { o: 'dirt4', a: 'dirt1', b: 'dirt2', W: 'cream0', k: 'stone2', r: 'red' });
+  LG.contract = () => {
+    const [c, x] = canvas(44, 40);
+    // the folder: its tab, back and front cover peeking out under the sheets
+    rect(x, 3, 2, 14, 5, 'dirt4'); rect(x, 4, 3, 12, 4, 'dirt1');
+    const folder = mask(44, 40, g => rect(g, 1, 5, 42, 34, '#000'));
+    x.drawImage(bevel(folder, { o: 'dirt4', ol: 'dirt3', h: 'dirt0', b: 'dirt1', s: 'dirt2' }, 1, 2), 0, 0);
+    // a thick stack of sheets, the top one typed
+    for (const k of [3, 2, 1]) rect(x, 4 + k, 7 + k, 34, 29, k > 1 ? 'cream2' : 'cream1');
+    rect(x, 4, 7, 34, 29, 'cream0'); rect(x, 4, 7, 34, 1, 'white');
+    text(x, 'DRAFT', 8, 10, 'ink2'); rect(x, 8, 16, 26, 1, 'stone3');
+    for (const [y, w] of [[19, 26], [21, 22], [23, 25], [25, 18], [27, 24]]) rect(x, 8, y, w, 1, 'stone2');
+    rect(x, 8, 32, 12, 1, 'ink2');   // the line to sign on, still empty
+    // the firm's red stamp and a paper clip
+    disc(x, 31, 31, 4, d => d > 3.2 ? 'roofR3' : d > 2 ? 'red' : 'cream0'); dot(x, 30, 30, 'red'); dot(x, 32, 31, 'red');
+    rect(x, 30, 4, 3, 9, 'stone3'); rect(x, 31, 5, 1, 7, 'stone1'); rect(x, 29, 6, 1, 6, 'stone3');
+    return c;
+  };
+
+  // The courier's coin purse: a leather pouch on a drawstring, a coin showing at its mouth.
+  SM.purse = () => S(`
+    ....o..o......
+    ...o.oo.o.....
+    ...oooooo.....
+    ..oyyccco.....
+    .oaaaaaaao....
+    oaabbbbbbbo...
+    oabbbbbbbco...
+    oabbbbbbbco...
+    oabbbbbbcco...
+    .occcccccco...
+    ..oooooooo....`, { o: 'wood4', a: 'wood1', b: 'wood2', c: 'wood3', y: 'brass1' });
+  LG.purse = () => {
+    const [c, x] = canvas(40, 40);
+    // the drawstring, tied in a bow above the gathered neck
+    line(x, 14, 4, 20, 10, 'wood4'); line(x, 26, 4, 20, 10, 'wood4'); line(x, 15, 4, 19, 9, 'wood2'); line(x, 25, 4, 21, 9, 'wood2');
+    const bag = mask(40, 40, g => { rect(g, 13, 10, 14, 6, '#000'); g.beginPath(); g.ellipse(20, 26, 15, 12, 0, 0, Math.PI * 2); g.fill(); });
+    x.drawImage(bevel(bag, { o: 'wood5', ol: 'wood4', h: 'wood1', b: 'wood2', s: 'wood3' }, 1, 2), 0, 0);
+    for (let i = 14; i < 27; i += 3) rect(x, i, 11, 1, 5, 'wood3');   // gathers at the neck
+    rect(x, 12, 15, 16, 2, 'wood4'); rect(x, 13, 15, 14, 1, 'wood3');
+    // a few coins showing at the mouth, a stitched seam
+    for (const [cx, cy] of [[16, 13], [21, 12], [24, 14]]) disc(x, cx, cy, 2.5, (d, lit) => d > 1.8 ? 'brass3' : lit > 0.3 ? 'brass0' : 'brass1');
+    for (let i = 10; i < 31; i += 3) dot(x, i, 30, 'wood4');
+    return c;
+  };
+
+  // A spare city shirt, folded: pale blue cotton, its collar and buttons up.
+  SM.shirt = () => S(`
+    ...oo..oo.....
+    .ooWWooWWoo...
+    oaaaWWWWaaao..
+    oaaaaWWaaaaao.
+    oaaaaayaaaaao.
+    oaaaaaaaaaaao.
+    oaaaaayaaaaao.
+    oaaaaaaaaaabo.
+    oaaaaayaaaabo.
+    obbbbbbbbbbbo.
+    ooooooooooooo.`, { o: 'roofB4', a: 'sky1', b: 'sky2', W: 'white', y: 'stone2' });
+  LG.shirt = () => {
+    const [c, x] = canvas(44, 38);
+    const body = mask(44, 38, g => rect(g, 2, 6, 40, 30, '#000'));
+    x.drawImage(bevel(body, { o: 'roofB4', ol: 'roofB3', h: 'white', b: 'sky1', s: 'sky2' }, 1, 2), 0, 0);
+    // the collar: two white points either side of the placket, folded down
+    poly(x, [[14, 4], [22, 6], [22, 13], [13, 9]], 'white'); poly(x, [[30, 4], [22, 6], [22, 13], [31, 9]], 'cream0');
+    line(x, 14, 4, 22, 13, 'stone2'); line(x, 30, 4, 22, 13, 'stone2');
+    rect(x, 21, 13, 3, 22, 'sky2'); for (let y = 16; y < 34; y += 5) { rect(x, 21, y, 2, 2, 'stone1'); dot(x, 21, y, 'white'); }
+    // the fold lines of the sleeves tucked behind, a breast pocket
+    rect(x, 7, 8, 1, 26, 'sky2'); rect(x, 36, 8, 1, 26, 'sky2'); rect(x, 26, 17, 8, 7, 'sky2'); rect(x, 26, 17, 8, 1, 'white');
+    return c;
+  };
+
+  // Pak Baker's ginger biscuit, warm from the oven: a round cracked top dusted with sugar.
+  SM.biscuit = () => S(`
+    ...oooooo...
+    ..oaaaaaao..
+    .oaaWbaaaao.
+    oaaabbaWaaco
+    oaWaaabbaaco
+    oaaaWaaabaco
+    oaaaaaWaaaco
+    .oaaaaaaacco
+    ..occccccco.
+    ...oooooo...`, { o: 'dirt4', a: 'dirt1', b: 'dirt3', c: 'dirt2', W: 'cream0' });
+  XS.biscuit = () => S(`
+    .oooo.
+    oaWaao
+    oabaWo
+    oaaWco
+    .oooo.`, { o: 'dirt4', a: 'dirt1', b: 'dirt3', c: 'dirt2', W: 'cream0' });
+  LG.biscuit = () => {
+    const [c, x] = canvas(40, 40);
+    disc(x, 20, 21, 16, (d, lit) => d > 15 ? 'dirt4' : d > 13.5 ? (lit > 0 ? 'dirt3' : 'dirt4') : lit > 0.5 ? 'dirt1' : lit > -0.4 ? 'dirt2' : 'dirt3');
+    // the cracks of a well-risen top, and sugar caught in them
+    for (const pts of [[[9, 18], [15, 20], [19, 17], [24, 21]], [[17, 27], [22, 25], [28, 28]], [[24, 12], [27, 16], [31, 15]]])
+      for (let i = 1; i < pts.length; i++) line(x, ...pts[i - 1], ...pts[i], 'dirt4');
+    for (const [a, b] of [[12, 14], [26, 19], [16, 24], [29, 25], [21, 31], [11, 24], [20, 11], [25, 30]]) dot(x, a, b, 'cream0');
+    for (const [a, b] of [[14, 13], [27, 23], [19, 29]]) dot(x, a, b, 'white');
+    return c;
+  };
+
+  // The key to Satria's home: an old brass key, mossy from two years under the geranium pot.
+  SM.homekey = () => S(`
+    .oooo..........
+    oyyddo.........
+    oy..do.........
+    oy..doooooooo..
+    oyyddyyyymyyyo.
+    .oooooooooydmo.
+    .........oyo.o.
+    .........oo....`, { o: 'brass4', y: 'brass1', d: 'brass2', m: 'g3' });
+  XS.homekey = () => S(`
+    .ooo....
+    oy.do...
+    oyydoooo
+    .ooomydo
+    ....oyo.`, { o: 'brass4', y: 'brass1', d: 'brass2', m: 'g3' });
+  LG.homekey = () => {
+    const [c, x] = canvas(44, 24);
+    const lit = (d, l) => d > 6.2 ? 'brass4' : l > 0.5 ? 'brass0' : l > -0.3 ? 'brass1' : 'brass2';
+    // the bow, a ring with a hole, then the shank and its bit
+    disc(x, 9, 11, 8, lit); disc(x, 9, 11, 3.5, () => 'brass4'); x.clearRect(7, 9, 5, 5); x.clearRect(8, 8, 3, 7); x.clearRect(6, 10, 7, 3);
+    rect(x, 16, 9, 26, 5, 'brass4'); rect(x, 16, 10, 25, 3, 'brass1'); rect(x, 16, 10, 25, 1, 'brass0');
+    rect(x, 33, 13, 8, 8, 'brass4'); rect(x, 34, 13, 6, 7, 'brass2'); rect(x, 36, 17, 2, 4, 'brass4');
+    // moss and verdigris in the grooves
+    for (const [a, b] of [[4, 6], [5, 15], [13, 15], [22, 12], [27, 11], [35, 15], [38, 19], [12, 5]]) { dot(x, a, b, 'g3'); dot(x, a + 1, b, 'g2'); }
+    return c;
+  };
+
+  // Helen's market basket, held by its handle: woven twig, two loaves poking out.
+  XS.basket = () => S(`
+    ..ooooo..
+    .o.....o.
+    .oaabbao.
+    ooooooooo
+    occccccco
+    ocdcdcdco
+    ocdcdcdco
+    .ooooooo.`, { o: 'wood4', a: 'dirt1', b: 'dirt0', c: 'wood2', d: 'wood3' });
+
   /* ================================================================ ICONS (16x16, ink outline) */
   const ICK = { o: 'ink' };
   ICONS.bag = () => S(`

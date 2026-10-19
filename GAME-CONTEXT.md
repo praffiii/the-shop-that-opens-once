@@ -2,10 +2,11 @@
 
 The single source of truth for what this game is, what has been decided, and what is still open. Read it before any full-game design, story or development task.
 
-Last updated: 2026-10-18.
+Last updated: 2026-10-20.
 
 **Status:** building the full game in Unity, on the new design in the UTS GDD. The following exist:
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
+- the master script and the world and character bible, which update the GDD's story, world and characters (`docs/The_Shop_That_Opens_Once_ULTIMATE_30PAGE_SCRIPT.pdf`, `docs/The_Shop_That_Opens_Once_WORLD_AND_CHARACTER_BIBLE.pdf`, both in Indonesian)
 - the earlier concept proposal and the feasibility report
 - the Unity project in `game/` with the foundation built: the Godot core ported to C# (places, walking, talk, the bag, keepsakes, saving, sound), a systems-test chapter that is not part of the story, and a playthrough test that passes
 - the art pipeline in `game/ArtSource/`, exporting into `game/Assets/Resources/Art/`. Bellwood outdoors is five small areas joined by edge exits (the station, the banyan grove, the square, the east and the coast; `areas.js`, drawn with the `village*.js` kits) in a cozy RPG-village style, with wind, cloud shadows and bugs. The game shows them in an HD-2D 3D view (raised ground, upright cards, tilt-shift blur and bloom), graded for the time of day (design: `docs/superpowers/specs/2026-10-18-bellwood-world-overhaul-design.md`, look and layout revised the same day). The nine interiors follow, cut open where their houses stand (`inside.js`): Satria's childhood home and Marlow's shop so far.
@@ -24,7 +25,9 @@ Every fact carries a source tag:
 | Tag | Source | Governs |
 |---|---|---|
 | `[Decision]` | The user's explicit choices, dated | Everything. It overrides the other tags. |
-| `[GDD]` | SE.3 Kelompok 1, *Perancangan Game Design Document (GDD) dan Storyboard Game*, the UTS report (`docs/game-design-document.pdf`, in Indonesian) | World, story, characters, mechanics, the seven nights, UI, audio |
+| `[Script]` | SE.3 Kelompok 1, *Master Production Screenplay & Comprehensive Game Bible* (`docs/The_Shop_That_Opens_Once_ULTIMATE_30PAGE_SCRIPT.pdf`, 54 pages, in Indonesian) | Story, scenes, dialogue, the daily loop, the minigames, the journal |
+| `[Bible]` | SE.3 Kelompok 1, *World Building & Character Bible Encyclopedia* (`docs/The_Shop_That_Opens_Once_WORLD_AND_CHARACTER_BIBLE.pdf`, 40 pages, in Indonesian) | The world, its places and interiors, and the characters' details |
+| `[GDD]` | SE.3 Kelompok 1, *Perancangan Game Design Document (GDD) dan Storyboard Game*, the UTS report (`docs/game-design-document.pdf`, in Indonesian) | Whatever the script and the bible leave open: UI, audio, mechanics |
 | `[Report]` | SE.3 Kelompok 1, *Game Concept and Development Feasibility Research Report* (`docs/feasibility-report.pdf`, in Indonesian) | Scope, audience, production risk |
 | `[Proposal]` | Andika Rafa Akbar's *Game Design Document & Concept Proposal* (`docs/concept-proposal.pdf`) | Superseded by the GDD. History only. |
 | `[Illustrative]` | Invented for the presentation or a draft | Not canon until the user adopts it |
@@ -34,6 +37,12 @@ Every fact carries a source tag:
 
 **Sources**
 - `[Decision]` The UTS GDD defines the world, story, characters, mechanics and the seven nights. It replaces the concept proposal, whose story (Arthur Tate, the 18:17 clock, Marlow's sister Elise, Sam as a child) is retired. The report still defines feasibility and scope. (2026-10-18)
+- `[Decision]` The master script and the world and character bible update the GDD and win over it where they differ. Between the two, the script wins for story, scenes and dialogue, and the bible for the world, places, interiors and the characters' details. The Decisions here win over all three: the ant planet, bugs only, the HD-2D top-down view and the controls stay, though the script and the bible have human relics at a 1:50 scale, roosters, sparrows and gulls, a car and a telephone, side-scrolling A/D movement, a 480x270 canvas and E/I keys. (2026-10-19)
+- `[Decision]` The storm was in October 1952 and the story is set in 1972, twenty years later, as the script and GDD 5 have it (the bible's "74 years" and its eras up to 2025 are not followed). Satria left for the city eleven years ago, at 17, so he is about 28; in 1952 he was a small boy, on the train's ticket register with his parents. Ratih died two years ago. (2026-10-19)
+- `[Decision]` Satria is he/him, the only son (*putra*) of Daniel and Ratih, as both new docs have it. Daniel is Satria's father: the GDD's separate "Ayah Satria" and "Daniel, Theo's friend" are one person. (2026-10-19)
+- `[Decision]` Helen waited for Marcus Bell, the station master who is Marlow: she was his fiancée, Night 1's watch is his, and on Night 6 Marlow, unmasked, leaves Satria a last message of love for her (the bible). The script's "Arthur", a separate train driver, is not followed: it is the retired story's name. (2026-10-19)
+- `[Decision]` The city property agent is Valdo (Agen Valdo, of the firm Bram Capital), as the bible names him; Kapten Bram, the retired conductor, is the only Bram. The script's "Pak Bram" lines for the agent become "Pak Valdo". (2026-10-19)
+- `[Decision]` Marlow's shop opens from 00:00 to 00:30, as the script and the GDD have it, not the bible's 00:00 to 04:00. (2026-10-19)
 
 **Engine and builds**
 - `[Decision]` The engine is Unity 6.6 (6000.6.6f1) with C#. It replaces Godot 4. The editor is VS Code. (2026-10-18)
@@ -93,11 +102,18 @@ Every fact carries a source tag:
 - `[Decision]` Marlow's shop is the second interior, cut open on its shopfront in the grove after GDD figure 7.6 (a reference, not copied: the figure is AI-made), and much bigger than its shopfront, about two and a half times its width. The ancient tree stands just behind it, and its roots come over the back wall, down it and across the floor. In the middle is the shop: a red runner from the door to the counter with its oil lamp and Marlow behind it, the pendulum clock stopped at 10:17 and moving on a minute for each lantern out, and against the back wall the glass-fronted cabinet of the seven keepsakes. West are the red rug with a round table and two chairs, the curio cases along the wall and, behind a partition, Marlow's own room (the stair up the wall to his rooms above, his books and writing desk, his armchair and candle, his station master's cap and a photo of the last train); east is the store (shelves, crates, a trunk, barrels, sacks) with the back door. It replaces the shop carried over from Godot. (2026-10-19)
 - `[Decision]` The seven keepsakes are always in sight in Marlow's shop, each in a big carved box clasped in brass, lit behind glass in its own cubby of the cabinet, with that night's lantern standing on the cabinet over it. A box stays shut until Marlow hands it over (revised below: he hands over the box itself), so the boxes count the nights and Nights 6 and 7 stay secret. The lanterns stand on the cabinet, not hung from a beam over the room, which hid Marlow and crowded the speech bubbles. (2026-10-19)
 - `[Decision]` Conversations are living scenes, as a general system for every chapter: while lines play, the speakers walk, turn, gesture and carry things (Marlow walks about his shop, fetches a box, opens it), instead of standing frozen. Marlow keeps a daily routine in his shop as the villagers do outdoors. (2026-10-19)
-- `[Decision]` Cutscenes come in two kinds, both drawn in code. Scenes in the present play in the game itself as cinematic scenes: letterbox bars, a close camera, the characters acting (Night 1's handover first). Memories, such as the 1952 storm, are comic panels: sepia panels sliding in with captions, the camera panning across them. No pre-rendered video. (2026-10-19)
+- `[Decision]` Cutscenes come in two kinds, both drawn in code. Scenes in the present play in the game itself as cinematic scenes: letterbox bars, a close camera, the characters acting (Night 1's handover first). Memories, such as the 1952 storm, are comic panels: sepia panels sliding in with captions, the camera panning across them. No pre-rendered video. (2026-10-19; memories revised below: animated, not comic panels)
 - `[Decision]` A room's floor stands its footing's height over the land in front of its door, wherever that land lies (the shop's knoll is raised), and the area's trees and things that would stand inside the room are taken away, while those behind it stay. (2026-10-19)
 - `[Decision]` Marlow hands the courier the night's box, not the bare keepsake: he fetches it from its cubby, which stands empty while the courier has it, and brings it to the counter. The courier opens it in a close-up (the screen darkens, the clasp flicks, the lid lifts and the keepsake rises out with its music-box motif and its name), and only then does the keepsake go into the bag. Once the night is resolved and its lantern goes out, the box is back in its cubby, open and empty. This revises the boxes decision above. (2026-10-19)
 - `[Decision]` In a living scene the people taken into it act alongside the lines (Marlow fetches the box while he talks), and nobody freezes; when it is over each goes back to their activity from the nearest stop of their round, not across the place to wherever they had been bound. (2026-10-19)
 - `[Decision]` Marlow minds his shop while the courier is in it, never wandering off as if they had gone: his routine keeps him behind the counter, polishing a cup and turned to the courier wherever they walk, now and then turning his back to glance at the lanterns, or looking in the ledger at the counter's end. A villager's stop can keep them watching the courier (`Watch`) or turned from the camera (`Away`). (2026-10-19)
+- `[Decision]` Every cutscene is animated in the game itself, as Stardew Valley, Octopath Traveler and To the Moon do: the game's own sprites, sets, light and camera, with letterbox bars, so it plays like a short film. No comic panels and no pre-rendered video (a video would be blurry when scaled and heavy for the web build). The 1952 memories are animated too, played in the real places as they were that night under a sepia grade, so the player always tells the past from the present. This replaces the comic panels for memories. (2026-10-19)
+- `[Decision]` (superseded 2026-10-19, see the next decision) The game opens on Satria's arrival, not on the station: Begin leads into an animated scene where the evening bus (a 1950s motor bus, cream over teal, BELLWOOD on its board: something real, not an animal) comes along the East's road from the city at dusk and pulls up at the wooden bus stop by the river bridge, where the East meets the village centre (the GDD's "halte bus kayu pembatas desa timur"). Satria steps off with the agent's contract and walks onto the bridge as the narration plays ("Bellwood. It still smells of bread and river water."), and the player takes over there, the square straight ahead, as in GDD storyboard 14.1; the bus turns back for the city out of shot. The stop stands on the road's south side, seen from behind with its open side to the road, the side the bus's door opens on. Not at the road's east end: there it stood in Satria's home's yard, and the bus would have dropped Satria at the family's doorstep, when the home waits in its quiet corner for later in the prologue. The square's old bus stop is gone, so Bellwood has one. Travellers once arrived by rail, but the railway has been cut since 1952, so the bus is the way in now. (2026-10-19)
+- `[Decision]` The game opens on Satria's arrival on foot, not on the station: no bus is shown, only heard far off up the road driving away, because a bus is out of scale on the ants' lanes and the one tried stood over Nora's house. Satria walks in along the East's road at dusk and onto the bridge as the narration plays ("Bellwood. It still smells of bread and river water."), as in GDD storyboard 14.1. Where the bus stop stands, and the rest of the prologue, follow the script's prologue: see the prologue beat sheet, under review. (2026-10-19)
+- `[Decision]` The East Road is a sixth outdoor area, east of the East: the road in from the city with the wooden bus stop (the bible's "halte bus perbatasan timur", its leaf roof) at the forest's edge, where Satria arrives and where the game ends. Its road joins the East's south lane, so arriving one passes the Gardener's glasshouse and home, not Satria's door, and the East's main road ends at Satria's home, in its quiet corner. The square's bus stop is gone. This replaces a stop by the bridge or at the road's east end, where the house stood right in front of it. (2026-10-19)
+- `[Decision]` Day 0 is walkable but kept on the story's path; free roam begins on Day 1's morning (the GDD's "whole map open from the start" starts then). Each area can be walked and its things looked at, but the ways off the path are closed with a reason, never an invisible wall: the house is "not yet" until Helen's welcome, the square's other exits say it's getting dark, the road back says the last bus has gone. The welcome starts on entering the square, so it cannot be skipped. Villagers passed on Day 0 get short prologue lines, not their everyday ones. (2026-10-19)
+- `[Decision]` The prologue mixes cinematic scenes and play: letterbox scenes only for the big moments (the few seconds at the bus stop, the welcome in the square, later the agent and the house), light touches without bars for the small ones (the glimpse of the house across the orchard, the narration on the bridge, Theo's greeting in passing), and plain play for looking at things and overheard gossip. Ratih's overgrown flower beds fill the lawn south of the house. (2026-10-19)
+- `[Decision]` The prologue's first part, as built: Satria arrives at 16:30, walking out of the trees from the bus heard pulling up out of sight round the bend, with a spare shirt, his coin purse and Valdo's draft contract in his bag, and can look at the stop's bin, its honey-festival poster and its bench carved "S + L". Halfway across the East he looks back at his home at the road's end ("...Not yet."); on the bridge the narration plays and Theo, at the rail, welcomes him. The welcome is in the square, since Helen's own stall is on the platform: she is at Baker's bread stall buying the last loaves, sees him and drops her basket, the Baker comes down with a tray, Leo comes over from the bench under the oak, the four gathered round Satria and turned to him, and the overheard gossip about the agent and Ratih's chamomile opens the scene. Replying about the city's noise gets a warm ginger biscuit from the Baker; either reply leads to Helen's directions (the key under the geranium pot, her stall on the platform). The house stays locked until Satria takes the key from under Ratih's cracked geranium pot by the door. (2026-10-20)
 - `[Decision]` The order of work: the look, proven on the West zone; the whole bigger world; living villagers; the nine interiors. Reference packs and the GDD's AI images are studied for technique only; nothing is traced or copied. (2026-10-18)
 - `[Decision]` The look is a cozy top-down RPG village, not the ant-scale fable: Harvest Moon / zedpxl houses with big roofs and short walls, flat colour with a few deliberate marks, a dark outline on everything that stands, leafy clumped trees, real height (grey cliff faces between terrace levels, stairs, eaves, footings) and bright water. Rich, one-of-a-kind buildings for the story places; simpler homes for background villagers. It replaces the natural-materials look, which felt flat and pasted together. Ants are still the only people and bugs the only animals. (2026-10-18)
 - `[Decision]` Reference packs (zedpxl, LimeZu, Maeve, Kenmi, anokolisa) are studied for technique only, because their licences cannot be bought. Every pixel is drawn in our own code; nothing is copied, traced, downloaded or sampled. The notes are in `game/ArtSource/ART.md`. (2026-10-18)
@@ -175,7 +191,7 @@ Design pillars:
 
 ## World and story `[GDD]`
 
-**Premise.** Satria spent eleven years as an express courier in the metropolis and comes home to the rural ant colony of Bellwood only to settle the deed and sell the late parents' house (Ibu Ratih and Ayah Satria) to a city property agent. A brass bell leads Satria to The Shop That Opens Once: Marlow's old shop in the roots of the banyan tree by the station. It opens only from 00:00 to 00:30, for those with unfinished business. For seven nights Marlow gives Satria one relic box a night.
+**Premise.** Satria spent eleven years as an express courier in the metropolis and comes home to the rural ant colony of Bellwood only to settle the deed and sell the late parents' house (Ibu Ratih and Daniel, Ayah Satria) to a city property agent. A brass bell leads Satria to The Shop That Opens Once: Marlow's old shop in the roots of the banyan tree by the station. It opens only from 00:00 to 00:30, for those with unfinished business. For seven nights Marlow gives Satria one relic box a night.
 
 **Bellwood** is built from natural materials: twigs, roots, walnut shells and leaves. It has four zones joined by footpaths, with no loading screens between them:
 
@@ -218,10 +234,9 @@ All 18 characters are ants. The GDD's colour codes are suggestions for each ant'
 | 12 | Nelayan Arlo | Fisher at the jetty | Satria's father's sailing friend. |
 | 13 | Kapten Bram | Retired train driver | Blew the whistle for the last train at 10:17 on the night of the storm, and still carries the guilt. |
 | 14 | Mia | Vegetable seller at the square | Pip's mother; protective and kind. |
-| 15 | Agen Properti Bram | City property agent | The narrative antagonist: presses for the sale to turn the house into a resort. A deadline, not a villain to fight. |
+| 15 | Agen Valdo (the GDD's Agen Properti Bram, renamed 2026-10-19) | City property agent, of the firm Bram Capital | The narrative antagonist: presses for the sale to turn the house into a resort. A deadline, not a villain to fight. |
 | 16 | Ibu Ratih | Satria's late mother | A generous seamstress who gave up her ticket to care for the storm's children. Present through relics, flashbacks and her letter. |
-| 17 | Ayah Satria | Satria's late father | An AM-radio builder who led the bridge rebuild and never asked for credit. |
-| 18 | Daniel | Theo's late best friend | Filmed the village's important moments on 8mm. |
+| 17 | Daniel (Ayah Satria) | Satria's late father, Theo's best friend | An AM-radio builder who led the bridge rebuild, never asked for credit, and filmed the village on 8mm. The GDD's separate Daniel is the same person (2026-10-19). |
 
 ## Core loop and rules `[GDD]`
 
@@ -255,7 +270,7 @@ Nights 6 and 7 and the epilogue are the ending. Keep them hidden as spoilers in 
 
 | Chapter | Keepsake | Owner and place | Minigame or resolution | Theme |
 |---|---|---|---|---|
-| Prologue: The Boy Who Left (Day 0) | The draft sale contract | Agen Properti Bram; the square and Satria's home | Satria comes home, looks over the house, and finds Marlow's shop in the banyan roots | |
+| Prologue: The Boy Who Left (Day 0) | The draft sale contract | Agen Valdo; the square and Satria's home | Satria comes home, looks over the house, and finds Marlow's shop in the banyan roots | |
 | 1: The Stopped Watch | A brass service pocket watch stopped at 10:17, engraved with initials | Helen, tea stall on the platform | Clean and calibrate its gears; tell her the truth about that night | Waiting |
 | 2: The Stitched Rabbit | Mochi, a patchwork rabbit with a loose ear | Pip (with Mia); the square and the chamomile garden | Re-stitch the ear on Ratih's treadle sewing machine; it calms Pip's fear of thunder | Caring |
 | 3: The Old Film Camera | Daniel's 8mm camera, dusty lens and undeveloped film | Theo, cliff-top studio and darkroom | Clean the lens and develop Daniel's last film of the villagers | Remembering |
@@ -263,7 +278,7 @@ Nights 6 and 7 and the epilogue are the ending. Keep them hidden as spoilers in 
 | 5: The Mismatched Running Shoes | Spiked running shoes, one worn sole, dried mud | Leo, the hilltop | Restore the sole with damar resin; Leo lets go of the late message | Moving on |
 | 6: The Deer Leather Ledger | The 1952 deer-leather ledger of debts and aid | Marlow, the shop | Read it with Marlow; it reveals the parents' sacrifice | Letting go |
 | 7: The Unsigned Letter and Music Box | The walnut music box and Ratih's letter | Satria, the childhood home | Open the sewing table's secret drawer with the inherited key, wind the music box, read the letter | Choosing |
-| Epilogue: The Morning After (Day 8) | The torn contract and a new post stamp | Agen Properti Bram and the whole village, the square | Refuse the offer, tear up the contract, reopen Bellwood's post office | |
+| Epilogue: The Morning After (Day 8) | The torn contract and a new post stamp | Agen Valdo and the whole village, the square | Refuse the offer, tear up the contract, reopen Bellwood's post office | |
 
 **Each night's emotional obstacle** (the "bosses" are inner walls, not enemies):
 
@@ -366,6 +381,19 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - **Where Marlow's shop is:** the text puts it in the banyan roots by the station (West zone), but the Centre zone map's legend lists "Toko Marlow". Resolved: the banyan in the West (2026-10-18).
 - **Typos:** the title appears as "The Shop That Once Opens" in 4.3, and table 6.1 numbers Mender 9 before Leo 8.
 
+**Inside the script and the bible** (each resolved by the precedence decision unless noted)
+- **When:** the script says "twenty years ago" yet marks 1952; the bible counts 74 years and runs to 2025. Resolved: 1952, set in 1972.
+- **Helen's love:** Arthur, a train driver (script), or Marcus Bell (bible). Resolved: Marcus.
+- **The agent:** "Pak Bram" (script) or Valdo of Bram Capital (bible). Resolved: Valdo.
+- **How long Satria was away:** eleven years (script), six (the bible's Satria), ten (the bible's Arlo). Resolved: eleven.
+- **Night 3's camera:** Daniel's brass still camera with a roll of film (script) or the 8mm film camera (bible, GDD, decision). The decision stands: 8mm.
+- **Shop hours:** 00:00–00:30 (script) or 00:00–04:00 (bible). Resolved: 00:30.
+- **Leo:** carried word that the train was waiting for Satria's family (script), or was hurt racing over the rotten bridge (bible); sits on the lighthouse hill (script) or the rail embankment (bible). The script's story stands; his hill stays in the East (decision).
+- **Kapten Bram:** a train driver (script) or a conductor (bible). Resolved: a conductor, as the decision already draws him.
+- **Night 7's drawer** opens to the music box's melody (script), not with an inherited key (GDD).
+- **Satria's home:** the bible's three rooms (Daniel's living room and workroom, the kitchen, Ratih's bedroom with her sewing table) against the decision's layout after GDD 7.5. The decision stands.
+- **Costumes** differ between the two (Helen's blue cardigan or cream scarf, Nora's pink knitted hood or grey turban). The bible's details apply except where a decision has drawn the villager.
+
 **Between the GDD and decisions or the repo**
 - **AI assets:** section 13.3 plans Midjourney, FLUX and Suno. The decision is no AI; 13.3 is for the formal report only.
 - **Night palette:** the GDD's midnight navy and fog read dark; the decision keeps night pastel and readable.
@@ -384,15 +412,11 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 - By day, does the banyan's root gap show the closed door, or nothing at all? The shop opens only from 00:00 to 00:30.
 - Day phases: what exactly moves time forward: each clue, each conversation, or entering a new zone?
 - Is the ending a real choice, with a "leave" ending, or only the canon "stay"?
-- Which minigames, and how many: one per night, or the GDD's 14 or more?
+- The script sets 14 minigames (two a night, the music box and tearing up the contract): build all of them, or fewer?
+- The script's home routine (gate, boots, washing the antennae, the mosquito coil, bed, waking, tea, the cap) plays every night: in full each time, or in full on Day 0 and Night 1 and shortened after?
+- Day 8's post office: the closed one on the square (the decision), or Satria's own home turned into Bellwood's post office, as the script has it?
+- Marlow's look: the bible's tall spirit in a star-sewn navy coat with glowing eyes and a brass lantern, or the script's old grey ant in a worn waistcoat with keys at his belt?
 - Saving, chapter select, text speed and other accessibility options.
-
-**Story**
-- Satria's pronouns.
-- Night 1: what the watch's engraved initials are, who Helen waited for, and the "truth" Satria tells her.
-- Night 2: Mochi was made by Ratih. Why does Satria have it now?
-- How the two Brams are told apart, or whether one is renamed.
-- What Ratih's letter says.
 
 **Business**
 - The business model, release targets and schedule. The concept proposal's pricing ideas have not been carried over.

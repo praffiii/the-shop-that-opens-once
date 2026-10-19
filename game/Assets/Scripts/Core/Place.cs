@@ -75,7 +75,7 @@ namespace Shop
             }
             foreach (var h in def.Hotspots)
                 if (Here(h.Chapters))
-                    place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo });
+                    place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo, Step = h.Step });
             return place;
         }
 
@@ -194,6 +194,13 @@ namespace Shop
                     Use(h);
                     return;
                 }
+            foreach (var h in hotspots)
+                if (h.Step && h.GlobalArea.Contains(Player.Feet) && !Game.Has($"stepped_{h.Id}"))
+                {
+                    Game.Mark($"stepped_{h.Id}");
+                    Use(h);
+                    return;
+                }
         }
 
         /// <summary>Walks the courier to a hotspot and uses it, as a click on it would. False if there is no such hotspot or no way there.</summary>
@@ -218,7 +225,7 @@ namespace Shop
         void Use(Hotspot h)
         {
             Controls = false;
-            Player.FaceTo(h.GlobalArea.center.x);
+            if (!h.Step) Player.FaceTo(h.GlobalArea.center.x);
             Used?.Invoke(h);
         }
 

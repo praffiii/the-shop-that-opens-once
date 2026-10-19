@@ -647,10 +647,11 @@
     return done(o, W / 2, gy, { shadow: [4, 1] });
   }
 
-  /* A terracotta pot with a plant: flowers, a clipped ball, tall blades or tulips. */
-  function flowerPot(seed = 1) {
+  /* A terracotta pot with a plant: flowers, a clipped ball, tall blades or tulips; colour picks the flowers' colour, and
+     cracked runs a crack down its side. */
+  function flowerPot(seed = 1, colour, cracked) {
     const r = rng(seed * 71 + 3), kind = seed % 4, W = 16, H = 23, gy = H - 1, cx = 8, rim = gy - 9;
-    const colours = ['rose', 'yellow', 'lilac', 'white', 'orange', 'pink'], c = colours[(r() * colours.length) | 0];
+    const colours = ['rose', 'yellow', 'lilac', 'white', 'orange', 'pink'], picked = colours[(r() * colours.length) | 0], c = colour || picked;
     const o = inked(W, H, b => {
       if (kind === 0) bloomMound(b, cx, rim - 4, 7, 4.5, [c], seed, 5);
       if (kind === 1) { fill(b, cx, rim - 4, 1, 4, 'wood3'); foliage(b, inE(cx, rim - 8, 6, 6), [cx - 6, rim - 14, cx + 6, rim - 2], LEAF.deep, seed, { cw: 6, ch: 5, dx: 4, dy: 3 }); }
@@ -664,6 +665,7 @@
       fill(b, cx - 6, rim, 13, 3, 'roofR2'); fill(b, cx - 6, rim, 13, 1, 'roofR0'); fill(b, cx - 6, rim + 1, 1, 1, 'roofR1'); fill(b, cx - 6, rim + 2, 13, 1, 'roofR3');
       for (let y = rim + 3; y <= gy; y++) { const i = Math.round((y - rim - 3) / 3); fill(b, cx - 5 + i, y, 11 - i * 2, 1, 'roofR2'); px(b, cx - 5 + i, y, 'roofR1'); fill(b, cx + 4 - i, y, 2, 1, 'roofR3'); }
       fill(b, cx - 3, gy, 7, 1, 'roofR4');
+      if (cracked) for (const [x, y] of [[cx + 1, rim + 1], [cx + 1, rim + 2], [cx, rim + 3], [cx, rim + 4], [cx + 1, rim + 5], [cx - 1, rim + 5]]) px(b, x, y, 'roofR4');
     });
     return done(o, cx, gy, { base: [-5, 5], foot: 3, shadow: [6, 1] });
   }

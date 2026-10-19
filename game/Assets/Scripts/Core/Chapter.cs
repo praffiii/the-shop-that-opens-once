@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Shop
 {
     /// <summary>
-    /// One chapter's story, written as plain code. A chapter overrides <see cref="Start"/>, <see cref="Entered"/> and
-    /// <see cref="Interact"/>, and uses the helpers below. Every helper that shows something must be awaited.
+    /// One chapter's story, written as plain code. A chapter overrides <see cref="Start"/>, <see cref="Entered"/>,
+    /// <see cref="Interact"/>, <see cref="Stepped"/> and <see cref="Closed"/>, and uses the helpers below. Every helper that shows something must be awaited.
     /// Scenes are alive: anyone the story speaks through or moves leaves their activity for the scene and goes back to
     /// it after (<see cref="Wrap"/>), and a step started without awaiting it plays on through the lines that follow,
     /// so people walk and act while they talk:
@@ -37,6 +37,12 @@ namespace Shop
 
         /// <summary>Runs when the courier uses a hotspot or talks to someone; <paramref name="id"/> is the hotspot's id.</summary>
         public virtual Awaitable Interact(string id) => Done();
+
+        /// <summary>Runs when the courier steps onto an unseen spot (<see cref="Hotspot.Step"/>) for the first time in the chapter.</summary>
+        public virtual Awaitable Stepped(string id) => Done();
+
+        /// <summary>Why a way out is shut for now, which the courier says before stepping back from it; null while it is open. <paramref name="id"/> is the exit's hotspot id.</summary>
+        public virtual string Closed(string id) => null;
 
         /// <summary>Learns someone's name: the talk box and their hotspot use it from now on.</summary>
         protected void Known(string id, string displayName)

@@ -362,6 +362,8 @@
   const HILL = wavy(300, 8, 37);
   // The coast: a terrace along the north, then grass, the beach and the sea; the land runs out to a point in the east.
   const SALT = [[162, 512], [226, 512]];   // the coast's salt pans: their top left corners, each 56 by 28
+  // The east road: the road in from the city, its south verge.
+  const ROAD_IN = smooth([[-20, 262], [300, 264], [620, 254], [880, 240], [1044, 236]]), VERGE = wavy(290, 4, 50);
   const BLUFF = wavy(230, 7, 45), SHORE = x => 610 + 20 * Math.sin(x / 70) + Math.max(0, x - 800) * 0.8;
 
   const AREAS = {
@@ -505,7 +507,6 @@
         at('bench_w', V.bench(), 590, 770); at('bench_e', V.bench(), 690, 770);
         [[466, 520], [814, 520], [466, 790], [814, 790], [560, 936], [720, 936]].forEach(([x, y], i) => at('lamp_' + i, V.lamp(), x, y));
         at('notice_square', V.noticeBoard(), 866, 560);
-        at('bus_stop', V.busStop(), 1200, 676);
         at('cart', V.cart(), 250, 676); at('crates', V.crateStack(2), 1196, 600); at('barrel', V.barrel(), 1218, 610);
         [[452, 474, 'rose'], [828, 474, 'yellow'], [452, 818, 'lilac'], [828, 818, 'pink']].forEach(([x, y, c], i) => at('bed_' + i, V.flowerClump(i + 1, c), x, y, { walk: true }));
         // the lawns below the road: the well and the vegetable patch on the west, a bench under an oak on the east
@@ -536,28 +537,31 @@
 
     /* The east: a bridge over the river, Nora's stilt house on its bank, the chamomile fields and the orchard, Satria's
        home below Leo's hill and Leo's lookout on top; the playground, the aphid pen and the Gardener's glasshouse and
-       home along the lane. West to the square. */
+       home along the lane. West to the square; the lane goes on east, out to the bus stop. */
     east: {
       w: 1024, h: 832, seed: 23, bg: '#2f7a3a', start: 'from_square',
       level: (x, y) => x > 640 && y < HILL(x) ? 1 : 0,
       water: (x, y) => near(RIVER, 34, x, y) ? '~' : null,
-      roads: [[[[-20, 470], [260, 470], [600, 486], [1044, 480]], 20], [[[640, 480], [640, 740]], 12], [[[220, 740], [960, 740]], 12]],
+      roads: [[[[-20, 470], [260, 470], [600, 486], [900, 480]], 20], [[[640, 480], [640, 740]], 12], [[[220, 740], [1044, 740]], 12]],
       gap: 40,
-      clear: [[600, 480, 440, 120], [380, 190, 170, 110], [580, 690, 420, 100]],
+      clear: [[580, 480, 400, 120], [380, 190, 170, 110], [580, 690, 420, 100]],
       species: mix(P => [[0.58, P.oak], [0.61, P.autumn], [1, P.pine]]),
       fields: [260, 100],
       things(at) {
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
-        at('way_square', V.waysign('SQUARE', -1), 44, 444);
+        at('way_square', V.waysign('SQUARE', -1), 44, 444); at('way_road', V.waysign('BUS STOP', 1), 984, 714);
         // north of the road: Nora's stilt house on the river bank, the orchard, Satria's home in its quiet corner under
-        // the hill, Leo's lookout on top
+        // the hill at the road's end, Leo's lookout on top
         at('nora_house', V.noraHouse(), 316, 440, { lane: [[316, 470]] });
         [[440, 392, 'apple'], [520, 404, 'apple'], [600, 388, 'orange']].forEach(([x, y, f], i) => at('fruit_tree_' + i, V.fruitTree(i + 1, f), x, y, { sway: 1 }));
         at('orchard_bench', V.bench2(4), 520, 446); at('orchard_crates', V.crateStack(5), 452, 446);
         [[690, 400], [722, 424]].forEach(([x, y], i) => at('birch_' + i, V.birch(i + 1), x, y, { sway: 2 }));
         at('satria_home', V.satriaHome(), 860, 440, { lane: [[860, 476]] });
         at('clothesline', V.clothesline(), 950, 444);
+        at('geranium_pot', V.flowerPot(4, 'red', true), 902, 452);   // Ratih's old geranium, the house key under it
         [['cabbage', 452], ['carrot', 462]].forEach(([k, y], i) => at('satria_veg_' + i, V.vegRow(k, 40), 770, y, { walk: true }));
+        // across the road from home, Ratih's flower beds, grown over in the two years since she died
+        [[716, 548, 56, 1], [792, 562, 48, 2], [862, 546, 56, 3]].forEach(([x, y, w, k], i) => at('ratih_bed_' + i, V.overgrownBed(k, w), x, y));
         at('leo_hut', V.leoHut(), 830, 200, { lane: [[814, 250], [790, 270], [790, 360], [740, 480]] });
         // south of the road: the willow and the playground by the river, the aphid pen, the Gardener's glasshouse and home
         at('willow_0', V.willow(1), 236, 570, { sway: 2 });
@@ -571,7 +575,7 @@
         [[300, 520, 'yellow'], [560, 540, 'white'], [640, 640, 'lilac'], [420, 760, 'rose'], [960, 760, 'yellow']]
           .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 50, c), x, y, { walk: true }));
       },
-      anchors: { from_square: [40, 470] },
+      anchors: { from_square: [40, 470], from_road: [984, 740], on_bridge: [176, 468], home: [877, 452] },   // on_bridge and home (its doorstep): Satria walking in (the Prologue)
       glow: [[380, 190, 150, 90], [176, 620, 60, 120]],
       dragonflies: [[176, 300], [196, 640]],
     },
@@ -625,6 +629,33 @@
       },
       anchors: { from_square: [480, 44] },
       glow: [[250, 300, 160, 50]],
+    },
+
+    /* The east road: the way into Bellwood, past the East. The road comes out of the forest from the city and runs west
+       into the East, tall grass and reeds thick along its south verge; the wooden bus stop stands on its north side at the forest's
+       edge, its open front to the road. Where Satria arrives, and where the game ends. West to the East. */
+    eastroad: {
+      w: 1024, h: 416, seed: 27, bg: '#2f7a3a', start: 'from_east',
+      level: () => 0,
+      roads: [[ROAD_IN, 16]],
+      gap: 40,
+      clear: [[512, 258, 540, 76]],
+      species: mix(P => [[0.5, P.pine], [0.8, P.oak], [1, P.autumn]]),
+      things(at) {
+        // where the road leaves: a waymark naming where it leads, its lantern lit at night
+        at('way_east', V.waysign('EAST', -1), 44, 236);
+        // the stop at the far end, by the forest, and a bench of logs and stumps where the wait is longer
+        at('bus_stop', V.busStop(), 700, 232); at('bus_bin', V.litterBin(), 654, 234);
+        at('road_logs', V.logPile(), 780, 232);
+        // the south verge: reeds and long grass along the road, flowers in it
+        [[30, 2], [50, 12], [176, 0], [196, 10], [218, 4], [380, 8], [520, 0], [540, 12], [690, 6], [710, 0], [732, 14], [900, 4], [920, 12], [1004, 6]]
+          .forEach(([x, dy], i) => at('reeds_' + i, V.reeds(i + 1), x, VERGE(x) + dy, { walk: true }));
+        [[150, 214, 'yellow'], [330, 212, 'white'], [520, 218, 'rose'], [280, 310, 'lilac'], [640, 312, 'yellow'], [900, 212, 'white']]
+          .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 70, c), x, y, { walk: true }));
+      },
+      anchors: { from_east: [40, 262], arrive: [808, 252] },   // arrive: Satria, just off the bus (the Prologue)
+      glow: [[512, 296, 420, 30]],
+      dragonflies: [[260, 292], [720, 290]],
     },
   };
 

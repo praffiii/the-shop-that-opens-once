@@ -9,7 +9,7 @@
   const SETTLE = 0.25;                        // Sound eases into its mood's filter and echo over 10 ms; start once they're set
   const WIND = 2 / 0.07, FADE = 4;            // the wind loop: two periods of its 0.07 Hz swell, so its loudness lines up
   const MOODS = ['dusk', 'shop', 'memory', 'resolved'];
-  const EFFECTS = ['bell', 'tick', 'chime', 'motif', 'page', 'pop', 'wrong', 'right', 'whoosh', 'latch'];
+  const EFFECTS = ['bell', 'tick', 'chime', 'motif', 'page', 'pop', 'wrong', 'right', 'whoosh', 'latch', 'bus_far', 'bus_stop', 'drop'];
 
   // Math.random with a fixed seed (mulberry32), so Sound's noise, and so every export, comes out the same.
   const seeded = a => () => {

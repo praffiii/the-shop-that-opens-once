@@ -35,7 +35,7 @@
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
     motif: 'Music box: 18:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', music: 'Quiet piano and music box',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -64,7 +64,32 @@
       s._note(t, 1900, { vol: 0.03, dec: 0.05, atk: 0.001 });
       s._noise(t + 0.12, { f: 340, f2: 620, q: 3, vol: 0.3, atk: 0.06, dur: 0.32 });
     },
+    // a bus far off up the road, driving away: its engine faint and fading
+    bus_far: (s, t) => engine(s, t, 3.6, u => 0.1 - 0.03 * u, u => 0.4 * (1 - u) * (1 - u)),
+    // a bus pulling up just out of sight: its engine slowing, the brakes' hiss, the door folding open
+    bus_stop: (s, t) => {
+      engine(s, t, 2.2, u => 0.08 + 0.06 * u, u => 0.45 * (1 - 0.5 * u));
+      s._noise(t + 1.5, { type: 'highpass', f: 2800, vol: 0.16, atk: 0.02, dur: 0.55 });
+      s._noise(t + 2.3, { type: 'lowpass', f: 320, vol: 0.4, dur: 0.06, atk: 0.003 });
+      s._noise(t + 2.36, { f: 1200, q: 2, vol: 0.12, dur: 0.12, atk: 0.01 });
+    },
+    // a woven basket landing on the cobbles, then the loaves in it settling with a little bounce
+    drop: (s, t) => {
+      s._noise(t, { type: 'lowpass', f: 420, vol: 0.55, dur: 0.08, atk: 0.003 });
+      s._note(t, 110, { vol: 0.08, dec: 0.12, atk: 0.002 });
+      s._noise(t + 0.09, { f: 900, q: 1.5, vol: 0.2, dur: 0.05, atk: 0.003 });
+      s._noise(t + 0.16, { type: 'lowpass', f: 380, vol: 0.18, dur: 0.05, atk: 0.003 });
+    },
   };
+
+  // An engine's putter: a low thud of noise and a growl every period(u) seconds for dur, its loudness level(u), u 0 to 1.
+  function engine(s, t, dur, period, level) {
+    for (let at = 0; at < dur; at += period(at / dur)) {
+      const v = level(at / dur);
+      s._noise(t + at, { type: 'lowpass', f: 180, vol: 0.5 * v, dur: 0.06, atk: 0.004 });
+      s._note(t + at, 62, { type: 'triangle', vol: 0.05 * v, dec: 0.07, atk: 0.003 });
+    }
+  }
 
   class Sound {
     constructor() {
