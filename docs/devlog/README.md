@@ -35,6 +35,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [26](26-toko-marlow.md) | 2026-10-19 | Toko Marlow: interior kedua, lemari tujuh kotak, kamera mendekat di dalam ruangan | |
 | [27](27-adegan-hidup-dan-kotak-marlow.md) | 2026-10-19 | Adegan hidup: penyerahan kotak sebagai adegan sinematik, kotak dibuka dari dekat, Marlow menjaga tokonya | |
 | [28](28-naskah-baru-dan-awal-prolog.md) | 2026-10-20 | Naskah dan bible baru, Jalan Timur, dan awal prolog: dari halte sampai sambutan di alun-alun | |
+| [29](29-valdo-dan-malam-pertama.md) | 2026-10-20 | Valdo mencegat Satria, pagar berkarat, rumah keluarga, dan malam pertama: akhir Day 0 | |
 
 ## Format setiap entri
 
