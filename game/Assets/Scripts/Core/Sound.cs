@@ -13,6 +13,8 @@ namespace Shop
         const float Fade = 1.2f;
         /// <summary>The wind's volume indoors, as a fraction of outdoors.</summary>
         const float IndoorWind = 0.2f;
+        /// <summary>The music and wind while someone speaks: 3.5 dB down, under their voice.</summary>
+        const float Duck = 0.67f;
 
         public static Sound Instance { get; private set; }
 
@@ -20,10 +22,13 @@ namespace Shop
         readonly AudioSource[] music = new AudioSource[2];
         readonly float[] target = new float[3]; // the two music players, then the wind
         readonly List<AudioSource> effects = new();
-        AudioSource wind;
+        AudioSource wind, voice;
         int front, steps;
         string mood = "";
         bool muted;
+
+        /// <summary>Set by Talk while a voice is speaking: the music and wind duck under it.</summary>
+        public static bool Speaking;
 
         /// <summary>Silences everything (the pause menu's sound switch).</summary>
         public static bool Muted
@@ -50,6 +55,8 @@ namespace Shop
             for (var i = 0; i < 2; i++) music[i] = Source(true);
             wind = Source(true);
             wind.clip = Clip("wind");
+            voice = Source(false);
+            voice.volume = 1f;
             for (var i = 0; i < 6; i++) effects.Add(Source(false));
         }
 
@@ -111,6 +118,14 @@ namespace Shop
             player.Play();
         }
 
+        /// <summary>One blip of a voice (voice_&lt;id&gt;), at a pitch around 1. Each overlaps the last one's tail.</summary>
+        public static void Blip(string id, float pitch)
+        {
+            if (!Instance) return;
+            Instance.voice.pitch = pitch;
+            Instance.voice.PlayOneShot(Instance.Clip("voice_" + id));
+        }
+
         /// <summary>One footstep, cycling through its four variations.</summary>
         public static void Step(bool wood)
         {
@@ -122,10 +137,11 @@ namespace Shop
         void Update()
         {
             var sources = new[] { music[0], music[1], wind };
+            var duck = Speaking ? Duck : 1f;
             for (var i = 0; i < 3; i++)
             {
                 var s = sources[i];
-                s.volume = Mathf.MoveTowards(s.volume, target[i], Time.unscaledDeltaTime / Fade);
+                s.volume = Mathf.MoveTowards(s.volume, target[i] * duck, Time.unscaledDeltaTime / Fade);
                 if (i < 2 && target[i] == 0f && s.volume == 0f && s.isPlaying) s.Stop();
             }
         }

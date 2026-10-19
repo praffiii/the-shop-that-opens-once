@@ -91,6 +91,7 @@
     for (const mood of MOODS) await put(`music_${mood}`, await music(mood));
     await put('wind', await wind());
     for (const name of EFFECTS) await put(name, await effect(name));
+    for (const id of Sound.voices) await put(`voice_${id}`, await effect(`voice_${id}`));
     for (let k = 0; k < 4; k++) {
       await put(`step_wood_${k}`, await effect('step', { surface: 'wood' }, k));
       await put(`step_${k}`, await effect('step', {}, k));

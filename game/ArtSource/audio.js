@@ -104,6 +104,60 @@
     },
   };
 
+  /* Voice blips (the bible's 3.1B): one short syllable per letter as a line types out, Animal Crossing style. Each is
+     exported as voice_<id>; the game varies its pitch letter by letter. Anyone not listed speaks as `villager`. */
+  const VOICES = {
+    courier: (s, t) => s._note(t, 320, { type: 'triangle', vol: 0.07, dec: 0.06, atk: 0.004 }),
+    // low and slow, ringing on like an old bell in the root cave
+    marlow: (s, t) => {
+      s._note(t, 110, { partials: [[1, 1, 1], [2, 0.3, 0.4]], vol: 0.11, dec: 0.12, atk: 0.008 });
+      s._note(t + 0.02, 110, { partials: [[1, 1, 1], [3.01, 0.15, 0.5]], vol: 0.025, dec: 0.5, atk: 0.04 });
+    },
+    // a soft bell-flute; the near-octave partial gives it a slow shimmer
+    helen: (s, t) => s._note(t, 440, { partials: [[1, 1, 1], [2.006, 0.18, 0.6]], vol: 0.06, dec: 0.08, atk: 0.008 }),
+    pip: (s, t) => s._note(t, 680, { type: 'square', lp: 2600, vol: 0.035, dec: 0.035, atk: 0.002 }),
+    nora: (s, t) => s._note(t, 260, { type: 'triangle', lp: 1100, vol: 0.08, dec: 0.1, atk: 0.012 }),
+    // a shutter's click with the tone under it
+    theo: (s, t) => {
+      s._noise(t, { type: 'highpass', f: 3200, vol: 0.12, dur: 0.012, atk: 0.001 });
+      s._note(t, 290, { vol: 0.05, dec: 0.045, atk: 0.002 });
+    },
+    // a typewriter key: a dry strike and a short pulse
+    sam: (s, t) => {
+      s._noise(t, { f: 2600, q: 2, vol: 0.14, dur: 0.018, atk: 0.001 });
+      s._note(t, 360, { type: 'square', lp: 1400, vol: 0.025, dec: 0.03, atk: 0.001 });
+    },
+    leo: (s, t) => s._note(t, 220, { type: 'sawtooth', lp: 1500, vol: 0.04, dec: 0.045, atk: 0.002 }),
+    // a hammer on an anvil, far down: a thud with a dull ring
+    mender: (s, t) => {
+      s._noise(t, { type: 'lowpass', f: 260, vol: 0.35, dur: 0.05, atk: 0.002 });
+      s._note(t, 95, { partials: [[1, 1, 1], [3.7, 0.12, 0.4]], vol: 0.1, dec: 0.12, atk: 0.003 });
+    },
+    baker: (s, t) => s._note(t, 520, { vol: 0.06, dec: 0.06, atk: 0.004, glide: 1.12 }),
+    // a mellow tone with breath through it, like wind in leaves
+    gardener: (s, t) => {
+      s._note(t, 380, { partials: [[1, 1, 1], [2, 0.08, 0.5]], vol: 0.05, dec: 0.08, atk: 0.012 });
+      s._noise(t, { f: 1800, q: 0.8, vol: 0.05, dur: 0.07, atk: 0.01 });
+    },
+    // rough and low: a buzzing pulse, salted with grit
+    arlo: (s, t) => {
+      s._note(t, 150, { type: 'square', lp: 650, vol: 0.06, dec: 0.08, atk: 0.004 });
+      s._noise(t, { type: 'lowpass', f: 900, vol: 0.06, dur: 0.06, atk: 0.004 });
+    },
+    // a hollow whistle with a faint hiss of steam
+    bram: (s, t) => {
+      s._note(t, 190, { partials: [[1, 1, 1], [3, 0.1, 0.5]], vol: 0.08, dec: 0.12, atk: 0.015 });
+      s._noise(t, { type: 'highpass', f: 4200, vol: 0.05, dur: 0.1, atk: 0.02 });
+    },
+    mia: (s, t) => s._note(t, 490, { partials: WARM, vol: 0.055, dec: 0.07, atk: 0.005 }),
+    // smooth and a touch synthetic: a clean tone sliding up, as if smiling
+    valdo: (s, t) => s._note(t, 340, { partials: [[1, 1, 1], [3, 0.06, 0.5]], vol: 0.06, dec: 0.05, atk: 0.004, glide: 1.04 }),
+    // the marble trio: a quick chirp of a bell
+    kid: (s, t) => s._note(t, 720, { partials: BELL, vol: 0.04, dec: 0.04, atk: 0.002 }),
+    villager: (s, t) => s._note(t, 300, { type: 'triangle', lp: 1500, vol: 0.07, dec: 0.06, atk: 0.004 }),
+  };
+  for (const [id, blip] of Object.entries(VOICES)) FX['voice_' + id] = blip;
+
   // A hinge or a bed's creak: the wood or iron sticks and slips, pulse after pulse every gap seconds for dur, its pitch
   // sliding from f0 to f1.
   function creak(s, t, dur, f0, f1, gap) {
@@ -130,6 +184,7 @@
       this._step = 0; this._next = 0; this._timer = 0; this._voices = 0; this._n = 0; this._wind = null;
     }
     static caption(name) { return CAPTIONS[name] || ''; }
+    static get voices() { return Object.keys(VOICES); }
     get on() { return this._on; }
 
     _init() {

@@ -10,8 +10,17 @@ namespace Shop
     /// </summary>
     public sealed class Talk : MonoBehaviour
     {
-        /// <summary>Characters typed per second.</summary>
+        /// <summary>Characters typed per second when no one speaks (narration).</summary>
         const float Speed = 50f;
+        /// <summary>The voiced ones (the bible's 3.1B): seconds per letter, with a blip each in Art/sound/voice_&lt;id&gt;.
+        /// Anyone else speaks as a villager, pitched by their id.</summary>
+        static readonly Dictionary<string, float> Voices = new()
+        {
+            ["courier"] = .035f, ["marlow"] = .055f, ["helen"] = .040f, ["pip"] = .025f, ["nora"] = .048f, ["theo"] = .038f,
+            ["sam"] = .032f, ["leo"] = .028f, ["mender"] = .050f, ["baker"] = .028f, ["gardener"] = .042f, ["arlo"] = .045f,
+            ["bram"] = .052f, ["mia"] = .033f, ["valdo"] = .034f, ["kid"] = .020f, ["grandkid"] = .020f,
+        };
+        const float VillagerPace = .036f;
         const float Height = 62f;
         /// <summary>The box spans the screen up to this width.</summary>
         const float MaxWidth = 560f;
@@ -27,8 +36,8 @@ namespace Shop
         Image box, nameTag, frame, face, arrow, mark;
         Text nameText, text;
         readonly List<Text> choices = new();
-        float width = MaxWidth, typed, clock;
-        string full = "", who = "", mood = "";
+        float width = MaxWidth, typed, clock, speed = Speed, pitch = 1f;
+        string full = "", who = "", mood = "", voice = "";
         int shown, sel, picked = -1;
         bool next;
         Ant speaker;
@@ -58,6 +67,7 @@ namespace Shop
             root.gameObject.SetActive(false);
             list.gameObject.SetActive(false);
             StopSpeaker();
+            Sound.Speaking = false;
         }
 
         public bool Open => root.gameObject.activeSelf || list.gameObject.activeSelf;
@@ -87,6 +97,7 @@ namespace Shop
             full = line;
             typed = 0f;
             Type(0);
+            Voice(who);
             nameTag.gameObject.SetActive(speakerName != "");
             Look.SetText(nameText, speakerName);
             Look.Move(nameText.rectTransform, new Vector2(5, 1));
@@ -181,10 +192,15 @@ namespace Shop
             if (!root.gameObject.activeSelf) return;
             if (Typing)
             {
-                typed += Speed * Time.deltaTime;
+                typed += speed * Time.deltaTime;
+                var was = shown;
                 Type(Mathf.Min((int)typed, full.Length));
+                // One blip per frame at most, on the newest letter shown: spaces and punctuation are silent.
+                if (voice != "" && shown > was && char.IsLetterOrDigit(full[shown - 1]))
+                    Sound.Blip(voice, pitch * (1f + (char.ToLowerInvariant(full[shown - 1]) * 7 % 9 - 4) * .025f));
             }
             else StopSpeaker();
+            Sound.Speaking = voice != "" && Typing;
             arrow.gameObject.SetActive(!list.gameObject.activeSelf && !Typing);
             // Portrait frames: 0 rests, 1 has the mouth open, 2 blinks.
             if (who != "")
@@ -197,6 +213,21 @@ namespace Shop
         }
 
         bool Typing => shown < full.Length;
+
+        // Picks the voice and pace of who speaks: "" for narration, which is silent and quicker.
+        void Voice(string id)
+        {
+            pitch = 1f;
+            if (id == "") (voice, speed) = ("", Speed);
+            else if (Voices.TryGetValue(id, out var pace)) (voice, speed) = (id == "grandkid" ? "kid" : id, 1f / pace);
+            else
+            {
+                (voice, speed) = ("villager", 1f / VillagerPace);
+                var h = 0;
+                foreach (var c in id) h = h * 31 + c;
+                pitch = .85f + (h & 0x7fffffff) % 7 * .05f;
+            }
+        }
 
         // The untyped rest is laid out but transparent, so words never jump to the next line mid-way.
         void Type(int n)
