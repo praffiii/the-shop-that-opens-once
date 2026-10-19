@@ -96,7 +96,7 @@
     satria_home: {
       area: 'east', seed: 7, room: [224, 92], door: 112,
       bays: [[76, 50], [150, 50]],
-      solid: [[4, 0, 36, 30], [42, 0, 72, 14], [46, 14, 58, 24], [1, 36, 17, 62], [22, 52, 50, 60], [51, 54, 61, 60],
+      solid: [[4, 0, 36, 30], [42, 0, 72, 14], [46, 14, 58, 24], [1, 36, 17, 62], [22, 52, 50, 60], [9, 62, 19, 68],
         [79, 0, 95, 8], [98, 0, 148, 20], [100, 32, 124, 42], [132, 36, 148, 50],
         [154, 0, 222, 16], [164, 30, 200, 48], [154, 40, 166, 46], [198, 40, 210, 46], [204, 60, 224, 70],
         [82, 80, 94, 90], [130, 80, 142, 90]],
@@ -136,15 +136,16 @@
           if (which === 'right') for (const x of [3, (w >> 1) + 1]) { fill(b, x, 4, (w >> 1) - 4, h - 10, 'wood2'); fill(b, x, 4, (w >> 1) - 4, 1, 'wood1'); px(b, x === 3 ? (w >> 1) - 2 : (w >> 1) + 2, h >> 1, 'brass1'); }
           if (which === 'top') fill(b, 0, 0, w, h, 'wood4');
         });
-        // the writing desk under the window, the journal open on it and the oil lamp, its chair pulled out
+        // the writing desk under the window, the journal open on it and the oil lamp at its end by the bed, its chair pulled out
         T.box('desk_top', 42, 0, 72, 14, 13, 16, (b, w, h) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); });
         T.box('desk_drawers', 58, 2, 70, 14, 0, 13, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); if (which === 'front') for (const y of [2, 7]) { fill(b, 1, y, w - 2, 4, 'wood2'); px(b, w >> 1, y + 2, 'brass1'); } });
         T.box('desk_leg', 43, 2, 46, 14, 0, 13, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
-        T.card('journal', sprite(12, 4, b => { fill(b, 0, 0, 6, 4, 'cream0'); fill(b, 6, 0, 6, 4, 'cream1'); for (let y = 1; y < 4; y++) { fill(b, 1, y, 4, 1, y % 2 ? 'stone2' : 'cream0'); fill(b, 7, y, 3, 1, y % 2 ? 'stone2' : 'cream1'); } }), 52, 10, 16);
-        T.card('lamp', sprite(7, 13, b => { fill(b, 2, 9, 3, 4, 'brass2'); fill(b, 1, 11, 5, 2, 'brass3'); fill(b, 1, 2, 5, 7, 'cream0'); fill(b, 2, 3, 2, 5, 'light1'); fill(b, 2, 0, 3, 2, 'brass2'); }), 66, 6, 16);
-        T.card('lamp_lit', sprite(7, 13, b => { fill(b, 2, 9, 3, 4, 'brass2'); fill(b, 1, 11, 5, 2, 'brass3'); fill(b, 1, 2, 5, 7, 'light1'); fill(b, 2, 3, 3, 5, 'light0'); px(b, 3, 5, 'white'); fill(b, 2, 0, 3, 2, 'brass2'); }), 66, 6, 16, true);
+        T.card('journal', sprite(12, 4, b => { fill(b, 0, 0, 6, 4, 'cream0'); fill(b, 6, 0, 6, 4, 'cream1'); for (let y = 1; y < 4; y++) { fill(b, 1, y, 4, 1, y % 2 ? 'stone2' : 'cream0'); fill(b, 7, y, 3, 1, y % 2 ? 'stone2' : 'cream1'); } }), 55, 10, 16);
+        T.card('lamp', sprite(7, 13, b => { fill(b, 2, 9, 3, 4, 'brass2'); fill(b, 1, 11, 5, 2, 'brass3'); fill(b, 1, 2, 5, 7, 'cream0'); fill(b, 2, 3, 2, 5, 'light1'); fill(b, 2, 0, 3, 2, 'brass2'); }), 45, 6, 16);
+        T.card('lamp_lit', sprite(7, 13, b => { fill(b, 2, 9, 3, 4, 'brass2'); fill(b, 1, 11, 5, 2, 'brass3'); fill(b, 1, 2, 5, 7, 'light1'); fill(b, 2, 3, 3, 5, 'light0'); px(b, 3, 5, 'white'); fill(b, 2, 0, 3, 2, 'brass2'); }), 45, 6, 16, true);
         T.card('desk_chair', sprite(14, 22, b => { fill(b, 1, 0, 12, 3, 'wood3'); fill(b, 1, 0, 12, 1, 'wood2'); fill(b, 2, 3, 2, 9, 'wood3'); fill(b, 10, 3, 2, 9, 'wood3'); fill(b, 4, 5, 6, 1, 'wood4'); fill(b, 0, 12, 14, 3, 'wood2'); fill(b, 1, 15, 2, 7, 'wood4'); fill(b, 11, 15, 2, 7, 'wood4'); }), 52, 24);
-        // Ibu Ratih's treadle sewing machine, walnut on iron legs, and her tin of fabric scraps on the floor beside it
+        // Ibu Ratih's treadle sewing machine, walnut on iron legs, and her tin of fabric scraps on the floor beside it (by
+        // the wardrobe, clear of the way between the bedroom and the rest of the house)
         T.card('sewing_machine', sprite(28, 26, b => {
           for (const x of [2, 22]) { fill(b, x, 12, 3, 14, 'iron3'); fill(b, x, 12, 1, 14, 'iron2'); }
           fill(b, 5, 19, 17, 5, 'iron3'); for (let x = 6; x < 21; x += 3) fill(b, x, 20, 1, 3, 'iron4'); fill(b, 9, 24, 9, 2, 'iron2');
@@ -152,7 +153,7 @@
           fill(b, 6, 1, 15, 3, 'iron4'); fill(b, 17, 1, 4, 8, 'iron4'); fill(b, 6, 4, 3, 5, 'iron4'); fill(b, 7, 1, 13, 1, 'iron3'); fill(b, 9, 2, 6, 1, 'brass1'); px(b, 19, 5, 'brass1');
           fill(b, 22, 3, 3, 4, 'iron3'); px(b, 23, 4, 'brass2');
         }), 36, 60);
-        T.card('scrap_tin', sprite(12, 10, b => { fill(b, 0, 3, 12, 7, 'roofB2'); fill(b, 0, 3, 12, 1, 'roofB1'); fill(b, 2, 5, 8, 3, 'roofB3'); fill(b, 3, 6, 6, 1, 'brass1'); fill(b, 1, 0, 3, 4, 'rose'); fill(b, 4, 1, 3, 3, 'yellow'); fill(b, 7, 0, 4, 4, 'roofG1'); }), 56, 60);
+        T.card('scrap_tin', sprite(12, 10, b => { fill(b, 0, 3, 12, 7, 'roofB2'); fill(b, 0, 3, 12, 1, 'roofB1'); fill(b, 2, 5, 8, 3, 'roofB3'); fill(b, 3, 6, 6, 1, 'brass1'); fill(b, 1, 0, 3, 4, 'rose'); fill(b, 4, 1, 3, 3, 'yellow'); fill(b, 7, 0, 4, 4, 'roofG1'); }), 14, 68);
         // the family room: Ayah's books, the dusty sofa against the back wall, his radio on its side table, the tea table
         T.box('bookshelf', 79, 0, 95, 8, 0, 44, (b, w, h, l, which) => {
           fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');

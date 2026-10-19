@@ -1820,6 +1820,16 @@
     ocdcdcdco
     .ooooooo.`, { o: 'wood4', a: 'dirt1', b: 'dirt0', c: 'wood2', d: 'wood3' });
 
+  // Valdo's briefcase, held by its handle: polished dark leather, brass clasps.
+  XS.briefcase = () => S(`
+    ...oooo...
+    ...o..o...
+    oooooooooo
+    ohbhhhhbho
+    ollllllllo
+    oddddddddo
+    oooooooooo`, { o: 'ink', h: 'wood3', b: 'brass1', l: 'wood4', d: 'wood5' });
+
   /* ================================================================ ICONS (16x16, ink outline) */
   const ICK = { o: 'ink' };
   ICONS.bag = () => S(`

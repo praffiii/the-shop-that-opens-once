@@ -66,7 +66,7 @@ namespace Shop
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {
-                if (!Here(p.Chapters) || !Now(p.Phases)) continue;
+                if (!Here(p.Chapters) || !Now(p.Phases) || (p.After != null && !Game.Has(p.After))) continue;
                 var ant = Ant.Create(p.Id, place.World.transform);
                 Villager.Add(ant, p, place);
                 place.people[p.Id] = ant;
@@ -118,9 +118,13 @@ namespace Shop
 
         // Marlow's shop follows the story: a lantern goes out for each night resolved and the clock moves on a minute
         // from 10:17. Each night's box stays shut in the cabinet until Marlow hands it over; its cubby is empty while
-        // the courier has it, and once the night is resolved it is back, open and empty.
+        // the courier has it, and once the night is resolved it is back, open and empty. Satria's yard gate is shut
+        // until he first pushes it open, coming home on Day 0.
         void FollowStory()
         {
+            var shut = Game.Chapter == 0 && !Game.Has("stepped_gate");
+            World.ShowItemIfAny("satria_gate", shut);
+            World.ShowItemIfAny("satria_gate_open", !shut);
             for (var i = 0; i < 7; i++)
             {
                 World.ShowItemIfAny($"lantern_{i}", i >= Game.LanternsOut);

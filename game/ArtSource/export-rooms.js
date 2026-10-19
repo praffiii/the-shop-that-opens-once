@@ -9,7 +9,7 @@
   // The scene's sorted props, in the order toyshop.js pushes them.
   const TOYSHOP_PROPS = ['workbench', 'rocking_horse', 'blocks', 'toy_chest', 'sewing_basket', 'train', 'tea_party', 'pram', 'dress_form', 'geranium', 'parcels', 'scrap_basket'];
   // IT.item names and their variants (ART.md, items contract), and the IT.icon names. '' is the plain image, written without a suffix.
-  const ITEMS = { watch: ['front', 'back', 'side'], doll: ['', 'foot'], camera: [], key: [], shoes: [], book: [], letter: [], musicbox: ['closed', 'open'], parcel: [], suitcase: [], contract: [], purse: [], shirt: [], biscuit: [], basket: [], homekey: [] };
+  const ITEMS = { watch: ['front', 'back', 'side'], doll: ['', 'foot'], camera: [], key: [], shoes: [], book: [], letter: [], musicbox: ['closed', 'open'], parcel: [], suitcase: [], contract: [], purse: [], shirt: [], biscuit: [], basket: [], homekey: [], briefcase: [] };
   const ICONS = ['bag', 'look', 'talk', 'hand', 'lantern', 'clock', 'heart', 'note', 'sound-on', 'sound-off'];
 
   PARTS.rooms = () => { toyshop(); itemsAndIcons(); };

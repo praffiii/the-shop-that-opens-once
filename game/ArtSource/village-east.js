@@ -205,6 +205,40 @@
     return { img: out.canvas(), ax: 8, ay: G + 1, base: [-6, 6], foot: 4, shadow: [6, 2] };
   }
 
+  /* Satria's front yard: low iron railings along the road gone rusty in the years nobody painted them, n bars 6 px
+     apart, a spear tip on each; and the gate in them between two stout posts, shut, or pushed open into the yard. */
+  const RUST = ['wood3', 'roofR3', 'wood4'];
+  function ironFence(n = 10) {
+    const S = 6, W = (n - 1) * S + 2, G = 16;
+    const out = inked(W, G + 1, b => {
+      for (const y of [4, 12]) { fill(b, 0, y, W, 1, 'iron3'); px(b, (y * 7) % W, y, RUST[0]); }
+      for (let i = 0; i < n; i++) {
+        const x = i * S;
+        fill(b, x, 2, 2, G - 2, 'iron3'); fill(b, x, 2, 1, G - 2, 'iron2'); fill(b, x, 0, 2, 2, 'iron4');
+        if (i % 3 !== 1) { px(b, x + 1, 7 + (i % 4), RUST[i % 3]); px(b, x, G - 2, RUST[(i + 1) % 3]); }
+      }
+    });
+    return { img: out.canvas(), ax: 1, ay: G + 1, base: [0, W], foot: 3 };
+  }
+  function yardGate(open) {
+    const W = 30, G = 20, post = (b, x) => { fill(b, x, 2, 3, G - 2, 'iron4'); fill(b, x, 2, 1, G - 2, 'iron3'); fill(b, x - 1, 0, 5, 2, 'iron3'); fill(b, x - 1, 0, 5, 1, 'iron2'); };
+    const out = inked(W, G + 1, b => {
+      post(b, 1); post(b, W - 4);
+      if (open) {
+        // the leaf swung in on its hinges: seen edge on, its bars crowd together beside the left post, rising away
+        for (let k = 0; k < 4; k++) { fill(b, 3 + k, 3 - k, 1, G - 6, k % 2 ? 'iron2' : 'iron3'); }
+        line(b, 3, 6, 7, 3, 'iron4'); line(b, 3, G - 5, 7, G - 8, 'iron4'); px(b, 5, 9, RUST[1]);
+      } else {
+        // the shut leaf: a frame, a scroll of bent iron along the top, bars, a latch bar and rust where hands held it
+        fill(b, 3, 4, W - 6, 1, 'iron3'); fill(b, 3, G - 4, W - 6, 1, 'iron3'); fill(b, 3, 10, W - 6, 1, 'iron3');
+        for (let x = 5; x < W - 4; x += 4) { fill(b, x, 4, 1, G - 7, 'iron3'); px(b, x, 5 + (x % 5), 'iron2'); }
+        for (const cx of [10, 19]) { ring(b, cx, 7, 2, 'iron3'); }
+        fill(b, W - 7, 9, 3, 2, 'iron4'); px(b, W - 6, 9, RUST[1]); px(b, W - 5, 10, RUST[0]); px(b, 8, G - 4, RUST[2]); px(b, 17, 12, RUST[0]);
+      }
+    });
+    return { img: out.canvas(), ax: (W >> 1) + 1, ay: G + 1 };
+  }
+
   /* Ratih's flower beds, left to grow over in the two years since she died: a bed edged with stones, its chamomile and
      lavender lost in waist-high grass and weeds. len: its width. */
   function overgrownBed(seed = 1, len = 56) {
@@ -338,5 +372,5 @@
     return { img: frames[0], frames, fps: 2, ax: W / 2 + 1, ay: G + 1, base: [-W / 2, W / 2], foot: G - back, gate: [39 + 1 - (W / 2 + 1), 0] };
   }
 
-  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, litterBin, overgrownBed, swing, playground, chamomile, fieldFence, aphidPen });
+  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, litterBin, ironFence, yardGate, overgrownBed, swing, playground, chamomile, fieldFence, aphidPen });
 })();

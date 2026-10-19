@@ -559,6 +559,12 @@
         at('satria_home', V.satriaHome(), 860, 440, { lane: [[860, 476]] });
         at('clothesline', V.clothesline(), 950, 444);
         at('geranium_pot', V.flowerPot(4, 'red', true), 902, 452);   // Ratih's old geranium, the house key under it
+        // the front yard: rusty railings along the road with the gate to the door between them (shut until Satria
+        // pushes it open: satria_gate_open), bushes closing its sides up to the house, wild grass grown up to the steps
+        at('yard_fence_0', V.ironFence(10), 806, 470); at('yard_fence_1', V.ironFence(10), 893, 470);
+        at('satria_gate', V.yardGate(false), 877, 470, { walk: true }); at('satria_gate_open', V.yardGate(true), 877, 470, { walk: true });
+        [[800, 452], [800, 462], [952, 452], [952, 462]].forEach(([x, y], i) => at('yard_bush_' + i, V.bush({ r: 5, seed: 60 + i }), x, y, { foot: 8 }));
+        [[836, 458, 3], [858, 464, 7], [922, 462, 9]].forEach(([x, y, k], i) => at('yard_grass_' + i, V.reeds(k), x, y, { walk: true }));
         [['cabbage', 452], ['carrot', 462]].forEach(([k, y], i) => at('satria_veg_' + i, V.vegRow(k, 40), 770, y, { walk: true }));
         // across the road from home, Ratih's flower beds, grown over in the two years since she died
         [[716, 548, 56, 1], [792, 562, 48, 2], [862, 546, 56, 3]].forEach(([x, y, w, k], i) => at('ratih_bed_' + i, V.overgrownBed(k, w), x, y));

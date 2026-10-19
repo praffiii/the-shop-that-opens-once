@@ -54,6 +54,8 @@ namespace Shop
         public int[] Chapters;
         /// <summary>The times of day they are there; null means at any time.</summary>
         public Phase[] Phases;
+        /// <summary>They are there only once the story has marked this flag (someone who turns up after a scene); null means from the start.</summary>
+        public string After;
         /// <summary>Stops they walk round in turn, starting at the first, instead of staying at <see cref="At"/>.</summary>
         public Stop[] Round;
         /// <summary>What they say when the chapter has nothing for them.</summary>

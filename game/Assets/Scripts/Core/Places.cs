@@ -397,6 +397,13 @@ namespace Shop
                         Id = "theo", At = V(186, 456), Label = "Theo", Spot = V(-18, 6), Pose = "look", Facing = 1, Chapters = DayZero, Phases = new[] { Phase.Dusk },
                         Line = "The sea wind never changes here, Satria. Nor do we, much.",
                     },
+                    // Day 0, once the square has welcomed Satria: Valdo, the city's land agent, waiting by the waymark at
+                    // the road's turn into the East to catch him on his way home.
+                    new Person
+                    {
+                        Id = "valdo", At = V(72, 452), Label = "Valdo", Spot = V(18, 6), Facing = -1, After = "welcomed", Chapters = DayZero, Phases = new[] { Phase.Dusk },
+                        Line = "The morning of Day Eight, Saudara Satria. The investors don't like waiting. Nor do I.",
+                    },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {
@@ -414,7 +421,9 @@ namespace Shop
                     West("to_square", 470, "To the square", "square/from_east"),
                     East("to_road", 1024, 740, "To the bus stop", "eastroad/from_east"),
                     new Hotspot { Id = "home_door", At = V(877, 440), Label = "Home", Area = R(-10, -30, 20, 36), Spot = V(0, 10), ExitTo = "satria_home/door" },
-                    new Hotspot { Id = "geranium", At = V(902, 452), Label = "Geranium pot", Area = R(-8, -22, 16, 22), Spot = V(0, 12), Chapters = DayZero },
+                    new Hotspot { Id = "geranium", At = V(902, 452), Label = "Geranium pot", Area = R(-8, -22, 16, 22), Spot = V(0, 9), Chapters = DayZero },
+                    // Day 0: the yard gate, pushed open on the way in
+                    new Hotspot { Id = "gate", At = V(877, 470), Area = R(-8, -8, 16, 12), Step = true, Chapters = DayZero },
                     // Day 0, on Satria's way in: a band across the East west of his home, which every way from the bus stop
                     // crosses, where he looks back at the house; and the bridge
                     new Hotspot { Id = "glimpse", At = V(620, 640), Area = R(-8, -260, 16, 452), Step = true, Chapters = DayZero },
@@ -533,6 +542,13 @@ namespace Shop
                 Hotspots = new[]
                 {
                     new Hotspot { Id = "door", At = V(877, 440), Label = "Outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "east/satria_home_door" },
+                    // what Satria finds of his family on Day 0: their photo over the sofa, Ayah's radio, Ibu's sewing
+                    // machine, the kitchen's water jar, and the bed he sleeps in
+                    new Hotspot { Id = "photo", At = V(892, 349), Label = "Family photo", Area = R(-24, -86, 48, 32), Spot = V(0, 26), Chapters = DayZero },
+                    new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(0, 11), Chapters = DayZero },
+                    new Hotspot { Id = "sewing", At = V(785, 408), Label = "Sewing machine", Area = R(-24, -29, 48, 30), Spot = V(14, 10), Chapters = DayZero },
+                    new Hotspot { Id = "water_jar", At = V(979, 418), Label = "Water jar", Area = R(-10, -24, 20, 24), Spot = V(0, 10), Chapters = DayZero },
+                    new Hotspot { Id = "bed", At = V(785, 378), Label = "Bed", Area = R(-36, -56, 55, 54), Spot = V(14, 6), Chapters = DayZero },
                 },
             },
             // Marlow's shop at the end of the grove path, cut open the same way: Marlow behind the counter, the clock

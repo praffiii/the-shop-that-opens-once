@@ -35,7 +35,7 @@
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
     motif: 'Music box: 18:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', music: 'Quiet piano and music box',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -80,7 +80,39 @@
       s._noise(t + 0.09, { f: 900, q: 1.5, vol: 0.2, dur: 0.05, atk: 0.003 });
       s._noise(t + 0.16, { type: 'lowpass', f: 380, vol: 0.18, dur: 0.05, atk: 0.003 });
     },
+    // a rusty iron gate pushed open, its hinges shrieking, and its latch clacking against the post
+    gate: (s, t) => {
+      creak(s, t, 0.9, 1400, 900, 0.05);
+      s._noise(t + 0.95, { type: 'highpass', f: 1800, vol: 0.2, dur: 0.03, atk: 0.001 });
+      s._note(t + 0.95, 820, { type: 'triangle', vol: 0.05, dec: 0.18, atk: 0.001 });
+    },
+    // the key turned in the lock (click), then the heavy teak door dragging open on its old hinges
+    door: (s, t) => {
+      s._noise(t, { type: 'highpass', f: 2400, vol: 0.18, dur: 0.02, atk: 0.001 });
+      s._note(t, 1700, { vol: 0.03, dec: 0.04, atk: 0.001 });
+      creak(s, t + 0.5, 1.3, 520, 300, 0.07);
+      s._noise(t + 0.5, { type: 'lowpass', f: 300, vol: 0.18, atk: 0.3, dur: 1.2 });
+    },
+    // the old bed's springs giving under a tired body
+    bed: (s, t) => { creak(s, t, 0.5, 700, 560, 0.06); creak(s, t + 0.65, 0.3, 640, 600, 0.07); },
+    // a soft breath, and the flame gone
+    blow: (s, t) => s._noise(t, { f: 900, f2: 500, q: 0.6, vol: 0.3, atk: 0.08, dur: 0.5 }),
+    // crickets outside in the dark: two of them, a few chirps each, one a little farther off
+    crickets: (s, t) => {
+      for (let k = 0; k < 6; k++) for (const [at, f, v] of [[0, 4300, 0.03], [0.37, 4700, 0.018]])
+        for (let p = 0; p < 3; p++) s._note(t + at + k * 0.62 + p * 0.045, f, { vol: v, dec: 0.03, atk: 0.004 });
+    },
   };
+
+  // A hinge or a bed's creak: the wood or iron sticks and slips, pulse after pulse every gap seconds for dur, its pitch
+  // sliding from f0 to f1.
+  function creak(s, t, dur, f0, f1, gap) {
+    for (let at = 0, k = 0; at < dur; at += gap * (0.8 + 0.4 * ((k * 7) % 5) / 4), k++) {
+      const f = f0 + (f1 - f0) * at / dur;
+      s._noise(t + at, { f, q: 9, vol: 0.32, dur: 0.05, atk: 0.004 });
+      s._note(t + at, f / 2, { type: 'triangle', vol: 0.025, dec: 0.05, atk: 0.003 });
+    }
+  }
 
   // An engine's putter: a low thud of noise and a growl every period(u) seconds for dur, its loudness level(u), u 0 to 1.
   function engine(s, t, dur, period, level) {

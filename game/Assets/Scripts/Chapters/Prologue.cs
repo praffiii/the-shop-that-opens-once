@@ -5,9 +5,10 @@ namespace Shop
 {
     /// <summary>
     /// The Prologue, The Boy Who Left (Day 0): Satria comes home to Bellwood at dusk with the agent's sale contract.
-    /// So far its first part: off the bus at the stop on the road in, through the East past a glimpse of home and over
-    /// the bridge, and the village's welcome in the square. Day 0 keeps to the story's path: the ways off it are shut,
-    /// each with its reason.
+    /// Off the bus at the stop on the road in, through the East past a glimpse of home and over the bridge, the
+    /// village's welcome in the square, Valdo waiting at the road's turn into the East, and home: the gate, the key,
+    /// what is left of his family in the house, and his first night there. Day 0 keeps to the story's path: the ways
+    /// off it are shut, each with its reason.
     /// </summary>
     public sealed class Prologue : Chapter
     {
@@ -18,7 +19,7 @@ namespace Shop
             Game.Phase = Phase.Dusk;
             // Satria knows everyone here: he grew up with them
             foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Nenek Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
-                         ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder") })
+                         ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder"), ("valdo", "Valdo") })
                 Known(id, name);
             Game.Bag.AddRange(new[] { "shirt", "purse", "contract" });
             await Card("Prologue: The Boy Who Left", "16:30, the bus stop on the road into Bellwood");
@@ -45,6 +46,20 @@ namespace Shop
         public override async Awaitable Entered(string place)
         {
             if (place == "square" && !Game.Has("welcomed")) await Welcome();
+            if (place == "east" && Main.Place.Actor("valdo") is { } valdo)
+            {
+                valdo.Held = Keepsakes.Art("briefcase", "xs", "");
+                if (!Game.Has("met_valdo")) await MeetValdo();
+            }
+            // through the door for the first time
+            if (place == "satria_home" && !Game.Has("home"))
+            {
+                Game.Mark("home");
+                Sfx("door");
+                await Wait(0.6f);
+                await ShowText("The key turns in the lock: click. The teak door gives inward with a heavy creak, and the room's still, stale air meets him, smelling of old paper.");
+                Hint("Look round the house.");
+            }
         }
 
         public override string Closed(string id) => id switch
@@ -67,6 +82,17 @@ namespace Shop
                     await Wait(1.2f);
                     await Say("courier", "...Not yet.");
                     await Look(null);
+                    break;
+                // the yard gate shrieks open on its rusty hinges, into a yard gone wild
+                case "gate":
+                    Actor("courier").FaceAway();
+                    Sfx("gate");
+                    await Wait(0.5f);
+                    Main.Place.World.ShowItemIfAny("satria_gate", false);
+                    Main.Place.World.ShowItemIfAny("satria_gate_open", true);
+                    await Wait(0.6f);
+                    await ShowText("The rusty iron gate shrieks as he pushes it: creak, clack. Wild grass has crept right up to the porch's wooden steps.");
+                    await ShowText("The dusk wind blows cold, carrying the smell of wet earth and a childhood that aches to remember.");
                     break;
                 // onto the bridge, Theo at its rail waving him in
                 case "bridge":
@@ -97,6 +123,27 @@ namespace Shop
                     break;
                 case "geranium":
                     await ShowText(Game.Bag.Contains("homekey") ? "Mother's geranium. Still flowering, somehow, with no one to water it." : "Mother's old geranium in its cracked clay pot. Still flowering, somehow.");
+                    break;
+                // the house as his family left it
+                case "photo":
+                    Actor("courier").FaceAway();
+                    await ShowText("A family photo behind dusty glass: Father smiling proudly in his mechanic's cap, Mother with her arm round little Satria's shoulders, still in his school uniform.");
+                    if (!Game.Has("monologue")) await Monologue();
+                    break;
+                case "radio":
+                    await ShowText("Father's old wooden valve radio on its little corner table. Its knobs are thick with dust, its copper aerial folded stiff.");
+                    break;
+                case "sewing":
+                    await ShowText("Mother's treadle sewing machine. Beside it, her tin of red thread, a small gold needle and her cloth scissors, laid out as neatly as if she had stepped out five minutes ago.");
+                    break;
+                case "water_jar":
+                    await ShowText("The clay water jar and its coconut-shell dipper, set neatly in the corner. The little stove wears a fine blanket of dust.");
+                    break;
+                case "bed" when !Game.Has("monologue"):
+                    await Say("courier", "Not yet. I've hardly looked round.");
+                    break;
+                case "bed":
+                    await FirstNight();
                     break;
                 case "bus_bin":
                     await ShowText("A wooden bin, clean but for a few pine cuttings. The ants out here still sort their dry leaves with care.");
@@ -133,6 +180,72 @@ namespace Shop
                     await Chat(id);
                     break;
             }
+        }
+
+        // 17:15, at the road's turn into the East: Valdo has waited by the waymark since the bus, and steps into
+        // Satria's way as he comes home from the square.
+        async Awaitable MeetValdo()
+        {
+            Game.Mark("met_valdo");
+            await Cinema(true);
+            var courier = Actor("courier");
+            var valdo = Actor("valdo");
+            var walking = Walk("courier", new Vector2(110, 470));
+            await Wait(0.8f);
+            await Say("valdo", "Ah, Saudara Satria! Right on time. I've been waiting for your bus since three o'clock.", "smile");
+            await walking;
+            var stepping = Walk("valdo", new Vector2(80, 468));
+            await Look(new Vector2(95, 466));
+            await stepping;
+            valdo.FaceTo(courier.Feet.x);
+            courier.FaceTo(valdo.Feet.x);
+            await Say("courier", "Pak Valdo... I've barely set foot in the village.");
+            await Say("valdo", "I understand, I understand. Homesick, of course. But business can't wait for nostalgia, Saudara Satria.");
+            await Say("valdo", "The sugar mill's investors in the capital have the money ready. They need your late parents' land settled before the week is out: by the morning of Day Eight, to be exact.");
+            await Say("valdo", "The draft agreement is already in your bag. Sign the stamped page, and the transfer clears every instalment on your courier's motorbike in the city. Clear out the house, pack what matters, and we sign the day after tomorrow. Agreed?");
+            await Say("courier", "Give me a few days to put my mother's things in order, Pak Valdo.");
+            await Say("valdo", "Of course. But remember the deadline: the morning of Day Eight. Don't let a golden chance slip away because the country air has lulled you.");
+            Note("Valdo wants the sale contract signed by the morning of Day Eight.");
+            await Cinema(false);
+            await Look(null);
+        }
+
+        // At the family photo: what Satria came home for, and what he will not let the house do to him.
+        async Awaitable Monologue()
+        {
+            Game.Mark("monologue");
+            await Cinema(true);
+            await Say("courier", "The old green velvet sofa... Father's valve radio... the walnut table where the three of us ate boiled sweet potatoes every night of the rainy season...");
+            await Say("courier", "Everything is just as it was eleven years ago, when I walked out with my worn canvas rucksack for the city bus.");
+            await Say("courier", "The dust comes away thick on my fingers when I touch the glass. Father... Mother... I'm sorry.", "moved");
+            await Say("courier", "I didn't come back to Bellwood for old times' sake. I came back to settle the deed with that land agent, clear what's left of my debts in the city, and go again, as far away as I can.");
+            await Say("courier", "This village is too quiet, and thinking of the two of you in this empty house only makes my chest tighter.");
+            await Say("courier", "Three days. Just three days, and it's all over.");
+            await Cinema(false);
+            Hint("Rest when you're ready: the bed is in the bedroom, by the west wall.");
+        }
+
+        // His first night home: onto the old kapok bed, the lamp blown out, the crickets outside, and the dark.
+        async Awaitable FirstNight()
+        {
+            await Cinema(true);
+            var courier = Actor("courier");
+            courier.Feet = new Vector2(795, 366); // on the middle of the bed
+            courier.Seat = 12;
+            courier.Pose = "sit";
+            courier.FaceTo(809); // to the lamp on the desk by the bed
+            Sfx("bed");
+            await Wait(0.8f);
+            await ShowText("The old kapok mattress creaks under his tired body. It smells of old kapok and faded sheets.");
+            Sfx("blow");
+            Main.Place.World.ShowItemIfAny("lamp_lit", false);
+            await Wait(0.8f);
+            await ShowText("He blows out the lamp. A thin wisp of smoke curls up, smelling of warm paraffin.");
+            // the crickets outside carry on into the dark, over the chapter's last card
+            Main.Talk.Close();
+            Sfx("crickets");
+            await Wait(1.5f);
+            await Main.EndChapter();
         }
 
         // Into the square, the village's talk carries on the evening air, and Helen, at the bread stall, sees who has come

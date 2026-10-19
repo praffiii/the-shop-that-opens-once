@@ -386,6 +386,16 @@
         { z: 'hat', at: [-1, -1], rows: ['...111111...', '.1122222223.', '1222222222333'], key: { 1: 'stone2', 2: 'stone3', 3: 'stone4' } },
       ],
     },
+    // Agen Valdo, the city's property agent (GDD 6.15): a modern charcoal wool suit over a white shirt, a maroon silk
+    // tie, gold-rimmed glasses; his polished leather briefcase is held in his hand (the item).
+    valdo: { sleeve: ['iron3', 'iron4'],
+      torso: { rows: ['.jJJww.', 'jJJJwrK', 'jJJJwrK', 'jJJJJrK', 'jJJJJRK', 'JJJJJKK', '.JJKKK.', '..KKK..'],
+               key: { j: 'iron2', J: 'iron3', K: 'iron4', w: 'white', r: 'roofR3', R: 'roofR4' } },
+      parts: [
+        { z: 'face', ol: false, at: [4, 3], rows: ['.oooo.', 'o....o', 'o....o', 'o....o', '.oooo.'], key: { o: 'brass1' } },
+        { z: 'face', ol: false, at: [0, 4], rows: ['oooo'], key: { o: 'brass2' } },
+      ],
+    },
   };
   const IDS = Object.keys(CAST);
 
@@ -1208,6 +1218,18 @@
         region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 14, 6) && y <= P.cy - 4, (x, y) => band(x - P.cx + (y - P.cy), -22, -8, ['stone2', 'stone3', 'stone4']));
         rect(g, P.cx + 4, P.cy - 5, 12, 2, 'stone4');
       }); } },
+    valdo: { cloth: ['iron2', 'iron3', 'iron4'],
+      bust(g) {
+        region(g, (x, y) => inBust(x, y) && Math.abs(x - 28) <= (y - 33) * 0.45 + 1, (x) => (x > 29 ? 'cream0' : 'white'));   // the shirt's V
+        line(g, 24, 34, 26, 47, 'iron4'); line(g, 32, 34, 30, 47, 'iron4'); line(g, 23, 34, 25, 47, 'iron2');                      // the lapels
+        rect(g, 27, 34, 3, 2, 'roofR3'); line(g, 28, 36, 28, 47, 'roofR3'); line(g, 29, 36, 29, 47, 'roofR4');                     // the tie
+        rect(g, 13, 40, 5, 2, 'white'); dot(g, 14, 39, 'white');                                                                  // the pocket square
+      },
+      face(x, P) {   // gold-rimmed glasses, the near lens round the eye and the far one beyond the bridge
+        region(x, (x, y) => inE(x, y, P.ex + 3, P.ey + 4, 5, 5) && !inE(x, y, P.ex + 3, P.ey + 4, 4, 4), () => 'brass1');
+        region(x, (x, y) => inE(x, y, P.ex + 11, P.ey + 4, 2, 5) && !inE(x, y, P.ex + 11, P.ey + 4, 1, 4), () => 'brass1');
+        line(x, P.ex + 8, P.ey + 3, P.ex + 9, P.ey + 3, 'brass2'); line(x, P.ex - 2, P.ey + 3, P.cx - 10, P.cy - 1, 'brass2');
+      } },
     sam: { cloth: ['moss0', 'moss1', 'moss2'],
       bust(g) { region(g, (x, y) => inBust(x, y) && x >= 25 && x <= 31, () => 'white'); region(g, (x, y) => inE(x, y, 28, 34, 6, 2), (x, y) => (y < 34 ? 'white' : 'stone1'));
         for (let y = 38; y < 48; y += 2) { dot(g, 22, y, 'moss2'); dot(g, 34, y, 'moss2'); } dot(g, 28, 40, 'stone2'); dot(g, 28, 44, 'stone2'); } },
