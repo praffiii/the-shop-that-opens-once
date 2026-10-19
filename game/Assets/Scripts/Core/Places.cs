@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Shop
 {
     /// <summary>
-    /// Every place in the game: Bellwood outdoors, one area per part of town (ArtSource/areas.js), and the interiors.
-    /// The shop still comes from the Godot build until the nine interiors are drawn. A place copies its hotspots, so these stay as written.
+    /// Every place in the game: Bellwood outdoors, one area per part of town (ArtSource/areas.js), and the interiors
+    /// (ArtSource/inside.js). The shop still comes from the Godot build until it is redrawn. A place copies its hotspots, so these stay as written.
     /// </summary>
     public static class Places
     {
@@ -388,7 +388,11 @@ namespace Shop
                         Line = "I'm not playing, I'm on my break! Couriers get breaks, don't they?",
                     },
                 },
-                Hotspots = new[] { West("to_square", 470, "To the square", "square/from_east") },
+                Hotspots = new[]
+                {
+                    West("to_square", 470, "To the square", "square/from_east"),
+                    new Hotspot { Id = "home_door", At = V(877, 440), Label = "Home", Area = R(-10, -30, 20, 36), Spot = V(0, 10), ExitTo = "satria_home/door" },
+                },
             },
             ["coast"] = new PlaceDef
             {
@@ -474,6 +478,19 @@ namespace Shop
                 {
                     new Hotspot { Id = "shop_door", At = V(300, 236), Label = "A small door", Area = R(-10, -30, 20, 32), Spot = V(0, 14), ExitTo = "shop/door" },
                     new Hotspot { Id = "to_station", At = V(636, 500), Label = "To the station", Area = R(-12, -24, 16, 48), Spot = V(-6, 0), ExitTo = "station/from_grove" },
+                },
+            },
+            // Satria's childhood home in the east, cut open as HD-2D shows a room (ArtSource/inside.js).
+            ["satria_home"] = new PlaceDef
+            {
+                Id = "satria_home",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                WoodFloor = true,
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(877, 440), Label = "Outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "east/satria_home_door" },
                 },
             },
             ["shop"] = new PlaceDef

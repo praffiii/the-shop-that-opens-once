@@ -219,6 +219,9 @@ namespace Shop
         /// <summary>Turns its back to the camera.</summary>
         public void FaceAway() => Turn(Heading.Back);
 
+        /// <summary>Turns to face the camera.</summary>
+        public void FaceCamera() => Turn(Heading.Front);
+
         public void FaceTo(float x)
         {
             heading = Heading.Side;

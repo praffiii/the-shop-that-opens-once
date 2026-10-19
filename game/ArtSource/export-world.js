@@ -5,8 +5,8 @@
    clips placed as decals, and every depth-sorted thing is an item. An area is drawn once, at midday; the game grades
    it for the time of day with KIT.GRADES (grades.json). */
 (() => {
-  // Each outdoor area is its own place.
-  PARTS.areas = () => AREA.ids.forEach(id => bake(id, AREA.build(id)));
+  // Each outdoor area is its own place, and so is each room (inside.js).
+  PARTS.areas = () => { AREA.ids.forEach(id => bake(id, AREA.build(id))); INSIDE.ids.forEach(id => bake(id, INSIDE.build(id))); };
 
   function bake(id, S) {
     const W = S.w, H = S.h;
@@ -18,6 +18,7 @@
     BAKE.place(id, 'day', {
       size: [S.area[2], S.area[3]], origin: [-S.area[0], -S.area[1]], bg: S.bg, below: BAKE.still(W, H, g => g.drawImage(S.ground, 0, 0)), above: null,
       clips, decals: { below: S.decals.below.map(decal) }, items, anchors: S.anchors, paths: S.paths,
+      ...(S.room ? { extra: { room: [S.room[0] - S.area[0], S.room[1] - S.area[1], S.room[2] - S.area[0], S.room[3] - S.area[1]] } } : {}),
     });
     BAKE.json('grades.json', KIT.GRADES);
     BAKE.png(`places/${id}/height.png`, heightMap(S));

@@ -582,5 +582,5 @@
     return { img: out.canvas(), ax: (W >> 1) + 1, ay: H + 1, base: [-3, 3], foot: 3, lit: [[4, 6, 8, 9]] };
   }
 
-  Object.assign(VIL, { house, hangSign, awning3d, modelCard: card, fountain, hall, bakery, postOffice, townHome, stall, noticeBoard, bunting, bench, lamp });
+  Object.assign(VIL, { wallPanel: wall, win, house, hangSign, awning3d, modelCard: card, fountain, hall, bakery, postOffice, townHome, stall, noticeBoard, bunting, bench, lamp });
 })();

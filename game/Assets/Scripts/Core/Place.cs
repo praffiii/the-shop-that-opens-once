@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Shop
@@ -22,6 +23,7 @@ namespace Shop
 
         /// <summary>The half width of the dark spot each ant casts on what it stands on, in world units (art px times scale).</summary>
         static readonly float SpotWidth = 7 * Scale.x;
+        static readonly int RoomId = Shader.PropertyToID("_Room");
         static readonly int FeetId = Shader.PropertyToID("_Feet"), FeetCountId = Shader.PropertyToID("_FeetCount");
 
         public event Action<Hotspot> Used;
@@ -58,10 +60,9 @@ namespace Shop
             place.transform.SetParent(parent, false);
             place.transform.localScale = Scale;
             place.Def = def;
-            Grade.Apply(Game.Phase, def.Indoors);
+            // its houses are shaded by the sun of its own grade
+            Grade.Apply(Game.Phase, def.Indoors && !def.Open);
             place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform);
-            Shader.SetGlobalMatrix("_ArtFromWorld", place.World.transform.worldToLocalMatrix);
-            Shader.SetGlobalMatrix("_WorldFromArt", place.World.transform.localToWorldMatrix);
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {
@@ -75,8 +76,19 @@ namespace Shop
             foreach (var h in def.Hotspots)
                 if (Here(h.Chapters))
                     place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo });
-            place.FollowStory();
             return place;
+        }
+
+        /// <summary>Makes this the place on screen: its grade, where the shaders find its art, its lights, the room that keeps its own light and the story's marks.</summary>
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            Grade.Apply(Game.Phase, Def.Indoors && !Def.Open);
+            Shader.SetGlobalMatrix("_ArtFromWorld", World.transform.worldToLocalMatrix);
+            Shader.SetGlobalMatrix("_WorldFromArt", World.transform.localToWorldMatrix);
+            World.Glow();
+            Shader.SetGlobalVector(RoomId, World.Data["room"] is JArray r ? new Vector4((float)r[0], (float)r[1], (float)r[2], (float)r[3]) : Vector4.zero);
+            FollowStory();
         }
 
         // The lights nearest the courier, and the spots under the courier and whoever else is shown, for Pixel.shader.

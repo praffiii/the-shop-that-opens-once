@@ -10,6 +10,8 @@
 // The sun casts real shadows (Core/Grade.cs turns it for the time of day): everything that is cut out casts and
 // receives them, looked up at the centre of each art pixel so their edges stay on the pixel grid too. A face turned
 // from the sun (uv2.z, how far: Core/BakedArt.cs) is shadowed the same way.
+// A room cut open in its area (_Room, Core/Place.cs) keeps its own light: what stands on its floor is not graded, nor
+// clouded or sunlit (it has a roof), while the area round it is.
 // After dark the lights glow on what is near them (_Lamps, Core/BakedArt.cs), in four steps. The characters (_Actor)
 // catch a rim of sky light along their tops (_Rim) and each casts a small dark spot on what it stands on (_Feet,
 // Core/Place.cs).
@@ -57,6 +59,7 @@ Shader "Shop/Pixel"
         float4 _Lamps[32];       // world position and reach of each light that glows on its surroundings
         float _LampCount;
         float4 _LampTint;        // the glow's colour (sRGB) and strength
+        float4 _Room;            // the room's floor, x and row + height (art px): x0, y0, x1, y1; none when x1 <= x0
         float4 _Feet[16];       // world position under each character, and the spot's half width
         float _FeetCount;
         float4 _Rim;             // the rim light's colour (sRGB) and strength
@@ -143,15 +146,17 @@ Shader "Shop/Pixel"
                 if (_Light > 0.5) return half4(c.rgb * 2, c.a); // over 1, so the bloom picks lights out
                 float3 s = LinearToSRGB(c.rgb);
                 float shade = 1 - dot(s, float3(0.299, 0.587, 0.114));
-                s = saturate(s * (1 + _GradeScale.rgb) + (_GradeAdd.rgb + _GradeShade.rgb * shade) / 255);
-                if (_Clouds > 0)
+                float2 floorAt = float2(i.art.x, -i.art.z);
+                bool room = _Room.z > _Room.x && all(floorAt >= _Room.xy) && all(floorAt < _Room.zw);
+                if (!room) s = saturate(s * (1 + _GradeScale.rgb) + (_GradeAdd.rgb + _GradeShade.rgb * shade) / 255);
+                if (_Clouds > 0 && !room)
                 {
                     float2 p = floor(i.ground) + _Time.y * float2(7, 2.5);
                     float n = Noise(p / 260) * 0.6 + Noise(p / 96) * 0.28 + Noise(p / 31) * 0.12;   // the fine octave curls the edges
                     s *= lerp(1, float3(0.8, 0.84, 0.94), step(0.6, n) * _Clouds);
                 }
                 float3 texel = mul(_WorldFromArt, float4(floor(i.art) + 0.5, 1)).xyz;
-                float sun = min(MainLightRealtimeShadow(TransformWorldToShadowCoord(texel)), 1 - i.sway.z);
+                float sun = room ? 1 : min(MainLightRealtimeShadow(TransformWorldToShadowCoord(texel)), 1 - i.sway.z);
                 s *= lerp(_ShadowTint.rgb, 1, sun);
                 if (_Actor > 0.5)
                 {

@@ -82,7 +82,6 @@ namespace Shop
                 if (light) art.Lamp(Art.World(middle, piece.Ground + piece.Feet - middle.y), Mathf.Max(piece.Size.x, piece.Size.y), name);
                 else if (piece.Size.y >= TallFrom) art.tall.Add((built.GetComponent<Renderer>(), new Rect(piece.At, piece.Size), y));
             }
-            art.Glow();
             return art;
         }
 
@@ -97,7 +96,8 @@ namespace Shop
             Glow();
         }
 
-        void Glow()
+        /// <summary>Gives the shader this place's lights (the nearest, if there are more than it takes).</summary>
+        public void Glow()
         {
             lamps.CopyTo(0, glows, 0, Mathf.Min(MaxLamps, lamps.Count));
             Shader.SetGlobalVectorArray(LampsId, glows);

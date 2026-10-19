@@ -38,6 +38,8 @@ namespace Shop
         const float Glide = 220f;
         /// <summary>Following the courier: how far ahead of its walk the camera leads (world px), how softly it catches up (seconds), and from how far it jumps instead (a new place, a teleport).</summary>
         const float Lead = 28f, Follow = 0.2f, SnapFrom = 160f;
+        /// <summary>Coming out of a house: the courier appears this far (art px) above its door spot, in the doorway, and steps down as far below it.</summary>
+        const float DoorStep = 7f;
         /// <summary>Where the title screen looks: Marlow's door in the banyan's roots, in its grove.</summary>
         const string TitlePlace = "grove";
         static readonly Vector2 TitleView = new(300, 236);
@@ -77,6 +79,8 @@ namespace Shop
         Vector2 offset, cam, camVelocity, lead, lastFeet;
         float camHeight, camClimb; // the ground height the camera looks at (art px), and how fast it is changing
         Vector2? look; // a world point the camera shows instead of the courier
+        readonly Dictionary<string, Place> kept = new(); // the places built, by id: the one on screen and those through its doors
+        (int chapter, Phase phase) keptFor;
         bool gliding;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -291,10 +295,25 @@ namespace Shop
         {
             Talk.Close();
             var bell = Place && Place.Def.DoorBell;
-            await Fade(true);
-            Swap(placeId, spawn);
+            // Through a door the view cuts straight to the other side, as HD-2D does: a room stands where its house
+            // does, so only the walls and roof change, and the courier faces on in, or comes out of the doorway and
+            // steps down. Along a road the view fades.
+            var door = Place && (Place.Def.Indoors || Places.Get(placeId).Indoors);
+            if (!door) await Fade(true);
+            Swap(placeId, spawn, door);
             if (bell || Place.Def.DoorBell) Sound.Play("bell");
-            await Fade(false);
+            if (door && spawn != "")
+            {
+                if (Place.Def.Indoors) courier.FaceAway();
+                else
+                {
+                    var step = courier.Feet;
+                    courier.Feet = step + new Vector2(0, -DoorStep);
+                    courier.FaceCamera();
+                    await courier.Walk(new List<Vector2> { step + new Vector2(0, DoorStep) });
+                }
+            }
+            if (!door) await Fade(false);
             if (Story == null) return;
             Story.Relabel();
             await Story.Entered(placeId);
@@ -315,17 +334,27 @@ namespace Shop
             await Cards.Show(lines);
         }
 
-        void Swap(string placeId, string spawn)
+        // Through a door only which place shows changes: both sides are built ahead, while a fade hides the work, and
+        // kept until the courier leaves along a road or the chapter or time of day moves on.
+        void Swap(string placeId, string spawn, bool door = false)
         {
             courier.transform.SetParent(transform, false);
             courier.gameObject.SetActive(false);
-            if (Place)
+            if (Place) Place.gameObject.SetActive(false);
+            if (!door || keptFor != (Game.Chapter, Game.Phase))
             {
-                Place.gameObject.SetActive(false);
-                Destroy(Place.gameObject);
+                foreach (var place in kept.Values) Destroy(place.gameObject);
+                kept.Clear();
+                keptFor = (Game.Chapter, Game.Phase);
             }
-            Place = Place.Build(Places.Get(placeId), transform);
-            Place.Used += h => Run(Use(h));
+            Place = Keep(placeId);
+            if (!door)
+                foreach (var h in Place.Def.Hotspots)
+                {
+                    var to = h.ExitTo?.Split('/')[0];
+                    if (to != null && (Place.Def.Indoors || Places.Get(to).Indoors)) Keep(to);
+                }
+            Place.Show();
             if (spawn != "")
             {
                 courier.gameObject.SetActive(true);
@@ -339,6 +368,16 @@ namespace Shop
             look = null;
             gliding = false;
             FrameCamera(0f);
+        }
+
+        // A place built for now, or the one already kept.
+        Place Keep(string placeId)
+        {
+            if (kept.TryGetValue(placeId, out var place)) return place;
+            place = kept[placeId] = Place.Build(Places.Get(placeId), transform);
+            place.Used += h => Run(Use(h));
+            place.gameObject.SetActive(false);
+            return place;
         }
 
         async Awaitable Use(Hotspot h)
