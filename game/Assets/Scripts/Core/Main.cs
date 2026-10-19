@@ -52,7 +52,7 @@ namespace Shop
 
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
         {
-            [0] = main => new DevChapter(main),
+            [0] = main => new Prologue(main),
         };
 
         public static Main Instance { get; private set; }
@@ -259,7 +259,7 @@ namespace Shop
             var saved = Game.SavedChapter();
             if (saved > 0 && Chapters.ContainsKey(saved)) options.Add("Continue");
             if (Application.platform != RuntimePlatform.WebGLPlayer) options.Add("Quit");
-            if (Application.isEditor) options.Add(InProgress); // to try the prologue as it is made; Begin stays the systems test until it is whole
+            if (Application.isEditor) options.Add(SystemsTest); // the run through every system, for the tests, until Night 1 takes it over
             var pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))];
             logo.gameObject.SetActive(false);
             switch (pick)
@@ -267,11 +267,11 @@ namespace Shop
                 case "Begin": await Begin(0); break;
                 case "Continue": await Begin(saved); break;
                 case "Quit": Application.Quit(); break;
-                case InProgress: await Begin(0, main => new Prologue(main)); break;
+                case SystemsTest: await Begin(0, main => new DevChapter(main)); break;
             }
         }
 
-        const string InProgress = "Prologue (in progress)";
+        public const string SystemsTest = "Systems test";
 
         async Awaitable Begin(int chapter, Func<Main, Chapter> make = null)
         {

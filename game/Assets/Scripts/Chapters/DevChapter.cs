@@ -4,7 +4,7 @@ namespace Shop
 {
     /// <summary>
     /// Not part of the story: a short run through every system (walking, places, talking, choices, the bag, handing
-    /// over a keepsake, a lantern going out, saving). The Prologue replaces it.
+    /// over a keepsake, a lantern going out, saving), from the title's editor-only option. Night 1 replaces it.
     /// </summary>
     public sealed class DevChapter : Chapter
     {

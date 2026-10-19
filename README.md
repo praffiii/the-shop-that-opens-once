@@ -4,7 +4,7 @@ A cozy, melancholic 2D pixel-art mystery. Satria, an ant courier, comes home to 
 
 A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie and Praffi Ramadhani.
 
-**Status:** building the full game in Unity 6.6 (C#), on the redesigned story and gameplay in the UTS GDD. The foundation is built: places, walking, talk, the bag, keepsakes, saving and sound, with a systems test in place of the story. Next come the redrawn maps and the prologue. The Godot MVP (Nights 1–2 of the earlier story) is archived.
+**Status:** building the full game in Unity 6.6 (C#), on the redesigned story and gameplay in the UTS GDD. The foundation is built (places, walking, talk with voice blips, the bag, keepsakes, saving and sound), Bellwood is redrawn, and the Prologue (Day 0) plays from Begin to Satria's first night. Next comes Night 1, The Stopped Watch. The Godot MVP (Nights 1–2 of the earlier story) is archived.
 
 ## What's in this repo
 

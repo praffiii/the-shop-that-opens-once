@@ -22,6 +22,7 @@ namespace Shop.Tests
             var keyboard = InputSystem.AddDevice<Keyboard>();
             Main.Auto = true;
             var main = new GameObject("Main").AddComponent<Main>();
+            main.Talk.Picks.Enqueue(Main.SystemsTest); // it starts at the station, with open ground to its east
             try
             {
                 var end = Time.realtimeSinceStartup + 60f;
