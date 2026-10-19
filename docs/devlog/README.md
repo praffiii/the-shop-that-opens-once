@@ -32,6 +32,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [23](23-puncak-tebing-pesisir-bisa-dilewati.md) | 2026-10-19 | Puncak tebing pesisir bisa dilewati; hutan kecil tanpa semut latar | |
 | [24](24-pip-berbalik-dan-sarung-tangan-bram.md) | 2026-10-19 | Pip berbalik menghadap kamera; sarung tangan putih Kapten Bram | |
 | [25](25-rumah-masa-kecil-satria.md) | 2026-10-19 | Rumah masa kecil Satria: interior pertama, pintu yang langsung berganti ala Octopath | |
+| [26](26-toko-marlow.md) | 2026-10-19 | Toko Marlow: interior kedua, lemari tujuh kotak, kamera mendekat di dalam ruangan | |
 
 ## Format setiap entri
 
