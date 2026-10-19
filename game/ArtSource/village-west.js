@@ -120,6 +120,18 @@
       if (k % 3 === 0) { const s = (k / 3) & 1 ? 1 : -2; fill(b, cx + s, y - 1, 2, 2, MOSS[2]); px(b, cx + s, y - 1, MOSS[1]); px(b, cx + s + 1, y, MOSS[3]); }
     }
   }
+  // An old root running down a picture through pts ([x, y], downward), thinning from w0 to w1: lit left, dark right.
+  function hangRoot(b, pts, w0, w1, seed) {
+    const OLD = V.OLD;
+    for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1], [cx, cy] = pts[i];
+      for (let y = Math.round(ay); y <= Math.round(cy); y++) {
+        const t = cy === ay ? 0 : (y - ay) / (cy - ay), w = Math.max(2, Math.round(w0 + (w1 - w0) * (i - 1 + t) / (pts.length - 1))), l = Math.round(ax + (cx - ax) * t - w / 2);
+        for (let k = 0; k < w; k++) px(b, l + k, y, k === w - 1 ? OLD[3] : k < 2 ? OLD[0] : k >= w - 3 ? OLD[2] : Math.sin(y * 0.6 + k * 1.7 + seed) > 0.8 ? OLD[2] : OLD[1]);
+      }
+      if (i % 2 === 0) moss(b, Math.round(ax - w0 / 2), Math.round(ay), Math.max(3, w0 - 2), seed + i, 2);
+    }
+  }
   // A garden bench, 32 wide: the seat top on row y, iron legs down to y + 9.
   function bench(b, x, y) {
     fill(b, x + 1, y - 7, 2, 7, 'iron3'); fill(b, x + 29, y - 7, 2, 7, 'iron3');
@@ -141,8 +153,8 @@
     for (let k = 0; k <= 6; k++) { const a = Math.PI * (1 + k / 12); px(b, cx + Math.round(Math.cos(a) * (r - 1)), cy + Math.round(Math.sin(a) * (r - 1)), 'iron0'); }
     disc(b, cx, cy, 1, 1, 'brass2'); px(b, cx, cy, 'brass0');
   }
-  // The station clock: a brass bezel round a cream face, the hands stopped at 10:17.
-  function clock(b, cx, cy, r) {
+  // The station clock: a brass bezel round a cream face, the hands stopped at 10:17 (or min minutes past ten).
+  function clock(b, cx, cy, r, min = 17) {
     disc(b, cx, cy, r, r, 'brass3'); disc(b, cx - 1, cy - 1, r - 1, r - 1, 'brass1'); disc(b, cx, cy, r - 1, r - 1, 'brass2');
     disc(b, cx, cy, r - 3, r - 3, 'cream1'); disc(b, cx - 1, cy - 1, r - 4, r - 4, 'cream0');
     for (let k = 0; k < 12; k++) {
@@ -151,7 +163,7 @@
       if (k % 3 === 0) px(b, cx + Math.round(s * (r - 5)), cy - Math.round(c * (r - 5)), 'ink2');
     }
     const hand = (a, l) => line(b, cx, cy, cx + Math.round(Math.sin(a) * l), cy - Math.round(Math.cos(a) * l), 'ink');
-    hand((10 + 17 / 60) / 12 * Math.PI * 2, Math.round(r * 0.42)); hand(17 / 60 * Math.PI * 2, Math.round(r * 0.66));
+    hand((10 + min / 60) / 12 * Math.PI * 2, Math.round(r * 0.42)); hand(min / 60 * Math.PI * 2, Math.round(r * 0.66));
     px(b, cx, cy, 'brass3');
   }
 
@@ -536,17 +548,6 @@
     };
     // leaves dropped from the crown above: a clump of foliage round (cx, cy)
     const leaves = (b, cx, cy, rx, ry, seed) => V.foliage(b, inEllipse(cx, cy, rx, ry), [cx - rx, cy - ry, cx + rx, cy + ry], MOSS, seed, { cw: 6, ch: 5, dx: 4, dy: 3 });
-    // an old root running down a picture through pts ([x, y], downward), thinning from w0 to w1: lit left, dark right
-    const hangRoot = (b, pts, w0, w1, seed) => {
-      for (let i = 1; i < pts.length; i++) {
-        const [ax, ay] = pts[i - 1], [cx, cy] = pts[i];
-        for (let y = Math.round(ay); y <= Math.round(cy); y++) {
-          const t = cy === ay ? 0 : (y - ay) / (cy - ay), w = Math.max(2, Math.round(w0 + (w1 - w0) * (i - 1 + t) / (pts.length - 1))), l = Math.round(ax + (cx - ax) * t - w / 2);
-          for (let k = 0; k < w; k++) px(b, l + k, y, k === w - 1 ? OLD[3] : k < 2 ? OLD[0] : k >= w - 3 ? OLD[2] : Math.sin(y * 0.6 + k * 1.7 + seed) > 0.8 ? OLD[2] : OLD[1]);
-        }
-        if (i % 2 === 0) moss(b, Math.round(ax - w0 / 2), Math.round(ay), Math.max(3, w0 - 2), seed + i, 2);
-      }
-    };
     // a curio window: small panes, shelves of clocks, bottles and toys behind the glass, flowers along its box
     const curio = (b, x, y, w, h, lit) => {
       fill(b, x - 3, y - 3, w + 6, h + 6, 'wood5'); fill(b, x - 2, y - 2, w + 4, h + 4, 'wall2'); fill(b, x - 2, y - 2, w + 4, 1, 'wall1');
@@ -799,5 +800,5 @@
     });
   }
 
-  Object.assign(VIL, { station, sleepers, stoneCottage, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, closedCard, lantern, helenHouse, menderHouse, bramHome });
+  Object.assign(VIL, { station, sleepers, stoneCottage, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, closedCard, lantern, clock, hangRoot, helenHouse, menderHouse, bramHome });
 })();

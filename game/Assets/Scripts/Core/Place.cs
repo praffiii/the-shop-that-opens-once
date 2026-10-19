@@ -116,17 +116,19 @@ namespace Shop
 
         static bool Now(Phase[] phases) => phases == null || Array.IndexOf(phases, Game.Phase) >= 0;
 
-        // Marlow's shop follows the story: a lantern goes out for each night resolved, and each night's keepsake
-        // stays on its shelf until Marlow hands it over.
+        // Marlow's shop follows the story: a lantern goes out for each night resolved and the clock moves on a minute
+        // from 10:17, and each night's keepsake stays boxed in the cabinet until Marlow hands it over, its box left open.
         void FollowStory()
         {
             for (var i = 0; i < 7; i++)
             {
                 World.ShowItemIfAny($"lantern_{i}", i >= Game.LanternsOut);
                 World.ShowItemIfAny($"shop_lantern_{i}", i >= Game.LanternsOut);
-                World.ShowItemIfAny($"keepsake_{i}", i >= Game.Chapter || (i == Game.Chapter - 1 && !Game.Has("keepsake_taken")));
+                var boxed = i >= Game.Chapter || (i == Game.Chapter - 1 && !Game.Has("keepsake_taken"));
+                World.ShowItemIfAny($"keepsake_{i}", boxed);
+                World.ShowItemIfAny($"box_open_{i}", !boxed);
             }
-            for (var m = 1; m < 8; m++) World.ShowItemIfAny($"clock_{1817 + m}", false);
+            for (var m = 0; m < 8; m++) World.ShowItemIfAny($"clock_{1017 + m}", m == Game.LanternsOut);
         }
 
         /// <summary>Puts the courier at a spawn point, or else at an exported anchor of that name.</summary>

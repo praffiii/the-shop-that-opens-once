@@ -98,6 +98,7 @@ namespace Shop
             var courier = Actor("courier");
             var art = Keepsakes.Art(keepsake, "xs");
             Main.Place.World.ShowItemIfAny($"keepsake_{shelf}", false);
+            Main.Place.World.ShowItemIfAny($"box_open_{shelf}", true);
             Game.Mark("keepsake_taken");
             marlow.Held = art;
             marlow.Pose = "give";
@@ -141,8 +142,8 @@ namespace Shop
             var world = Main.Place.World;
             var lit = Game.LanternsOut;
             await Wait(0.8f);
-            world.ShowItemIfAny($"clock_{1817 + lit}", false);
-            world.ShowItemIfAny($"clock_{1818 + lit}", true);
+            world.ShowItemIfAny($"clock_{1017 + lit}", false);
+            world.ShowItemIfAny($"clock_{1018 + lit}", true);
             Sfx("tick");
             await Wait(0.6f);
             world.ShowItemIfAny($"lantern_{lit}", false);

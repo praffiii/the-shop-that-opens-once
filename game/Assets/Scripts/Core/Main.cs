@@ -22,18 +22,21 @@ namespace Shop
         public const int Zoom = 2;
         /// <summary>
         /// Each world pixel covers this many screen-canvas pixels at the camera's focus: the camera stands back, as
-        /// Octopath's does, so the courier is small in a wide view of the place.
+        /// Octopath's does, so the courier is small in a wide view of the place, and comes in close in a room cut open,
+        /// whose walls run past the screen's edges.
         /// </summary>
-        const int WorldZoom = 1;
+        int WorldZoom => Place && Place.Def.Open ? 2 : 1;
         /// <summary>How far past a place's edge (art px) the camera may look, so the courier is never pinned to the screen's edge; there the forest goes on.</summary>
         const float Overscan = 96f;
         /// <summary>The view camera's vertical field of view, in degrees; it looks down at <see cref="Art.Pitch"/>.</summary>
         const float Fov = 42f;
-        /// <summary>The depth of field (blur grows as 1 / distance², so the aperture follows the camera's distance): a long lens keeps a band round the courier sharp and blurs what is nearer and farther, like a miniature.</summary>
+        /// <summary>The depth of field (blur grows as 1 / distance², so the aperture follows the camera's distance): a long lens keeps a band round the courier sharp and blurs what is nearer and farther, like a miniature; closer in a room, the lens stops down so the room stays sharp.</summary>
         const float FocalLength = 150f, Aperture = 3.2f;
         const int UiLayer = 5;
         /// <summary>The least canvas the screen shows (the world is Base / WorldZoom).</summary>
         static readonly Vector2 Base = new(640, 360);
+        /// <summary>In a room cut open the camera looks this far (art px) past the courier toward the back wall, where the room's things stand.</summary>
+        const float LookIn = 24f;
         /// <summary>How fast the camera glides to what it is asked to look at, in world px per second.</summary>
         const float Glide = 220f;
         /// <summary>Following the courier: how far ahead of its walk the camera leads (world px), how softly it catches up (seconds), and from how far it jumps instead (a new place, a teleport).</summary>
@@ -297,8 +300,8 @@ namespace Shop
             var bell = Place && Place.Def.DoorBell;
             // Through a door the view cuts straight to the other side, as HD-2D does: a room stands where its house
             // does, so only the walls and roof change, and the courier faces on in, or comes out of the doorway and
-            // steps down. Along a road the view fades.
-            var door = Place && (Place.Def.Indoors || Places.Get(placeId).Indoors);
+            // steps down. Along a road, or when the story moves the courier somewhere else, the view fades.
+            var door = Place && (Place.Def.Indoors || Places.Get(placeId).Indoors) && Array.Exists(Place.Def.Hotspots, h => h.ExitTo?.Split('/')[0] == placeId);
             if (!door) await Fade(true);
             Swap(placeId, spawn, door);
             if (bell || Place.Def.DoorBell) Sound.Play("bell");
@@ -535,6 +538,7 @@ namespace Shop
             var size = (Vector2)Place.World.Size;
             var following = look == null && Place.Player;
             var target = look ?? (Place.Player ? courier.Feet : TitleView);
+            if (Place.Def.Open) target.y -= LookIn;
             var height = Place.World.Relief.Under(target);
             if (following)
             {
@@ -572,6 +576,7 @@ namespace Shop
             var at = Place.transform.TransformPoint(Art.World(cam, camHeight));
             View.transform.SetPositionAndRotation(at - turn * Vector3.forward * distance, turn);
             focus.focusDistance.Override(distance);
+            focus.aperture.Override(Aperture * WorldZoom * WorldZoom);
         }
 
         // The art point under a screen point: walks the mouse's ray down to the ground, reading the height where it lands.

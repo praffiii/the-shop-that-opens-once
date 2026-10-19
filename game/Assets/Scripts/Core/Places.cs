@@ -5,7 +5,7 @@ namespace Shop
 {
     /// <summary>
     /// Every place in the game: Bellwood outdoors, one area per part of town (ArtSource/areas.js), and the interiors
-    /// (ArtSource/inside.js). The shop still comes from the Godot build until it is redrawn. A place copies its hotspots, so these stay as written.
+    /// (ArtSource/inside.js). A place copies its hotspots, so these stay as written.
     /// </summary>
     public static class Places
     {
@@ -476,7 +476,7 @@ namespace Shop
                 Variants = new[] { "day" },
                 Hotspots = new[]
                 {
-                    new Hotspot { Id = "shop_door", At = V(300, 236), Label = "A small door", Area = R(-10, -30, 20, 32), Spot = V(0, 14), ExitTo = "shop/door" },
+                    new Hotspot { Id = "shop_door", At = V(300, 236), Label = "A small door", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "shop/door" },
                     new Hotspot { Id = "to_station", At = V(636, 500), Label = "To the station", Area = R(-12, -24, 16, 48), Spot = V(-6, 0), ExitTo = "station/from_grove" },
                 },
             },
@@ -493,25 +493,28 @@ namespace Shop
                     new Hotspot { Id = "door", At = V(877, 440), Label = "Outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "east/satria_home_door" },
                 },
             },
+            // Marlow's shop at the end of the grove path, cut open the same way: Marlow behind the counter, the clock
+            // and the cabinet of the seven boxes and their lanterns against the back wall. The counter anchor is the
+            // customer's side.
             ["shop"] = new PlaceDef
             {
                 Id = "shop",
-                Variants = new[] { "night" },
+                Variants = new[] { "day" },
                 Mood = "shop",
                 Indoors = true,
+                Open = true,
                 WoodFloor = true,
                 DoorBell = true,
                 People = new[]
                 {
-                    new Person { Id = "marlow", At = V(200, 151), Label = "Marlow", Area = R(-12, -32, 24, 32), Spot = V(-44, 35), Facing = -1 },
+                    new Person { Id = "marlow", At = V(310, 136), Label = "Marlow", Area = R(-12, -32, 24, 32), Spot = V(0, 28), Facing = -1 },
                 },
                 Hotspots = new[]
                 {
-                    new Hotspot { Id = "door", At = V(180, 234), Label = "Back outside", Area = R(-14, -6, 28, 10), Spot = V(0, 0), ExitTo = "grove/from_shop" },
-                    new Hotspot { Id = "lanterns", At = V(180, 41), Label = "Lanterns", Area = R(-160, -14, 320, 26), Spot = V(-70, 159) },
-                    new Hotspot { Id = "clock", At = V(180, 74), Label = "Clock", Area = R(-19, -19, 38, 38), Spot = V(-2, 122) },
+                    new Hotspot { Id = "door", At = V(300, 236), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "grove/shop_door" },
+                    new Hotspot { Id = "lanterns", At = V(308, 104), Label = "Lanterns", Area = R(-42, -48, 84, 48), Spot = V(-28, 58) },
+                    new Hotspot { Id = "clock", At = V(257, 106), Label = "Clock", Area = R(-8, -62, 16, 64), Spot = V(0, 10) },
                 },
-                Spawns = new() { ["door"] = V(180, 218), ["counter"] = V(156, 186) },
             },
         };
     }

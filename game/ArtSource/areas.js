@@ -95,7 +95,7 @@
     }).filter(Boolean).sort((a, b) => a.y - b.y);
     const clipOf = new Map();
     for (const { x, y, s } of trees) {
-      if (!clipOf.has(s)) { const k = 'tree_' + clipOf.size; clipOf.set(s, k); S.clips[k] = { w: s.img.width, h: s.img.height, sway: s.img.height > 70 ? 2 : 1, draw: gg => gg.drawImage(s.img, 0, 0) }; }
+      if (!clipOf.has(s)) { const k = 'tree_' + clipOf.size; clipOf.set(s, k); S.clips[k] = { w: s.img.width, h: s.img.height, ay: s.ay, sway: s.img.height > 70 ? 2 : 1, draw: gg => gg.drawImage(s.img, 0, 0) }; }
       S.decals.below.push([clipOf.get(s), x - s.ax + 1, y - s.ay + 1, 0]);
       crown(s, x, y, (cx, cy) => { if (cy < H) S.canopy[cy * W + cx] = 1; });
     }
@@ -344,7 +344,7 @@
   /* The grove, west of the station: a narrow path winds in from the station's side between ancient trees, climbs
      root-steps onto the knoll and ends at Marlow's shop, hidden among them. */
   const GROVE_PATH = smooth([[660, 498], [590, 508], [526, 486], [462, 500], [414, 466], [404, 420], [446, 380], [500, 352], [502, 312], [470, 282], [400, 270], [330, 266], [301, 250]]);
-  const KNOLL = [300, 196, 196, 86];
+  const KNOLL = [300, 172, 220, 116];
 
   // How the town's trees mix, as [chance below, pool]: the old West dark pines, the Centre round broadleaves, the
   // East light and mixed, the coast wind-bent pines.

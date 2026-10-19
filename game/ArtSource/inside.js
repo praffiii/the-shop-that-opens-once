@@ -7,9 +7,10 @@
    A room's def, in its own art px from the back wall's foot at its west end: area (where its house stands; the house
    is the item named after the room, its door the anchor <room>_door), room [w, d] (the floor inside the walls),
    door (the x of the way out at the open front), bays [[x, row]] (a partition from the back wall to that row), solid
-   [[x0, y0, x1, y1]] (furniture feet can't enter), paint(b, R) (rugs and such on the floor, R(x0, y0, x1, y1, f)
-   asking f(x, y, w, h) for each pixel's colour), back/left/right(b, w, h, win) (the walls' pictures, plaster and
-   wainscot already on them, win(b, x, y, w, h) putting a window in) and things(T) (the furniture, T as below). */
+   [[x0, y0, x1, y1]] (furniture feet can't enter), anchors {name: [x, row]} (points the game looks for), paint(b, R,
+   at) (rugs and such on the floor, R(x0, y0, x1, y1, f) asking f(x, y, w, h) for each pixel's colour, at(x, row) the
+   floor's pixel there), wall(b, w, h, seed) (the walls' paper and wainscot, plaster unless given), back/left/right(b,
+   w, h, win) (the walls' pictures, win(b, x, y, w, h) putting a window in) and things(T) (the furniture, T as below). */
 (() => {
   const V = VIL, { fill, px } = V, { hash, Buf, u32 } = KIT, DEEP = MODEL.DEEP;
   const FLOOR = 10, WALL = 60, THICK = 6; // art px: the footing's height; texels: the walls' height and thickness
@@ -21,6 +22,7 @@
   const darker = (v, k) => (v & 0xff000000) | ((((v >>> 16) & 255) * k) << 16) | ((((v >>> 8) & 255) * k) << 8) | ((v & 255) * k);
   const stamp = (b, x, y, rows, key) => rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (key[r[i]]) px(b, x + i, y + j, key[r[i]]); });
   const sprite = (w, h, paint) => ({ img: V.inked(w, h, paint).canvas(), ax: (w >> 1) + 1, ay: h + 1 });
+  const bare = (w, h, paint) => { const b = new Buf(w, h); paint(b); return { img: b.canvas(), ax: w >> 1, ay: h }; }; // a sprite with no ink round it: glass
 
   /* ---------- the parts every room shares ---------- */
   // Old boards running across, 5 rows each, a lit top row and a dark seam, their ends staggered, a knot here and there.
@@ -52,12 +54,14 @@
     who.forEach(([dx, s]) => { const cx = x + dx, top = y + h - 3 - 6 * s; fill(b, cx - s, top, 2 * s + 1, 2 * s, 'wood4'); fill(b, cx - s - 1, top + 2 * s, 2 * s + 3, h - 3 - (top + 2 * s - y), 'wood4'); });
   }
 
-  /* ---------- Satria's childhood home (GDD 7.5, LOC-INT-01) ---------- */
-  // Three bays under one roof: the bedroom (west: the bed, the desk where Satria writes the journal each night, Ibu
-  // Ratih's treadle sewing machine and her tin of scraps), the family room (the dusty sofa, Ayah's books and wooden
-  // tube radio, the family's photos) and the kitchen (east: the counter, the wood stove, the walnut table, the clay
-  // water jar). The door is in the middle of the front.
+  /* ---------- the rooms ---------- */
+  // Marlow's shop's paint: its shopfront's bottle green, and faded plum.
+  const GREEN = ['#8fc3a8', '#5f9680', '#46755f', '#325747', '#213b35'], PLUM = ['#b49ab4', '#8a7196', '#68557a', '#4a3c5c', '#3f3350', '#30263f'];
   const ROOMS = {
+    // Satria's childhood home (GDD 7.5, LOC-INT-01). Three bays under one roof: the bedroom (west: the bed, the desk
+    // where Satria writes the journal each night, Ibu Ratih's treadle sewing machine and her tin of scraps), the
+    // family room (the dusty sofa, Ayah's books and wooden tube radio, the family's photos) and the kitchen (east:
+    // the counter, the wood stove, the walnut table, the clay water jar). The door is in the middle of the front.
     satria_home: {
       area: 'east', seed: 7, room: [224, 92], door: 112,
       bays: [[76, 50], [150, 50]],
@@ -165,6 +169,198 @@
         T.card('door_fern_l', plant, 88, 90); T.card('door_fern_r', plant, 136, 90);
       },
     },
+    // Marlow's shop (GDD 7.6, LOC-INT-02). The Shop That Opens Once, grown into the ancient tree behind it: its roots
+    // come over the back wall, down it and out across the boards. In the middle the shop: the counter and its oil
+    // lamp, Marlow behind it, and against the back wall the pendulum clock stopped at 10:17 (clock_<hhmm>, a minute
+    // on for each lantern out) and the glass-fronted cabinet of the seven carved boxes (keepsake_i, opened and empty
+    // once Marlow hands its keepsake over: box_open_i), each box's lantern standing on the cabinet over it (lantern_i
+    // lit over its dark one). West, the red rug and its round table, the curio cases along the wall, and behind the
+    // partition Marlow's own room: the stair up, his books and writing desk, his armchair and candle, the station
+    // master's cap and the last train in its frame. East, the store: shelves, crates, a trunk, barrels, sacks and the
+    // back door. The door is in the front, a little west of the middle.
+    shop: {
+      area: 'grove', seed: 13, room: [272, 136], door: 150,
+      bays: [[96, 44], [204, 40]],
+      solid: [[2, 0, 28, 44], [46, 0, 62, 8], [66, 0, 92, 12], [34, 36, 50, 46], [56, 36, 64, 42],
+        [100, 0, 114, 6], [116, 0, 200, 10], [124, 46, 196, 54],
+        [1, 64, 15, 80], [1, 90, 15, 106], [48, 86, 72, 96], [34, 88, 44, 96], [76, 88, 86, 96],
+        [208, 0, 226, 12], [258, 18, 271, 60], [258, 72, 271, 106], [214, 52, 240, 62], [236, 74, 254, 86],
+        [220, 92, 244, 104], [208, 108, 222, 116]],
+      anchors: { counter: [160, 64], clock: [107, 16] },
+      // faded plum paper with a gold sprig, over a wainscot painted the shopfront's bottle green
+      wall(b, w, h, seed) {
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, x % 10 === 0 ? PLUM[4] : hash(x, y, seed) < 0.03 ? PLUM[5] : PLUM[3]);
+        for (let y = 9; y < h - 22; y += 12) for (let x = 5; x < w; x += 10) { px(b, x, y, 'brass2'); px(b, x - 1, y + 1, PLUM[2]); px(b, x + 1, y + 1, PLUM[2]); px(b, x, y + 2, PLUM[2]); }
+        for (let x = 0; x < w; x++) fill(b, x, h - 18, 1, 18, x % 6 === 0 ? GREEN[3] : x % 6 === 1 ? GREEN[1] : GREEN[2]);
+        fill(b, 0, h - 19, w, 2, 'wood4'); fill(b, 0, h - 19, w, 1, 'wood2');
+        fill(b, 0, h - 2, w, 2, 'wood5');
+        fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'wood5'); fill(b, 0, 0, w, 1, 'wood3');
+      },
+      paint(b, R, at) {
+        // the red rug under the round table, Marlow's worn one by his armchair, the runner from the door to the
+        // counter, the doormat, and the tree's roots out from under the back wall
+        const red = (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 1 ? 'roofR4' : e < 3 ? 'brass2' : e < 4 ? 'roofR3' : (x + y) % 6 === 0 || (x - y + 120) % 6 === 0 ? 'roofR1' : 'roofR2'; };
+        R(24, 68, 96, 114, (x, y, w, h) => (((x - w / 2) / (w / 2)) ** 2 + ((y - h / 2) / (h / 2)) ** 2 > 1.02 ? 0 : red(x, y, w, h)));
+        R(32, 28, 72, 52, (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 1 ? PLUM[4] : e < 2 ? 'brass3' : (x >> 2) % 2 === (y >> 2) % 2 ? PLUM[1] : PLUM[2]; });
+        R(140, 56, 160, 126, red);
+        R(136, 126, 164, 136, (x, y, w, h) => (Math.min(x, y, w - 1 - x, h - 1 - y) < 1 ? 'dirt3' : y % 2 ? 'dirt2' : 'dirt1'));
+        const root = (pts, w0, w1, seed) => V.root(b, pts.map(([x, y]) => at(x, y)), w0, w1, V.OLD, seed);
+        root([[96, 0], [92, 8], [80, 16], [68, 20]], 12, 4, 1);
+        root([[100, 0], [104, 10], [98, 22]], 8, 3, 2);
+        root([[206, 0], [212, 10], [224, 16]], 11, 4, 3);
+        root([[202, 0], [198, 12], [200, 24]], 8, 3, 4);
+      },
+      back(b, w, h) {
+        // posts where the bays meet; the roots over the wall down the partitions, the tree's leaves spilling over its
+        // top; the store's back door
+        for (const x of [96, 204]) post(b, x - 2, h - 2);
+        // over the stair, the way up into Marlow's rooms: a dark doorway in a timber frame
+        fill(b, 3, 0, 24, h - 38, 'wood4'); fill(b, 5, 0, 20, h - 40, '#1d1420'); fill(b, 5, 0, 20, 2, 'wood5');
+        // his station master's cap on its peg, and the last train in its frame over his desk
+        fill(b, 35, 14, 2, 2, 'wood4'); fill(b, 31, 16, 10, 4, 'roofB3'); fill(b, 31, 16, 10, 1, 'roofB2'); fill(b, 30, 19, 13, 2, 'iron4'); px(b, 35, 17, 'brass1');
+        fill(b, 66, 6, 26, 18, 'wood3'); fill(b, 66, 6, 26, 1, 'wood2'); fill(b, 67, 7, 24, 16, 'cream1'); fill(b, 68, 8, 22, 14, 'wall3');
+        fill(b, 71, 14, 12, 5, 'wood4'); fill(b, 81, 11, 5, 8, 'wood4'); fill(b, 74, 11, 2, 3, 'wood4'); fill(b, 69, 20, 20, 1, 'wood4');
+        for (const x of [73, 77, 83]) px(b, x, 19, 'wall2');
+        for (const [x, y] of [[74, 9], [72, 8], [69, 9]]) fill(b, x, y, 2, 1, 'cream0');
+        V.hangRoot(b, [[92, 0], [98, 16], [94, 34], [96, h]], 15, 6, 3);
+        V.hangRoot(b, [[210, 0], [204, 20], [208, 38], [204, h]], 14, 6, 4);
+        V.hangRoot(b, [[84, 0], [80, 12], [79, 22]], 6, 3, 5);
+        V.hangRoot(b, [[218, 0], [223, 14], [224, 26]], 7, 3, 6);
+        V.hangRoot(b, [[156, 0], [160, 8], [158, 14]], 6, 3, 7);
+        for (const [cx, cy, rx, ry, seed] of [[94, 2, 22, 5, 7], [70, 1, 9, 3, 8], [158, 1, 14, 3, 9], [210, 2, 20, 5, 10], [240, 1, 9, 3, 11]])
+          V.foliage(b, (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1, [cx - rx, cy - ry, cx + rx, cy + ry], V.LEAF.deep, seed, { cw: 6, ch: 5, dx: 4, dy: 3 });
+        fill(b, 230, h - 46, 26, 46, 'wood5'); fill(b, 232, h - 44, 22, 42, GREEN[2]); fill(b, 232, h - 44, 22, 1, GREEN[1]);
+        for (let x = 236; x < 254; x += 5) fill(b, x, h - 43, 1, 41, GREEN[3]);
+        fill(b, 233, h - 32, 20, 2, GREEN[4]); fill(b, 233, h - 12, 20, 2, GREEN[4]); px(b, 251, h - 23, 'brass1'); px(b, 251, h - 22, 'brass3');
+      },
+      left(b, w, h, win) { win(b, 42, 14, 16, 16); }, // over the curio cases
+      right(b, w, h, win) { win(b, 20, 14, 16, 16); },
+      things(T) {
+        // Marlow's room: the stair up the west wall to the doorway into his rooms, its banister along the open side;
+        // his books and his writing desk with its ledgers; his armchair, his little table and its candle
+        for (let k = 0; k < 11; k++) T.box('stair_' + k, 4, 0, 26, 44 - 4 * k, 0, 2 + 4 * k, (b, w, h, l, which) => {
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, 0, w, 1, 'wood1'); return; }
+          fill(b, 0, 0, w, h, which === 'front' ? 'wood4' : 'wood5'); fill(b, 0, 0, w, 1, 'wood3');
+        });
+        T.box('stair_string', 26, 0, 28, 44, 0, 4, (b, w, h) => fill(b, 0, 0, w, h, 'wood5'));
+        for (let k = 0; k < 11; k += 2) T.card('baluster_' + k, sprite(1, 12, b => fill(b, 0, 0, 1, 12, 'wood3')), 27, 43 - 4 * k, 2 + 4 * k);
+        T.card('newel', sprite(3, 16, b => { fill(b, 0, 0, 3, 16, 'wood3'); fill(b, 0, 0, 3, 2, 'wood2'); fill(b, 1, 2, 1, 14, 'wood2'); }), 27, 46);
+        T.box('bookshelf', 46, 0, 62, 8, 0, 48, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'front') for (let y = 3; y < h - 4; y += 11) { fill(b, 2, y, w - 4, 9, 'wood5'); for (let x = 2; x < w - 3; x += 3) fill(b, x, y + 2 + (x % 2), 2, 7 - (x % 2), ['roofR3', PLUM[2], 'roofG3', 'brass3', 'wood2'][(x + y) % 5]); fill(b, 2, y + 9, w - 4, 1, 'wood3'); }
+        });
+        T.box('desk', 66, 0, 92, 12, 0, 15, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); return; }
+          if (which === 'front') for (const x of [2, w - 10]) { fill(b, x, 3, 8, h - 5, 'wood4'); px(b, x + 4, 7, 'brass1'); }
+        });
+        T.card('desk_ledgers', sprite(14, 7, b => { fill(b, 0, 3, 13, 4, 'roofR3'); fill(b, 1, 3, 12, 1, 'cream1'); fill(b, 1, 0, 11, 3, 'roofB3'); fill(b, 2, 0, 10, 1, 'cream1'); fill(b, 6, 4, 1, 3, 'brass2'); }), 74, 8, 15);
+        const candle = lit => sprite(5, 9, b => { fill(b, 0, 7, 5, 2, 'brass2'); fill(b, 1, 3, 3, 4, 'cream0'); fill(b, 1, 3, 1, 4, 'white'); if (lit) { fill(b, 2, 0, 1, 3, 'light1'); px(b, 2, 2, 'light0'); } });
+        T.card('desk_candle', candle(false), 86, 6, 15); T.card('desk_candle_lit', candle(true), 86, 6, 15, true);
+        T.card('armchair', sprite(18, 20, b => {
+          fill(b, 1, 0, 7, 16, PLUM[1]); fill(b, 1, 0, 7, 1, PLUM[0]); fill(b, 1, 10, 16, 5, PLUM[1]); fill(b, 1, 10, 16, 1, PLUM[0]);
+          fill(b, 13, 7, 4, 8, PLUM[2]); fill(b, 13, 7, 4, 1, PLUM[0]); fill(b, 1, 15, 16, 2, PLUM[3]); fill(b, 2, 17, 2, 3, 'wood4'); fill(b, 14, 17, 2, 3, 'wood4');
+        }), 42, 46);
+        T.card('nook_table', sprite(10, 14, b => { fill(b, 0, 0, 10, 2, 'wood2'); fill(b, 0, 1, 10, 1, 'wood3'); fill(b, 4, 2, 2, 10, 'wood4'); fill(b, 2, 12, 6, 2, 'wood4'); }), 60, 41);
+        T.card('candle', candle(false), 62, 40, 14); T.card('candle_lit', candle(true), 62, 40, 14, true);
+        // the pendulum clock against the back wall, stopped at 10:17: its face a card for each minute on
+        T.box('clock_case', 100, 0, 114, 6, 0, 60, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3'); fill(b, 0, h - 3, w, 3, 'wood5');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood3'); return; }
+          if (which !== 'front') return;
+          fill(b, 1, 2, w - 2, 17, 'wood5'); fill(b, 3, 24, w - 6, 24, 'wood5'); fill(b, 4, 25, w - 8, 22, '#1d1420');
+          fill(b, w >> 1, 25, 1, 15, 'brass3'); V.disc(b, w >> 1, 41, 2, 2, 'brass1'); px(b, (w >> 1) - 1, 40, 'brass0'); fill(b, 4, 25, 1, 22, PLUM[4]);
+        });
+        // (a card leans back a third of a row for each px up it stands, so one in front of a face stands far enough out
+        // that its top stays in front, lifted as much more so it shows where it was)
+        for (let m = 0; m < 8; m++) T.card('clock_' + (1017 + m), sprite(13, 13, b => V.clock(b, 6, 6, 6, 17 + m)), 107, 12, 49);
+        // the cabinet of the seven boxes: drawers under seven cubbies lined in plum velvet and lit from above, each
+        // behind its glass; in each a carved box clasped in brass, or once its keepsake is given, that box open and
+        // empty; on top, each box's lantern
+        T.box('cabinet', 116, 0, 200, 10, 0, 32, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); fill(b, 0, h - 2, w, 2, 'wood5');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, h - 1, w, 1, 'wood3'); return; }
+          if (which !== 'front') return;
+          fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'brass3'); fill(b, 0, 0, w, 1, 'wood2');
+          for (let i = 0; i < 7; i++) {
+            const x = 12 * i + 2;
+            for (let y = 5; y < 21; y++) fill(b, x, y, 10, 1, y < 7 ? 'light2' : y < 9 ? PLUM[1] : y < 14 ? PLUM[2] : PLUM[3]);
+            fill(b, x, 21, 10, 1, 'wood2');
+            fill(b, x + 1, 24, 7, 4, 'wood4'); fill(b, x + 1, 24, 7, 1, 'wood2'); px(b, x + 4, 26, 'brass1');
+          }
+        });
+        T.card('cabinet_light', sprite(80, 2, b => fill(b, 0, 0, 80, 2, 'light1')), 158, 12, 27, true);
+        const RELIC = [['wood3', 'brass1'], ['roofR3', 'brass1'], ['roofB3', 'brass1'], [PLUM[2], 'brass1'], ['roofG3', 'brass1'], ['wood4', 'cream0'], ['roofR2', 'brass0']];
+        // a box: its body carved in a band of diamonds, brass bands at its ends and its clasp; closed, its lid domed
+        // over it; open, the lid stands up behind and the velvet inside is empty
+        const body = (b, y, c, k) => {
+          fill(b, 0, y, 9, 11 - y, c); fill(b, 0, 10, 9, 1, 'wood5');
+          for (let x = 1; x < 8; x++) px(b, x, y + 2 + ((x & 1) ^ 1), 'wood5');
+          fill(b, 0, y, 1, 11 - y, 'brass3'); fill(b, 8, y, 1, 11 - y, 'brass3'); fill(b, 4, y, 1, 3, k);
+        };
+        RELIC.forEach(([c, k], i) => {
+          const x = 122 + 12 * i;
+          T.card('box_open_' + i, sprite(9, 11, b => { fill(b, 0, 0, 9, 4, c); fill(b, 1, 1, 7, 3, 'wood5'); fill(b, 0, 0, 9, 1, 'cream0'); fill(b, 0, 4, 9, 2, PLUM[5]); body(b, 6, c, k); }), x, 15, 16);
+          T.card('keepsake_' + i, sprite(9, 11, b => { fill(b, 1, 0, 7, 1, c); fill(b, 0, 1, 9, 4, c); fill(b, 1, 0, 7, 1, 'cream0'); fill(b, 0, 1, 1, 1, 'cream0'); fill(b, 0, 4, 9, 1, 'wood5'); body(b, 5, c, k); px(b, 4, 4, k); }), x, 15, 16);
+          T.card('glass_' + i, bare(10, 15, b => { for (let k2 = 0; k2 < 4; k2++) px(b, 7 - k2, 1 + k2, 'white'); px(b, 8, 9, 'white'); px(b, 9, 8, 'white'); }), x, 16, 17);
+        });
+        const lantern = lit => sprite(9, 16, b => {
+          fill(b, 3, 0, 3, 1, 'iron4'); px(b, 2, 1, 'iron4'); px(b, 6, 1, 'iron4'); fill(b, 3, 2, 3, 1, 'iron3');
+          fill(b, 2, 3, 5, 1, 'iron3'); fill(b, 1, 4, 7, 1, 'iron4');
+          fill(b, 1, 5, 7, 8, 'iron4'); fill(b, 2, 5, 5, 8, lit ? 'light2' : 'stone5');
+          if (lit) { fill(b, 3, 6, 3, 6, 'light1'); fill(b, 4, 7, 1, 3, 'light0'); } else px(b, 2, 5, 'sky4');
+          fill(b, 4, 5, 1, 8, lit ? 'brass2' : 'iron3'); fill(b, 0, 13, 9, 2, 'iron3'); fill(b, 0, 13, 9, 1, 'iron2'); fill(b, 1, 15, 7, 1, 'iron4');
+        });
+        RELIC.forEach((_, i) => { const x = 122 + 12 * i; T.card('lantern_dark_' + i, lantern(false), x, 5, 32); T.card('lantern_' + i, lantern(true), x, 5, 32, true); });
+        // the counter: bottle-green panels under a worn top, the ledger, the bell and the oil lamp
+        T.box('counter', 124, 46, 196, 54, 0, 14, (b, w, h, l, which) => {
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, 0, w, 1, 'wood1'); for (let x = 9; x < w; x += 14) fill(b, x, 0, 1, h, 'wood3'); return; }
+          fill(b, 0, 0, w, h, GREEN[2]); fill(b, 0, 0, w, 2, 'wood2'); fill(b, 0, h - 2, w, 2, GREEN[4]);
+          if (which === 'front') for (let x = 3; x < w - 8; x += 13) { fill(b, x, 4, 10, h - 8, GREEN[3]); fill(b, x + 1, 5, 8, h - 10, GREEN[1]); fill(b, x + 2, 6, 6, h - 12, GREEN[2]); }
+        });
+        T.card('ledger', sprite(14, 4, b => { fill(b, 0, 0, 14, 4, 'roofR3'); fill(b, 1, 0, 12, 3, 'cream0'); fill(b, 7, 0, 1, 3, 'wood4'); for (let y = 1; y < 3; y++) { fill(b, 2, y, 4, 1, 'stone2'); fill(b, 9, y, 3, 1, 'stone2'); } }), 140, 52, 14);
+        T.card('bell', sprite(7, 5, b => { fill(b, 1, 1, 5, 3, 'brass2'); fill(b, 2, 0, 3, 1, 'brass1'); fill(b, 0, 4, 7, 1, 'wood4'); px(b, 2, 1, 'brass0'); }), 172, 52, 14);
+        const lamp = lit => sprite(7, 13, b => { fill(b, 2, 9, 3, 4, 'brass2'); fill(b, 1, 11, 5, 2, 'brass3'); fill(b, 1, 2, 5, 7, lit ? 'light1' : 'cream0'); fill(b, 2, 3, lit ? 3 : 2, 5, lit ? 'light0' : 'light1'); if (lit) px(b, 3, 5, 'white'); fill(b, 2, 0, 3, 2, 'brass2'); });
+        T.card('oil_lamp', lamp(false), 188, 51, 14); T.card('oil_lamp_lit', lamp(true), 188, 51, 14, true);
+        // the round table on the red rug and its two chairs, a teapot waiting on it
+        T.card('round_table', sprite(26, 16, b => { V.disc(b, 13, 3, 12, 3, 'wood3'); V.disc(b, 13, 2, 12, 2, 'wood2'); fill(b, 1, 3, 24, 2, 'wood4'); fill(b, 11, 5, 4, 9, 'wood4'); fill(b, 7, 14, 12, 2, 'wood4'); }), 60, 96);
+        T.card('teapot', sprite(11, 8, b => { fill(b, 2, 2, 7, 6, 'white'); fill(b, 3, 1, 5, 1, 'white'); fill(b, 4, 0, 3, 1, 'roofG2'); fill(b, 0, 3, 2, 2, 'white'); fill(b, 9, 3, 2, 3, 'white'); fill(b, 3, 4, 5, 1, 'roofG2'); }), 60, 93, 13);
+        const chair = flip => sprite(12, 22, b => { const bx = flip ? 9 : 0; fill(b, bx, 0, 3, 14, 'wood4'); fill(b, bx, 0, 3, 1, 'wood3'); fill(b, 0, 12, 12, 3, PLUM[1]); fill(b, 0, 12, 12, 1, PLUM[0]); for (const x of [1, 9]) fill(b, x, 15, 2, 7, 'wood4'); });
+        T.card('chair_l', chair(false), 39, 96); T.card('chair_r', chair(true), 81, 96);
+        // the curio cases along the west wall: old glass in wooden frames, odd things on their shelves
+        [[64, 80], [90, 106]].forEach(([c, e], i) => T.box('curio_' + i, 1, c, 15, e, 0, 30, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'top') { fill(b, 1, 1, w - 2, h - 2, 'wood2'); return; }
+          if (which !== 'right' && which !== 'front') return;
+          fill(b, 2, 2, w - 4, h - 7, 'sky3'); fill(b, 2, 12, w - 4, 1, 'wood3'); fill(b, 0, h - 5, w, 5, 'wood4');
+          [[3, 8, 'brass1'], [7, 9, 'rose'], [11, 8, 'roofB2'], [4, 19, 'roofG2'], [9, 19, 'brass2'], [13, 18, 'cream0']].forEach(([x, y, k]) => x < w - 3 && fill(b, x, y, 2, 3, k));
+          px(b, 3, 3, 'white'); px(b, 4, 3, 'white');
+        }));
+        // the store: crates by the back door, shelves of jars and parcels along the east wall, a trunk, a stack of
+        // crates, barrels and sacks
+        const crate = (b, w, h) => { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, 0, w, 1, 'wood1'); fill(b, 0, 0, 2, h, 'wood4'); fill(b, w - 2, 0, 2, h, 'wood4'); fill(b, 0, h - 2, w, 2, 'wood4'); for (let k = 2; k < Math.min(w, h) - 2; k++) px(b, k, h - 1 - k, 'wood3'); };
+        T.box('crate_0', 208, 0, 226, 12, 0, 14, crate); T.box('crate_1', 210, 1, 222, 10, 14, 25, crate);
+        T.box('crate_2', 236, 74, 254, 86, 0, 16, crate); T.box('crate_3', 238, 76, 250, 84, 16, 27, crate);
+        const shelves = (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which !== 'left') return;
+          for (let y = 4; y < h - 4; y += 12) {
+            fill(b, 2, y, w - 4, 10, 'wood5'); fill(b, 2, y + 10, w - 4, 1, 'wood3');
+            for (let x = 3; x < w - 6; x += 7 + ((hash(x, y, 5) * 4) | 0)) {
+              const k = ['roofR2', 'cream2', 'roofB2', 'brass2', 'roofG2', 'wood2'][((hash(x, y, 6) * 6) | 0)], t = 5 + ((hash(x, y, 7) * 4) | 0);
+              fill(b, x, y + 10 - t, 5, t, k); fill(b, x + 1, y + 10 - t, 1, t - 1, 'white');
+            }
+          }
+        };
+        T.box('shelves_0', 258, 18, 271, 60, 0, 46, shelves); T.box('shelves_1', 258, 72, 271, 106, 0, 40, shelves);
+        T.box('trunk', 214, 52, 240, 62, 0, 12, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'roofB3'); fill(b, 0, 0, w, 1, 'roofB2'); for (let x = 3; x < w; x += 8) fill(b, x, 0, 2, h, 'brass3'); if (which === 'front') fill(b, (w >> 1) - 1, 3, 3, 3, 'brass1'); });
+        const barrel = sprite(12, 16, b => { fill(b, 1, 0, 10, 16, 'wood3'); fill(b, 0, 2, 12, 12, 'wood3'); fill(b, 2, 1, 2, 14, 'wood2'); for (const y of [3, 12]) fill(b, 0, y, 12, 1, 'iron3'); fill(b, 1, 0, 10, 1, 'wood4'); });
+        T.card('barrel_0', barrel, 226, 100); T.card('barrel_1', barrel, 238, 104);
+        T.card('sacks', sprite(14, 12, b => { V.disc(b, 4, 7, 4, 5, 'cream2'); V.disc(b, 10, 8, 4, 4, 'cream2'); V.disc(b, 3, 6, 2, 3, 'cream1'); fill(b, 3, 1, 3, 2, 'wood4'); }), 215, 116);
+        // by the door, ferns grown in from the grove
+        T.card('fern_l', V.fern(3), 128, 132); T.card('fern_r', V.fern(6), 172, 132);
+      },
+    },
   };
 
   /* ---------- building a room ---------- */
@@ -180,14 +376,19 @@
     const P = x => x + ox, Q = y => y + oy, [W, H] = [E.w, E.h];
     const [x0, y0, x1, y1] = [P(0), Q(0), P(R.room[0]), Q(R.room[1])], xd = P(R.door), xc = (x0 + x1) >> 1;
     const back = Math.ceil(THICK * DEEP) + 1, fx0 = x0 - THICK, fx1 = x1 + THICK;
+    // The floor stands FLOOR px over the land in front of the door.
+    const top = E.height(xd, y1 + FLOOR) + FLOOR;
     const footed = (x, y) => x >= fx0 && x < fx1 && y >= y0 - back && y < y1, face = (x, y) => x >= fx0 && x < fx1 && y >= y1 && y < y1 + FLOOR;
-    const S = { id, w: W, h: H, area: E.area, bg: E.bg, start: 'door', clips: {}, decals: { below: E.decals.below }, items: [], anchors: { door: [xd, y1 - 16] }, paths: {}, decks: E.decks, flats: E.flats };
+    const S = { id, w: W, h: H, area: E.area, bg: E.bg, start: 'door', clips: {}, decals: { below: [] }, items: [], anchors: { door: [xd, y1 - 16] }, paths: {}, decks: E.decks, flats: E.flats };
+    for (const [k, [x, y]] of Object.entries(R.anchors || {})) S.anchors[k] = [P(x), Q(y)];
     // What stands on the floor keeps the room's own light while the area round it is graded (Pixel.shader): x and
-    // row + height, which is the floor's row + FLOOR for everything on it, walls and furniture too.
-    S.room = [fx0, y0 - back + FLOOR, fx1, y1 + FLOOR + 1];
+    // row + height, which is the floor's row + top for everything on it, walls and furniture too.
+    S.room = [fx0, y0 - back + top, fx1, y1 + top + 1];
     // The area round it, dimmed: its ground, its animated bits and its things, but not the house or what the room covers.
     for (const [k, c] of Object.entries(E.clips)) S.clips[k] = { ...c, draw: dimDraw(c.draw) };
-    const covered = it => { const [bx, , bw] = it.box, x = bx + bw / 2; return it.name.startsWith(id) || (x > fx0 - 4 && x < fx1 + 4 && it.y > y0 - back - 4 && it.y < y1 + FLOOR + 4); };
+    const standsIn = (x, y) => x > fx0 - 4 && x < fx1 + 4 && y > y0 - back - 4 && y < y1 + FLOOR + 4;
+    const covered = it => { const [bx, , bw] = it.box; return it.name.startsWith(id) || standsIn(bx + bw / 2, it.y); };
+    S.decals.below = E.decals.below.filter(([k, x, y]) => { const c = E.clips[k]; return c.ay === undefined || !standsIn(x + c.w / 2, y + c.ay - 1); });
     for (const it of E.items) if (!covered(it)) S.items.push(it.track ? { ...it, track: { ...it.track, frames: it.track.frames.map(f => dim(new ImageData(new Uint8ClampedArray(f.data), f.width, f.height))) } } : { ...it, draw: dimDraw(it.draw) });
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const cg = cv.getContext('2d'); cg.filter = `brightness(${SHADE})`; cg.drawImage(E.ground, 0, 0); cg.filter = 'none';
@@ -195,11 +396,11 @@
     // The footing: the floor stands on it, under the walls too; its stone face drops to the land, with a step at the door.
     fill(b, fx0, y0 - back, fx1 - fx0, y1 - y0 + back, 'wood5');
     boards(b, x0, y0, x1, y1, R.seed);
-    R.paint(b, (a, c, d, e, f) => { for (let y = c; y < e; y++) for (let x = a; x < d; x++) { const k = f(x - a, y - c, d - a, e - c); if (k) px(b, P(x), Q(y), k); } });
+    R.paint(b, (a, c, d, e, f) => { for (let y = c; y < e; y++) for (let x = a; x < d; x++) { const k = f(x - a, y - c, d - a, e - c); if (k) px(b, P(x), Q(y), k); } }, (x, y) => [P(x), Q(y)]);
     V.wallPanel(b, fx0, y1, fx1 - fx0, FLOOR, 'stone', R.seed);
     fill(b, fx0, y1, fx1 - fx0, 1, 'wood4');
     for (let k = 0; k < 2; k++) { fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 4, 'stone1'); fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 1, 'stone0'); fill(b, xd - 14 + k * 2, y1 + 4 + k * 5, 28 - k * 4, 1, 'stone3'); }
-    S.height = (x, y) => (footed(x, y) ? FLOOR : face(x, y) ? FLOOR - (y - y1) : E.height(x, y));
+    S.height = (x, y) => (footed(x, y) ? top : face(x, y) ? top - (y - y1) : E.height(x, y));
     S.vertical = (x, y) => face(x, y) || (!footed(x, y) && E.vertical(x, y));
     // Feet stay on the floor, off the furniture and the partitions.
     const solid = [...R.solid.map(([a, c, d, e]) => [P(a), Q(c), P(d), Q(e)]), ...R.bays.map(([x, row]) => [P(x) - 3, y0, P(x) + 3, Q(row)])];
@@ -219,10 +420,11 @@
       m.lit.forEach((l, i) => (l.b = panes[i]));
       if (m.lit.length) S.items.push({ name: name + '_day', y: ay, day: true, walk: true, ...MODEL.item({ faces: m.lit }, ax, ay) });
     };
-    // A wall's picture: plaster, and what extra puts on it; its windows' glass is drawn for the night, the day's kept
+    // A wall's picture: plaster (or the room's own paper), and what extra puts on it; its windows' glass is drawn for the night, the day's kept
     // for its pane (glass is its rect on the wall, for the pane's corners; flip for a wall whose picture is mirrored).
+    const wall = R.wall || plaster;
     const walls = (b2, w, h, extra, glass, panes, flip) => {
-      plaster(b2, w, h, R.seed);
+      wall(b2, w, h, R.seed);
       if (extra) extra(b2, w, h, (b3, x, y, ww, wh) => {
         V.win(b3, x, y, ww, wh, { frame: ['wood1', 'wood2', 'wood3'] });
         const pane = new Buf(ww, wh);
@@ -243,7 +445,7 @@
     // The partitions between the bays: lower than the walls, cut along their tops and ends.
     R.bays.forEach(([x, row], i) => model('partition_' + i, P(x), Q(row) - 1, (m, X, B) => {
       const f = B(Q(row)), d = B(y0) - f;
-      m.box(X(P(x)) - 2, X(P(x)) + 2, f, f + d, 0, WALL - 16, (bb, w, h, l, which) => (which === 'top' || which === 'front' ? cut(bb, w, h) : plaster(bb, w, h, R.seed + i)));
+      m.box(X(P(x)) - 2, X(P(x)) + 2, f, f + d, 0, WALL - 16, (bb, w, h, l, which) => (which === 'top' || which === 'front' ? cut(bb, w, h) : wall(bb, w, h, R.seed + i)));
     }));
 
     // What the room's def puts in it: boxes (models) and cards, each at its feet on the floor.
