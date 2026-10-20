@@ -18,6 +18,8 @@ namespace Shop
         const float CompanyNear = 44f, NoticeNear = 40f;
         /// <summary>Seconds before they turn to the courier again, and after the courier arrives before they first do.</summary>
         const float GreetAgain = 40f, Settling = 1.5f;
+        /// <summary>Seconds they keep their stop for the courier coming to them.</summary>
+        const float ExpectFor = 8f;
         /// <summary>Poses at work: they stop for a breath now and then.</summary>
         static readonly HashSet<string> Work = new() { "brew", "hammer", "polish", "sweep", "weave", "tend", "water", "rake", "fish", "photo", "peer", "look", "knead", "tinker" };
         static readonly HashSet<string> Young = new() { "pip", "kid", "grandkid", "leo" }, Old = new() { "nora", "bram", "helen", "marlow" };
@@ -33,7 +35,7 @@ namespace Shop
         string rest = "idle";
         int restFacing;
         bool restAway, restWatch;
-        float beat, aside, greeted = -GreetAgain, since;
+        float beat, aside, greeted = -GreetAgain, since, expecting;
         Ant company;
         readonly Dictionary<int, GameObject> setDown = new(); // the loads they left lying, by the stop they left them at
 
@@ -64,6 +66,9 @@ namespace Shop
             ant.Pose = listening = ant.Carrying ? "carry" : ant.Pose == "sit" ? "sit" : "idle";
             ant.FaceTo(courierX);
         }
+
+        /// <summary>The courier is coming to them: they keep the stop they are at, or reach next, for a while.</summary>
+        public void Expect() => expecting = Time.time + ExpectFor;
 
         /// <summary>Stops their activity where they are and stands by, for a scene to move them; someone sitting stays seated.</summary>
         public void Cue()
@@ -111,7 +116,7 @@ namespace Shop
                 Keep();
             }
             else Live();
-            if (!walking && def.Round != null && (wait -= Time.deltaTime) <= 0)
+            if (!walking && def.Round != null && (wait -= Time.deltaTime) <= 0 && Time.time > expecting)
             {
                 aside = 0;
                 var stop = def.Round[at];

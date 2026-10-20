@@ -282,12 +282,13 @@ namespace Shop
 
         async Awaitable<bool> WalkTo(Hotspot h, Vector2 point)
         {
+            if (h != null && h.Owner && h.Owner.TryGetComponent<Villager>(out var villager)) villager.Expect();
             var points = Walk.Path(Player.Feet, point);
             if (points.Count == 0) return false;
             var arrived = await Player.Walk(points);
             if (!arrived || h == null || !controls) return false;
-            // someone on their round has walked on meanwhile: follow them
-            if (h.Owner && h.Owner.Walking && Vector2.Distance(Player.Feet, h.GlobalSpot) > Reach) return await WalkTo(h, h.GlobalSpot);
+            // someone on their round has walked on meanwhile, maybe to their next stop already: follow them
+            if (h.Owner && Vector2.Distance(point, h.GlobalSpot) > Reach) return await WalkTo(h, h.GlobalSpot);
             Use(h);
             return true;
         }
