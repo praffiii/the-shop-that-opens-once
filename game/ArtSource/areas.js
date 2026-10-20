@@ -649,6 +649,8 @@
         // up on the bluff: Theo's studio, what is left of the rope bridge, a bench to watch the sea from
         at('theo_studio', V.theoStudio(), 250, 204, { lane: [[360, 214], [480, 196]] });
         at('rope_bridge', V.ropeBridgeRemains(), 80, 214);
+        // wild sea mint along the bluff's west edge, over the rock face the courier climbs (Night 3)
+        [[104, 228], [132, 234], [160, 230], [190, 236], [218, 230]].forEach(([x, y], i) => at('mint_' + i, V.mintClump(i + 1), x, y, { walk: true }));
         at('bluff_bench', V.bench2(5), 640, 200); at('bluff_pine', V.oak(7), 760, 180);
         [[370, 186, 'yellow'], [580, 210, 'white'], [700, 214, 'lilac'], [860, 196, 'yellow']].forEach(([x, y, c], i) => at('bluff_flowers_' + i, V.flowerClump(i + 60, c), x, y, { walk: true }));
         // the beach street: the salt store and Arlo's home, the day's work between them
@@ -667,8 +669,11 @@
         // crates, driftwood, rocks
         at('beached_boat', V.rowboat(true), 230, 598, { walk: true }); at('nets_1', B.nets(), 400, 540, { walk: true });
         at('catch_crates', B.catchCrates(), 462, 604); at('salt_heaps', B.saltHeaps(), 270, 534, { walk: true });
-        at('crates_beach', V.crateStack(7), 520, 530); at('bucket_beach', V.bucket(), 548, 540); at('driftwood_1', B.driftwood(), 740, 560, { walk: true });
-        [[130, 520], [880, 470], [560, 600]].forEach(([x, y], i) => at('beach_rock_' + i, V.boulder(i + 4), x, y)); at('nets', B.nets(), 650, 560, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
+        at('crates_beach', V.crateStack(7), 520, 530); at('bucket_beach', V.bucket(), 548, 540);
+        // the harbour coffee stall east of the jetty's foot, its terrace of a table and a bench where the coast's
+        // mornings start, and its rumours
+        at('coffee_stall', V.coffeeStall(), 720, 528); at('cafe_table', V.cafeTable(), 664, 566); at('cafe_bench', V.bench2(8), 630, 572);
+        [[130, 520], [880, 470], [560, 600]].forEach(([x, y], i) => at('beach_rock_' + i, V.boulder(i + 4), x, y)); at('nets', B.nets(), 590, 556, { walk: true }); at('driftwood', B.driftwood(), 300, 590, { walk: true });
         [[180, 560, 'scallop'], [350, 600, 'spiral'], [620, 592, 'clam'], [780, 600, 'scallop'], [110, 600, 'clam']].forEach(([x, y, k], i) => at('shell_' + i, B.shell(k), x, y, { walk: true }));
         [[140, 740], [760, 772], [300, 790]].forEach(([x, y], i) => at('sea_rock_' + i, V.rockStack(i + 1), x, y, { walk: true }));
         at('boat_0', V.boat(1), 590, 740, { walk: true }); at('boat_1', V.boat(2), 380, 770, { walk: true }); at('rowboat', V.rowboat(), 430, 680, { walk: true });

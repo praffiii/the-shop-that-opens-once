@@ -1169,48 +1169,6 @@
     .olLLLLLdo..
     ..oao.oao...
     ...o...o....`, { o: 'wood4', a: 'cream0', b: 'cream1', c: 'cream2', p: 'pink', e: 'ink', q: 'sky3', x: 'ink2', l: X.lil0, L: 'lilac', d: 'dusk5' });
-  SM.camera = () => S(`
-    ..ooo.....oooo..
-    .obbbo...oaabbo.
-    oooooooooooooooo
-    oaaaaaaaaaaaaaco
-    oLLLooooooLLLLLo
-    oLLoiiiiioLyyLLo
-    oLLoiWggioLLLLLo
-    oLLoigGgioLLLLLo
-    oLLoiggGioLLLLLo
-    oLLLoiiioLLLLLLo
-    oMMMMoooMMMMMMMo
-    oooooooooooooooo`, { o: 'iron4', a: 'iron0', b: 'iron1', c: 'iron2', L: 'wood3', M: 'wood4', i: 'iron1', W: 'white', g: 'water4', G: 'water5', y: 'brass1' });
-  SM.key = () => S(`
-    .oooo..........
-    oabbco.........
-    ob..co.........
-    ob..cooooooooo.
-    oabbcaaaaaaabco
-    .oooooooooobcco
-    ..........obo.o
-    ..........oo...`, { o: 'iron4', a: 'iron0', b: 'iron1', c: 'iron2' });
-  SM.shoes = () => {
-    const [c, x] = canvas(17, 9);
-    x.drawImage(S(`
-      .ooo........
-      oaabo.......
-      oabbboooo...
-      oabbwbwbboo.
-      oabbbbbbbbbo
-      ocbbbbbbbbco
-      odddddddddo.
-      .ooooooooo..`, { o: 'wood5', a: 'wood1', b: 'wood2', c: 'wood3', d: 'wood4', w: 'cream0' }), 0, 0);
-    x.drawImage(S(`
-      ..ooo...
-      .oasswo.
-      oarrrrro
-      orrrrrRo
-      oRRRRRRo
-      .oooooo.`, { o: 'roofR4', a: 'roofR0', r: 'red', R: 'roofR2', s: 'roofR3', w: 'white' }), 9, 3);
-    return c;
-  };
   SM.book = () => S(`
     .oooooooooo.
     oSSaaaaaaabo
@@ -1237,29 +1195,6 @@
     owwwwwrrwwwwwo
     owwwwwwwwwwwwo
     oooooooooooooo`, { o: 'dirt4', w: 'cream1', W: 'cream0', f: 'cream2', r: 'roofR2', R: 'rose' });
-  SM.musicbox = (v = 'closed') => v === 'open' ? S(`
-    .oooooooooo...
-    .ossssssssso..
-    .osWssssssso..
-    .ossssssssso..
-    .oooooooooooo.
-    ..o...p.....o.
-    ..o..ppp....o.
-    oooooooooooooo
-    oaaaaaaaaaaaao
-    obbbybbbbbbbyo
-    obbbbbbbbbbbbo
-    ocbbbbbbbbbbco
-    oooooooooooooo`, { o: 'wood4', s: 'sky1', W: 'white', p: 'pink', a: 'wood0', b: 'wood1', c: 'wood2', y: 'brass1' }) : S(`
-    .oooooooooooo..
-    oaaaaaaaaaaaao.
-    oabbbbrrbbbbbo.
-    oooooooooooooo.
-    oaaaaaaaaaaaao.
-    obbbbbyybbbbboq
-    obbbbbyybbbbboq
-    ocbbbbbbbbbbco.
-    oooooooooooooo.`, { o: 'wood4', a: 'wood0', b: 'wood1', c: 'wood2', r: 'rose', y: 'brass1', q: 'brass3' });
   SM.parcel = () => S(`
     ...oooooooooo.
     ..oaaattaaaaoo
@@ -1319,28 +1254,6 @@
     .oLLLLo.
     oLLLLLLo
     .oo..oo.`, { o: 'wood4', a: 'cream0', b: 'cream1', p: 'pink', q: 'sky3', x: 'ink2', e: 'ink', L: 'lilac' });
-  XS.camera = () => S(`
-    .ooo..oo.
-    ooooooooo
-    oaaaaaaco
-    oLoooLLLo
-    oLoWgoLyo
-    oLoggoLLo
-    ooooooooo`, { o: 'iron4', a: 'iron0', c: 'iron2', L: 'wood3', W: 'white', g: 'water4', y: 'brass1' });
-  XS.key = () => S(`
-    .ooo......
-    oa.oooooo.
-    oa.oabbbbo
-    .ooo.ooboo
-    ......ooo.`, { o: 'iron4', a: 'iron0', b: 'iron1' });
-  XS.shoes = () => S(`
-    .oo.......
-    oabo......
-    oaboo.....
-    oabbbo.oo.
-    oabbbboaro
-    oddddooRRo
-    .oooo.ooo.`, { o: 'wood5', a: 'wood1', b: 'wood2', d: 'wood4', r: 'red', R: 'roofR2' });
   XS.book = () => S(`
     .ooooo.
     oSabbbo
@@ -1357,22 +1270,6 @@
     owwwrwwwo
     owwwwwwwo
     ooooooooo`, { o: 'dirt4', w: 'cream0', f: 'cream2', r: 'red' });
-  XS.musicbox = (v = 'closed') => v === 'open' ? S(`
-    .ooooooo..
-    .osssWso..
-    .ooooooo..
-    oaaapaaao.
-    ooooooooo.
-    obbbybbboq
-    occcccccoq
-    ooooooooo.`, { o: 'wood4', s: 'sky1', W: 'white', p: 'pink', a: 'roofR2', b: 'wood1', c: 'wood2', y: 'brass1', q: 'brass3' }) : S(`
-    .ooooooo..
-    oaaaaaaao.
-    oabbrbbbo.
-    ooooooooo.
-    obbbybbboq
-    occcccccoq
-    ooooooooo.`, { o: 'wood4', a: 'wood0', b: 'wood1', c: 'wood2', r: 'rose', y: 'brass1', q: 'brass3' });
   XS.parcel = () => S(`
     oooooooo
     oaaataao
@@ -1486,61 +1383,6 @@
     rect(x, 16, 31, 3, 3, 'roofR2'); rect(x, 21, 31, 3, 3, 'roofR2'); rect(x, 19, 32, 2, 2, 'rose'); dot(x, 16, 31, 'rose'); dot(x, 23, 31, 'rose');
     return c;
   };
-  LG.camera = () => {
-    const [c, x] = canvas(48, 36);
-    // top plate (chrome) with rewind knob, shutter button and advance lever
-    rect(x, 5, 3, 7, 4, 'iron4'); rect(x, 6, 3, 5, 3, 'iron1'); rect(x, 6, 3, 5, 1, 'iron0');
-    rect(x, 36, 1, 8, 5, 'iron4'); rect(x, 37, 2, 6, 3, 'iron1'); rect(x, 37, 2, 6, 1, 'iron0');
-    rect(x, 30, 4, 4, 3, 'brass3'); rect(x, 31, 4, 2, 1, 'brass1');
-    const top = mask(48, 36, g => { rect(g, 2, 6, 44, 9, '#000'); rect(g, 1, 7, 46, 7, '#000'); });
-    x.drawImage(bevel(top, { o: 'iron4', ol: 'iron3', h: 'iron0', b: 'iron1', s: 'iron2' }, 1, 1), 0, 0);
-    for (const [wx, ww] of [[6, 8], [34, 6]]) { rect(x, wx, 9, ww, 4, 'iron4'); rect(x, wx + 1, 10, ww - 2, 2, 'water3'); dot(x, wx + 1, 10, 'water0'); }
-    rect(x, 18, 9, 8, 3, 'iron2'); rect(x, 19, 10, 6, 1, 'iron3');
-    // leather body
-    const body = mask(48, 36, g => { rect(g, 1, 14, 46, 19, '#000'); rect(g, 2, 33, 44, 1, '#000'); });
-    x.drawImage(bevel(body, { o: 'wood5', ol: 'wood4', h: 'wood2', b: 'wood3', s: 'wood4' }, 1, 2), 0, 0);
-    for (let j = 17; j < 31; j += 3) for (let i = 4 + ((j / 3) % 2) * 2; i < 45; i += 4) dot(x, i, j, 'wood4');
-    rect(x, 1, 14, 46, 1, 'iron3');
-    // lens: chrome barrel, knurled focus ring, deep glass with glints
-    disc(x, 19.5, 23.5, 11.5, (d, lit, dx, dy) => d > 10.8 ? 'iron4' : d > 8.4 ? (((Math.round(Math.atan2(dy, dx) * 12 / Math.PI)) & 1) ? 'iron2' : lit > 0 ? 'iron0' : 'iron1') : d > 7.6 ? 'iron3' : d > 6 ? (lit > 0 ? 'iron1' : 'iron2') : d > 5.2 ? 'iron4'
-      : lit > 0.6 && d > 2.8 ? 'water2' : d < 2 ? 'water6' : 'water5');
-    line(x, 16, 21, 18, 19, 'white'); dot(x, 22, 26, 'water1'); dot(x, 23, 25, 'water2');
-    // strap lugs
-    rect(x, 0, 16, 1, 3, 'iron3'); rect(x, 47, 16, 1, 3, 'iron3');
-    return c;
-  };
-  LG.key = () => {
-    const [c, x] = canvas(48, 22);
-    // round bow: a thick ring with a lit inner lip and four small knobs
-    for (const [kx, ky] of [[10.5, 1.5], [10.5, 21.5], [0.5, 11.5], [4, 4.5], [4, 18.5], [17, 4.5], [17, 18.5]]) disc(x, kx, ky, 1.6, (d, lit) => d > 1.1 ? 'iron4' : lit > 0 ? 'iron0' : 'iron2');
-    disc(x, 10.5, 11.5, 9.5, (d, lit, dx, dy) => d > 8.7 ? 'iron4' : d < 4.2 ? null : d < 5 ? (dx + dy > 0 ? 'iron0' : 'iron4') : lit > 0.55 ? 'iron0' : lit > 0 ? 'iron1' : lit > -0.5 ? 'iron2' : 'iron3');
-    // collar and shaft
-    rect(x, 19, 7, 5, 9, 'iron4'); rect(x, 20, 8, 3, 7, 'iron1'); rect(x, 20, 8, 3, 1, 'iron0'); rect(x, 22, 8, 1, 7, 'iron2');
-    rect(x, 23, 9, 23, 5, 'iron4'); rect(x, 23, 10, 22, 1, 'iron0'); rect(x, 23, 11, 22, 1, 'iron1'); rect(x, 23, 12, 22, 1, 'iron2');
-    rect(x, 30, 8, 2, 7, 'iron4'); rect(x, 30, 9, 1, 5, 'iron1');
-    // bit with wards
-    rect(x, 36, 13, 10, 8, 'iron4'); rect(x, 37, 13, 8, 7, 'iron1'); rect(x, 37, 13, 8, 1, 'iron2');
-    x.clearRect(39, 16, 2, 5); x.clearRect(43, 18, 2, 3); rect(x, 38, 16, 1, 4, 'iron4'); rect(x, 41, 16, 1, 4, 'iron4'); rect(x, 42, 18, 1, 2, 'iron4'); rect(x, 45, 13, 1, 8, 'iron4');
-    rect(x, 39, 15, 2, 1, 'iron4'); rect(x, 43, 17, 2, 1, 'iron4');
-    return c;
-  };
-  LG.shoes = () => {
-    const [c, x] = canvas(48, 30);
-    // grown-up's lace-up shoe (behind)
-    const big = mask(48, 30, g => { poly(g, [[3, 14], [10, 6], [19, 5], [22, 11], [34, 14], [40, 17], [42, 22], [42, 26], [2, 26]], '#000'); });
-    x.drawImage(bevel(big, { o: 'wood5', ol: 'wood4', h: 'wood1', b: 'wood2', s: 'wood3' }, 1, 2), 0, 0);
-    rect(x, 2, 25, 41, 3, 'wood5'); rect(x, 3, 25, 39, 1, 'wood4');
-    rect(x, 3, 22, 6, 3, 'wood4');
-    for (let k = 0; k < 4; k++) { rect(x, 18 + k * 3, 11 + k, 3, 1, 'cream0'); dot(x, 19 + k * 3, 12 + k, 'cream2'); }
-    line(x, 12, 8, 17, 14, 'wood3'); rect(x, 30, 17, 9, 1, 'wood3');
-    // child's mary-jane (in front, clearly smaller)
-    const small = mask(48, 30, g => { poly(g, [[27, 21], [31, 17], [36, 16], [41, 18], [46, 21], [47, 25], [26, 25]], '#000'); });
-    x.drawImage(bevel(small, { o: 'roofR4', ol: 'roofR3', h: 'roofR0', b: 'red', s: 'roofR2' }, 1, 1), 0, 0);
-    rect(x, 26, 25, 22, 2, 'roofR4'); rect(x, 27, 25, 20, 1, 'roofR3');
-    rect(x, 30, 19, 11, 2, 'roofR3'); rect(x, 30, 19, 11, 1, 'roofR2'); rect(x, 39, 19, 2, 2, 'white');
-    rect(x, 34, 21, 6, 2, 'cream1');
-    return c;
-  };
   LG.book = () => {
     const [c, x] = canvas(40, 46);
     // pages peeking out at the right and bottom
@@ -1560,74 +1402,6 @@
     rect(x, 20, 28, 5, 5, 'roofG3'); rect(x, 21, 29, 3, 3, 'roofG1'); dot(x, 22, 30, 'roofG0');
     // ribbon bookmark
     rect(x, 26, 42, 3, 4, 'roofR2'); rect(x, 26, 42, 1, 4, 'rose'); dot(x, 27, 45, 'roofR2'); x.clearRect(27, 45, 1, 1);
-    return c;
-  };
-  LG.letter = () => {
-    const [c, x] = canvas(44, 30);
-    const env = mask(44, 30, g => rect(g, 1, 2, 42, 27, '#000'));
-    x.drawImage(bevel(env, { o: 'dirt4', ol: 'dirt3', h: 'white', b: 'cream0', s: 'cream1' }, 1, 2), 0, 0);
-    // back flap and folds
-    poly(x, [[2, 3], [42, 3], [22, 18]], 'cream1'); line(x, 2, 3, 22, 17, 'dirt3'); line(x, 42, 3, 22, 17, 'dirt3');
-    line(x, 2, 27, 16, 15, 'cream2'); line(x, 42, 27, 28, 15, 'cream2');
-    // red wax seal with an embossed heart and drips
-    disc(x, 22, 18.5, 5.5, (d, lit) => d > 4.8 ? 'roofR4' : lit > 0.55 && d > 2 ? 'rose' : lit > -0.3 ? 'red' : 'roofR2');
-    rect(x, 18, 23, 2, 2, 'roofR2'); rect(x, 25, 23, 1, 3, 'roofR2');
-    rect(x, 20, 17, 2, 1, 'roofR3'); rect(x, 23, 17, 2, 1, 'roofR3'); rect(x, 20, 18, 5, 1, 'roofR3'); rect(x, 21, 19, 3, 1, 'roofR3'); dot(x, 22, 20, 'roofR3');
-    dot(x, 19, 15, 'white');
-    return c;
-  };
-  LG.musicbox = (v = 'closed') => {
-    const [c, x] = canvas(44, 44);
-    const wood = { o: 'wood5', ol: 'wood4', h: 'wood1', b: 'wood2', s: 'wood3' };
-    if (v === 'open') {
-      // raised lid showing a mirror, a velvet well and a little dancer
-      const lid = mask(44, 44, g => rect(g, 5, 2, 34, 17, '#000'));
-      x.drawImage(bevel(lid, wood, 1, 1), 0, 0);
-      rect(x, 8, 5, 28, 12, 'wood4'); rect(x, 9, 6, 26, 10, 'sky1'); rect(x, 9, 6, 26, 2, 'white'); line(x, 12, 14, 17, 7, 'white'); line(x, 14, 14, 19, 7, 'water0');
-      // music notes rising out of the box
-      const note = S(`
-        ..oo.
-        ..o.o
-        ..o..
-        ooo..
-        oo...`, { o: 'roofR3' });
-      x.drawImage(note, 38, 5); x.drawImage(note, 1, 1);
-    } else {
-      rect(x, 3, 13, 38, 3, 'wood5');
-    }
-    // box: top face (lid closed, or the open velvet well), front face with brass corners and keyhole, crank at the side
-    const top = mask(44, 44, g => rect(g, 3, 18, 38, 8, '#000'));
-    x.drawImage(bevel(top, { o: 'wood5', ol: 'wood4', h: 'wood0', b: 'wood1', s: 'wood2' }, 1, 1), 0, 0);
-    if (v === 'open') {
-      rect(x, 6, 20, 32, 5, 'roofR3'); rect(x, 7, 21, 30, 3, 'roofR2'); rect(x, 7, 21, 30, 1, 'roofR1');
-      // the little dancer on her brass pin
-      rect(x, 21, 17, 2, 5, 'brass3'); rect(x, 21, 17, 1, 5, 'brass1');
-      x.drawImage(S(`
-        ...ooo...
-        ..ohhho..
-        ..ohhho..
-        o..ooo..o
-        ao.ofo.oa
-        .aoffooa.
-        ..offfo..
-        .opppppo.
-        opPpPpPpo
-        .ooooooo.
-        ...o.o...
-        ...o.o...`, { o: 'wood4', h: 'wood2', a: 'cream0', f: 'cream0', p: 'pink', P: 'white' }), 18, 5);
-    } else {
-      // closed lid top with a rose inlay
-      rect(x, 3, 13, 38, 6, 'wood5'); rect(x, 4, 14, 36, 4, 'wood1'); rect(x, 4, 14, 36, 1, 'wood0');
-      ellipse(x, 22, 21, 5, 2, 'roofR2'); ellipse(x, 22, 21, 3, 1, 'rose'); rect(x, 15, 21, 3, 1, 'leaf3'); rect(x, 27, 21, 3, 1, 'leaf3');
-    }
-    const front = mask(44, 44, g => rect(g, 3, 25, 38, 17, '#000'));
-    x.drawImage(bevel(front, wood, 1, 2), 0, 0);
-    rect(x, 3, 30, 38, 1, 'wood4'); rect(x, 4, 31, 36, 1, 'wood1');
-    for (const [bx, by] of [[3, 25], [37, 25], [3, 38], [37, 38]]) { rect(x, bx, by, 4, 4, 'brass3'); rect(x, bx + 1, by + 1, 2, 2, 'brass1'); dot(x, bx + 1, by + 1, 'brass0'); }
-    // brass plate with an engraved note
-    rect(x, 17, 32, 10, 8, 'brass3'); rect(x, 18, 33, 8, 6, 'brass1'); rect(x, 18, 33, 8, 1, 'brass0');
-    rect(x, 22, 34, 1, 4, 'brass4'); dot(x, 23, 34, 'brass4'); dot(x, 24, 35, 'brass4'); rect(x, 20, 37, 2, 1, 'brass4'); dot(x, 21, 36, 'brass4');
-    rect(x, 41, 30, 2, 2, 'brass3'); rect(x, 42, 26, 1, 5, 'brass3'); rect(x, 40, 25, 4, 2, 'brass2'); dot(x, 40, 25, 'brass0');
     return c;
   };
   LG.parcel = () => {
@@ -2179,6 +1953,834 @@
     line(x, 6, 7, 9, 4, 'white');
     return c;
   };
+
+  // Daniel's 8mm cine camera (Night 3): an upright bronze body with black leather sides, the lens turret on its front,
+  // the viewfinder tube on top beside the brass plate with his D, the folding wind crank on its side. Out of the box
+  // its glass is clouded with twenty years of dust, its bronze dull; cleaned in Theo's studio (camera_clean) the
+  // lens is clear and the bronze glows.
+  const camKey = (clean) => ({ o: 'brass4', a: clean ? 'brass1' : 'brass2', b: clean ? 'brass2' : 'brass3', c: 'brass3', L: 'ink2', l: 'iron4', g: clean ? 'water4' : 'stone2', G: clean ? 'water5' : 'stone3', w: clean ? 'white' : 'stone1', k: 'iron2', y: clean ? 'brass0' : 'brass1', d: clean ? 'brass3' : 'stone2' });
+  XS.camera = () => S(`
+    ..ooooo.
+    .oayyao.
+    oooooooo
+    ogoLLLao
+    owoLLLak
+    oooLLLao
+    .oooooo.`, camKey(false));
+  XS.camera_clean = () => S(`
+    ..ooooo.
+    .oayyao.
+    oooooooo
+    ogoLLLao
+    owoLLLak
+    oooLLLao
+    .oooooo.`, camKey(true));
+  const camSM = `
+    ....ooooooo...
+    ....oaayyao...
+    ..oooooooooo..
+    ooooaaaaaaaao.
+    oggoabLLLLLaok
+    owgoabLLLLLaokk
+    oGGoabLLLLLao.k
+    ooooabLLLLLao.
+    ...oabbbbbbao.
+    ...oooooooooo.
+    .....oc..co...`;
+  SM.camera = () => S(camSM, camKey(false));
+  SM.camera_clean = () => S(camSM, camKey(true));
+  const camera = clean => {
+    const [c, x] = canvas(48, 36);
+    const B = clean ? { o: 'brass4', ol: 'brass3', h: 'brass0', b: 'brass1', s: 'brass2' } : { o: 'brass4', ol: 'brass3', h: 'brass1', b: 'brass2', s: 'brass3' };
+    const glass = (cx, cy, r) => disc(x, cx, cy, r, (d, lit) => d > r - 0.8 ? 'iron4' : clean ? (lit > 0.5 && d > r * 0.4 ? 'water2' : d < r * 0.35 ? 'water6' : 'water5') : lit > 0.3 ? 'stone1' : 'stone3');
+    // the viewfinder tube along the top, its rubber eyepiece at the back, the red run button at the front
+    x.drawImage(bevel(mask(48, 36, g => rect(g, 14, 3, 24, 5, '#000')), B, 1, 1), 0, 0);
+    rect(x, 38, 2, 3, 7, 'ink2'); rect(x, 38, 2, 1, 7, 'iron4');
+    rect(x, 15, 2, 3, 1, 'roofR3'); dot(x, 15, 2, 'roofR1');
+    // the body, bronze; black pebbled leather round its lower half
+    x.drawImage(bevel(mask(48, 36, g => { rect(g, 14, 8, 27, 25, '#000'); rect(g, 15, 33, 25, 1, '#000'); }), B, 1, 2), 0, 0);
+    rect(x, 15, 22, 25, 10, 'ink2'); rect(x, 15, 22, 25, 1, 'iron4');
+    for (let j = 24; j < 31; j += 2) for (let i = 16 + (j % 4 ? 1 : 0); i < 39; i += 2) dot(x, i, j, 'iron4');
+    // the plate on its side: an engraved border and Daniel's D cut big in the middle
+    rect(x, 18, 10, 19, 10, 'brass4'); rect(x, 19, 11, 17, 8, clean ? 'brass1' : 'brass2'); rect(x, 20, 12, 15, 6, clean ? 'brass0' : 'brass1');
+    for (let i = 21; i < 34; i += 2) { dot(x, i, 12, 'brass3'); dot(x, i + 1, 17, 'brass3'); }
+    ['###.', '#..#', '#..#', '###.'].forEach((r, j) => [...r].forEach((ch, i) => ch === '#' && dot(x, 26 + i, 13 + j, 'brass4')));
+    // the lens turret on the front: a round plate, the long lens and the short one under it
+    disc(x, 12, 19, 7, (d, lit) => d > 6.2 ? 'iron4' : lit > 0.4 ? 'iron1' : 'iron2');
+    x.drawImage(bevel(mask(48, 36, g => { rect(g, 2, 13, 9, 9, '#000'); rect(g, 5, 23, 6, 6, '#000'); }), { o: 'iron4', ol: 'iron3', h: 'iron0', b: 'iron1', s: 'iron2' }, 1, 1), 0, 0);
+    for (let k = 4; k < 10; k += 2) rect(x, k, 14, 1, 7, 'iron3');
+    rect(x, 1, 14, 2, 7, 'iron4'); glass(2, 17.5, 3.4); glass(5, 26, 2.4);
+    // the wind key on its side: a round boss and the folding butterfly key
+    disc(x, 42, 22, 2.6, (d, lit) => d > 2 ? 'brass4' : lit > 0 ? 'brass1' : 'brass3');
+    x.drawImage(bevel(mask(48, 36, g => { rect(g, 43, 16, 3, 13, '#000'); rect(g, 44, 15, 3, 15, '#000'); }), B, 1, 1), 0, 0);
+    rect(x, 44, 21, 2, 3, 'brass4');
+    if (!clean) { camDust(x, 48, 36, 83); line(x, 2, 14, 4, 21, 'stone1'); }
+    else { rect(x, 15, 9, 1, 12, 'brass0'); dot(x, 1, 15, 'white'); dot(x, 2, 15, 'white'); dot(x, 4, 25, 'white'); }
+    return c;
+  };
+  // twenty years of dust: grey bloom over the glass and in the leather's grain, the bronze dull
+  const camDust = (x, w, h, seed) => {
+    const r = rng(seed);
+    for (let k = 0; k < w * h / 16; k++) { const i = Math.floor(r() * w), j = Math.floor(r() * h); if (x.getImageData(i, j, 1, 1).data[3] && r() < 0.6) dot(x, i, j, r() < 0.7 ? 'stone2' : 'cream2'); }
+  };
+  const camB = clean => clean ? { o: 'brass4', ol: 'brass3', h: 'brass0', b: 'brass1', s: 'brass2' } : { o: 'brass4', ol: 'brass3', h: 'brass1', b: 'brass2', s: 'brass3' };
+  const camIron = { o: 'iron4', ol: 'iron3', h: 'iron0', b: 'iron1', s: 'iron2' };
+  // front: the lens turret head-on, the long lens over the short one, both glasses clouded until it is cleaned
+  const cameraFront = clean => {
+    const [c, x] = canvas(40, 40), B = camB(clean);
+    const glass = (cx, cy, r) => disc(x, cx, cy, r, (d, lit) => d > r - 0.8 ? 'iron4' : clean ? (lit > 0.5 && d > r * 0.4 ? 'water2' : d < r * 0.35 ? 'water6' : 'water5') : lit > 0.3 ? 'stone1' : d < r * 0.5 ? 'stone3' : 'stone2');
+    // the viewfinder tube's round end over the body, and the body itself with its leather band
+    x.drawImage(bevel(mask(40, 40, g => rect(g, 22, 1, 9, 7, '#000')), B, 1, 1), 0, 0);
+    glass(26.5, 4.5, 2.4);
+    x.drawImage(bevel(mask(40, 40, g => { rect(g, 7, 7, 26, 29, '#000'); rect(g, 8, 36, 24, 1, '#000'); }), B, 1, 2), 0, 0);
+    rect(x, 8, 27, 24, 8, 'ink2'); rect(x, 8, 27, 24, 1, 'iron4');
+    for (let j = 29; j < 35; j += 2) for (let i = 9 + (j % 4 ? 1 : 0); i < 31; i += 2) dot(x, i, j, 'iron4');
+    // the folding wind key, edge-on beyond the right side
+    x.drawImage(bevel(mask(40, 40, g => { rect(g, 33, 15, 3, 13, '#000'); rect(g, 36, 19, 2, 5, '#000'); }), B, 1, 1), 0, 0);
+    // the turret: a round iron plate on a pin, the long lens barrel ringed with grip ridges, the short one below
+    disc(x, 19, 20, 10.5, (d, lit) => d > 9.8 ? 'iron4' : d > 8.6 ? (lit > 0.2 ? 'iron0' : 'iron2') : lit > 0.4 ? 'iron1' : 'iron2');
+    disc(x, 16, 16, 6.5, (d, lit, dx, dy) => d > 5.8 ? 'iron4' : (Math.round(Math.atan2(dy, dx) * 10 / Math.PI) & 1) ? 'iron3' : lit > 0 ? 'iron0' : 'iron1');
+    glass(16, 16, 4.6);
+    disc(x, 24, 25, 4.2, (d, lit) => d > 3.5 ? 'iron4' : lit > 0 ? 'iron0' : 'iron2');
+    glass(24, 25, 2.8);
+    rect(x, 18, 19, 3, 3, 'iron4'); dot(x, 19, 20, 'iron1');
+    if (!clean) { camDust(x, 40, 40, 31); line(x, 13, 18, 15, 13, 'stone1'); }
+    else { line(x, 13, 16, 15, 13, 'white'); dot(x, 23, 24, 'white'); rect(x, 8, 8, 1, 18, 'brass0'); }
+    return c;
+  };
+  // top: looking down on it, the viewfinder along the top, the run button, and the footage dial stopped part-way:
+  // a reel is still inside
+  const cameraTop = clean => {
+    const [c, x] = canvas(48, 28), B = camB(clean);
+    x.drawImage(bevel(mask(48, 28, g => { rect(g, 13, 5, 28, 17, '#000'); rect(g, 14, 22, 26, 1, '#000'); }), B, 1, 2), 0, 0);
+    // the long lens out the front, ridged, and the turret plate's edge behind it
+    x.drawImage(bevel(mask(48, 28, g => { rect(g, 1, 9, 10, 8, '#000'); rect(g, 10, 3, 3, 21, '#000'); }), camIron, 1, 1), 0, 0);
+    for (let k = 3; k < 10; k += 2) rect(x, k, 10, 1, 6, 'iron3');
+    // the viewfinder tube with its rubber eyepiece, the red run button
+    x.drawImage(bevel(mask(48, 28, g => rect(g, 14, 6, 24, 5, '#000')), B, 1, 1), 0, 0);
+    rect(x, 38, 5, 3, 7, 'ink2'); rect(x, 38, 5, 1, 7, 'iron4');
+    disc(x, 17.5, 16.5, 2, (d, lit) => d > 1.4 ? 'roofR4' : lit > 0 ? 'roofR1' : 'roofR3');
+    // the footage dial: a cream face, its red hand stopped a third of the way round
+    disc(x, 30, 16, 4.5, (d, lit) => d > 3.8 ? 'brass4' : lit > 0.3 ? 'cream0' : 'cream1');
+    for (const [a, b] of [[29, 12], [33, 15], [29, 19], [26, 15]]) dot(x, a, b, 'wood4');
+    line(x, 29, 15, 32, 13, 'red'); dot(x, 29, 15, 'ink2');
+    // the wind key folded flat at its side
+    x.drawImage(bevel(mask(48, 28, g => { rect(g, 41, 11, 3, 6, '#000'); rect(g, 43, 9, 4, 10, '#000'); }), B, 1, 1), 0, 0);
+    if (!clean) camDust(x, 48, 28, 57);
+    else { rect(x, 14, 6, 20, 1, 'brass0'); dot(x, 27, 14, 'white'); }
+    return c;
+  };
+  LG.camera = (v = 'side') => v === 'front' ? cameraFront(false) : v === 'top' ? cameraTop(false) : camera(false);
+  LG.camera_clean = (v = 'side') => v === 'front' ? cameraFront(true) : v === 'top' ? cameraTop(true) : camera(true);
+  // Arlo's hemp rope, coiled for the cliff: loops of twisted rope, its end whipped with twine.
+  XS.rope = () => S(`
+    .oooo.
+    oabbao
+    ob..bo
+    oabbao
+    .oooo.`, { o: 'dirt4', a: 'dirt1', b: 'dirt2' });
+  SM.rope = () => S(`
+    ...oooooo...
+    ..oaabbaao..
+    .oaboooobao.
+    oaboaabboabo
+    obo.o..o.obo
+    oaboaabboabo
+    .oaboooobao.
+    ..oaabbaao.o
+    ...oooooo.oo`, { o: 'dirt4', a: 'dirt1', b: 'dirt2' });
+  LG.rope = () => {
+    const [c, x] = canvas(40, 34);
+    // three loops, each a ring of rope whose twist shows as light and dark dashes round it
+    for (const [cx, cy, r] of [[19, 18, 14], [19, 18, 10.5], [19, 18, 7]]) disc(x, cx, cy, r + 2, (d, lit, dx, dy) => {
+      if (d < r - 1.5) return null;
+      const a = Math.atan2(dy, dx), tw = ((Math.round(a * r) + Math.round(d * 2)) & 3);
+      return d > r + 1.4 ? 'dirt4' : tw === 0 ? 'dirt4' : lit > 0.2 ? 'dirt1' : tw === 1 ? 'dirt3' : 'dirt2';
+    });
+    // the end, whipped with dark twine, trailing out
+    line(x, 31, 26, 38, 33, 'dirt2'); line(x, 32, 26, 39, 32, 'dirt3'); rect(x, 34, 28, 2, 3, 'wood4'); dot(x, 38, 33, 'dirt1');
+    return c;
+  };
+  // Sea mint off the south cliff: three clumps of dark, crinkled leaves, tied together.
+  XS.mint = () => S(`
+    gG.Gg
+    GgGgG
+    .gGg.
+    ..s..
+    ..s..`, { g: 'leaf2', G: 'leaf4', s: 'leaf5' });
+  SM.mint = () => S(`
+    ..gG...Gg...
+    .gGGg.gGGg..
+    gGgGG.GgGGg.
+    .GgG.g.GgG..
+    ..G.gGg.G...
+    ...gGgGg....
+    ....sss.....
+    ....ttt.....
+    ....s.s.....
+    ...s...s....`, { g: 'leaf2', G: 'leaf4', s: 'leaf5', t: 'dirt3' });
+  LG.mint = () => {
+    const [c, x] = canvas(34, 34);
+    // a leaf: a pointed oval, crinkled at the edge, its lit side and its midrib
+    const leaf = (cx, cy, ang, L) => {
+      const ux = Math.cos(ang), uy = Math.sin(ang);
+      for (let t = -L; t <= L; t += 0.5) {
+        const w = Math.max(0, (1 - (t / L) ** 2) * L * 0.55), mx = cx + ux * t, my = cy + uy * t;
+        for (let q = -w; q <= w; q += 0.5) {
+          const qx = Math.round(mx - uy * q), qy = Math.round(my + ux * q), edge = Math.abs(q) > w - 1;
+          dot(x, qx, qy, edge ? (((qx + qy) & 1) ? 'leaf5' : 'leaf4') : q * (ux - uy) < 0 ? 'leaf2' : 'leaf3');
+        }
+      }
+      line(x, Math.round(cx - ux * L * 0.8), Math.round(cy - uy * L * 0.8), Math.round(cx + ux * L * 0.7), Math.round(cy + uy * L * 0.7), 'leaf5');
+    };
+    // three short stems and the twine round them
+    for (const [a, b] of [[9, 12], [17, 8], [25, 12]]) line(x, a, b, 17, 26, 'leaf5');
+    for (const [cx, cy] of [[9, 12], [25, 12], [17, 8]]) for (let k = 0; k < 4; k++) leaf(cx + Math.round(Math.cos(k * 1.6 + cx) * 3), cy + Math.round(Math.sin(k * 1.6 + cx) * 3), -Math.PI / 2 + (k - 1.5) * 0.9, 5);
+    rect(x, 14, 25, 6, 3, 'dirt3'); rect(x, 14, 25, 6, 1, 'dirt1'); dot(x, 19, 28, 'dirt3'); dot(x, 20, 29, 'dirt3');
+    line(x, 16, 28, 14, 33, 'leaf5'); line(x, 18, 28, 20, 33, 'leaf5');
+    return c;
+  };
+  // The mint tea brewed for Theo: a clay cup of pale green tea, a sprig on its rim, the steam rising.
+  XS.mint_tea = () => S(`
+    .s.s.
+    ooooo
+    obggo
+    obbbo
+    .ooo.`, { o: 'roofR3', b: 'roofR2', g: 'leaf1', s: 'white' });
+  SM.mint_tea = () => S(`
+    ...s..s....
+    ..s..s.....
+    ...s..s.G..
+    .oooooooGG.
+    oaaggggaao.
+    obbbbbbbbo.
+    obbbbbbbbo.
+    .obbbbbbo..
+    ..oooooo...`, { o: 'roofR4', a: 'roofR1', b: 'roofR2', g: 'leaf1', G: 'leaf3', s: 'white' });
+  LG.mint_tea = () => {
+    const [c, x] = canvas(32, 34);
+    // the cup: unglazed clay, a lit rim, a band pressed round it
+    const cup = mask(32, 34, g => { rect(g, 6, 14, 20, 16, '#000'); rect(g, 8, 30, 16, 2, '#000'); });
+    x.drawImage(bevel(cup, { o: 'roofR4', ol: 'roofR3', h: 'roofR0', b: 'roofR1', s: 'roofR2' }, 1, 2), 0, 0);
+    rect(x, 7, 14, 18, 3, 'leaf1'); rect(x, 7, 14, 18, 1, 'leaf0'); rect(x, 6, 21, 20, 1, 'roofR3');
+    // a sprig of mint over the rim, and the steam
+    for (const [bx, by, a] of [[24, 12, -0.6], [27, 9, -1.2], [21, 10, -1.9]]) { lens(x, bx, by, a, 5, 2.4, 'leaf4'); lens(x, bx, by, a, 4, 1.4, 'leaf2'); }
+    for (const sx of [11, 16, 21]) for (let j = 0; j < 10; j++) if (j % 3 !== 2) dot(x, sx + Math.round(Math.sin((j + sx) / 2) * 1.5), 2 + j, j < 4 ? 'cream1' : 'white');
+    return c;
+  };
+
+  // Wear on a drawn thing, kept off its outline: clots of `cols` wherever the noise falls under `rate`.
+  const grime = (x, seed, rate, cols) => {
+    const { width: w, height: h } = x.canvas, d = x.getImageData(0, 0, w, h).data, on = (i, j) => i >= 0 && j >= 0 && i < w && j < h && d[(j * w + i) * 4 + 3] > 0;
+    const n = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233 + seed * 7.13) * 43758.5453; return v - Math.floor(v); };
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++)
+      if (on(i, j) && on(i - 1, j) && on(i + 1, j) && on(i, j - 1) && on(i, j + 1) && n(i >> 1, j >> 1) < rate && n(i, j) < 0.75) dot(x, i, j, cols[Math.floor(n(j, i) * cols.length)]);
+  };
+  // A four-pointed glint on something polished.
+  const glint = (x, cx, cy, r = 2) => { rect(x, cx - r, cy, 2 * r + 1, 1, 'white'); rect(x, cx, cy - r, 1, 2 * r + 1, 'white'); };
+
+  // Night 4's key from Sam's box: plain black iron forged by the old station service, nothing engraved on it, a hollow
+  // acorn for its bow and four stepped notches cut in its bit. Out of the box it is cold and freckled with rust (key);
+  // once the vault's four tumblers have turned it, the rust is worn off its bit and the notches shine (key_turned).
+  const IRON = { o: 'ink', ol: 'iron4', h: 'iron2', b: 'iron3', s: 'iron4' }, IRON_LIT = { o: 'ink', ol: 'iron3', h: 'iron1', b: 'iron2', s: 'iron3' };
+  const RUST = ['wood3', 'wood4', 'dirt3'];
+  const keyFront = turned => {
+    const [c, x] = canvas(48, 24), ramp = turned ? IRON_LIT : IRON;
+    // the bow, an acorn on its side: the nut and its tip to the left, the scaly cup to the right, hollow through the nut
+    x.drawImage(bevel(mask(48, 24, g => {
+      ellipse(g, 9, 12, 7, 7, '#000'); poly(g, [[0, 12], [4, 9], [4, 15]], '#000'); ellipse(g, 17, 12, 4, 9, '#000');
+      g.globalCompositeOperation = 'destination-out'; ellipse(g, 8, 12, 3, 3, '#000');
+    }), ramp, 1, 2), 0, 0);
+    for (let j = 5; j < 20; j += 2) for (let i = 15 + (j % 4 === 1 ? 1 : 0); i < 21; i += 2) if (x.getImageData(i, j, 1, 1).data[3]) dot(x, i, j, ramp.s);
+    rect(x, 13, 6, 1, 13, 'ink');
+    // the collar, the shaft and the bit with its four steps, deepest at the tip
+    x.drawImage(bevel(mask(48, 24, g => { rect(g, 20, 8, 4, 9, '#000'); rect(g, 23, 10, 24, 5, '#000'); rect(g, 34, 14, 12, 2, '#000'); [3, 4, 5, 6].forEach((d, k) => rect(g, 34 + k * 3, 15, 3, d, '#000')); }), ramp, 1, 1), 0, 0);
+    rect(x, 22, 9, 1, 7, 'ink');
+    grime(x, 4, turned ? 0.04 : 0.12, RUST);
+    if (turned) { [3, 4, 5, 6].forEach((d, k) => rect(x, 34 + k * 3, 14 + d, 3, 1, 'iron0')); rect(x, 24, 11, 21, 1, 'iron1'); glint(x, 40, 11); glint(x, 6, 7, 1); }
+    return c;
+  };
+  // turned over it is just as bare
+  LG.key = (v = 'front') => v === 'back' ? PX.flip(keyFront(false)) : keyFront(false);
+  LG.key_turned = (v = 'front') => v === 'back' ? PX.flip(keyFront(true)) : keyFront(true);
+  const keySM = `
+    .ooo..............
+    oabbo.............
+    ob.coooooooooooo..
+    ob.ccaaaaaaaaaaco.
+    obccoooobbrbbbbco.
+    .ooo....obobobobo.
+    .........oobobobo.
+    ...........oobobo.
+    .............oobo.
+    ...............oo.`;
+  const keyXS = `
+    .oo.......
+    obcooooo..
+    o.caaaaco.
+    obcoobrbo.
+    .oo.obobo.
+    .....oobo.
+    .......oo.`;
+  const keyKey = turned => ({ o: 'ink', a: turned ? 'iron1' : 'iron2', b: turned ? 'iron2' : 'iron3', c: turned ? 'iron3' : 'iron4', r: turned ? 'iron2' : 'wood3' });
+  SM.key = () => S(keySM, keyKey(false));
+  SM.key_turned = () => S(keySM, keyKey(true));
+  XS.key = () => S(keyXS, keyKey(false));
+  XS.key_turned = () => S(keyXS, keyKey(true));
+
+  // The copy Sam writes out of the 1952 register's page for Satria: ticket 041 struck through in red ink, and Marcus
+  // Bell's red note under it, cancelled at 10:15.
+  LG.register = () => {
+    const [c, x] = canvas(36, 44);
+    x.drawImage(bevel(mask(36, 44, g => rect(g, 2, 2, 32, 40, '#000')), { o: 'dirt3', ol: 'dirt2', h: 'cream0', b: 'cream1', s: 'cream2' }, 1, 2), 0, 0);
+    rect(x, 3, 22, 30, 1, 'cream2');   // where it was folded
+    text(x, 'NO.', 5, 5, 'wood4'); rect(x, 17, 7, 13, 1, 'wood3'); rect(x, 5, 11, 26, 1, 'wood3');
+    for (const [y, s] of [[14, '040'], [20, '041'], [26, '042']]) { text(x, s, 5, y - 2, s === '041' ? 'ink2' : 'wood3'); for (let i = 18; i < 31; i += 4) rect(x, i, y, 3, 1, 'stone3'); }
+    rect(x, 4, 20, 28, 1, 'red'); dot(x, 31, 19, 'red');
+    text(x, '10:15', 5, 31, 'red');
+    for (const [y, w] of [[33, 9], [37, 26], [40, 18]]) for (let i = 0; i < w; i += 3) rect(x, (y === 33 ? 23 : 5) + i, y, 2, 1, 'roofR2');
+    return c;
+  };
+  SM.register = () => S(`
+    oooooooooooo
+    oWWWWWWWWWWo
+    okkWWkkkkkWo
+    oWWWWWWWWWWo
+    orrrrrrrrrro
+    oWWWWWWWWWWo
+    okkWWkkkkkWo
+    oWWWWWWWWWWo
+    oWrrWrrrWWWo
+    oWWWrrrrrWWo
+    oooooooooooo`, { o: 'dirt3', W: 'cream0', k: 'stone3', r: 'red' });
+  XS.register = () => S(`
+    ooooooo
+    oWkkkWo
+    orrrrro
+    oWkkkWo
+    oWrrWWo
+    ooooooo`, { o: 'dirt3', W: 'cream0', k: 'stone3', r: 'red' });
+
+  // Night 5's shoes from Leo's box: a pair of old canvas running shoes, faded dark red with white laces, their soles two
+  // sizes, the left long and slender, the right short and thick with dull iron spikes. Out of the box the canvas is hard
+  // and mossy, the laces broken, the rubber stiff and caked with dried mud, the tongue's seam gaping (shoes); bonded,
+  // cleaned and waxed in the Mender's press they shine (shoes_mended).
+  const shoeRamp = mended => ({
+    up: mended ? { o: 'roofR4', ol: 'roofR3', h: 'rose', b: 'red', s: 'roofR2' } : { o: 'roofR4', ol: 'roofR3', h: 'roofR1', b: 'roofR2', s: 'roofR3' },
+    sole: mended ? { o: 'wood5', ol: 'wood4', h: 'cream0', b: 'dirt1', s: 'dirt2' } : { o: 'wood5', ol: 'wood4', h: 'dirt2', b: 'dirt3', s: 'wood3' },
+  });
+  // one shoe side-on, toe to the right: the canvas upper from the heel's collar down the laces to the toe, its sole under it
+  const shoeSide = (x, W, H, x0, len, top, base, sole, mended, spikes) => {
+    const r = shoeRamp(mended), up = new Array(4);
+    x.drawImage(bevel(mask(W, H, g => poly(g, [[x0, top + 3], [x0 + 2, top], [x0 + len * 0.36, top + 1], [x0 + len * 0.62, top + (base - top) * 0.45], [x0 + len * 0.9, base - (base - top) * 0.35], [x0 + len, base - 2], [x0 + len, base], [x0, base]], '#000')), r.up, 1, 1), 0, 0);
+    // the stitched toe cap and heel tab, and the eyelets down the throat
+    rect(x, x0 + Math.round(len * 0.8), base - 3, Math.round(len * 0.2), 1, 'roofR4'); rect(x, x0 + 1, top + 4, 2, base - top - 5, mended ? 'roofR2' : 'roofR3');
+    for (let k = 0; k < 4; k++) up[k] = [Math.round(x0 + len * (0.4 + k * 0.12)), Math.round(top + 2 + (base - top) * 0.13 * k)];
+    for (const [ex, ey] of up) dot(x, ex, ey, 'brass3');
+    // the laces: crossed and tied (mended), or snapped short with one frayed end hanging (broken)
+    if (mended) { for (let k = 0; k < 3; k++) line(x, up[k][0], up[k][1], up[k + 1][0], up[k + 1][1] - 1, 'white'); line(x, up[0][0], up[0][1] - 1, up[0][0] - 3, up[0][1] - 3, 'white'); line(x, up[0][0], up[0][1] - 1, up[0][0] + 2, up[0][1] - 4, 'white'); }
+    else { dot(x, up[1][0] + 1, up[1][1] - 1, 'cream1'); dot(x, up[3][0] + 1, up[3][1] - 1, 'cream1'); line(x, up[0][0], up[0][1], up[0][0] - 2, up[0][1] + 6, 'cream1'); dot(x, up[0][0] - 2, up[0][1] + 7, 'cream2'); }
+    x.drawImage(bevel(mask(W, H, g => rect(g, x0 - 1, base, len + 2, sole, '#000')), r.sole, 1, 1), 0, 0);
+    if (spikes) for (let i = x0 + 2; i <= x0 + len - 3; i += 5) { rect(x, i, base + sole, 3, 1, mended ? 'iron1' : 'iron3'); dot(x, i + 1, base + sole + 1, mended ? 'iron0' : 'iron4'); }
+  };
+  const shoesPair = mended => {
+    const [c, x] = canvas(48, 32);
+    shoeSide(x, 48, 32, 2, 30, 7, 19, 2, mended, false);
+    shoeSide(x, 48, 32, 22, 23, 12, 24, 4, mended, true);
+    if (!mended) grime(x, 21, 0.16, ['leaf3', 'leaf4', 'stone2', 'dirt4']);
+    else { glint(x, 29, 9, 1); glint(x, 41, 19); dot(x, 6, 10, 'rose'); dot(x, 25, 15, 'rose'); }
+    return c;
+  };
+  // turned over: the two soles side by side, the left long and slim, the right short and broad with six spikes
+  const shoesSoles = mended => {
+    const [c, x] = canvas(44, 44), r = shoeRamp(mended);
+    const left = g => poly(g, [[10, 2], [16, 2], [19, 8], [19, 28], [17, 40], [12, 42], [9, 37], [8, 10]], '#000');
+    const right = g => poly(g, [[27, 10], [37, 10], [41, 16], [41, 31], [38, 39], [30, 39], [26, 33], [25, 17]], '#000');
+    for (const f of [left, right]) x.drawImage(bevel(mask(44, 44, f), r.sole, 1, 2), 0, 0);
+    // tread bars across both, the right's six spikes in its ball, its heel worn
+    for (let y = 6; y < 39; y += 4) rect(x, 11, y, 6, 1, r.sole.s);
+    for (let y = 30; y < 37; y += 3) rect(x, 29, y, 9, 1, r.sole.s);
+    for (const [sx, sy] of [[29, 14], [33, 13], [37, 14], [29, 20], [33, 19], [37, 20]]) { rect(x, sx - 1, sy - 1, 3, 3, mended ? 'iron2' : 'iron4'); dot(x, sx, sy, mended ? 'white' : 'iron2'); }
+    if (!mended) {
+      grime(x, 13, 0.28, ['dirt4', 'wood4', 'dirt2']);
+      line(x, 12, 15, 16, 19, 'wood5'); line(x, 30, 25, 35, 27, 'wood5'); line(x, 14, 31, 13, 35, 'wood5');
+    } else { glint(x, 33, 16); rect(x, 10, 4, 1, 10, 'white'); }
+    return c;
+  };
+  // the left shoe up close: its tongue standing out of the throat, its seam gaping (broken) or stitched (mended)
+  const shoesTongue = mended => {
+    const [c, x] = canvas(46, 34), r = shoeRamp(mended);
+    const tongue = mended ? [[15, 15], [14, 5], [20, 4], [25, 16]] : [[15, 15], [11, 6], [17, 3], [25, 16]];
+    x.drawImage(bevel(mask(46, 34, g => poly(g, tongue, '#000')), { o: 'roofR4', ol: 'roofR3', h: r.up.h, b: r.up.b, s: r.up.s }, 1, 1), 0, 0);
+    shoeSide(x, 46, 34, 3, 40, 13, 27, 3, mended, false);
+    if (mended) { for (let k = 0; k < 4; k++) dot(x, 16 + k * 2, 14 - k * 2 + 4, 'cream0'); glint(x, 38, 21); dot(x, 9, 17, 'rose'); }
+    else {
+      // the seam split between the tongue and the vamp, threads pulled loose from it
+      poly(x, [[18, 12], [25, 15], [28, 20], [21, 16]], 'wood5');
+      for (const [a, b] of [[19, 11], [23, 12], [27, 16], [26, 19], [22, 17]]) dot(x, a, b, 'cream2');
+      grime(x, 17, 0.14, ['leaf3', 'leaf4', 'stone2', 'dirt4']);
+    }
+    return c;
+  };
+  for (const [id, mended] of [['shoes', false], ['shoes_mended', true]]) LG[id] = (v = 'pair') => v === 'soles' ? shoesSoles(mended) : v === 'tongue' ? shoesTongue(mended) : shoesPair(mended);
+  const shoesSM = `
+    .ooo.............
+    obbbo............
+    obabbooo.........
+    obbawawbooo......
+    obbbbbbbbbbo.ooo.
+    ossssssssssoobbbo
+    .ooooooooooobbawwo
+    ...........obbbbbo
+    ...........osssssso
+    ...........oooooooo
+    ............i.i.i..`;
+  const shoesXS = `
+    .oo.......
+    obboo.....
+    obbwbo.oo.
+    osssssobbo
+    .ooooosssso
+    ......ooooo
+    .......i.i.`;
+  const shoeKey = mended => ({ o: 'roofR4', a: mended ? 'rose' : 'roofR1', b: mended ? 'red' : 'roofR2', w: mended ? 'white' : 'cream2', s: mended ? 'dirt1' : 'dirt3', i: mended ? 'iron1' : 'iron3' });
+  SM.shoes = () => S(shoesSM, shoeKey(false));
+  SM.shoes_mended = () => S(shoesSM, shoeKey(true));
+  XS.shoes = () => S(shoesXS, shoeKey(false));
+  XS.shoes_mended = () => S(shoesXS, shoeKey(true));
+
+  // Night 6's ledger from the sixth box: Marcus Bell's station accounts for 1952, a thick book in dark deer leather with
+  // brass corner plates, copper stitching round its board and a bronze clasp, its title tooled in gold. Its last page
+  // leaves the balance blank under a red question mark, over the railway's unbroken red wax seal (ledger); balanced in
+  // 6B, the page is stamped PAID IN FULL WITH FAMILY LOVE and the clasp hangs open (ledger_balanced).
+  const LEATHER = { o: 'ink', ol: 'wood5', h: 'wood3', b: 'wood4', s: 'wood5' }, PAGE = { o: 'dirt3', ol: 'dirt2', h: 'cream0', b: 'cream1', s: 'cream2' };
+  const gold = (x, s, px, py) => { text(x, s, px + 1, py + 1, 'wood5'); text(x, s, px, py, 'brass1'); };
+  // the railway's seal in red wax: a rim, a spoked wheel pressed in it, a drip
+  const waxSeal = (x, cx, cy, r) => {
+    disc(x, cx, cy, r, (d, lit, dx, dy) => d > r - 0.8 ? 'roofR4' : Math.abs(d - r * 0.55) < 0.5 || (d < r * 0.55 && (Math.round(Math.atan2(dy, dx) * 4 / Math.PI) & 1) === 0 && d > 1) ? 'roofR3' : lit > 0.5 ? 'rose' : 'roofR2');
+    rect(x, cx - 1, cy + r - 1, 2, 2, 'roofR3');
+  };
+  const ledgerCover = done => {
+    const [c, x] = canvas(48, 48);
+    // the page block at the fore-edge, receipts sticking out of it
+    rect(x, 6, 3, 39, 42, 'cream2'); for (let j = 5; j < 44; j += 2) rect(x, 43, j, 2, 1, 'cream0');
+    for (const [ry, rw] of [[9, 3], [21, 4], [32, 2]]) { rect(x, 44, ry, rw, 4, 'dirt3'); rect(x, 44, ry + 1, rw - 1, 2, 'cream0'); }
+    x.drawImage(bevel(mask(48, 48, g => rect(g, 1, 1, 42, 44, '#000')), LEATHER, 1, 2), 0, 0);
+    // the spine's raised bands, the copper stitching round the board, brass plates on its corners
+    rect(x, 1, 1, 7, 44, 'ink'); rect(x, 2, 2, 5, 42, 'wood4'); rect(x, 2, 2, 1, 42, 'wood3');
+    for (const j of [6, 14, 31, 39]) { rect(x, 2, j, 5, 2, 'wood5'); rect(x, 2, j, 5, 1, 'wood3'); }
+    for (let i = 11; i < 40; i += 2) { dot(x, i, 4, 'brass3'); dot(x, i, 41, 'brass3'); }
+    for (let j = 6; j < 41; j += 2) { dot(x, 9, j, 'brass3'); dot(x, 40, j, 'brass3'); }
+    for (const [cx, cy, sy] of [[43, 1, 1], [43, 45, -1]]) {
+      poly(x, [[cx, cy], [cx - 8, cy], [cx, cy + sy * 8]].map(([a, b]) => [a, sy < 0 ? b : b]), 'brass4');
+      poly(x, [[cx - 1, cy + sy], [cx - 6, cy + sy], [cx - 1, cy + sy * 6]], 'brass1'); dot(x, cx - 3, cy + sy * 2, 'brass3');
+    }
+    // the title tooled in gold
+    gold(x, 'BELLWOOD', 10, 8); gold(x, 'STATION', 12, 15);
+    for (let i = 13; i < 37; i += 3) dot(x, i, 22, 'brass2');
+    gold(x, '1952', 17, 25); gold(x, 'M. BELL', 13, 34);
+    // the bronze clasp: its strap over the fore-edge, buckled shut (ledger) or hanging loose (balanced)
+    if (!done) { rect(x, 37, 20, 11, 7, 'ink'); rect(x, 38, 21, 10, 5, 'wood4'); rect(x, 35, 19, 6, 9, 'brass4'); rect(x, 36, 20, 4, 7, 'brass2'); rect(x, 36, 20, 4, 1, 'brass1'); dot(x, 37, 23, 'brass4'); dot(x, 38, 23, 'brass4'); }
+    else { rect(x, 43, 26, 5, 12, 'ink'); rect(x, 44, 26, 3, 11, 'wood4'); rect(x, 42, 36, 6, 6, 'brass4'); rect(x, 43, 37, 4, 4, 'brass2'); dot(x, 43, 37, 'brass1'); glint(x, 41, 3); }
+    return c;
+  };
+  // the spine: BELL / WOOD, the railway's wheel and 1952 in gold between its raised bands
+  const ledgerSpine = () => {
+    const [c, x] = canvas(22, 48);
+    x.drawImage(bevel(mask(22, 48, g => rect(g, 2, 1, 18, 46, '#000')), LEATHER, 1, 2), 0, 0);
+    for (const j of [3, 18, 32, 43]) { rect(x, 2, j, 18, 3, 'ink'); rect(x, 3, j, 16, 1, 'wood3'); rect(x, 3, j + 1, 16, 1, 'wood4'); }
+    gold(x, 'BELL', 4, 6); gold(x, 'WOOD', 4, 12);
+    disc(x, 11, 25.5, 5, (d, lit, dx, dy) => d > 4.2 ? 'brass3' : d < 1.2 ? 'brass1' : (Math.round(Math.atan2(dy, dx) * 4 / Math.PI) & 1) === 0 ? 'brass2' : null);
+    gold(x, '1952', 4, 36);
+    return c;
+  };
+  // the last pages open: Daniel's gifts of timber and cement down the left in faded gold ink with Marcus Bell's stamps,
+  // and the balance page on the right
+  const ledgerPage = done => {
+    const [c, x] = canvas(70, 46);
+    x.drawImage(bevel(mask(70, 46, g => rect(g, 0, 3, 70, 42, '#000')), LEATHER, 1, 1), 0, 0);
+    for (const px of [2, 35]) x.drawImage(bevel(mask(70, 46, g => rect(g, px, 1, 33, 42, '#000')), PAGE, 1, 1), 0, 0);
+    rect(x, 34, 1, 2, 42, 'dirt3'); rect(x, 33, 2, 1, 40, 'cream2'); rect(x, 36, 2, 1, 40, 'cream2');
+    for (const [rx, rw] of [[8, 7], [20, 5]]) { rect(x, rx, 0, rw, 4, 'dirt3'); rect(x, rx + 1, 0, rw - 2, 3, 'cream0'); }
+    rect(x, 12, 5, 1, 36, 'roofR0'); rect(x, 26, 5, 1, 36, 'roofR0');
+    for (let y = 6; y < 34; y += 4) { rect(x, 4, y, 6, 1, 'brass3'); rect(x, 14, y, 3 + (y * 7) % 9, 1, 'brass3'); rect(x, 28, y, 4, 1, 'wood3'); }
+    for (const y of [9, 25]) { rect(x, 4, y - 2, 6, 4, 'roofR2'); rect(x, 5, y - 1, 4, 2, 'roofR1'); }
+    if (!done) {
+      for (let y = 6; y < 30; y += 4) rect(x, 38, y, 28, 1, 'cream2');
+      bigText(x, '?', 46, 9, 'red', 3); rect(x, 47, 9, 1, 1, 'rose');
+      waxSeal(x, 51, 37, 5);
+    } else {
+      // Marcus Bell's stamp, bright red and square on the page, the station's new seal pressed beside it
+      rect(x, 37, 2, 30, 36, 'red'); rect(x, 38, 3, 28, 34, 'cream1'); rect(x, 39, 4, 26, 1, 'red'); rect(x, 39, 35, 26, 1, 'red');
+      ['PAID IN', 'FULL', 'WITH', 'FAMILY', 'LOVE'].forEach((s, k) => text(x, s, 52 - (textWidth(s) >> 1), 6 + k * 6, 'red'));
+      for (const [a, b] of [[44, 8], [57, 14], [49, 26], [60, 31], [42, 20]]) dot(x, a, b, 'roofR0');
+      rect(x, 4, 34, 28, 1, 'wood3'); text(x, '4800', 16, 35, 'ink2'); rect(x, 15, 41, 16, 1, 'ink2');
+      waxSeal(x, 62, 39, 5);
+    }
+    return c;
+  };
+  LG.ledger = (v = 'cover') => v === 'spine' ? ledgerSpine() : v === 'page' ? ledgerPage(false) : ledgerCover(false);
+  LG.ledger_balanced = (v = 'page') => v === 'spine' ? ledgerSpine() : v === 'cover' ? ledgerCover(true) : ledgerPage(true);
+  const ledgerSM = `
+    .ooooooooooo.
+    oSyLLLLLLLyyo
+    oSLLLLLLLLLyw
+    oSLLggggLLLLw
+    oSLLLLLLLLLLw
+    oSLLggggLLccw
+    oSLLLLLLLLcqw
+    oSLLLggLLLccw
+    oSLLLLLLLLLLw
+    oSLLLLLLLLLLw
+    oSyLLLLLLLLyw
+    oSyyLLLLLLyyo
+    .oooooooooooo`;
+  const ledgerXS = `
+    .oooooo.
+    oSyLLyyw
+    oSLggLLw
+    oSLLLccw
+    oSLggLLw
+    oSyLLLyw
+    .oooooo.`;
+  const ledgerKey = done => ({ o: 'ink', S: 'wood5', L: 'wood4', y: 'brass1', g: 'brass2', w: 'cream1', c: done ? 'wood4' : 'brass3', q: done ? 'wood4' : 'brass1' });
+  SM.ledger = () => S(ledgerSM, ledgerKey(false));
+  SM.ledger_balanced = () => S(ledgerSM, ledgerKey(true));
+  XS.ledger = () => S(ledgerXS, ledgerKey(false));
+  XS.ledger_balanced = () => S(ledgerXS, ledgerKey(true));
+
+  // Father's savings book from the village post office, hidden behind his radio: blue cloth, DANIEL on its label, every
+  // page a withdrawal for the bridge's beams, down to nothing.
+  const CLOTH = { o: 'roofB4', ol: 'roofB3', h: 'roofB1', b: 'roofB2', s: 'roofB3' };
+  LG.savings_book = (v = 'cover') => {
+    if (v === 'inside') {
+      const [c, x] = canvas(58, 38);
+      x.drawImage(bevel(mask(58, 38, g => rect(g, 0, 2, 58, 35, '#000')), CLOTH, 1, 1), 0, 0);
+      for (const px of [2, 29]) x.drawImage(bevel(mask(58, 38, g => rect(g, px, 1, 27, 34, '#000')), PAGE, 1, 1), 0, 0);
+      rect(x, 28, 1, 2, 34, 'dirt3');
+      // each line a withdrawal with the post office's blue mark beside it, the balance running down to 0
+      for (let k = 0; k < 9; k++) {
+        const px = k < 5 ? 4 : 31, y = 5 + (k % 5) * 6;
+        rect(x, px, y, 7, 1, 'stone3'); rect(x, px + 10, y, 5 - (k % 3), 1, 'ink2');
+        disc(x, px + 21.5, y + 0.5, 2, d => d > 1.3 ? 'roofB3' : null);
+      }
+      text(x, '0', 47, 27, 'red'); rect(x, 44, 33, 9, 1, 'red');
+      return c;
+    }
+    const [c, x] = canvas(34, 44);
+    rect(x, 4, 3, 29, 39, 'cream2');
+    x.drawImage(bevel(mask(34, 44, g => rect(g, 1, 1, 30, 40, '#000')), CLOTH, 1, 2), 0, 0);
+    for (const [a, b] of [[2, 2], [29, 2], [2, 38], [29, 38]]) { rect(x, a, b, 2, 2, 'roofB1'); dot(x, a + (a > 9 ? 1 : 0), b + (b > 9 ? 1 : 0), 'sky1'); }
+    text(x, 'POST', 9, 5, 'cream0'); text(x, 'SAVINGS', 3, 11, 'cream0');
+    // the post's mark, a letter with a leaf for its stamp
+    rect(x, 10, 18, 12, 8, 'roofB4'); rect(x, 11, 19, 10, 6, 'cream0'); line(x, 11, 19, 16, 22, 'roofB3'); line(x, 20, 19, 16, 22, 'roofB3'); dot(x, 19, 20, 'leaf3'); dot(x, 19, 21, 'leaf2');
+    // the name label
+    rect(x, 3, 29, 26, 9, 'roofB4'); rect(x, 4, 30, 24, 7, 'cream0'); text(x, 'DANIEL', 5, 31, 'ink2');
+    return c;
+  };
+  SM.savings_book = () => S(`
+    oooooooooo.
+    obbbbbbbbbo
+    obWWWWWWbbw
+    obbbbbbbbbw
+    obbbeeebbbw
+    obbbeeebbbw
+    obbbbbbbbbw
+    obWWWWWWWbw
+    obWkkkkkWbw
+    obWWWWWWWbw
+    oooooooooow`, { o: 'roofB4', b: 'roofB2', W: 'cream0', e: 'cream1', k: 'ink2', w: 'cream2' });
+  XS.savings_book = () => S(`
+    oooooo.
+    obWWbo.
+    obbbbow
+    oWkkWow
+    oooooow`, { o: 'roofB4', b: 'roofB2', W: 'cream0', k: 'ink2', w: 'cream2' });
+
+  // Night 7's music box from the last box, FOR THE COURIER: fine walnut carved by Father's hand, a chamomile on its lid,
+  // brass hinges and a small brass crank on its right side; Father's D and Mother's R cut under its base. It comes
+  // silent and a little dusty (musicbox); wound three times at Mother's sewing table it plays, open, its lid lined with
+  // the Gardener's dried lavender (musicbox_open).
+  const WALNUT = { o: 'wood5', ol: 'wood4', h: 'wood2', b: 'wood3', s: 'wood4' }, WALNUT_TOP = { o: 'wood5', ol: 'wood4', h: 'wood1', b: 'wood2', s: 'wood3' };
+  const musicBody = (x, W, H, open) => {
+    // the front with its carved border, brass feet, the crank on the right side
+    x.drawImage(bevel(mask(W, H, g => rect(g, 3, 23, 36, 14, '#000')), WALNUT, 1, 2), 0, 0);
+    rect(x, 6, 26, 30, 1, 'wood4'); rect(x, 6, 33, 30, 1, 'wood4'); rect(x, 6, 26, 1, 8, 'wood4'); rect(x, 35, 26, 1, 8, 'wood4'); rect(x, 7, 27, 28, 1, 'wood2');
+    for (let i = 9; i < 34; i += 4) { dot(x, i, 30, 'wood4'); dot(x, i + 1, 29, 'wood2'); }
+    for (const fx of [4, 35]) { rect(x, fx, 37, 3, 2, 'brass4'); rect(x, fx, 37, 2, 1, 'brass1'); }
+    rect(x, 39, 28, 2, 3, 'brass4'); rect(x, 41, open ? 23 : 25, 2, open ? 8 : 6, 'brass3'); rect(x, 41, open ? 23 : 25, 1, open ? 8 : 6, 'brass1');
+    disc(x, 42, open ? 22.5 : 24.5, 1.8, (d, lit) => d > 1.2 ? 'brass4' : lit > 0 ? 'brass0' : 'brass2');
+  };
+  // the chamomile Father set into the lid in pale wood, its heart a brass pin
+  const chamomileInlay = (x, cx, cy) => {
+    lens(x, cx - 5, cy + 1, Math.PI - 0.3, 6, 1.4, 'wood1'); lens(x, cx + 5, cy + 1, 0.3, 6, 1.4, 'wood1');
+    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; lens(x, cx, cy, a, 4.5, 1.5, 'wood4'); lens(x, cx, cy, a, 3.8, 0.8, k < 4 ? 'cream0' : 'cream1'); }
+    disc(x, cx, cy, 1.8, (d, lit) => d > 1.2 ? 'brass3' : 'brass1');
+  };
+  const musicClosed = dusty => {
+    const [c, x] = canvas(46, 40);
+    x.drawImage(bevel(mask(46, 40, g => rect(g, 3, 9, 36, 12, '#000')), WALNUT_TOP, 1, 1), 0, 0);
+    for (const hx of [9, 30]) { rect(x, hx, 9, 4, 2, 'brass4'); rect(x, hx + 1, 9, 2, 1, 'brass1'); }
+    chamomileInlay(x, 21, 15);
+    rect(x, 3, 20, 36, 3, 'wood5'); rect(x, 4, 20, 34, 1, 'wood3');   // the lid's edge over the box
+    musicBody(x, 46, 40, false);
+    if (dusty) grime(x, 41, 0.05, ['stone2']);
+    else glint(x, 33, 13);
+    return c;
+  };
+  // turned over: its base, a brass foot at each corner, and the letters Father cut there: D, a heart, R
+  const musicUnder = () => {
+    const [c, x] = canvas(42, 30);
+    x.drawImage(bevel(mask(42, 30, g => rect(g, 2, 3, 38, 24, '#000')), WALNUT_TOP, 1, 2), 0, 0);
+    for (const [a, b] of [[5, 6], [36, 6], [5, 23], [36, 23]]) disc(x, a + 0.5, b + 0.5, 2, (d, lit) => d > 1.4 ? 'brass4' : lit > 0 ? 'brass0' : 'brass2');
+    for (let i = 10; i < 33; i += 5) rect(x, i, 4, 1, 22, 'wood3');   // the grain
+    engrave(x, ['####.', '#...#', '#...#', '#...#', '#...#', '#...#', '####.'], 10, 11, 'wood5', 'wood1');
+    engrave(x, ['.#.#.', '#####', '#####', '.###.', '..#..'], 18, 12, 'roofR3', 'wood1');
+    engrave(x, ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'], 26, 11, 'wood5', 'wood1');
+    return c;
+  };
+  // open and playing: the lid up, lined with lavender, the brass cylinder turning its pins past the steel comb,
+  // notes rising and chamomile petals falling round it
+  const musicOpen = () => {
+    const [c, x] = canvas(46, 42);
+    x.drawImage(bevel(mask(46, 42, g => rect(g, 5, 0, 32, 17, '#000')), WALNUT, 1, 1), 0, 0);
+    rect(x, 8, 3, 26, 11, 'dusk5'); rect(x, 9, 4, 24, 9, 'lilac'); rect(x, 9, 4, 24, 1, X.lil0);
+    for (const [lx, ly] of [[11, 7], [17, 10], [24, 6], [29, 9]]) { line(x, lx, ly + 3, lx + 2, ly - 1, 'leaf3'); dot(x, lx + 1, ly, 'dusk5'); dot(x, lx + 2, ly - 1, 'dusk5'); dot(x, lx + 1, ly + 1, 'dusk5'); }
+    for (const hx of [9, 30]) { rect(x, hx, 15, 4, 3, 'brass4'); rect(x, hx + 1, 15, 2, 2, 'brass1'); }
+    x.drawImage(bevel(mask(46, 42, g => rect(g, 3, 17, 36, 7, '#000')), WALNUT_TOP, 1, 1), 0, 0);
+    rect(x, 6, 18, 30, 5, 'wood5');
+    rect(x, 8, 19, 16, 3, 'brass2'); rect(x, 8, 19, 16, 1, 'brass0'); for (let i = 9; i < 24; i += 2) dot(x, i, 20 + (i % 4 ? 0 : 1), 'brass4');
+    rect(x, 25, 19, 10, 3, 'iron1'); for (let i = 26; i < 35; i += 2) rect(x, i, 19, 1, 3, 'iron3');
+    musicBody(x, 46, 42, true);
+    const note = S(`
+      ..oo.
+      ..o.o
+      ..o..
+      ooo..
+      oo...`, { o: 'wood4' });
+    x.drawImage(note, 39, 4); x.drawImage(note, 0, 8);
+    for (const [px, py, a] of [[41, 14, 0.6], [2, 20, -0.8], [43, 37, 2.2], [1, 33, 1.4]]) lens(x, px, py, a, 3, 1, 'white');
+    glint(x, 33, 26);
+    return c;
+  };
+  LG.musicbox = (v = 'closed') => v === 'under' ? musicUnder() : v === 'open' ? musicOpen() : musicClosed(true);
+  LG.musicbox_open = (v = 'open') => v === 'under' ? musicUnder() : v === 'closed' ? musicClosed(false) : musicOpen();
+  const musicKey = { o: 'wood5', a: 'wood2', b: 'wood3', c: 'wood4', w: 'cream0', y: 'brass1', q: 'brass3', l: 'lilac', n: 'wood4' };
+  SM.musicbox = SM.musicbox_open = (v = 'closed') => v === 'open' ? S(`
+    ..oooooooooo...
+    ..ollllllllo.n.
+    ..ollllllllo.nn
+    ..oyoooooyoo...
+    .oaaaaaaaaaao..
+    oooooooooooooo.
+    obbbbbbbbbbbboq
+    obcbbbbbbbbcbqy
+    obbbbbbbbbbbbo.
+    oooooooooooooo.
+    .qq.......qq...`, musicKey) : S(`
+    .oooooooooooo..
+    oaaaaawaaaaao..
+    oaaaawywaaaao..
+    oaaaaawaaaaao..
+    oooooooooooooo.
+    obbbbbbbbbbbboq
+    obcbbbbbbbbcbqy
+    obbbbbbbbbbbbo.
+    oooooooooooooo.
+    .qq.......qq...`, musicKey);
+  XS.musicbox = XS.musicbox_open = (v = 'closed') => v === 'open' ? S(`
+    .oooooo...
+    .ollllo.n.
+    .oyooyo.nn
+    ooooooooo.
+    obbbbbbboq
+    obcbbbcboy
+    ooooooooo.`, musicKey) : S(`
+    .ooooooo..
+    oaaawaaao.
+    ooooooooo.
+    obbbbbbboq
+    obcbbbcboy
+    ooooooooo.`, musicKey);
+
+  // Mother's letter in the last box: a thick envelope, no name on it and no sender, sealed in red wax pressed with a
+  // chamomile, a sprig of dried lavender caught under the seal (letter); opened and read, the pages in her hand (letter_read).
+  const ENVELOPE = { o: 'dirt4', ol: 'dirt3', h: 'white', b: 'cream0', s: 'cream1' };
+  LG.letter = (v = 'back') => {
+    const [c, x] = canvas(44, 30);
+    x.drawImage(bevel(mask(44, 30, g => rect(g, 1, 2, 42, 27, '#000')), ENVELOPE, 1, 2), 0, 0);
+    if (v === 'front') {
+      // the face: blank, not a name on it; only the lavender's faint stain in a corner
+      for (const [a, b] of [[34, 6], [36, 7], [35, 8], [37, 6]]) dot(x, a, b, X.lil0);
+      rect(x, 3, 26, 38, 1, 'cream1');
+      return c;
+    }
+    poly(x, [[2, 3], [42, 3], [22, 18]], 'cream1'); line(x, 2, 3, 22, 17, 'dirt3'); line(x, 42, 3, 22, 17, 'dirt3');
+    line(x, 2, 27, 16, 15, 'cream2'); line(x, 42, 27, 28, 15, 'cream2');
+    // the lavender under the seal
+    line(x, 12, 24, 22, 17, 'leaf3'); for (const [a, b] of [[13, 22], [15, 21], [14, 23], [16, 20], [12, 23]]) { dot(x, a, b, 'lilac'); dot(x, a + 1, b - 1, 'dusk5'); }
+    disc(x, 22, 17.5, 5.5, (d, lit) => d > 4.8 ? 'roofR4' : lit > 0.55 && d > 2.5 ? 'red' : lit > -0.3 ? 'roofR2' : 'roofR3');
+    rect(x, 18, 22, 2, 2, 'roofR3'); rect(x, 25, 22, 1, 3, 'roofR3');
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; dot(x, Math.round(21.5 + Math.cos(a) * 2.6), Math.round(17 + Math.sin(a) * 2.6), 'roofR4'); }
+    dot(x, 22, 17, 'rose'); dot(x, 19, 14, 'white');
+    return c;
+  };
+  LG.letter_read = () => {
+    const [c, x] = canvas(38, 46);
+    x.drawImage(bevel(mask(38, 46, g => rect(g, 2, 1, 34, 44, '#000')), { o: 'dirt3', ol: 'dirt2', h: 'white', b: 'cream0', s: 'cream1' }, 1, 2), 0, 0);
+    rect(x, 3, 15, 32, 1, 'cream2'); rect(x, 3, 30, 32, 1, 'cream2');   // its folds
+    // her hand: a greeting, line on line of it, and RATIH at the foot
+    for (let i = 0; i < 12; i += 3) rect(x, 6 + i, 5, 2, 1, 'wood4');
+    for (let y = 9; y < 37; y += 3) { if (y === 15 || y === 30) continue; for (let i = 6; i < 32 - (y * 5) % 7; i += 1) if ((i + y) % 5 !== 0) dot(x, i, y + ((i >> 1) % 2), 'wood3'); }
+    text(x, 'RATIH', 14, 39, 'wood4');
+    for (const [a, b] of [[30, 3], [32, 4], [31, 5], [33, 3]]) dot(x, a, b, 'lilac');
+    return c;
+  };
+  SM.letter_read = () => S(`
+    oooooooooo
+    oWWWWWWWWo
+    okkkWkkkWo
+    oWkkkkWkWo
+    occccccccc
+    okkWkkkkWo
+    oWkkkWkkWo
+    occccccccc
+    oWkkkkWkWo
+    oWWWWWkkko
+    oooooooooo`, { o: 'dirt3', W: 'cream0', k: 'wood3', c: 'cream2' });
+  XS.letter_read = () => S(`
+    oooooo
+    oWkkWo
+    occcco
+    okkWko
+    oWWkko
+    oooooo`, { o: 'dirt3', W: 'cream0', k: 'wood3', c: 'cream2' });
+
+  // The photo from the sewing table's hidden drawer: Father, Mother and little Satria laughing over grilled corn in the
+  // kitchen, taken by Theo when none of them was looking; his studio's stamp and a line of his pencil on the back.
+  const SEPIA = ['wood5', 'wood4', 'wood3', 'dirt3', 'dirt2', 'dirt1', 'dirt0'];
+  LG.photo = (v = 'front') => {
+    const [c, x] = canvas(44, 36);
+    x.drawImage(bevel(mask(44, 36, g => rect(g, 1, 1, 42, 34, '#000')), { o: 'stone3', ol: 'stone2', h: 'white', b: 'cream0', s: 'cream1' }, 1, 1), 0, 0);
+    if (v === 'back') {
+      disc(x, 13, 13, 8, d => d > 7.2 || (d > 5.6 && d < 6.4) ? 'roofB3' : null); text(x, 'THEO', 6, 11, 'roofB3');
+      for (const [y, w] of [[25, 28], [29, 18]]) for (let i = 0; i < w; i++) if (i % 6 !== 5) dot(x, 7 + i, y + ((i >> 2) % 2), 'stone3');
+      return c;
+    }
+    // the print: the kitchen's back wall and window, the table, the three of them with the corn, its smoke going up
+    rect(x, 4, 4, 36, 28, SEPIA[5]); rect(x, 4, 4, 36, 2, SEPIA[4]);
+    rect(x, 28, 7, 9, 8, SEPIA[2]); rect(x, 29, 8, 7, 6, SEPIA[6]); rect(x, 32, 8, 1, 6, SEPIA[3]); rect(x, 29, 11, 7, 1, SEPIA[3]);
+    rect(x, 4, 26, 36, 6, SEPIA[2]); rect(x, 4, 26, 36, 1, SEPIA[4]);
+    const ant = (cx, cy, r, flower) => {
+      ellipse(x, cx, cy + r + 3, r + 1, r + 1, SEPIA[1]);
+      disc(x, cx, cy, r, (d, lit) => d > r - 0.8 ? SEPIA[0] : lit > 0.4 ? SEPIA[3] : SEPIA[2]);
+      line(x, cx - 1, cy - r, cx - 3, cy - r - 3, SEPIA[0]); line(x, cx + 1, cy - r, cx + 3, cy - r - 3, SEPIA[0]);
+      // eyes shut with laughing, the mouth open
+      dot(x, cx - 2, cy - 1, SEPIA[6]); dot(x, cx - 1, cy - 2, SEPIA[6]); dot(x, cx + 2, cy - 1, SEPIA[6]); dot(x, cx + 1, cy - 2, SEPIA[6]);
+      rect(x, cx - 1, cy + 1, 2, 2, SEPIA[0]);
+      if (flower) { dot(x, cx + r - 1, cy - r + 1, 'cream0'); dot(x, cx + r, cy - r + 1, 'cream0'); dot(x, cx + r - 1, cy - r, 'cream0'); }
+    };
+    ant(10, 15, 4, false); ant(21, 20, 3, false); ant(32, 17, 4, true);
+    // the corn cobs in their hands, and the smoke off the grill
+    for (const [cx, cy] of [[15, 21], [24, 24], [27, 22]]) { rect(x, cx, cy, 2, 5, SEPIA[6]); dot(x, cx, cy + 1, SEPIA[4]); dot(x, cx + 1, cy + 3, SEPIA[4]); }
+    for (let j = 0; j < 8; j++) dot(x, 20 + Math.round(Math.sin(j) * 1.5), 6 + j, SEPIA[6]);
+    return c;
+  };
+  SM.photo = () => S(`
+    ooooooooooooo
+    oWWWWWWWWWWWo
+    oWllllllllyWo
+    oWlhlllllhyWo
+    oWlblhlllblWo
+    oWlblblllblWo
+    oWddddddddWWo
+    oWWWWWWWWWWWo
+    ooooooooooooo`, { o: 'stone3', W: 'cream0', l: 'dirt1', h: 'wood3', b: 'wood4', d: 'wood3', y: 'dirt0' });
+  XS.photo = () => S(`
+    oooooooo
+    oWWWWWWo
+    oWhlhlWo
+    oWddddWo
+    oWWWWWWo
+    oooooooo`, { o: 'stone3', W: 'cream0', l: 'dirt1', h: 'wood3', d: 'wood3' });
+
+  // Day 8: Valdo's contract torn in two before the whole village, the halves apart, scraps on the wind.
+  const SHEET = { o: 'stone3', ol: 'stone2', h: 'white', b: 'cream0', s: 'cream1' };
+  LG.contract_torn = () => {
+    const [c, x] = canvas(46, 40);
+    const edge = [[21, 3], [19, 8], [22, 12], [18, 17], [21, 22], [17, 27], [20, 32], [18, 37]];
+    x.drawImage(bevel(mask(46, 40, g => poly(g, [[2, 3], ...edge, [2, 37]], '#000')), SHEET, 1, 1), 0, 0);
+    x.drawImage(bevel(mask(46, 40, g => poly(g, [...edge.map(([a, b]) => [a + 5, b + 2]), [42, 39], [42, 5]].reverse(), '#000')), SHEET, 1, 1), 0, 0);
+    text(x, 'DR', 5, 6, 'ink2'); text(x, 'AFT', 26, 8, 'ink2');
+    for (const [y, w] of [[13, 13], [16, 11], [19, 12], [22, 9]]) { rect(x, 5, y, w, 1, 'stone2'); rect(x, 26, y + 2, w + 2, 1, 'stone2'); }
+    rect(x, 5, 32, 10, 1, 'ink2');   // the line to sign on, empty for good
+    disc(x, 35, 31, 4, d => d > 3.2 ? 'roofR3' : d > 2 ? 'red' : 'cream0');
+    for (const [a, b, w, h] of [[38, 0, 3, 2], [43, 4, 2, 2], [11, 0, 2, 2], [1, 0, 2, 1]]) { rect(x, a, b, w, h, 'cream0'); dot(x, a + w - 1, b + h - 1, 'stone2'); }
+    return c;
+  };
+  SM.contract_torn = () => S(`
+    oooooo..ooooo.
+    oWkkWo.oWkkWo.
+    oWWWWWooWWWWo.
+    okkkWo.okkkWo.
+    oWWWWWooWWrWo.
+    okkkWo.oWrrWo.
+    oWWWWWooWWWWo.
+    oooooo..ooooo.`, { o: 'stone3', W: 'cream0', k: 'stone2', r: 'red' });
+  XS.contract_torn = () => S(`
+    oooo.ooo.
+    oWko.oWo.
+    okWooWro.
+    oWko.oko.
+    oooo.ooo.`, { o: 'stone3', W: 'cream0', k: 'stone2', r: 'red' });
+  XS.contract = () => S(`
+    .ooo.....
+    ooooooooo
+    oWkkkWWao
+    oWWWWWWao
+    oWkkWrWao
+    ooooooooo`, { o: 'dirt4', a: 'dirt1', W: 'cream0', k: 'stone2', r: 'red' });
+
+  // Day 8: the new stamp for the post office Satria opens again, its turned handle still bright with varnish, and the
+  // mark it leaves: BELLWOOD POST 1972.
+  LG.post_stamp = (v = 'handle') => {
+    if (v === 'face') {
+      const [c, x] = canvas(46, 30);
+      x.drawImage(bevel(mask(46, 30, g => rect(g, 1, 1, 44, 28, '#000')), SHEET, 1, 2), 0, 0);
+      const ink = 'roofB3';
+      rect(x, 4, 4, 38, 22, ink); rect(x, 5, 5, 36, 20, 'cream0'); rect(x, 6, 6, 34, 18, ink); rect(x, 7, 7, 32, 16, 'cream0');
+      text(x, 'BELLWOOD', 8, 9, ink); rect(x, 8, 15, 30, 1, ink); text(x, 'POST', 8, 17, ink); text(x, '1972', 24, 17, ink);
+      for (const [a, b] of [[12, 4], [30, 6], [40, 14], [9, 18], [26, 25], [19, 11]]) dot(x, a, b, 'roofB1');
+      return c;
+    }
+    const [c, x] = canvas(30, 44);
+    // the knob and neck turned from honey wood, the brass ferrule, the rubber block and its blue-inked face
+    x.drawImage(bevel(mask(30, 44, g => { ellipse(g, 15, 7, 7, 6, '#000'); rect(g, 12, 12, 6, 14, '#000'); ellipse(g, 15, 25, 6, 3, '#000'); }), { o: 'wood4', ol: 'wood3', h: 'wood0', b: 'wood1', s: 'wood2' }, 1, 2), 0, 0);
+    x.drawImage(bevel(mask(30, 44, g => rect(g, 8, 27, 14, 4, '#000')), { o: 'brass4', ol: 'brass3', h: 'brass0', b: 'brass1', s: 'brass2' }, 1, 1), 0, 0);
+    x.drawImage(bevel(mask(30, 44, g => rect(g, 5, 31, 20, 9, '#000')), { o: 'ink', ol: 'iron4', h: 'iron2', b: 'iron3', s: 'iron4' }, 1, 1), 0, 0);
+    rect(x, 5, 40, 20, 2, 'roofB3'); rect(x, 6, 40, 18, 1, 'roofB2');
+    glint(x, 11, 4); dot(x, 13, 15, 'wood0');
+    return c;
+  };
+  SM.post_stamp = () => S(`
+    ..oooo..
+    .oaabbo.
+    .oabbbo.
+    ..obbo..
+    ..obbo..
+    .ooooooo
+    oyyyyyyo
+    oiiiiiio
+    oiiiiiio
+    ouuuuuuo
+    oooooooo`, { o: 'wood4', a: 'wood0', b: 'wood1', y: 'brass1', i: 'iron3', u: 'roofB2' });
+  XS.post_stamp = () => S(`
+    .oo..
+    oabo.
+    .obo.
+    oyyyo
+    oiiio
+    ouuuo`, { o: 'wood4', a: 'wood0', b: 'wood1', y: 'brass1', i: 'iron3', u: 'roofB2' });
 
   // The key to Satria's home: an old brass key, mossy from two years under the geranium pot.
   SM.homekey = () => S(`

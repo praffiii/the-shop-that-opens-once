@@ -25,6 +25,37 @@ namespace Shop
         // the days the story takes the Mender into his forge at midday (Night 1's watch, Night 5's shoes); the others he
         // tinkers with the old engine on the platform
         static readonly int[] ForgeDays = { 1, 5 }, EngineDays = { 0, 2, 3, 4, 6, 7, 8 };
+        // Night 3 keeps Theo shut in his studio behind its chain, Leo on the coffee stall's terrace, Valdo on the beach
+        // street and Arlo mending nets in the salt store; the coffee drinkers sit over their cups
+        static readonly int[] NightThree = { 3 }, NotNightThree = { 0, 1, 2, 4, 5, 6, 7, 8 }, FromNightThree = { 3, 4, 5, 6, 7, 8 };
+        // Night 4 (the key with no engraving): the village hall's lobby and Sam's basement archive open from it on.
+        static readonly int[] NightFour = { 4 }, NotNightFour = { 0, 1, 2, 3, 5, 6, 7, 8 }, FromNightFour = { 4, 5, 6, 7, 8 };
+
+        // The coast's fisher carries the catch landed at the jetty's foot to the fish rack; the salt worker rakes the
+        // salt pans and carries the sacks to the salt store.
+        static readonly Stop[] FisherRound =
+        {
+            new Stop { At = V(486, 606), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
+            new Stop { At = V(820, 536), Pose = "lift", Facing = -1, Wait = 3f },
+        };
+        static readonly Stop[] SalterRound =
+        {
+            new Stop { At = V(186, 528), Pose = "rake", Facing = 1, Wait = 5f },
+            new Stop { At = V(242, 530), Pose = "rake", Facing = 1, Wait = 5f, Carry = true },
+            new Stop { At = V(236, 470), Pose = "lift", Facing = 1, Wait = 3f },
+        };
+        static readonly string[] FisherLines =
+        {
+            "Arlo catches them, I carry them. He says that makes him the brains. I say it makes me the back.",
+            "Mind the wet planks, they're slicker than they look.",
+            "Good haul today. Arlo says it's skill. It's mostly tide.",
+        };
+        static readonly string[] SalterLines =
+        {
+            "The sea leaves the salt and I fetch it in. A fair arrangement. The sea's never once complained.",
+            "Rake slow, rake even. Salt's like people, it doesn't like being rushed.",
+            "My hands taste of the sea all year. My wife says it's romantic. My wife is lying.",
+        };
 
         // One of the platform's oil lanterns on its post, the post's foot at x.
         static Hotspot Lantern(int i, float x) => new()
@@ -640,7 +671,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "leo", Label = "Leo", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Id = "leo", Label = "Leo", Spot = V(0, 12), Chapters = NotNightThree, Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
@@ -823,7 +854,7 @@ namespace Shop
                     // street at midday, and sits at the jetty's end at dusk.
                     new Person
                     {
-                        Id = "theo", At = V(400, 228), Label = "Theo", Spot = V(-18, 4), Pose = "photo", Facing = 1, Phases = new[] { Phase.Morning },
+                        Id = "theo", At = V(400, 228), Label = "Theo", Spot = V(-18, 4), Pose = "photo", Facing = 1, Chapters = NotNightThree, Phases = new[] { Phase.Morning },
                         Lines = new[]
                         {
                             "The light off the sea is honest at this hour. It doesn't flatter anyone.",
@@ -833,7 +864,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "theo", At = V(278, 216), Label = "Theo", Spot = V(-16, 2), Pose = "look", Facing = -1, Phases = new[] { Phase.Midday },
+                        Id = "theo", At = V(278, 216), Label = "Theo", Spot = V(-16, 2), Pose = "look", Facing = -1, Chapters = NotNightThree, Phases = new[] { Phase.Midday },
                         Lines = new[]
                         {
                             "Too bright. Everything goes flat at noon. I'll wait for the light to come back.",
@@ -843,7 +874,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Chapters = NotNightThree, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Sunsets are easy to photograph. That's why I keep trying to get one right.",
@@ -853,7 +884,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "arlo", At = V(514, 754), Label = "Arlo", Spot = V(-16, -6), Pose = "fish", Facing = 1, Phases = new[] { Phase.Morning },
+                        Id = "arlo", At = V(514, 754), Label = "Arlo", Spot = V(-16, -6), Pose = "fish", Facing = 1, Chapters = NotNightThree, Phases = new[] { Phase.Morning },
                         Lines = new[]
                         {
                             "Tide's turning. Fish bite when the water changes its mind. Sit quiet and you'll see.",
@@ -884,36 +915,32 @@ namespace Shop
                     // A fisher carries the catch landed at the jetty's foot, crate by crate, to the fish rack; the salt worker
                     // rakes the salt pans on the sand and carries the sacks to the salt store. At dusk the fisher sits on the rowboat pulled up on the
                     // sand and the salt worker sweeps the store's step.
+                    new Person { Id = "fisher", Label = "Fisher", Spot = V(14, 0), Chapters = NotNightThree, Phases = new[] { Phase.Morning }, Round = FisherRound, Lines = FisherLines },
+                    new Person { Id = "fisher", Label = "Fisher", Spot = V(14, 0), Phases = new[] { Phase.Midday }, Round = FisherRound, Lines = FisherLines },
+                    new Person { Id = "salter", Label = "Salt worker", Spot = V(0, 14), Chapters = NotNightThree, Phases = new[] { Phase.Morning }, Round = SalterRound, Lines = SalterLines },
+                    new Person { Id = "salter", Label = "Salt worker", Spot = V(0, 14), Phases = new[] { Phase.Midday }, Round = SalterRound, Lines = SalterLines },
+                    // Night 3's morning: the fisher and the salt worker over their coffee on the stall's terrace (the
+                    // rumour of Theo's chain), Leo stretching by the stall after his run, Valdo pacing the beach street
+                    // to see whether a road could be laid to the jetty
                     new Person
                     {
-                        Id = "fisher", Label = "Fisher", Spot = V(14, 0), Phases = new[] { Phase.Morning, Phase.Midday },
-                        Round = new[]
-                        {
-                            new Stop { At = V(486, 606), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
-                            new Stop { At = V(820, 536), Pose = "lift", Facing = -1, Wait = 3f },
-                        },
-                        Lines = new[]
-                        {
-                            "Arlo catches them, I carry them. He says that makes him the brains. I say it makes me the back.",
-                            "Mind the wet planks, they're slicker than they look.",
-                            "Good haul today. Arlo says it's skill. It's mostly tide.",
-                        },
+                        Id = "fisher", At = V(630, 572), Seat = 7, Label = "Fisher", Spot = V(-4, 16), Pose = "sit", Facing = 1, Chapters = NightThree, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Coffee first, catch after. The fish don't mind waiting.", "Theo? Don't knock. Nobody's got an answer out of that door in years." },
                     },
                     new Person
                     {
-                        Id = "salter", Label = "Salt worker", Spot = V(0, 14), Phases = new[] { Phase.Morning, Phase.Midday },
-                        Round = new[]
-                        {
-                            new Stop { At = V(186, 528), Pose = "rake", Facing = 1, Wait = 5f },
-                            new Stop { At = V(242, 530), Pose = "rake", Facing = 1, Wait = 5f, Carry = true },
-                            new Stop { At = V(236, 470), Pose = "lift", Facing = 1, Wait = 3f },
-                        },
-                        Lines = new[]
-                        {
-                            "The sea leaves the salt and I fetch it in. A fair arrangement. The sea's never once complained.",
-                            "Rake slow, rake even. Salt's like people, it doesn't like being rushed.",
-                            "My hands taste of the sea all year. My wife says it's romantic. My wife is lying.",
-                        },
+                        Id = "salter", At = V(690, 574), Label = "Salt worker", Spot = V(12, 10), Pose = "idle", Facing = -1, Chapters = NightThree, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Strong enough to stand a spoon in. The only way to start a day on the sand.", "Daniel used to drink his on that bench. Black, no sugar." },
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(604, 586), Label = "Leo", Spot = V(20, 6), Pose = "stretch", Facing = 1, Chapters = NightThree, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "The beach run's the only one my knees still forgive me for.", "Theo opens to nobody who comes with empty hands. Remember that." },
+                    },
+                    new Person
+                    {
+                        Id = "valdo", At = V(560, 470), Label = "Valdo", Spot = V(20, 4), Pose = "idle", Facing = 1, Chapters = NightThree, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "A proper road down to the jetty. The investors' lorries will need one.", "Day Eight, Mr Satria. Nine o'clock sharp. I've the pen ready." },
                     },
                     new Person
                     {
@@ -936,7 +963,17 @@ namespace Shop
                         },
                     },
                 },
-                Hotspots = new[] { North("to_square", 480, "Up to the square", "square/from_coast") },
+                Hotspots = new[]
+                {
+                    North("to_square", 480, "Up to the square", "square/from_coast"),
+                    new Hotspot { Id = "theo_studio_door", At = V(263, 204), Label = "Studio", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "theo_studio/door", Chapters = FromNightThree },
+                    new Hotspot { Id = "salt_store_door", At = V(236, 446), Label = "Salt store", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "salt_store/door", Chapters = FromNightThree },
+                    // Night 3: the darkroom's vent beside the studio door, where the mint tea is set; the wild mint on
+                    // the bluff's west edge, over the rock face below it; the coffee stall by the jetty's foot
+                    new Hotspot { Id = "vent", At = V(282, 204), Label = "Vent", Area = R(-6, -26, 12, 14), Spot = V(4, 14), Chapters = NightThree, Text = "A louvred vent beside the studio door, a narrow sill under it. It smells faintly of vinegar: the darkroom's breath." },
+                    new Hotspot { Id = "mint_cliff", At = V(150, 286), Label = "Rock face", Area = R(-40, -54, 80, 56), Spot = V(0, 10), Chapters = NightThree, Text = "The bluff's rock face, black and slick with green moss from the spray. Up on its edge, wild mint is flowering." },
+                    new Hotspot { Id = "coffee_stall", At = V(720, 528), Label = "Coffee stall", Area = R(-36, -60, 72, 62), Spot = V(0, 16), Chapters = FromNightThree, Text = "The harbour coffee stall. A brass pot muttering on the brazier, and the smell of strong coffee and salt fish." },
+                },
             },
             ["grove"] = new PlaceDef
             {
@@ -1012,6 +1049,77 @@ namespace Shop
                     new Hotspot { Id = "lanterns", At = V(308, 104), Label = "Lanterns", Area = R(-42, -48, 84, 48), Spot = V(-28, 58) },
                     new Hotspot { Id = "clock", At = V(257, 106), Label = "Clock", Area = R(-8, -62, 16, 64), Spot = V(0, 10) },
                 },
+            },
+            // Theo's studio on the coast's bluff, cut open: the darkroom behind its red curtain in the west, the gallery
+            // under the round sea window, the projector lounge in the east. On Night 3 he is shut in it all day: at the
+            // darkroom's bench at midday, in his rocking chair for the film at dusk.
+            ["theo_studio"] = new PlaceDef
+            {
+                Id = "theo_studio",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                WoodFloor = true,
+                People = new[]
+                {
+                    new Person { Id = "theo", At = V(176, 146), Label = "Theo", Spot = V(18, 6), Pose = "idle", Away = true, Chapters = NightThree, Phases = new[] { Phase.Midday } },
+                    new Person { Id = "theo", At = V(371, 196), Seat = 8, Label = "Theo", Spot = V(-24, 4), Pose = "sit", Facing = -1, Chapters = NightThree, Phases = new[] { Phase.Dusk } },
+                },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(263, 204), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "coast/theo_studio_door" },
+                    new Hotspot { Id = "dark_bench", At = V(166, 130), Label = "Darkroom bench", Area = R(-28, -20, 56, 22), Spot = V(5, 12), Text = "Three trays on the bench, amber, clear and grey: developer, stop bath, fixer. The developing tank stands by them, its lid shut." },
+                    new Hotspot { Id = "red_basin", At = V(144, 158), Label = "Red basin", Area = R(-9, -20, 18, 22), Spot = V(15, 10), Text = "A red enamel basin of old developer, and a bucket of ice beside it. The safelight's red lies on its surface like a skin." },
+                    new Hotspot { Id = "gallery", At = V(262, 140), Label = "Photographs", Area = R(-46, -34, 92, 34), Spot = V(-3, 32), Text = "Photographs all round the round sea window: boats, the jetty, storms coming in. Not one face among them." },
+                    new Hotspot { Id = "projector", At = V(348, 176), Label = "Projector", Area = R(-11, -22, 22, 22), Spot = V(16, -10), Text = "An 8mm projector with a brass crank, dust in the grooves of its reels. A lamp lies ready beside it." },
+                    new Hotspot { Id = "screen", At = V(349, 120), Label = "Screen", Area = R(-28, -54, 56, 54), Spot = V(-16, 70), Text = "A burlap screen on its wooden frame, stretched tight and pale." },
+                    new Hotspot { Id = "reels", At = V(385, 156), Label = "Film cans", Area = R(-7, -38, 14, 38), Spot = V(-14, 30), Text = "Shelves of round film cans, each with a date on its lid in Theo's square hand. The dates stop five years ago." },
+                },
+            },
+            // Arlo's salt store on the beach street, cut open: the salt bin and its sacks, his nets and floats, the
+            // resin drums and the storm lantern. On Night 3's morning he mends his nets in it.
+            ["salt_store"] = new PlaceDef
+            {
+                Id = "salt_store",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                WoodFloor = true,
+                People = new[]
+                {
+                    new Person
+                    {
+                        Id = "arlo", At = V(256, 424), Label = "Arlo", Spot = V(20, 4), Pose = "tend", Facing = 1, Chapters = NightThree, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Salt in the store, nets on the hooks, and a knot for every storm I've seen.", "Your father mended nets with me in here. Talked the whole time. I let him." },
+                    },
+                },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(236, 446), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "coast/salt_store_door" },
+                    new Hotspot { Id = "rope_coil", At = V(294, 388), Label = "Rope", Area = R(-10, -16, 20, 16), Spot = V(0, 10), Text = "A coil of hemp rope, thick as a wrist and bristly, its end whipped tight with twine." },
+                },
+            },
+            // The village hall on the square, cut open: its lobby, the registration counter, the pendulum clock, the
+            // residents' board and Sam's typewriter desk, and the stone stair down to the archive.
+            ["hall"] = new PlaceDef
+            {
+                Id = "hall",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(640, 392), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "square/hall_door" },
+                },
+            },
+            // Under the hall, down its stair: Sam's archive and the steel door of vault No. 7.
+            ["hall_vault"] = new PlaceDef
+            {
+                Id = "hall_vault",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                Hotspots = new Hotspot[] { },
             },
             // The Baker's bakery on the square, cut open: the dome oven and its flour sacks, the dough table, the bread
             // shelves and the counter. Mornings he is at work in it: kneading, a tray out of the oven, loaves onto the

@@ -97,7 +97,7 @@ namespace Shop
         {
             if (!wind.isPlaying) wind.Play();
             target[2] = indoors ? IndoorWind : 1f;
-            var phase = "amb_" + Game.Phase.ToString().ToLowerInvariant();
+            var phase = Main.Raining ? "amb_rain" : "amb_" + Game.Phase.ToString().ToLowerInvariant();
             if (phase != amb)
             {
                 amb = phase;

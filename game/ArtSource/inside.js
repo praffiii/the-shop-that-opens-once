@@ -94,6 +94,8 @@
     else if (k === 'chain') { for (let j = 0; j < 12; j += 2) { px(b, cx, y + 3 + j, 'iron2'); px(b, cx + (j % 4 ? 1 : -1), y + 4 + j, 'iron3'); } }
     else if (k === 'shoe') { fill(b, cx - 2, y + 3, 4, 3, 'iron2'); fill(b, cx - 3, y + 6, 2, 3, 'iron2'); fill(b, cx + 1, y + 6, 2, 3, 'iron2'); }
     else if (k === 'ladle') { fill(b, cx, y + 3, 1, 8, 'brass2'); V.disc(b, cx, y + 12, 2, 2, 'brass2'); }
+    else if (k === 'rope') { for (let j = 0; j < 4; j++) { V.disc(b, cx, y + 9, 5 - (j & 1), 6 - (j & 1), j % 2 ? 'dirt2' : 'dirt3'); } V.disc(b, cx, y + 9, 2, 3, 'wall2'); fill(b, cx - 1, y + 2, 2, 2, 'dirt3'); }
+    else if (k === 'net') { for (let j = 0; j < 16; j++) for (let i = -4; i <= 4; i++) if ((i + j) % 3 === 0 || (i - j + 30) % 3 === 0) { if (Math.abs(i) <= 2 + (j >> 2)) px(b, cx + i, y + 3 + j, 'dirt2'); } px(b, cx - 3, y + 12, 'roofR2'); px(b, cx + 2, y + 15, 'roofR2'); }
     else if (k === 'apron') { fill(b, cx - 3, y + 3, 7, 13, 'white'); fill(b, cx - 3, y + 3, 7, 1, 'cream1'); fill(b, cx - 1, y + 8, 3, 3, 'cream1'); } }); };
 
   /* ---------- the rooms ---------- */
@@ -173,6 +175,49 @@
     }
   }
   const boxItems = () => BOXES.flatMap((_, i) => [['xs', 'closed'], ['lg', 'closed'], ['lg', 'open'], ['lg', 'front']].map(([size, v]) => [`items/box_${i}_${size}_${v}.png`, boxItem(i, size, v)]));
+  /* Daniel's last reel, as Theo's projector throws it on the burlap screen (Night 3): the villagers by the river
+     the year the bridge went up, Daniel shouldering a beam, Ratih and young Helen calling to him from the bank, all
+     in flickering black and white with the film's scratches and dust. Drawn at twice the size from the cast's own
+     sprites and halved, so they read small, as people on a screen do. */
+  function footage() {
+    const W = 48, H = 34, FR = 8, out = [];
+    const GREYS = ['#f4efe0', '#cfc9b8', '#9d978a', '#6b665e', '#3c3934', '#1f1d1b'];
+    for (let k = 0; k < FR; k++) {
+      const big = document.createElement('canvas'); big.width = W * 2; big.height = H * 2;
+      const g = big.getContext('2d');
+      // sky, the far bank's trees, the river, the near bank
+      g.fillStyle = '#b9d6ef'; g.fillRect(0, 0, W * 2, 30);
+      g.fillStyle = '#4a9848'; for (let x = 0; x < W * 2; x += 6) g.fillRect(x, 18 - ((x * 7) % 5), 7, 14);
+      g.fillStyle = '#3db3e0'; g.fillRect(0, 30, W * 2, 12);
+      g.fillStyle = '#86cc55'; g.fillRect(0, 42, W * 2, 26);
+      // the new bridge's posts and its first beams, going up across the river
+      g.fillStyle = '#7a452e'; for (const x of [24, 56]) g.fillRect(x, 22, 4, 22);
+      g.fillStyle = '#cf8a4c'; g.fillRect(20, 24, 40, 3); g.fillRect(52, 28, 30, 3);
+      // Daniel walks the beam across, Ratih and Helen on the bank, a neighbour hauling a rope
+      CH.draw(g, 'daniel', 'carryWalk', k, 36 + k * 2, 62, 1, { shadow: false });
+      CH.draw(g, 'mother', k % 4 < 2 ? 'talk' : 'idle', k, 74, 64, -1, { shadow: false });
+      CH.draw(g, 'young_helen', 'talk', k + 1, 86, 66, -1, { shadow: false });
+      CH.draw(g, 'porter', 'carry', k, 12, 64, 1, { shadow: false });
+      // halved, then washed to the film's greys, its light flickering frame to frame
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(big, 0, 0, W, H);
+      const im = x.getImageData(0, 0, W, H), d = im.data, flick = [0, 0.06, -0.04, 0.03, 0.08, -0.02, 0.05, -0.05][k];
+      for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+        const o = (j * W + i) * 4, l = (0.299 * d[o] + 0.587 * d[o + 1] + 0.114 * d[o + 2]) / 255;
+        const v = Math.hypot((i - W / 2) / (W / 2), (j - H / 2) / (H / 2)), lum = Math.min(1, Math.max(0, l + flick - Math.max(0, v - 0.75) * 0.9));
+        const [r, gg, b] = KIT.hex(GREYS[Math.min(5, Math.floor((1 - lum) * 6))]).match(/\w\w/g).map(h => parseInt(h, 16));
+        d[o] = r; d[o + 1] = gg; d[o + 2] = b; d[o + 3] = 255;
+      }
+      // a scratch down the film, and dust, never the same twice
+      const sx = (k * 13 + 7) % W;
+      for (let j = 0; j < H; j++) if ((j + k) % 5) { const o = (j * W + sx) * 4; d[o] = d[o + 1] = d[o + 2] = 240; }
+      for (let n = 0; n < 4; n++) { const o = ((((k * 7 + n * 11) % H) * W) + ((k * 17 + n * 23) % W)) * 4; d[o] = d[o + 1] = d[o + 2] = n % 2 ? 30 : 245; }
+      x.putImageData(im, 0, 0);
+      out.push(c);
+    }
+    return { img: out[0], frames: out, fps: 4, ax: W >> 1, ay: H };
+  }
+
   const ROOMS = {
     // Satria's childhood home (GDD 7.5, LOC-INT-01). Three bays under one roof: the bedroom (west: the bed, the desk
     // where Satria writes the journal each night, Ibu Ratih's treadle sewing machine and her tin of scraps), the
@@ -656,6 +701,177 @@
         T.card('fern_l', V.fern(3), 128, 132); T.card('fern_r', V.fern(6), 172, 132);
       },
     },
+    // Theo's studio on the bluff (Night 3), cut open: the darkroom in the west behind its red curtain (the bench of
+    // three trays and the developing tank, the enlarger, the red enamel basin, the safelight, the film pegged up to
+    // dry), the gallery in the middle under its round sea window (the photographs, the work table with its loupe and
+    // negatives, his old plate camera on its tripod) and the projector lounge in the east (the burlap screen, the
+    // 8mm projector on its table, the rocking chair, the cans of film).
+    theo_studio: {
+      area: 'coast', seed: 23, room: [256, 88], door: 128,
+      bays: [[80, 46]],
+      solid: [[4, 0, 58, 14], [1, 22, 15, 42], [76, 46, 84, 60], [96, 30, 150, 42], [160, 18, 172, 28], [96, 72, 110, 84],
+        [186, 0, 242, 4], [204, 54, 222, 62], [244, 8, 256, 40], [230, 64, 246, 74], [18, 36, 30, 44]],
+      anchors: { tank: [36, 26], basin: [24, 52], projector: [229, 50], screen_seat: [198, 74], rocker: [236, 82], gallery: [124, 56], curtain: [80, 74] },
+      paint(b, R) {
+        // the darkroom's black rubber mat by the bench, the gallery's old kilim, the lounge's woven rug
+        R(4, 16, 60, 30, (x, y, w, h) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'iron3' : (x + y) % 2 ? 'iron4' : 'ink2'));
+        R(100, 46, 150, 66, (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 2 ? 'roofB3' : Math.abs(((x - w / 2) | 0) % 8) + Math.abs(((y - h / 2) | 0) % 8) < 4 ? 'roofR2' : e % 4 < 2 ? 'cream1' : 'roofB2'; });
+        R(180, 42, 252, 84, (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 2 ? 'dirt4' : e < 4 ? 'roofR3' : (x + y * 2) % 6 < 3 ? 'dirt2' : 'dirt1'; });
+      },
+      back(b, w, h, win) {
+        // the darkroom's wall painted black-red, the safelight's red glass and its glow, the film pegged on its line
+        for (let y = 4; y < h - 2; y++) for (let x = 0; x < 80; x++) px(b, x, y, hash(x, y, 4) < 0.08 ? 'roofR4' : 'ink2');
+        fill(b, 28, 8, 10, 8, 'iron4'); fill(b, 29, 9, 8, 6, 'red'); fill(b, 30, 10, 3, 2, 'rose'); fill(b, 32, 16, 2, 3, 'iron3');
+        for (let y = 4; y < 30; y++) for (let x = 14; x < 52; x++) if (hash(x, y, 9) < 0.3 * (1 - Math.hypot(x - 33, y - 12) / 22)) px(b, x, y, 'roofR4');
+        fill(b, 6, 22, 70, 1, 'iron2');
+        for (let i = 0; i < 6; i++) { const fx = 9 + i * 11; fill(b, fx, 21, 2, 3, 'wood2'); fill(b, fx - 1, 24, 4, 14 + (i % 3) * 2, 'iron4'); for (let j = 25; j < 36 + (i % 3) * 2; j += 3) { fill(b, fx, j, 2, 2, 'stone3'); } }
+        shelf(b, 58, 40, 20, 8);
+        V.clock(b, 70, 12, 5, 21);
+        // the gallery: the round sea window and the photographs round it, framed in black, a few in colour
+        const cx = 128, cy = 22, r = 13;
+        for (let y = cy - r - 2; y <= cy + r + 2; y++) for (let x = cx - r - 2; x <= cx + r + 2; x++) {
+          const d = Math.hypot(x - cx, y - cy);
+          if (d <= r + 2) px(b, x, y, d > r ? (y < cy ? 'brass1' : 'brass3') : y < cy + 1 ? (y < cy - 6 ? 'sky2' : 'sky3') : y === cy + 1 ? 'white' : (x + y) % 5 === 0 ? 'water2' : y > cy + 7 ? 'water5' : 'water4');
+        }
+        for (let a = 0; a < 8; a++) px(b, Math.round(cx + Math.cos(a * Math.PI / 4) * (r + 1)), Math.round(cy + Math.sin(a * Math.PI / 4) * (r + 1)), 'brass4');
+        fill(b, cx - r, cy, 2 * r + 1, 1, 'brass3'); fill(b, cx, cy - r, 1, 2 * r + 1, 'brass3');
+        photo(b, 86, 8, 14, 12, [[7, 2]]); photo(b, 86, 24, 12, 10, [[4, 1], [8, 1]]); photo(b, 102, 14, 10, 14, [[5, 2]]);
+        photo(b, 146, 8, 16, 12, [[5, 2], [11, 2]]); photo(b, 150, 24, 12, 12, [[6, 2]]); photo(b, 164, 14, 10, 10, [[5, 1]]);
+        fill(b, 88, 40, 70, 2, 'wood3'); fill(b, 88, 40, 70, 1, 'wood2');
+        // the lounge: posters of old films and a shelf of reels
+        fill(b, 246, 10, 8, 14, 'roofR3'); fill(b, 247, 11, 6, 12, 'cream1'); fill(b, 248, 13, 4, 4, 'ink2'); fill(b, 248, 19, 4, 1, 'roofR2');
+        fill(b, 178, 10, 8, 12, 'roofB3'); fill(b, 179, 11, 6, 10, 'cream0'); V.disc(b, 182, 15, 2, 2, 'ink2');
+      },
+      left(b, w, h, win) { hooks(b, 30, 14, ['apron', 'coat']); calendar(b, 60, 16, 'ink2'); },
+      right(b, w, h, win) { win(b, 34, 14, 16, 16); photo(b, 58, 12, 12, 10, [[6, 2]]); },
+      things(T) {
+        // the darkroom's bench: three trays on it (developer amber, stop clear, fixer grey), the tank, the enlarger
+        T.box('dark_bench', 4, 0, 58, 14, 0, 15, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'iron3'); fill(b, 0, 0, w, 1, 'iron2'); return; }
+          if (which === 'front') for (let x = 3; x < w - 6; x += 7) { fill(b, x, 5, 4, 8, ['wood3', 'roofR4', 'wood2', 'roofR4'][(x / 7 | 0) % 4]); fill(b, x + 1, 5, 2, 2, 'cream2'); }
+        });
+        [['tray_dev', 14, 'brass2'], ['tray_stop', 28, 'water1'], ['tray_fix', 42, 'stone2']].forEach(([n, x, c]) => T.card(n, sprite(12, 4, b => { fill(b, 0, 0, 12, 4, 'cream0'); fill(b, 1, 1, 10, 2, c); fill(b, 0, 3, 12, 1, 'cream2'); px(b, 3, 1, 'white'); }), x, 10, 15));
+        T.card('dev_tank', sprite(8, 11, b => { fill(b, 1, 2, 6, 9, 'ink2'); fill(b, 1, 2, 1, 9, 'iron3'); fill(b, 0, 0, 8, 3, 'iron3'); fill(b, 0, 0, 8, 1, 'iron2'); fill(b, 3, 0, 2, 1, 'brass1'); fill(b, 6, 4, 2, 1, 'iron2'); }), 36, 6, 15);
+        T.card('enlarger', sprite(12, 30, b => { fill(b, 9, 2, 2, 28, 'iron3'); fill(b, 9, 2, 1, 28, 'iron2'); fill(b, 0, 2, 10, 9, 'iron4'); fill(b, 1, 3, 8, 2, 'iron3'); fill(b, 3, 11, 4, 4, 'iron3'); fill(b, 4, 15, 2, 2, 'water4'); fill(b, 0, 27, 12, 3, 'wood3'); fill(b, 0, 27, 12, 1, 'wood2'); }), 53, 10, 15);
+        T.card('thermometer', sprite(3, 12, b => { fill(b, 0, 0, 3, 12, 'cream0'); fill(b, 1, 2, 1, 8, 'red'); fill(b, 0, 10, 3, 2, 'red'); }), 22, 8, 15);
+        // the red enamel basin on its cupboard against the west wall, the ice bucket by it
+        T.box('red_basin', 1, 22, 15, 42, 0, 13, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'roofR2'); fill(b, 2, 2, w - 4, h - 4, 'roofR3'); fill(b, 3, 3, w - 6, h - 6, 'water5'); px(b, 4, 4, 'water2'); return; }
+          if (which === 'right') { fill(b, 2, 3, w - 4, h - 5, 'wood4'); px(b, w - 4, h >> 1, 'brass1'); }
+        });
+        T.card('ice_bucket', sprite(12, 11, b => { fill(b, 1, 2, 10, 9, 'iron2'); fill(b, 1, 2, 1, 9, 'iron1'); fill(b, 0, 0, 12, 3, 'iron3'); for (const [x, y] of [[2, 0], [5, 1], [8, 0]]) fill(b, x, y, 3, 2, 'water0'); fill(b, 3, 6, 6, 1, 'iron3'); }), 24, 44);
+        T.card('chemicals', sprite(16, 12, b => { [[0, 10, 'wood4'], [4, 12, 'roofR4'], [8, 9, 'wood3'], [12, 11, 'wood4']].forEach(([x, h2, c]) => { fill(b, x, 12 - h2, 4, h2, c); fill(b, x + 1, 12 - h2, 2, 2, 'iron3'); fill(b, x + 1, 12 - h2 + 4, 1, 3, 'cream0'); }); }), 70, 30);
+        // the red curtain drawn back across the darkroom's way in
+        T.box('curtain', 76, 46, 84, 60, 0, 44, (b, w, h, l, which) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, y < 3 ? 'brass2' : x % 3 === 0 ? 'roofR4' : x % 3 === 1 ? 'roofR2' : 'roofR3'); });
+        // the gallery's work table: prints and negatives, the loupe, a lamp; Theo's old plate camera on its tripod
+        T.box('work_table', 96, 30, 150, 42, 12, 15, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); fill(b, 3, 2, 20, h - 4, 'cream1'); } });
+        for (const [x, y] of [[97, 31], [146, 31], [97, 39], [146, 39]]) T.box(`table_leg_${x}`, x, y, x + 3, y + 3, 0, 12, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
+        T.card('prints', sprite(16, 4, b => { fill(b, 0, 1, 10, 3, 'white'); fill(b, 1, 2, 8, 1, 'stone2'); fill(b, 6, 0, 10, 3, 'cream0'); fill(b, 7, 1, 8, 1, 'stone3'); }), 108, 38, 15);
+        T.card('negatives', sprite(14, 3, b => { fill(b, 0, 0, 14, 3, 'iron4'); for (let x = 1; x < 13; x += 3) fill(b, x, 1, 2, 1, 'brass1'); }), 126, 36, 15);
+        T.card('loupe', sprite(5, 5, b => { V.disc(b, 2, 2, 2, 2, 'iron3'); px(b, 2, 2, 'water1'); }), 136, 38, 15);
+        T.card('desk_lamp', sprite(10, 14, b => { fill(b, 1, 0, 8, 4, 'roofG3'); fill(b, 2, 4, 6, 1, 'light1'); fill(b, 4, 4, 2, 8, 'iron3'); fill(b, 1, 12, 8, 2, 'iron3'); }), 144, 34, 15);
+        T.card('tripod', sprite(16, 34, b => { fill(b, 2, 0, 12, 10, 'wood3'); fill(b, 2, 0, 12, 1, 'wood2'); fill(b, 0, 2, 3, 6, 'ink2'); V.disc(b, 0, 5, 2, 2, 'iron3'); fill(b, 12, 3, 4, 4, 'wood4'); for (const [a, e] of [[7, 1], [8, 8], [8, 15]]) for (let y = 10; y < 34; y++) px(b, Math.round(a + (e - a) * (y - 10) / 24), y, 'wood4'); }), 166, 26);
+        T.card('stool', PROPS.stool(), 120, 50);
+        T.box('print_crate', 96, 72, 110, 84, 0, 12, PROPS.crate);
+        T.card('crate_prints', sprite(14, 6, b => { for (let i = 0; i < 4; i++) { fill(b, i * 3, 6 - 4 - (i % 2), 4, 4 + (i % 2), i % 2 ? 'white' : 'cream1'); fill(b, i * 3 + 1, 6 - 3 - (i % 2), 2, 2, 'stone3'); } }), 103, 82, 12);
+        // the lounge: the burlap screen on its frame, and on its cloth the reel of the night, a frame a model so the
+        // film stands on the cloth (the screening shows them in turn; hidden till then)
+        T.box('screen', 186, 0, 242, 4, 6, 52, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'front') for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) px(b, x, y, (x + y) % 2 ? 'dirt1' : (x % 4 === 0 || y % 4 === 0) ? 'dirt2' : 'cream1');
+        });
+        for (const x of [188, 238]) T.box('screen_leg_' + x, x, 0, x + 3, 3, 0, 6, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
+        footage().frames.forEach((f, k) => T.box('screen_film_' + k, 190, 4, 238, 5, 12, 46, (b, w, h, l, which) => {
+          if (which !== 'front') return;
+          const d = f.getContext('2d').getImageData(0, 0, w, h).data;
+          for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { const o = (j * w + i) * 4; b.set(i, j, (0xff000000 | (d[o + 2] << 16) | (d[o + 1] << 8) | d[o]) >>> 0); }
+        }));
+        T.box('projector_table', 204, 54, 222, 62, 0, 12, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'front') fill(b, 2, 3, w - 4, h - 5, 'wood4'); });
+        T.card('projector', sprite(18, 18, b => {
+          for (const [cx, cy] of [[5, 4], [13, 4]]) { V.disc(b, cx, cy, 4, 4, 'iron3'); V.disc(b, cx, cy, 2, 2, 'iron1'); px(b, cx, cy, 'iron4'); }
+          fill(b, 8, 4, 2, 6, 'iron4'); fill(b, 2, 9, 14, 8, 'iron3'); fill(b, 2, 9, 14, 1, 'iron2'); fill(b, 4, 11, 4, 3, 'iron4'); fill(b, 16, 11, 2, 4, 'iron4'); px(b, 17, 12, 'light1'); fill(b, 11, 12, 3, 1, 'brass1');
+        }), 213, 60, 12);
+        T.card('film_cans', sprite(14, 10, b => { [[0, 6], [1, 3], [2, 0]].forEach(([dx, y]) => { fill(b, dx, y, 12, 4, 'iron2'); fill(b, dx, y, 12, 1, 'iron1'); fill(b, dx + 4, y + 1, 4, 1, 'roofR2'); }); }), 194, 76);
+        T.box('reel_shelf', 244, 8, 256, 40, 0, 38, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'left') for (let y = 4; y < h - 4; y += 9) { fill(b, 1, y + 7, w - 2, 1, 'wood3'); for (let x = 2; x < w - 4; x += 6) { V.disc(b, x + 2, y + 4, 2, 3, 'iron2'); px(b, x + 2, y + 4, 'iron4'); } }
+        });
+        T.card('rocking_chair', sprite(18, 24, b => {
+          fill(b, 11, 0, 3, 14, 'wood3'); fill(b, 11, 0, 3, 1, 'wood2'); for (let y = 2; y < 12; y += 3) fill(b, 3, y, 9, 1, 'wood4');
+          fill(b, 2, 0, 2, 14, 'wood3'); fill(b, 1, 12, 14, 3, 'roofR2'); fill(b, 1, 12, 14, 1, 'roofR1'); for (const x of [3, 12]) fill(b, x, 15, 2, 6, 'wood4');
+          for (let x = 0; x < 18; x++) px(b, x, 21 + Math.round(((x - 8) / 9) ** 2 * 2), 'wood4');
+        }), 238, 70);
+        T.card('cushion', sprite(14, 5, b => { V.disc(b, 7, 3, 6, 2, 'roofB2'); fill(b, 3, 1, 8, 1, 'roofB1'); px(b, 7, 3, 'roofB4'); }), 198, 68);
+        T.card('lounge_lamp', sprite(10, 30, b => { fill(b, 1, 0, 8, 7, 'cream1'); fill(b, 1, 6, 8, 1, 'cream2'); fill(b, 4, 7, 2, 21, 'iron3'); fill(b, 1, 28, 8, 2, 'iron3'); }), 176, 30);
+        T.card('lounge_lamp_lit', sprite(10, 8, b => { fill(b, 1, 0, 8, 7, 'light1'); fill(b, 2, 2, 6, 4, 'light0'); }), 176, 7, 22, true);
+        const fern = PROPS.plant();
+        T.card('door_fern_l', fern, 112, 86); T.card('door_fern_r', fern, 146, 86);
+      },
+    },
+    // Arlo's salt store on the beach street (Night 3's rope), cut open: the salt bin and its sacks in the west, Arlo's
+    // nets heaped on the floor with their floats and his mending stool, the bench of net needles and twine under the
+    // storm lantern, coils of rope and oars on the walls, the drums of resin for the boats' seams in the east corner.
+    salt_store: {
+      area: 'coast', seed: 29, room: [208, 80], door: 104,
+      bays: [],
+      solid: [[4, 0, 44, 16], [2, 24, 22, 52], [108, 34, 138, 50], [150, 0, 200, 12], [182, 50, 206, 74], [60, 0, 80, 8]],
+      anchors: { nets: [124, 58], bench: [176, 22], rope: [162, 30] },
+      wall(b, w, h, seed) {
+        // weathered boards, salt crust along their foot
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, x % 12 === 0 ? 'wood4' : hash(x >> 1, y >> 3, seed) < 0.15 ? 'stone2' : y > h - 8 && hash(x, y, 3) < 0.6 ? 'cream0' : 'stone1');
+        fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'wood5'); fill(b, 0, h - 2, w, 2, 'wood4');
+      },
+      paint(b, R) {
+        // salt trodden into the boards round the bin, a rag rug before the bench
+        R(0, 14, 60, 44, (x, y) => hash(x, y, 2) < 0.18 * (1 - y / 30) ? 'white' : 0);
+        R(150, 14, 196, 30, (x, y, w, h) => (Math.min(x, y, w - 1 - x, h - 1 - y) < 1 ? 'water4' : y % 3 ? 'water3' : 'cream1'));
+      },
+      back(b, w, h, win) {
+        win(b, 92, 14, 16, 14);
+        hooks(b, 52, 10, ['rope', 'rope', 'net']); hooks(b, 118, 12, ['net', 'rope']);
+        // oars crossed on the wall, a tide chart, the storm lantern's hook
+        for (let i = 0; i < 26; i++) { px(b, 140 + i, 8 + i, 'wood3'); px(b, 166 - i, 8 + i, 'wood2'); }
+        fill(b, 138, 32, 5, 4, 'wood3'); fill(b, 164, 32, 5, 4, 'wood2');
+        fill(b, 176, 12, 18, 14, 'cream0'); for (let x = 177; x < 193; x++) px(b, x, 19 + Math.round(Math.sin(x / 2.5) * 4), 'water4'); fill(b, 176, 12, 18, 1, 'wood3');
+      },
+      left(b, w, h, win) { hooks(b, 40, 14, ['coat', 'cap']); },
+      right(b, w, h, win) { win(b, 30, 14, 14, 14); hooks(b, 52, 12, ['rope']); },
+      things(T) {
+        // the salt bin, heaped white, and the sacks stacked by it
+        T.box('salt_bin', 4, 0, 44, 16, 0, 16, (b, w, h, l, which) => {
+          if (which === 'top') { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, x < 2 || x > w - 3 || y < 1 || y > h - 2 ? 'wood3' : hash(x, y, 5) < 0.2 ? 'stone0' : 'white'); return; }
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); for (let x = 6; x < w; x += 10) fill(b, x, 0, 1, h, 'wood4');
+        });
+        const sack = PROPS.sack('cream1');
+        [[8, 34], [17, 36], [10, 46], [6, 26, 10], [16, 30, 9]].forEach(([x, y, up = 0], i) => T.card('salt_sack_' + i, sack, x, y, up));
+        T.card('salt_scoop', sprite(10, 5, b => { fill(b, 0, 1, 7, 4, 'iron2'); fill(b, 1, 1, 5, 2, 'white'); fill(b, 7, 2, 3, 1, 'wood3'); }), 30, 10, 16);
+        // Arlo's nets heaped on the floor, their cork floats, his stool and the needle in the mesh
+        T.card('net_heap', sprite(34, 16, b => {
+          for (let y = 0; y < 16; y++) for (let x = 0; x < 34; x++) if (((x - 17) / 17) ** 2 + ((y - 15) / 15) ** 2 <= 1) px(b, x, y, (x + y) % 3 === 0 || (x - y + 33) % 3 === 0 ? 'dirt3' : y < 6 ? 'water4' : 'water5');
+          for (const [x, y] of [[6, 10], [14, 4], [24, 7], [29, 12], [18, 12]]) { fill(b, x, y, 3, 2, 'roofR2'); px(b, x, y, 'roofR1'); }
+        }), 123, 48);
+        T.card('net_stool', PROPS.stool(), 112, 58);
+        // the bench of net needles, twine and floats, the storm lantern on it
+        T.box('bench', 150, 0, 200, 12, 0, 14, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 2, 'wood2');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); for (let x = 4; x < w - 6; x += 9) { fill(b, x, 3, 5, 1, 'wood4'); fill(b, x + 1, 6, 3, 2, 'roofR2'); } }
+          if (which === 'front') fill(b, 3, 4, w - 6, h - 6, 'wood4');
+        });
+        T.card('twine', sprite(8, 6, b => { V.disc(b, 4, 3, 3, 2, 'dirt2'); fill(b, 1, 2, 6, 1, 'dirt1'); }), 160, 8, 14);
+        const lantern = lit => sprite(8, 13, b => { fill(b, 3, 0, 2, 2, 'iron3'); fill(b, 1, 2, 6, 2, 'roofR3'); fill(b, 1, 4, 6, 6, lit ? 'light1' : 'cream0'); fill(b, 2, 5, 4, 4, lit ? 'light0' : 'cream1'); fill(b, 1, 4, 1, 6, 'roofR3'); fill(b, 6, 4, 1, 6, 'roofR3'); fill(b, 0, 10, 8, 3, 'roofR3'); fill(b, 0, 10, 8, 1, 'roofR2'); });
+        T.card('storm_lantern', lantern(false), 190, 8, 14); T.card('storm_lantern_lit', lantern(true), 190, 8, 14, true);
+        // the coil of rope Arlo lends for the cliff, on the floor by the bench
+        T.card('rope_coil', sprite(16, 8, b => { for (const [rx, ry, c] of [[7, 3, 'dirt3'], [6, 2.5, 'dirt2'], [4, 1.6, 'dirt1']]) V.disc(b, 8, 4, rx, ry, c); V.disc(b, 8, 4, 2, 1, 'dirt4'); fill(b, 13, 5, 3, 1, 'dirt3'); }), 162, 30);
+        // the resin drums for caulking the boats, drips down their sides
+        const drum = sprite(14, 18, b => { fill(b, 1, 0, 12, 18, 'roofR4'); fill(b, 0, 2, 14, 14, 'roofR4'); fill(b, 2, 1, 3, 16, 'roofR3'); for (const y of [3, 14]) fill(b, 0, y, 14, 1, 'iron3'); fill(b, 1, 0, 12, 1, 'brass3'); for (const x of [6, 10]) fill(b, x, 1, 1, 3 + x % 4, 'brass2'); });
+        T.card('drum_0', drum, 190, 62); T.card('drum_1', drum, 200, 70); T.card('drum_2', drum, 194, 52, 0);
+        T.box('crate_0', 60, 0, 80, 8, 0, 14, PROPS.crate); T.card('float_basket', PROPS.basket('veg'), 70, 4, 14);
+        T.card('oars', sprite(10, 34, b => { for (let y = 0; y < 34; y++) { px(b, 2 + (y >> 4), y, 'wood3'); px(b, 6 + (y >> 4), y, 'wood2'); } fill(b, 1, 24, 4, 10, 'wood2'); fill(b, 5, 24, 4, 10, 'wood1'); }), 204, 36);
+        T.card('broom', PROPS.broom(), 46, 70); T.card('bucket', sprite(10, 11, b => { fill(b, 1, 2, 8, 9, 'wood3'); fill(b, 0, 2, 10, 2, 'iron3'); fill(b, 2, 2, 6, 1, 'water2'); }), 58, 74);
+      },
+    },
   };
 
   /* ---------- building a room ---------- */
@@ -766,9 +982,11 @@
         model(name, P((a + d) >> 1), Q(e) - 1, (m, X, B) => m.box(X(P(a)), X(P(d)), B(Q(e)), B(Q(c)), up0, up1, paint));
       },
       // a card standing with its feet at (x, y), or up texels up on what is there; a light shows at dusk and night only
+      // (s.frames and s.fps: it plays them over and over)
       card(name, s, x, y, up = 0, light = false) {
-        const fy = Q(y) - up, ox2 = P(x) - s.ax, oy2 = fy - s.ay;
-        S.items.push({ name, y: fy, box: [ox2, oy2, s.img.width, s.img.height], foot: 3, walk: true, ...(up ? { lift: up, on: [P(x), Q(y)] } : {}), ...(light ? { light: true } : {}), draw: g => g.drawImage(s.img, ox2, oy2) });
+        const fy = Q(y) - up, ox2 = P(x) - s.ax, oy2 = fy - s.ay, fr = s.frames, fps = s.fps || 4;
+        S.items.push({ name, y: fy, box: [ox2, oy2, s.img.width, s.img.height], foot: 3, walk: true, ...(up ? { lift: up, on: [P(x), Q(y)] } : {}), ...(light ? { light: true } : {}),
+          ...(fr ? { animated: true, draw: (g, t) => g.drawImage(fr[Math.floor(t * fps) % fr.length], ox2, oy2) } : { draw: g => g.drawImage(s.img, ox2, oy2) }) });
       },
     });
     return S;

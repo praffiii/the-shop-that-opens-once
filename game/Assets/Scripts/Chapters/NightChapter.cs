@@ -269,6 +269,19 @@ namespace Shop
             Game.Bag.Add(item);
         }
 
+        /// <summary>Someone gives the courier a thing they hold, and it goes into the bag.</summary>
+        protected async Awaitable Give(string id, string item)
+        {
+            var owner = Actor(id);
+            owner.FaceTo(Actor("courier").Feet.x);
+            owner.Held = Keepsakes.Art(item, "xs");
+            owner.Pose = "give";
+            await Wait(0.6f);
+            owner.Held = null;
+            owner.Pose = "idle";
+            await Receive(item);
+        }
+
         /// <summary>The courier hands one thing over and gets another back.</summary>
         protected async Awaitable Trade(string id, string give, string get)
         {

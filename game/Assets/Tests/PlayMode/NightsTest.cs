@@ -80,6 +80,39 @@ namespace Shop.Tests
             CollectionAssert.DoesNotContain(Game.Bag, "rabbit_mended");
         });
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night3PlaysThrough() => Run(3, async main =>
+        {
+            await Go(main, "coast", "from_square");
+            Assert.IsTrue(Game.Has("rumour"), "The coffee stall's morning rumour");
+            await Use(main, "valdo");
+            await Use(main, "leo");
+            await Go(main, "salt_store", "door");
+            await Use(main, "arlo");
+            Assert.AreEqual(Phase.Midday, Game.Phase, "Arlo's rope opens the climb");
+            CollectionAssert.Contains(Game.Bag, "rope");
+
+            await Go(main, "coast", "salt_store_door");
+            Board.FailFirst = 1;
+            await Use(main, "mint_cliff");
+            CollectionAssert.Contains(Game.Bag, "mint");
+            CollectionAssert.DoesNotContain(Game.Bag, "rope", "The rope left for Arlo");
+            await Use(main, "coffee_stall");
+            CollectionAssert.Contains(Game.Bag, "mint_tea");
+            Board.FailFirst = 1;
+            await Use(main, "vent");
+            Assert.AreEqual("theo_studio", main.Place.Def.Id, "Theo lets him in");
+            Assert.AreEqual(Phase.Dusk, Game.Phase, "The reel developed");
+            CollectionAssert.Contains(Game.Bag, "camera_clean");
+            CollectionAssert.IsEmpty(Game.Bag.FindAll(k => k is "camera" or "mint" or "mint_tea"));
+            Assert.AreEqual("dusk", Game.Checkpoint);
+
+            await Use(main, "theo");
+            Assert.AreEqual(3, Game.LanternsOut, "Theo has Daniel's camera");
+            Assert.AreEqual("coast", main.Place.Def.Id, "Out on the bluff for the last light");
+            CollectionAssert.DoesNotContain(Game.Bag, "camera_clean");
+        });
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
         // story, and home to the journal, which ends the night.
         static IEnumerator Run(int night, Func<Main, Awaitable> day)

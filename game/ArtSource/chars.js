@@ -106,6 +106,8 @@
     closed: ['....', '....', 'kkkk', '.kk.'],
     squint: ['....', 'kkkk', 'wwph', '.ww.'],
     up:     ['.wpp', 'wwph', 'wwww', '.ww.'],
+    wide:   ['wwww', 'wwph', 'wwpw', '.ww.'],
+    angry:  ['kk..', '.kkk', 'wwph', '.ww.'],
   };
   const MK = { k: 'ink', r: 'roofR4' };
   const MOUTH = {
@@ -409,8 +411,43 @@
     torso: { rows: ['.cccc.', 'ooooOO', 'oooooO', 'ooooOO', '.oooO.', '..oO..'], key: { c: 'white', o: 'orange', O: 'roofR2' } },
     parts: [{ z: 'hat', at: [-3, -1], rows: ['....11111...', '...1222223..', '3322222233..'], key: { 1: 'dirt0', 2: 'dirt1', 3: 'dirt2' } }] };
   CAST.lulu = CAST.grandkid;
+  // Daniel, Satria's father, as Theo's 8mm film shows him by the river (Night 3): a cream work shirt with the sleeves
+  // rolled, braces, a flat cap pushed back, a beam for the bridge on his shoulder.
+  CAST.daniel = { sleeve: ['cream0', 'cream2', true],
+    torso: { rows: ['.wwbww.', 'wwwbwwM', 'wwwbwwM', 'wwwbwwM', 'wwwbwwM', 'wwwbwMM', '.wwbMM.', '..MMM..'],
+             key: { w: 'cream0', b: 'wood4', M: 'cream2' } },
+    villager: true,
+    load: { rows: ['11111111', '22222223', '33333333'], key: { 1: 'wood1', 2: 'wood2', 3: 'wood3' } },
+    parts: [{ z: 'hat', at: [-1, -2], rows: ['...111111...', '.1122222223.', '1222222222333'], key: { 1: 'dirt2', 2: 'dirt3', 3: 'dirt4' } }] };
   // Pip ten years ago, in the storm's emergency tent (Night 2's memory): small as he is now
   CAST.young_pip = CAST.pip;
+  // Marlow unmasked as Marcus Bell (Night 6): the same old shopkeeper, his eyes glowing brighter (BODIES.spirit).
+  CAST.marcus = { ...CAST.marlow, body: 'spirit', glow: true };
+  // Leo in 1952, the sprinter he was (Night 5's memory): a white running singlet with a red sash and his number, the
+  // headband, the spiked running shoes that come home to him (faded red, white laces).
+  CAST.young_leo = { sleeve: ['ant1', 'ant2'],
+    torso: { rows: ['.wwwrr.', 'wwwrrsw', 'wwrrsww', 'wrrnnws', 'rrsnnws', 'rswwwss', '.wwwss.', '..sss..'],
+             key: { w: 'white', s: 'stone1', r: 'red', n: 'ink2' } },
+    shoe: 'spike',
+    parts: [{ z: 'hat', at: [0, 1], rows: ['wwwwwwwwww', 'rrrrrrrrrr'], key: { w: 'white', r: 'red' } }] };
+  // Satria as a small boy, in 1952 and in the hidden photo (Night 7): a cream shirt, green braces, a little green cap
+  // like the one he wears now.
+  CAST.young_satria = { kid: true, sleeve: ['cream0', 'cream2', true],
+    torso: { rows: ['.wgww.', 'wwgwwG', 'wwgwwG', 'wwgwGG', '.ggggg', '..gG..'], key: { w: 'cream0', g: 'cap2', G: 'cap3' } },
+    parts: [{ z: 'hat', at: [-1, -2], rows: ['..122223...', '.12w22333..', '44444444443'], key: CAP }] };
+  // The Baker's bread lad (Night 5), a young ant on a bamboo bicycle: a mustard shirt, a leather satchel strap across it,
+  // a brown cycling cap with a short peak, a basket of loaves to carry.
+  CAST.breadboy = { sleeve: ['light2', 'light3', true],
+    torso: { rows: ['.yyyYY.', 'syyyYYZ', 'ysyyYYZ', 'yysyYYZ', 'yyysYZZ', 'YYYYsZZ', '.YYZZs.', '..ZZZ..'],
+             key: { y: 'light2', Y: 'light3', Z: 'light4', s: 'wood4' } },
+    villager: true,
+    load: { rows: ['.12.12..', '1223122.', '22332233', 'WWWWWWWW', 'WwWwWwWW', '.wWwWww.'], key: { 1: 'wood0', 2: 'wood1', 3: 'wood2', W: 'dirt3', w: 'dirt4' } },
+    parts: [{ z: 'hat', at: [0, -2], rows: ['..111111...', '.1222222233', '12222222333333'], key: { 1: 'wood2', 2: 'wood3', 3: 'wood4' } }] };
+  // The Mender's load: the new carved teak signboard for Satria's post office (Day 8)
+  CAST.mender.load = { rows: ['1111111111', '2kk2k2kk22', '2222222223', '3333333333'], key: { 1: 'wood1', 2: 'wood2', 3: 'wood3', k: 'wood4' } };
+  // Sam's round reading glasses (the script and the bible agree), his folder; Kapten Bram's newspaper; Theo's photo frame
+  CAST.sam.parts.push({ z: 'face', ol: false, at: [4, 3], rows: ['.oooo.', 'o....o', 'o....o', 'o....o', '.oooo.'], key: { o: 'iron3' } });
+  CAST.sam.paper = 'folder'; CAST.bram.paper = 'news'; CAST.theo.polish = 'frame';
   const IDS = Object.keys(CAST);
 
   /* How each character that turns looks from the front and from the back, over the shared ant body (drawn round x 20,
@@ -571,10 +608,15 @@
   };
   TURN.young_helen = TURN.helen;
   if (TURN.pip) TURN.young_pip = TURN.pip;
+  TURN.marcus = TURN.marlow;
+  // Sam's round glasses, from the front
+  TURN.sam.face = (x, d) => { for (const ex of [16, 22]) { rect(x, ex - 1, 16 + d, 4, 1, 'iron3'); rect(x, ex - 1, 20 + d, 4, 1, 'iron3'); rect(x, ex - 1, 17 + d, 1, 3, 'iron3'); rect(x, ex + 2, 17 + d, 1, 3, 'iron3'); } };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2, knead: 4, tinker: 4 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3, lie: 1, wake: 1, write: 4, drink: 1, crouch: 3, strike: 2, wash: 1, knead: 4, tinker: 3 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2, knead: 4, tinker: 4, crank: 4, unchain: 2, stretch: 2,
+    climb: 4, balance: 2, slip: 2, pick: 2, sitCross: 2, doze: 2, pump: 4, jump: 2, tumble: 2, tired: 2, read: 2, hug: 2, tear: 2, bow: 2, cheer: 2, laugh: 2, stamp: 2, shocked: 2, panic: 2, whistle: 2, agitate: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3, lie: 1, wake: 1, write: 4, drink: 1, crouch: 3, strike: 2, wash: 1, knead: 4, tinker: 3, crank: 6, unchain: 3, stretch: 1,
+    climb: 4, balance: 2, slip: 4, pick: 3, sitCross: 1, doze: 1, pump: 4, jump: 3, tumble: 3, tired: 3, read: 1, hug: 2, tear: 2, bow: 2, cheer: 4, laugh: 5, stamp: 4, shocked: 5, panic: 5, whistle: 2, agitate: 5 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -594,7 +636,7 @@
     if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'young_helen') s.push('moved');
     if (['gigi', 'kiko', 'lulu'].includes(id)) s.push('crouch');   // flicking marbles
-    if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
+    if (id === 'marlow' || id === 'marcus') s.push('wave', 'look', 'inspect', 'sweep', 'give', 'receive', 'moved', 'bow');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer', 'tinker');
     if (id === 'bram' || id === 'sam' || id === 'leo') s.push('look');
@@ -606,7 +648,26 @@
     if (id === 'nora') s.push('weave');
     if (id === 'gardener') s.push('water', 'tend');
     if (id === 'leo') s.push('peer');
-    if (id === 'theo') s.push('photo', 'look');
+    if (id === 'theo') s.push('photo', 'look', 'crank', 'unchain');   // the projector's crank, the chain off his door (Night 3)
+    if (id === 'leo') s.push('stretch');   // stretching on the jetty terrace (Night 3)
+    // Nights 3 to 7 and Day 8: the cliff climb, the pump, the hill sprint, the letter, the contract torn, the dawn
+    if (id === 'courier') s.push('climb', 'balance', 'slip', 'pick', 'sitCross', 'doze', 'pump', 'jump', 'tumble', 'tired', 'read', 'hug', 'tear', 'bow', 'hammer');
+    if (id === 'theo') s.push('agitate');   // the developing tank shaken in the darkroom (Night 3)
+    if (id === 'sam') s.push('pump', 'read', 'panic');   // the flooded vault and the 1952 register (Night 4)
+    if (id === 'bram') s.push('read', 'whistle', 'moved');   // his newspaper (Night 4), the whistle as the engine rolls (Day 8)
+    if (id === 'valdo') s.push('laugh', 'stamp', 'shocked', 'write', 'receive');   // scorn, papers stamped, a hand out for the key, the contract torn
+    if (id === 'young_leo') s.push('run', 'look', 'tired', 'moved');   // the run with the message in 1952 (Night 5)
+    if (['daniel', 'mother', 'young_helen', 'young_satria'].includes(id)) s.push('laugh', 'wave');   // by the river on the film, the photo (Nights 3, 7)
+    if (id === 'daniel') s.push('hammer', 'give', 'sit');
+    if (id === 'mother' || id === 'young_satria') s.push('sit');
+    if (id === 'young_satria') s.push('run');
+    if (id === 'helen' || id === 'pip') s.push('hug', 'laugh');   // Day 8: Pip leaps to hug Satria, Helen's arm round him
+    if (id === 'mender') s.push('laugh');
+    if (id === 'mia') s.push('moved');
+    if (['gigi', 'kiko', 'lulu', 'kid'].includes(id)) s.push('run');   // Leo's young runners (Day 7)
+    if (id === 'breadboy') s.push('wave');
+    // Day 8: the whole village gathered in the square cheers
+    if (!['valdo', 'marlow', 'marcus', 'daniel', 'mother'].includes(id) && !id.startsWith('young_')) s.push('cheer');
     if (id === 'arlo') s.push('fish', 'tend', 'sit');
     if (id === 'neighbour_a' || id === 'neighbour_b') s.push('sit');
     if (id === 'neighbour_a') s.push('look');
@@ -617,7 +678,7 @@
     if (id === 'fisher') s.push('sit');
     if (id === 'salter') s.push('rake', 'sweep');
     if (TURN[id]) s.push(...TURNS.filter(p => s.includes(p)).flatMap(p => VIEWS.map(v => `${p}_${v}`)));
-    HAS[id] = s;
+    HAS[id] = [...new Set(s)];
   }
   const FALLBACK = { run: 'walk', carryWalk: 'walk', carry: 'idle', talk: 'idle' };
   const resolve = (id, pose) => {
@@ -785,6 +846,124 @@
         armN = f ? [[3, 1], [5, -3]] : [[3, 2], [6, 0]]; armF = [[2, 3], [4, 4]];
         r.cup = f; r.eye = f ? 'closed' : 'open';
         break;
+      case 'crank':   // turning a crank at his side round and round: the projector's, the hand going over the top and under
+        armN = [[3, 2], [[8, -1], [10, 2], [8, 5], [6, 2]][f]]; armF = [[2, 3], [5, 4]];
+        r.hy += 1; if (f === 2) r.eye = 'squint';
+        r.crank = [8, 2];
+        break;
+      case 'unchain':   // both hands on a chain at the chest, drawn back through the door's handles
+        r.dx = f ? -1 : 1; r.hx += f ? -1 : 1;
+        armN = f ? [[2, 1], [5, 1]] : [[3, 1], [8, 0]]; armF = f ? [[3, 2], [7, 1]] : [[4, 1], [10, 0]];
+        r.mouth = f ? 'closed' : 'open'; r.chain = f;
+        break;
+      case 'stretch':   // a runner's stretch: a long lunge, then both arms reached high overhead
+        legs = leg3(6, 0, -5, 0);
+        r.dy = 2;
+        armN = f ? [[10, -1], [12, -12]] : [[3, 2], [6, 4]]; armF = f ? [[-2, -5], [-4, -13]] : [[3, 2], [8, 3]];
+        r.eye = f ? 'closed' : 'open';
+        break;
+      case 'climb':   // up the cliff's crack: one hand reaching high for a hold, a foot up on the next, then pulled up
+        r.dx = 1; r.hx += 1; r.hy -= 1; r.eye = 'up'; r.dy = f & 1 ? -1 : 0;
+        armN = f < 2 ? [[4, -3], [12, -8 + (f & 1)]] : [[4, 0], [10, -2 + (f & 1)]];
+        armF = f < 2 ? [[4, 0], [10, -1 + (f & 1)]] : [[4, -3], [11, -9 + (f & 1)]];
+        legs = f < 2 ? leg3(5, 5 - (f & 1), -1, f & 1) : leg3(2, f & 1, 1, 5 - (f & 1));
+        break;
+      case 'balance':   // caught by a gust: arms flung out either side, rocking to keep from falling
+        legs = leg3(3, 0, -3, 0); r.dx = f; r.sway = f ? 1 : -1; r.eye = 'squint';
+        armN = f ? [[3, -1], [8, -3]] : [[3, 0], [8, 1]]; armF = f ? [[-2, 1], [-7, 2]] : [[-2, 0], [-7, -2]];
+        break;
+      case 'slip':   // a foot gone from under him: arms windmilling, eyes wide
+        r.dx = -1; r.eye = 'wide'; r.mouth = 'open';
+        legs = f ? leg3(4, 2, -3, 3) : leg3(7, 5, -1, 0);
+        armN = f ? [[4, 0], [10, 1]] : [[5, -1], [12, -3]]; armF = f ? [[-2, -3], [-6, -6]] : [[-1, -3], [-4, -8]];
+        break;
+      case 'pick':   // a sprig of wild mint pinched off the rock before him and drawn back
+        armN = f ? [[3, 2], [6, 1]] : [[4, 0], [11, 0]]; armF = [[2, 3], [5, 4]];
+        r.eye = f ? 'open' : 'squint'; r.sprig = f === 1;
+        break;
+      case 'sitCross': case 'doze': {   // sat cross-legged on the floor, hands on his knees; dozing, his head nods
+        r.dy = 5;
+        legs = [
+          { far: true, hip: L.hipB, foot: [L.hipB[0] + 4, 36], knee: [L.hipB[0] + 6, L.hipB[1] - 2] },
+          { hip: L.hipF, foot: [L.hipF[0] + 2, 37], knee: [L.hipF[0] + 6, L.hipF[1] - 1] },
+        ];
+        armN = [[2, 3], [6, 4]]; armF = [[2, 3], [7, 3]];
+        if (pose === 'doze') { r.eye = 'closed'; r.hy += 1 + f; r.droop = 1; } else if (f) r.eye = 'blink';
+        break;
+      }
+      case 'pump':   // both hands on the pump's lever, heaved down and drawn up again
+        r.hy += [0, 1, 2, 1][f]; r.dy = [0, 0, 1, 0][f];
+        armN = [[3, 2], [7, [-2, 1, 4, 1][f]]]; armF = [[3, 2], [8, [-1, 2, 5, 2][f]]];
+        r.lever = [12, 5]; if (f === 2) r.eye = 'squint';
+        break;
+      case 'jump':   // crouched to spring, then up in the air, legs tucked, reaching for the next step
+        if (f) { r.dy = -5; legs = leg3(5, 7, -4, 6); armN = [[4, -2], [10, -4]]; armF = [[3, -2], [9, -3]]; r.mouth = 'open'; }
+        else { r.dy = 3; legs = leg3(3, 0, -3, 0); armN = [[-1, 3], [-4, 5]]; armF = [[-1, 3], [-3, 5]]; r.eye = 'squint'; }
+        break;
+      case 'tumble':   // tripped: pitched forward, arms out, then down on hands and knees
+        if (f) {
+          r.dy = 5; r.dx = 2; r.hx += 1; r.hy += 3; r.eye = 'closed'; r.mouth = 'sad';
+          legs = [
+            { far: true, hip: L.hipF, foot: [L.hipF[0] - 3, 36], knee: [L.hipF[0] + 3, L.hipF[1]] },
+            { hip: L.hipB, foot: [L.hipB[0] - 4, 37], knee: [L.hipB[0] + 2, L.hipB[1] + 1] },
+          ];
+          armN = [[3, 4], [6, 6]]; armF = [[3, 4], [8, 6]];
+        } else {
+          r.dx = 2; r.hx += 2; r.hy += 2; r.eye = 'wide'; r.mouth = 'open';
+          legs = leg3(7, 0, -6, 4); armN = [[5, 0], [11, 1]]; armF = [[4, -1], [10, -1]];
+        }
+        break;
+      case 'tired':   // bent over, hands on his knees, panting
+        r.dx = 1; r.hx += 2; r.hy += 3; r.dy = 1; r.droop = 1;
+        legs = leg3(3, 0, -3, 0);
+        armN = [[3, 4], [5, 7]]; armF = [[3, 4], [6, 7]];
+        r.mouth = f ? 'closed' : 'open'; r.eye = f ? 'closed' : 'squint';
+        break;
+      case 'read':   // a sheet held in both hands before the chest, the head bowed over it: a letter, a newspaper, a folder
+        armN = [[3, 4], [6, 4]]; armF = [[3, 4], [7, 4]];
+        r.hy += 1; r.eye = f ? 'blink' : 'squint'; r.paper = ch.paper || 'letter';
+        break;
+      case 'hug':   // something dear held tight to the chest, eyes shut, smiling
+        armN = [[4, 2], [3, -1]]; armF = [[4, 2], [5, 0]];
+        r.eye = 'happy'; r.mouth = 'smile'; r.dy = f ? -1 : 0; r.hold = [3, 0];
+        break;
+      case 'tear':   // the contract in both hands, then torn in two, a scrap off on the wind
+        armN = f ? [[4, 1], [8, -2]] : [[3, 2], [6, 1]]; armF = f ? [[1, 2], [-2, 0]] : [[3, 2], [7, 1]];
+        r.tearing = f; r.eye = f ? 'squint' : 'open';
+        break;
+      case 'bow':   // a bow from the waist, arms at the sides, eyes shut
+        r.dx = 1; r.hx += 2 + f; r.hy += 3 + f * 2; r.eye = 'closed';
+        armN = [[1, 3], [2, 6]]; armF = [[1, 3], [3, 6]];
+        break;
+      case 'cheer':   // both arms thrown up over the head, a hop
+        r.eye = 'happy'; r.mouth = 'open'; r.dy = f ? -2 : 0;
+        armN = f ? [[10, -1], [12, -11]] : [[10, 0], [13, -9]]; armF = f ? [[-2, -5], [-5, -13]] : [[-2, -5], [-6, -12]];
+        break;
+      case 'laugh':   // head thrown back, a hand on the belly, shaking with it
+        r.hx -= 1; r.hy -= 1; r.dy = f ? -1 : 0; r.eye = 'happy'; r.mouth = 'open';
+        armN = [[2, 3], [5, 5]]; armF = [[2, 3], [6, 4]];
+        break;
+      case 'stamp':   // a foot stamped down in a rage, fists clenched at the sides
+        r.eye = 'angry'; r.mouth = 'open';
+        legs = f ? leg3(3, 0, -2, 0) : leg3(3, 5, -2, 0); r.dy = f;
+        armN = [[1, 3], [2, 7]]; armF = [[1, 3], [3, 7]]; r.dust = f === 1;
+        break;
+      case 'shocked':   // recoiling, hands up and palms out, eyes wide
+        r.dx = -2 + f; r.hx -= 1; r.eye = 'wide'; r.mouth = 'open';
+        armN = [[4, 0], [10, -1]]; armF = [[3, 0], [9, -2]];
+        break;
+      case 'panic':   // a hand to his cheek, the other at the back of his head, a cold sweat
+        r.dx = f; r.eye = 'wide'; r.mouth = 'open';
+        armN = [[3, -1], [3, -5]]; armF = [[2, -1], [1, -6]]; r.sweat = f;
+        break;
+      case 'whistle':   // the brass whistle to his mouth, blown: a puff of breath
+        armN = [[3, 0], [7, -3]]; armF = [[2, 3], [4, 5]];
+        r.whistle = f; r.eye = f ? 'closed' : 'open';
+        break;
+      case 'agitate':   // the developing tank in both hands, tipped over and back to wash the film
+        armN = [[3, 2], [6, 2]]; armF = [[3, 2], [7, 2]];
+        r.hy += 1; r.eye = 'squint'; r.tank = [0, -1, 0, 1][f];
+        break;
       case 'crouch':   // down low, a hand at the ground: feet scrubbed on the doormat, a latch lifted
         r.dy = 4; r.hx += 2; r.hy += 2;
         armN = [[3, 4], [7, 9 - f]]; armF = [[3, 4], [9, 8 + f]];
@@ -826,6 +1005,7 @@
     r.arms = [{ far: true, pts: [sF, ...abs(sF, armF)] }, { far: false, pts: [sN, ...abs(sN, armN)] }];
     if (r.hold) r.hold = [sN[0] + r.hold[0], sN[1] + r.hold[1]];
     if (r.parcel) r.parcel = [sN[0] + r.parcel[0], sN[1] + r.parcel[1]];
+    for (const k of ['crank', 'lever']) if (r[k]) r[k] = [sN[0] + r[k][0], sN[1] + r[k][1]];   // pivots, relative to the near shoulder
     return r;
   }
 
@@ -856,7 +1036,8 @@
     line(x, kn[0], kn[1], l.foot[0], l.foot[1], c);
     if (shoe === 'boot') { rect(x, l.foot[0] - 1, l.foot[1] - 5, 2, 6, l.far ? 'moss3' : 'moss2'); rect(x, l.foot[0], l.foot[1], 2, 1, 'ink'); }
     if (shoe === 'wrap') rect(x, l.foot[0] - 1, l.foot[1] - 3, 3, 2, l.far ? 'cream2' : 'cream0');   // cloth wrapped round the ankle
-    if (shoe === 'sneaker') { rect(x, l.foot[0] - 1, l.foot[1] - 1, 4, 2, 'ink'); rect(x, l.foot[0], l.foot[1] - 1, 2, 1, l.far ? 'stone1' : 'white'); }
+    if (shoe === 'spike') { rect(x, l.foot[0] - 1, l.foot[1] - 2, 4, 3, l.far ? 'roofR3' : 'roofR2'); dot(x, l.foot[0], l.foot[1] - 2, 'white'); rect(x, l.foot[0] - 1, l.foot[1], 4, 1, 'ink'); }   // the spiked shoe, its white lace
+    else if (shoe === 'sneaker') { rect(x, l.foot[0] - 1, l.foot[1] - 1, 4, 2, 'ink'); rect(x, l.foot[0], l.foot[1] - 1, 2, 1, l.far ? 'stone1' : 'white'); }
     else if (!l.far) dot(x, l.foot[0] + 1, l.foot[1], c);
   }
 
@@ -916,6 +1097,7 @@
     x.drawImage(memo('eye|' + r.eye, () => grid(EYE[r.eye] || EYE.open, EK)), hx + L.eye[0], hy + L.eye[1]);
     x.drawImage(memo('mouth|' + r.mouth, () => grid(MOUTH[r.mouth], MK)), hx + L.mouth[0], hy + L.mouth[1]);
     if (ch.lash && (r.eye === 'open' || r.eye === 'squint')) { dot(x, hx + L.eye[0], hy + L.eye[1], 'ink'); dot(x, hx + L.eye[0] - 1, hy + L.eye[1] - 1, 'ink'); }
+    if (ch.glow && r.eye !== 'closed' && r.eye !== 'blink') { const [ex, ey] = [hx + L.eye[0], hy + L.eye[1]]; dot(x, ex - 1, ey + 1, 'light2'); dot(x, ex - 1, ey + 2, 'light3'); dot(x, ex + 1, ey + 4, 'light2'); }   // the light spilling from his eyes
     layer('face');
     const ants = () => L.ant.forEach((a, i) => antenna(x, hx, hy, a, r.sway, ch.bent === i, r.droop));
     if (!ch.antTop) ants();
@@ -942,9 +1124,55 @@
       const [px2, py2] = r.arms[0].pts[r.arms[0].pts.length - 1];
       plated(x, g => ch.polish === 'cup'
         ? (rect(g, px2 - 1, py2 - 3, 4, 3, 'white'), dot(g, px2 - 2, py2 - 2, 'white'))
-        : (rect(g, px2, py2 - 5, 2, 5, 'brass1'), dot(g, px2, py2 - 5, 'brass0'), dot(g, px2 + 1, py2 - 2, 'brass2')));
+        : ch.polish === 'frame'   // Daniel's photo in its frame
+          ? (rect(g, px2 - 1, py2 - 6, 6, 6, 'wood3'), rect(g, px2 - 1, py2 - 6, 6, 1, 'wood2'), rect(g, px2, py2 - 5, 4, 4, 'stone0'), rect(g, px2 + 1, py2 - 4, 2, 3, 'stone3'))
+          : (rect(g, px2, py2 - 5, 2, 5, 'brass1'), dot(g, px2, py2 - 5, 'brass0'), dot(g, px2 + 1, py2 - 2, 'brass2')));
+    }
+    if (r.crank) {   // the projector's crank: its brass boss, the arm out to the handle in the hand
+      const [cx2, cy2] = r.crank;
+      plated(x, g => { line(g, cx2, cy2, hand[0], hand[1], 'iron1'); rect(g, cx2 - 1, cy2 - 1, 3, 3, 'brass2'); dot(g, cx2 - 1, cy2 - 1, 'brass1'); });
+    }
+    if (r.lever) {   // the pump: its post down to the floor, the lever from the pivot to the handle in his hands
+      const [lx, ly] = r.lever;
+      plated(x, g => { rect(g, lx - 1, ly, 3, 37 - ly, 'iron3'); rect(g, lx - 1, ly, 1, 37 - ly, 'iron2'); line(g, hand[0] - 1, hand[1], lx, ly, 'iron1'); rect(g, lx - 1, ly - 1, 3, 2, 'brass2'); });
+    }
+    if (r.chain !== undefined) {   // the ship's chain, its links between the hands and its end swinging down
+      const [fx2, fy2] = r.arms[0].pts[r.arms[0].pts.length - 1];
+      plated(x, g => {
+        let n = 0; raster(fx2, fy2, hand[0], hand[1], (px2, py2) => dot(g, px2, py2, n++ & 1 ? 'iron3' : 'iron1'));
+        for (let y = hand[1] + 1; y < 36; y++) dot(g, hand[0] + 1 + ((y - hand[1]) >> (r.chain ? 2 : 1)), y, y & 1 ? 'iron3' : 'iron1');
+      });
+    }
+    if (r.paper) {   // what is read, held up in both hands
+      const [px2, py2] = hand, P = { letter: ['cream0', 'cream2', 'cream1'], news: ['stone0', 'stone2', 'stone1'], folder: ['wood3', 'cream1', 'wood4'] }[r.paper];
+      plated(x, g => {
+        rect(g, px2 - 2, py2 - 6, 7, 7, P[0]); rect(g, px2 + 4, py2 - 6, 1, 7, P[2]);
+        if (r.paper === 'folder') rect(g, px2 - 1, py2 - 5, 5, 5, P[1]);
+        for (let y = py2 - 4; y < py2; y += 2) rect(g, px2 - 1, y, 4, 1, r.paper === 'folder' ? 'wood2' : P[1]);
+        if (r.paper === 'news') rect(g, px2 - 1, py2 - 5, 5, 1, 'stone4');
+      });
+    }
+    if (r.tank !== undefined) {   // the developing tank, tipped one way and the other: its black lid and lit side
+      const [tx2, ty2] = hand;
+      plated(x, g => { for (let j = 0; j < 7; j++) { const ox = Math.round(r.tank * (3 - j) / 3); rect(g, tx2 - 1 + ox, ty2 - 5 + j, 5, 1, j ? 'iron2' : 'iron4'); dot(g, tx2 - 1 + ox, ty2 - 5 + j, j ? 'iron1' : 'iron3'); } });
+    }
+    if (r.tearing !== undefined) {   // the contract, whole and then in two halves, a scrap flying
+      const [fx2, fy2] = r.arms[0].pts[r.arms[0].pts.length - 1];
+      plated(x, g => {
+        if (!r.tearing) { rect(g, hand[0] - 2, hand[1] - 6, 8, 7, 'cream0'); rect(g, hand[0] + 5, hand[1] - 6, 1, 7, 'cream2'); rect(g, hand[0], hand[1] - 4, 4, 1, 'roofR3'); }
+        else for (const [ex, ey] of [[hand[0], hand[1]], [fx2 - 2, fy2]]) { rect(g, ex - 1, ey - 6, 4, 7, 'cream0'); rect(g, ex, ey - 4, 2, 1, 'roofR3'); }
+      });
+      if (r.tearing) { dot(x, hand[0] + 4, hand[1] - 9, 'cream0'); dot(x, hand[0] + 5, hand[1] - 9, 'cream2'); dot(x, hand[0] + 2, hand[1] - 12, 'cream0'); }
     }
     if (!r.behind) arm(x, r.arms[1], ch);
+    if (r.sprig) { const [ex, ey] = hand; dot(x, ex + 1, ey - 2, 'leaf2'); dot(x, ex, ey - 3, 'leaf1'); dot(x, ex + 2, ey - 3, 'leaf3'); dot(x, ex + 1, ey - 4, 'lilac'); }   // sea mint, a white-purple flower on it
+    if (r.whistle !== undefined) {   // the whistle at his lips; blown, a puff out ahead of it
+      const [ex, ey] = hand;
+      plated(x, g => { rect(g, ex + 1, ey - 1, 3, 2, 'brass1'); dot(g, ex + 3, ey - 1, 'brass0'); });
+      if (r.whistle) for (const [ox, oy] of [[6, -2], [7, -3], [8, -1], [9, -3], [10, -2]]) dot(x, ex + ox, ey + oy, ox & 1 ? 'cloud0' : 'cloud2');
+    }
+    if (r.sweat !== undefined) { const sy = hy - 1 + r.sweat; dot(x, hx + 2, sy, 'water1'); dot(x, hx + 2, sy + 1, 'water2'); dot(x, hx + 1, sy + 3, 'water1'); }
+    if (r.dust) for (const [ox, oy] of [[-2, 0], [3, -1], [5, 0], [-1, -2]]) dot(x, r.legs[2].foot[0] + ox, r.legs[2].foot[1] + oy, ox & 1 ? 'stone0' : 'dirt1');
     if (r.polish) [[0, -1, 'red'], [1, -1, 'white'], [0, 0, 'white'], [1, 0, 'red']].forEach(([ox, oy, c]) => dot(x, hand[0] + ox, hand[1] + oy, c));   // a checked cloth
     if (r.pot) {   // the teapot by its handle, leaning forward to pour, tea running from the spout
       const [hx2, hy2] = hand, lean = i => (r.pot.tip ? i >> 1 : 0);
@@ -1330,6 +1558,50 @@
       rect(g, P.cx - 16, P.cy - 6, 30, 2, 'dirt2'); }); } };
   PORT.lulu = PORT.grandkid;
   PORT.young_pip = PORT.pip;
+  // Sam's round reading glasses, wire-thin, the near lens round the eye and the far one beyond the bridge
+  PORT.sam.face = (x, P) => {
+    region(x, (x, y) => inE(x, y, P.ex + 3, P.ey + 4, 5, 5) && !inE(x, y, P.ex + 3, P.ey + 4, 4, 4), () => 'iron3');
+    region(x, (x, y) => inE(x, y, P.ex + 11, P.ey + 4, 2, 5) && !inE(x, y, P.ex + 11, P.ey + 4, 1, 4), () => 'iron3');
+    line(x, P.ex + 8, P.ey + 3, P.ex + 9, P.ey + 3, 'iron3'); line(x, P.ex - 2, P.ey + 3, P.cx - 10, P.cy - 1, 'iron2');
+  };
+  // Marlow unmasked: the light spilling from his eyes (shut, it goes out)
+  PORT.marcus = { ...PORT.marlow, face(x, P, eye) {
+    PORT.marlow.face(x, P);
+    if (!['open', 'wide', 'sad', 'cross', 'moved'].includes(eye)) return;
+    for (let dy = 2; dy <= 6; dy++) dot(x, P.ex - 1, P.ey + dy, dy & 1 ? 'light2' : 'light1');
+    rect(x, P.ex + 1, P.ey + 8, 5, 1, 'light3'); rect(x, P.ex + 11, P.ey + 3, 1, 3, 'light2');
+  } };
+  // Daniel: the cream work shirt open at the neck, his braces, the flat cap pushed back
+  PORT.daniel = { cloth: ['cream0', 'cream1', 'cream2'],
+    bust(g) { region(g, (x, y) => inE(x, y, 27, 34, 6, 2), (x, y) => (y < 34 ? 'cream1' : 'cream2')); line(g, 27, 35, 28, 39, 'cream2');
+      for (const bx of [19, 34]) { line(g, bx, 35, bx - 1, 47, 'wood4'); line(g, bx + 1, 35, bx, 47, 'wood3'); dot(g, bx, 38, 'brass1'); } },
+    hat(x, P) { plate(x, g => {
+      region(g, (x, y) => inE(x, y, P.cx - 2, P.cy - 9, 13, 6) && y <= P.cy - 6, (x, y) => band(x - P.cx + (y - P.cy), -22, -9, ['dirt2', 'dirt3', 'dirt4']));
+      rect(g, P.cx + 4, P.cy - 7, 11, 2, 'dirt4'); rect(g, P.cx + 4, P.cy - 7, 11, 1, 'dirt3'); dot(g, P.cx - 3, P.cy - 15, 'dirt2');
+    }); } };
+  // little Satria: the cream shirt and green braces, the small green cap with its cream patch
+  PORT.young_satria = { cloth: ['cream0', 'cream1', 'cream2'], kid: true,
+    bust(g) { for (const bx of [20, 33]) { line(g, bx, 35, bx - 1, 47, 'cap3'); line(g, bx + 1, 35, bx, 47, 'cap2'); } region(g, (x, y) => inE(x, y, 27, 35, 6, 2), () => 'cream1'); },
+    hat(x, P) { plate(x, g => {
+      region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 6, 13, 7) && y <= P.cy - 5, (x, y) => band((x - P.cx) + (y - P.cy) * 1.5, -20, -4, ['cap1', 'cap2', 'cap3']));
+      rect(g, P.cx - 13, P.cy - 6, 26, 2, 'cap3'); rect(g, P.cx + 8, P.cy - 6, 10, 2, 'cap2'); rect(g, P.cx + 8, P.cy - 5, 10, 1, 'cap3');
+      rect(g, P.cx - 7, P.cy - 12, 4, 3, 'cream0'); dot(g, P.cx - 6, P.cy - 11, 'cream1');
+    }); } };
+  // Leo in 1952: bare shoulders, the white singlet with its red sash and his number, the headband
+  PORT.young_leo = { cloth: RUST,
+    bust(g) {
+      region(g, (x, y) => inBust(x, y) && x >= 16 && x <= 37 && y >= 36, (x, y) => (x > 34 ? 'stone1' : 'white'));
+      for (let k = 0; k < 3; k++) line(g, 35 - k, 36, 21 - k, 47, k === 1 ? 'roofR3' : 'red');
+      rect(g, 24, 41, 7, 5, 'cream0'); rect(g, 24, 41, 7, 1, 'cream2'); rect(g, 26, 42, 1, 3, 'ink2'); rect(g, 28, 42, 2, 1, 'ink2'); rect(g, 29, 43, 1, 2, 'ink2');
+    },
+    hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx, P.cy, 14, 12) && y >= P.cy - 8 && y <= P.cy - 4, (x, y) => (y === P.cy - 8 ? 'stone0' : y >= P.cy - 5 ? 'red' : 'white')); }); } };
+  // the bread lad: the mustard shirt, his satchel's strap across it, the brown cycling cap with its short peak
+  PORT.breadboy = { cloth: ['light2', 'light3', 'light4'],
+    bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 8, 2), (x, y) => (y < 35 ? 'light2' : 'light4')); for (let k = 0; k < 2; k++) line(g, 32 + k, 34, 17 + k, 47, k ? 'wood3' : 'wood4'); dot(g, 28, 41, 'wood4'); },
+    hat(x, P) { plate(x, g => {
+      region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 7, 13, 6) && y <= P.cy - 4, (x, y) => band(x - P.cx + (y - P.cy), -22, -8, ['wood2', 'wood3', 'wood4']));
+      rect(g, P.cx + 6, P.cy - 5, 9, 2, 'wood4'); rect(g, P.cx - 12, P.cy - 6, 3, 1, 'wood2');
+    }); } };
 
   function renderPortrait(id, frame, mood) {
     const d = PORT[id] || { cloth: [CAST[id].sleeve[0], CAST[id].sleeve[0], CAST[id].sleeve[1]] };
@@ -1365,7 +1637,7 @@
     else line(x, P.ex + 9, P.ey + 4, P.ex + 10, P.ey + 4, 'ink');
     rect(x, P.ex - 3, P.ey + 9, 3, 1, smile || moved ? 'rose' : 'roofR1');                          // blush
     G2(x, PMOUTH[frame === 1 ? 'talk' : moved ? 'wobble' : smile ? 'smile' : own ? own[1] : 'neutral'], PMK, P.mx - 2, P.my);
-    if (d.face) d.face(x, P);
+    if (d.face) d.face(x, P, eyeKey);
     if (moved && frame !== 2) { dot(x, P.ex - 1, P.ey + 9, 'water1'); dot(x, P.ex - 1, P.ey + 10, 'water1'); dot(x, P.ex - 1, P.ey + 11, 'white'); }
     if (moved) { dot(x, P.ex + 8, P.ey - 3, 'white'); dot(x, P.ex + 9, P.ey - 4, 'light1'); dot(x, P.ex + 7, P.ey - 4, 'light1'); }
     if (d.hat) d.hat(x, P);
@@ -1392,6 +1664,7 @@
 
   // Bodies of another colour, swapped into a finished frame: Marlow is an old grey ant, and his eyes glow faintly.
   const BODIES = { grey: { ant0: 'stone1', ant1: 'stone2', ant2: 'stone3', ant3: 'stone4', ant4: 'stone5', pupil: 'light2' }, young: { stone0: 'wood3', stone1: 'wood4', stone2: 'wood5' } };
+  BODIES.spirit = { ...BODIES.grey, pupil: 'light1' };   // Marlow unmasked: his eyes brighter
   const rgb = k => { const v = R(k).startsWith('#') ? R(k) : PX.PAL[k]; return [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)); };
   function bodied(src, body) {
     if (!body) return src;

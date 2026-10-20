@@ -323,18 +323,5 @@ namespace Shop
             pip.FaceTo(courier.Feet.x);
             await Say("courier", "Pip... someone's come back to find you, from a long way off.");
         });
-
-        // Someone gives the courier a thing they hold, and it goes into the bag.
-        async Awaitable Give(string id, string item)
-        {
-            var owner = Actor(id);
-            owner.FaceTo(Actor("courier").Feet.x);
-            owner.Held = Keepsakes.Art(item, "xs");
-            owner.Pose = "give";
-            await Wait(0.6f);
-            owner.Held = null;
-            owner.Pose = "idle";
-            await Receive(item);
-        }
     }
 }

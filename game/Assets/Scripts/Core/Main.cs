@@ -57,6 +57,7 @@ namespace Shop
             [0] = main => new Prologue(main),
             [1] = main => new Night1(main),
             [2] = main => new Night2(main),
+            [3] = main => new Night3(main),
         };
 
         public static Main Instance { get; private set; }
@@ -103,12 +104,32 @@ namespace Shop
             Instance = null;
             Auto = false;
             Sepia = false;
+            Safelight = false;
+            Raining = false;
         }
 
         static readonly int SepiaId = Shader.PropertyToID("_Sepia");
 
         /// <summary>The world washed to sepia, for a memory of 1952 (Pixel.shader's _Sepia).</summary>
         public static bool Sepia { set => Shader.SetGlobalFloat(SepiaId, value ? 1 : 0); }
+
+        static readonly int SafelightId = Shader.PropertyToID("_Safelight");
+
+        /// <summary>The world under a darkroom's safelight, black and red (Pixel.shader's _Safelight).</summary>
+        public static bool Safelight { set => Shader.SetGlobalFloat(SafelightId, value ? 1 : 0); }
+
+        static readonly int RainId = Shader.PropertyToID("_Rain");
+
+        /// <summary>Rain falling out of doors, under a grey sky (Rain, Pixel.shader's _Rain, and the rain's ambience in place of the hour's).</summary>
+        public static bool Raining
+        {
+            get => Rain.Falling;
+            set
+            {
+                Rain.Falling = value;
+                Shader.SetGlobalFloat(RainId, value ? 1 : 0);
+            }
+        }
 
         /// <summary>Runs a story step that nobody awaits, and reports its errors.</summary>
         public static async void Run(Awaitable step)
@@ -172,6 +193,7 @@ namespace Shop
             ui.referencePixelsPerUnit = 1;
             ui.pixelPerfect = true;
             var t = ui.transform;
+            Rain.Create(t); // under everything else on the screen
             logo = Look.Picture("Logo", t);
             bars = new[] { Look.Picture("Bar", t), Look.Picture("Bar", t) };
             foreach (var bar in bars)
@@ -313,6 +335,7 @@ namespace Shop
         public async Awaitable Begin(int chapter, string checkpoint = "", Func<Main, Chapter> make = null)
         {
             Story = (make ?? Chapters[chapter])(this);
+            Raining = false; // every chapter starts dry; a rainy one says so
             if (checkpoint == "")
             {
                 Game.StartChapter(chapter, Story.StartPhase);
@@ -365,8 +388,9 @@ namespace Shop
             var bell = Place && Place.Def.DoorBell;
             // Through a door the view cuts straight to the other side, as HD-2D does: a room stands where its house
             // does, so only the walls and roof change, and the courier faces on in, or comes out of the doorway and
-            // steps down. Along a road, or when the story moves the courier somewhere else, the view fades.
-            var door = Place && (Place.Def.Indoors || Places.Get(placeId).Indoors) && Array.Exists(Place.Def.Hotspots, h => h.ExitTo?.Split('/')[0] == placeId);
+            // steps down. Along a road, down a stair from one room to another, or when the story moves the courier
+            // somewhere else, the view fades.
+            var door = Place && Place.Def.Indoors != Places.Get(placeId).Indoors && Array.Exists(Place.Def.Hotspots, h => h.ExitTo?.Split('/')[0] == placeId);
             if (!door) await Fade(true);
             Swap(placeId, spawn, door, at);
             if (bell || Place.Def.DoorBell) Sound.Play("bell");

@@ -395,6 +395,11 @@
      its gable to the sea; the big many-paned studio window, the darkroom's blacked-out window with its little red lamp,
      a box camera hung out as the sign. */
   function theoStudio() {
+    const chain = inked(14, 16, b => {
+      for (let i = 0; i < 12; i++) { px(b, 1 + i, 2 + (i >> 1), i % 2 ? 'iron1' : 'iron3'); px(b, 12 - i, 2 + (i >> 1), i % 2 ? 'iron2' : 'iron3'); }
+      fill(b, 4, 9, 6, 6, 'brass2'); fill(b, 4, 9, 6, 1, 'brass1'); fill(b, 5, 6, 4, 3, 'iron3'); fill(b, 6, 7, 2, 2, 'wood5'); px(b, 6, 11, 'ink');
+    });
+    const cup = inked(6, 5, b => { fill(b, 0, 0, 6, 4, 'roofR2'); fill(b, 0, 0, 6, 1, 'leaf2'); fill(b, 1, 4, 4, 1, 'roofR3'); px(b, 4, 1, 'roofR1'); });
     const camera = (b, w, h) => {
       fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 2, 'wood2'); fill(b, 0, h - 2, w, 2, 'wood4');
       disc(b, (w >> 1) + 1, h >> 1, 3, 3, 'brass2'); disc(b, (w >> 1) + 1, h >> 1, 2, 2, 'iron4'); px(b, w >> 1, (h >> 1) - 1, 'white'); px(b, w - 3, 2, 'red');
@@ -407,8 +412,17 @@
         // the darkroom: a blacked-out window, and the little red lamp over it
         fill(b, 108, top + 12, 16, 18, 'wood4'); fill(b, 110, top + 14, 12, 14, '#2a1b2e'); fill(b, 110, top + 14, 12, 1, '#3d2a40'); fill(b, 107, top + 30, 18, 2, 'wood3');
         fill(b, 114, top + 4, 4, 2, 'iron3'); fill(b, 114, top + 6, 4, 3, 'red'); px(b, 114, top + 6, 'rose');
+        // the darkroom's vent beside the door, its louvres and the little sill under it
+        fill(b, 96, top + 28, 9, 7, 'wood4'); for (let y = top + 29; y < top + 34; y += 2) fill(b, 97, y, 7, 1, 'ink2');
+        fill(b, 95, top + 35, 11, 2, 'wood2'); fill(b, 95, top + 36, 11, 1, 'wood4');
       },
       extra(m, g, { X0, B0, PH }) { V.hangSign(m, X0 + 64, B0, PH + 38, 14, 11, camera); },
+      // Night 3: a ship's chain looped through the door's handles and padlocked from inside, and the clay cup of
+      // mint tea set on the vent's sill
+      cards: [
+        { name: 'chain', img: chain.canvas(), ax: 7, ay: 15, x: 13, back: 14, up: 22, wall: true, walk: true },
+        { name: 'cup', img: cup.canvas(), ax: 3, ay: 4, x: 32, back: 14, up: 23, wall: true, walk: true },
+      ],
     });
   }
 
@@ -482,5 +496,75 @@
     return { img: out.canvas(), ax: 16, ay: 14, shadow: [14, 3] };
   }
 
-  Object.assign(VIL, { jetty, boat, rowboat, lighthouse, saltStore, arloHome, theoStudio, ropeBridgeRemains, rockStack, beachProps: { shell, driftwood, fishRack, nets, saltHeaps, catchCrates } });
+  /* The harbour coffee stall by the jetty's foot: a little kiosk of bleached boards under a weathered-blue and white
+     awning, the brass coffee pot on its charcoal brazier, cups and a jar of sugar on the counter, sacks of beans, the
+     COFFEE board. Where the coast's mornings start, and its rumours. */
+  function coffeeStall() {
+    const W = 76, H = 66;
+    const out = inked(W, H, b => {
+      // the back boards and a shelf of tins and cups
+      fill(b, 6, 22, 64, 18, BW[2]); for (let x = 11; x < 70; x += 6) fill(b, x, 22, 1, 18, BW[3]);
+      fill(b, 6, 31, 64, 2, BW[1]); fill(b, 6, 33, 64, 1, BW[4]);
+      for (const [x, c] of [[10, BL[2]], [15, 'brass2'], [20, BL[3]], [48, 'cream1'], [53, BL[2]], [58, 'brass2']]) { fill(b, x, 26, 4, 5, c); fill(b, x, 26, 4, 1, BW[0]); px(b, x, 27, 'white'); }
+      for (const x of [26, 31, 36]) { fill(b, x, 28, 3, 3, 'cream0'); px(b, x + 3, 29, 'cream1'); }
+      // posts and the counter
+      for (const x of [3, 69]) { fill(b, x, 20, 4, 44, BW[2]); fill(b, x, 20, 1, 44, BW[1]); fill(b, x + 3, 20, 1, 44, BW[4]); }
+      fill(b, 1, 38, 74, 4, BW[0]); fill(b, 1, 38, 74, 1, 'white'); fill(b, 1, 41, 74, 1, BW[2]);
+      fill(b, 3, 42, 70, 18, BL[1]); for (let x = 9; x < 72; x += 6) fill(b, x, 44, 1, 14, BL[2]); fill(b, 3, 42, 70, 2, BL[2]); fill(b, 3, 58, 70, 2, BL[3]);
+      // a painted cup on the counter front
+      fill(b, 32, 47, 10, 6, 'cream0'); fill(b, 32, 47, 10, 1, 'white'); fill(b, 42, 48, 2, 3, 'cream1'); fill(b, 30, 53, 14, 1, 'cream2');
+      for (const x of [34, 38]) { px(b, x, 44, 'cream0'); px(b, x + 1, 45, 'cream0'); }
+      fill(b, 2, 60, 72, 6, BW[3]); fill(b, 2, 60, 72, 1, BW[2]);
+      // the awning, weathered blue and white, scalloped at its front
+      for (let y = 8; y < 22; y++) {
+        const l = Math.round(6 - (y - 8) * 0.4), r = W - l;
+        for (let x = l; x < r; x++) px(b, x, y, Math.floor((x - l) / (r - l) * 10) & 1 ? (y < 11 ? BL[1] : BL[2]) : y < 11 ? 'white' : BW[0]);
+      }
+      for (let k = 0; k < 10; k++) { const x0 = Math.round(k * W / 10), x1 = Math.round((k + 1) * W / 10); for (let j = 0; j < 4; j++) { const i = [0, 0, 1, 2][j]; fill(b, x0 + i, 22 + j, x1 - x0 - 2 * i, 1, k & 1 ? BL[3] : BW[1]); } }
+      fill(b, 6, 7, 64, 2, BW[3]);
+      // the board
+      fill(b, 20, 0, 36, 8, BW[4]); fill(b, 21, 1, 34, 6, BW[0]);
+      [[23, 'C'], [28, 'O'], [33, 'F'], [38, 'F'], [43, 'E'], [48, 'E']].forEach(([x, ch]) => {
+        const G = { C: ['111', '1..', '111'], O: ['111', '1.1', '111'], F: ['111', '11.', '1..'], E: ['111', '11.', '111'] }[ch];
+        G.forEach((r, j) => { for (let i = 0; i < 3; i++) if (r[i] === '1') px(b, x + i, 2 + j, BL[4]); });
+      });
+      // the brazier and its brass pot, cups and sugar on the counter
+      fill(b, 54, 30, 12, 8, 'iron3'); fill(b, 54, 30, 12, 1, 'iron1'); fill(b, 56, 32, 8, 4, 'light3'); fill(b, 57, 33, 6, 2, 'light1');
+      disc(b, 60, 26, 4, 3, 'brass2'); fill(b, 57, 28, 7, 1, 'brass3'); px(b, 59, 25, 'brass0'); line(b, 64, 25, 67, 22, 'brass3'); line(b, 56, 24, 55, 28, 'iron3');
+      for (const x of [14, 21]) { fill(b, x, 34, 5, 4, 'cream0'); fill(b, x, 34, 5, 1, 'wood4'); px(b, x + 5, 35, 'cream1'); }
+      fill(b, 40, 32, 6, 6, 'water0'); fill(b, 40, 32, 6, 1, BW[3]); fill(b, 41, 34, 4, 3, 'white');
+      // sacks of beans by the posts
+      for (const [x, y] of [[0, 52], [64, 52]]) { disc(b, x + 6, y + 7, 6, 6, 'dirt1'); fill(b, x + 2, y + 2, 8, 2, 'dirt2'); fill(b, x + 4, y + 7, 4, 2, 'wood4'); px(b, x + 5, y + 7, 'wood2'); }
+    });
+    return { img: out.canvas(), ax: (W >> 1) + 1, ay: H + 1, base: [-(W >> 1), W >> 1], foot: 12 };
+  }
+  /* A café table on the stall's terrace: a round top of bleached boards on one post, two cups and a saucer. */
+  function cafeTable() {
+    const out = inked(22, 18, b => {
+      disc(b, 11, 5, 10, 4, BW[0]); fill(b, 2, 5, 19, 1, BW[1]); fill(b, 1, 7, 21, 2, BW[2]); fill(b, 9, 9, 4, 7, BW[3]); fill(b, 5, 16, 12, 2, BW[4]);
+      for (const x of [5, 13]) { fill(b, x, 2, 4, 3, 'cream0'); fill(b, x, 2, 4, 1, 'wood4'); px(b, x + 4, 3, 'cream1'); }
+    });
+    return { img: out.canvas(), ax: 12, ay: 19, base: [-10, 10], foot: 4 };
+  }
+  /* Wild sea mint growing where the bluff meets the sea wind: a bushy clump of dark serrated leaves with little white
+     and lilac flowers. seed: its shape. */
+  function mintClump(seed = 1) {
+    const r = rng(seed * 37 + 5), W = 28, H = 22;
+    const out = inked(W, H, b => {
+      // a mound of paired, serrated leaves, darker at its foot
+      for (let k = 0; k < 22; k++) {
+        const x = 2 + ((r() * (W - 6)) | 0), y = 8 + ((r() * (H - 10)) | 0), c = y > H - 6 ? 'leaf3' : k % 3 ? 'leaf2' : 'leaf1';
+        fill(b, x, y, 3, 2, c); px(b, x + 3, y, c); px(b, x + 1, y - 1, 'leaf1'); px(b, x, y + 2, 'leaf4'); px(b, x + 2, y + 1, 'leaf3');
+      }
+      // flower spikes standing out of it, white and lilac whorls up a stem
+      for (let k = 0; k < 5; k++) {
+        const x = 4 + ((r() * (W - 8)) | 0), top = 1 + ((r() * 5) | 0), c = k & 1 ? 'white' : 'lilac';
+        for (let y = top; y < top + 8; y++) px(b, x, y, 'leaf3');
+        for (let y = top; y < top + 6; y += 2) { px(b, x - 1, y, c); px(b, x + 1, y, c); px(b, x, y, k & 1 ? 'lilac' : 'white'); }
+      }
+    });
+    return { img: out.canvas(), ax: W >> 1, ay: H };
+  }
+
+  Object.assign(VIL, { jetty, boat, rowboat, lighthouse, saltStore, arloHome, theoStudio, ropeBridgeRemains, rockStack, coffeeStall, cafeTable, mintClump, beachProps: { shell, driftwood, fishRack, nets, saltHeaps, catchCrates } });
 })();

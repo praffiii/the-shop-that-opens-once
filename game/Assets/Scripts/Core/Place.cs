@@ -121,7 +121,16 @@ namespace Shop
         // from 10:17. Each night's box stays shut in the cabinet until Marlow hands it over; its cubby is empty while
         // the courier has it, and once the night is resolved it is back, open and empty. Satria's yard gate is shut
         // until he first pushes it open, coming home on Day 0. The platform's oil lanterns are lit by the story. At home the
-        // coil and the night's box follow the routine.
+        // coil and the night's box follow the routine. Theo's studio is chained shut till Night 3 opens it.
+        /// <summary>The frames of Daniel's last reel on Theo's screen (inside.js footage).</summary>
+        const int Film = 8;
+
+        /// <summary>Shows one frame of the reel on Theo's screen, or none (-1).</summary>
+        public void ShowFilm(int frame)
+        {
+            for (var k = 0; k < Film; k++) World.ShowItemIfAny($"screen_film_{k}", k == frame);
+        }
+
         public void FollowStory()
         {
             var shut = Game.Chapter == 0 && !Game.Has("stepped_gate");
@@ -141,6 +150,11 @@ namespace Shop
             for (var i = 0; i < 3; i++) World.ShowItemIfAny($"lantern_post_{i}_lit_0", Game.Has($"lantern_post_{i}") || (i == 1 && Game.Chapter >= 2));
             // Night 2's marble game on the square's east lawn
             World.ShowItemIfAny("marble_ring", Game.Chapter == 2);
+            // Theo's studio door is chained from inside until Night 3's mint tea on its vent's sill brings him out; the
+            // film shows on his screen only while the projector runs
+            World.ShowItemIfAny("theo_studio_chain", Game.Chapter < 3 || (Game.Chapter == 3 && !Game.Has("studio_open")));
+            World.ShowItemIfAny("theo_studio_cup", Game.Chapter == 3 && Game.Has("tea_set"));
+            for (var k = 0; k < Film; k++) World.ShowItemIfAny($"screen_film_{k}", false); // the screening runs them (ShowFilm)
             // at home: the coil lit before sleep, and the night's box on the table once brought home
             World.ShowItemIfAny("coil_lit", Game.Has("coil_lit"));
             for (var i = 0; i < 7; i++) World.ShowItemIfAny($"box_on_table_{i}", i == Game.Chapter - 1 && Game.Has("box_home"));

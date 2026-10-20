@@ -65,8 +65,18 @@ Shader "Shop/Pixel"
         float4 _Rim;             // the rim light's colour (sRGB) and strength
         float _Sepia;            // 1 in a memory of 1952: everything washed to old-photograph brown
 
-        // Washed toward sepia by _Sepia.
-        float3 Sepia(float3 s) { return lerp(s, dot(s, float3(0.299, 0.587, 0.114)) * float3(1.08, 0.9, 0.66) + float3(0.05, 0.03, 0), _Sepia); }
+        float _Safelight;        // 1 in Theo's darkroom: everything black and red under the safelight
+        float _Rain;             // 1 under rain cloud: the colours half drained, a little cooler
+
+        // Greyed under rain by _Rain, washed toward sepia by _Sepia, and to the darkroom's black and red by _Safelight.
+        float3 Sepia(float3 s)
+        {
+            float g = dot(s, float3(0.299, 0.587, 0.114));
+            s = lerp(s, lerp(float3(g, g, g), s, 0.55) * float3(0.92, 0.97, 1.06), _Rain);
+            s = lerp(s, dot(s, float3(0.299, 0.587, 0.114)) * float3(1.08, 0.9, 0.66) + float3(0.05, 0.03, 0), _Sepia);
+            float l = dot(s, float3(0.299, 0.587, 0.114));
+            return lerp(s, float3(l * 1.15, l * 0.25, l * 0.2), _Safelight * 0.9);
+        }
 
         // rect: the piece's own texels in the atlas (u0, v top, u1, v bottom); sway: (amplitude in texels, phase,
         // how much darker this face is).
