@@ -4,7 +4,21 @@ A cozy, melancholic 2D pixel-art mystery. Satria, an ant courier, comes home to 
 
 A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khairul Insan, Piere Valkyrie and Praffi Ramadhani.
 
-**Status:** building the full game in Unity 6.6 (C#), on the redesigned story and gameplay in the UTS GDD. The foundation is built (places, walking, talk with voice blips, the bag, keepsakes, saving and sound), Bellwood is redrawn, and the Prologue (Day 0) plays from Begin to Satria's first night. Next comes Night 1, The Stopped Watch. The Godot MVP (Nights 1–2 of the earlier story) is archived.
+**Status:** the whole game is built in Unity 6.6 (C#), on the redesigned story and gameplay in the UTS GDD. It plays from the Prologue (Day 0) through all seven nights and the Epilogue (Day 8) to the credits, with 14 minigames. Every pixel is drawn in code and every sound is synthesized in code. The Godot MVP (Nights 1–2 of the earlier story) is archived.
+
+## How to play
+
+| Key | Action |
+| --- | --- |
+| WASD or the arrow keys | Walk |
+| Shift | Run |
+| Space or Enter | Talk, look and use; hold it in some minigames |
+| E | Open the bag |
+| I | Inspect a keepsake in the bag |
+| R | Retry a minigame |
+| Esc | Pause |
+
+There are no markers. Follow what the villagers say, and read the Notes in the bag. The game saves at every checkpoint, and Continue on the title picks up from there.
 
 ## What's in this repo
 
@@ -21,5 +35,7 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 
 - **Read the design:** `GAME-CONTEXT.md`, then `docs/game-design-document.pdf`.
 - **Open the game:** in Unity Hub, choose **Add → Add project from disk**, pick `game/`, and open it with Unity 6000.6.6f1. Open `Assets/Scenes/Main.unity` and press Play.
+- **Build the game:** in Unity choose **File → Build Profiles**, pick **Windows** or **macOS**, and build into `game/Builds/Windows` or `game/Builds/macOS` (both ignored by git). There is no web build: the full HD-2D look runs far too slowly in a browser.
+- **Run the tests:** in Unity open **Window → General → Test Runner** and run the PlayMode tests. `PlaythroughTest` and `NightsTest` play the Prologue, every night and the Epilogue through unattended.
 - **Play the archived Godot MVP:** open https://the-shop-that-opens-once-game.vercel.app in a browser. See `archive/README.md`.
 - **See the presentation:** open `presentation/the-shop-that-opens-once.html` in a browser. It works offline.
