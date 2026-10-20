@@ -582,5 +582,24 @@
     return { img: out.canvas(), ax: (W >> 1) + 1, ay: H + 1, base: [-3, 3], foot: 3, lit: [[4, 6, 8, 9]] };
   }
 
-  Object.assign(VIL, { wallPanel: wall, win, house, hangSign, awning3d, modelCard: card, fountain, hall, bakery, postOffice, townHome, stall, noticeBoard, bunting, bench, lamp });
+  /* An oil lantern on a wooden post, the platform's old kind, dark since the storm: a squared post on a stone, an iron
+     arm with the brass lantern hanging from its hook. lit: its glass, shown only once someone lights it (the story's
+     lantern_post_<i>_lit_0). */
+  function postLantern() {
+    const W = 18, H = 40;
+    const out = inked(W, H, b => {
+      fill(b, 2, H - 3, 8, 3, 'stone3'); fill(b, 2, H - 3, 8, 1, 'stone2');
+      fill(b, 4, 4, 4, H - 7, 'wood3'); fill(b, 4, 4, 1, H - 7, 'wood2'); fill(b, 7, 4, 1, H - 7, 'wood4');
+      for (let y = 10; y < H - 4; y += 7) fill(b, 5, y, 2, 1, 'wood4');   // its grain
+      fill(b, 3, 2, 6, 2, 'wood4'); fill(b, 8, 5, 8, 1, 'iron3'); px(b, 8, 6, 'iron3'); px(b, 9, 7, 'iron3');   // cap and arm
+      px(b, 13, 6, 'iron3');                                                                                      // hook
+      fill(b, 11, 7, 5, 1, 'brass2'); fill(b, 10, 8, 7, 1, 'brass3');                                              // lantern top
+      fill(b, 11, 9, 5, 6, 'iron4'); fill(b, 11, 9, 1, 6, 'brass2'); fill(b, 15, 9, 1, 6, 'brass2');               // dark glass in its frame
+      fill(b, 12, 10, 3, 4, 'stone4'); px(b, 12, 10, 'stone3');
+      fill(b, 10, 15, 7, 1, 'brass3'); fill(b, 12, 16, 3, 1, 'brass2');
+    });
+    return { img: out.canvas(), ax: 6, ay: H + 1, base: [-4, 4], foot: 3, lit: [[11, 9, 5, 6]] };
+  }
+
+  Object.assign(VIL, { wallPanel: wall, win, house, hangSign, awning3d, modelCard: card, fountain, hall, bakery, postOffice, townHome, stall, noticeBoard, bunting, bench, lamp, postLantern });
 })();

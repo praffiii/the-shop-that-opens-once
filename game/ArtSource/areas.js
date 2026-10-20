@@ -469,6 +469,8 @@
         at('bench_p0', V.bench(), 430, 276); at('bench_p1', V.bench(), 580, 276); at('barrel_p', V.barrel(), 500, 272);
         at('info_board', V.noticeBoard(), 640, 306);
         [[236, 322], [410, 322], [560, 322], [690, 322]].forEach(([x, y], i) => at('lamp_p' + i, V.lamp(), x, y));
+        // the platform's three old oil lanterns on their posts, dark since the storm until someone lights them
+        [[352, 262], [470, 262], [660, 262]].forEach(([x, y], i) => at('lantern_post_' + i, V.postLantern(), x, y));
         [[90, 336, 'rose'], [212, 338, 'yellow'], [700, 344, 'white'], [930, 340, 'rose']].forEach(([x, y, c], i) => at('garden_' + i, V.flowerClump(i + 40, c), x, y, { walk: true }));
         // Helen's garden below her cottage, at the foot of the terrace: herbs for the tea in rows behind a picket fence
         [['cabbage', 402], ['carrot', 418]].forEach(([k, y], i) => at('herbs_' + i, V.vegRow(k, 48), 120, y, { walk: true }));

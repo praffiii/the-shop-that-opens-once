@@ -80,12 +80,55 @@
         for (let y = 0; y < 16; y++) { const e = y === 0 ? 3 : y === 1 ? 1 : 0; fill(b, e, y, W - 2 * e, 1, y < 4 ? l : y < 12 ? c : d); }
         for (const x of [0, W - 4]) { fill(b, x, 2, 4, 14, 'brass2'); fill(b, x + 1, 2, 1, 14, 'brass1'); }
         fill(b, 0, 14, W, 2, 'brass3'); body(b, 16); fill(b, 26, 11, 4, 7, k); px(b, 27, 12, 'white');
+        lidMark(b, i, l, d);
+        if (i === 6) { fill(b, 4, 21, W - 8, 15, c); carve(b, 'FOR THE', 28, 23, d, l); carve(b, 'COURIER', 28, 30, d, l); }
       } else if (variant === 'open') {
         // the lid stands up behind, its inside lined in plum velvet; inside the box, dark velvet
         fill(b, 1, 0, W - 2, 16, c); fill(b, 4, 2, W - 8, 13, PLUM[3]); fill(b, 4, 2, W - 8, 1, PLUM[2]); fill(b, 0, 14, W, 2, 'brass3');
         fill(b, 0, 16, W, 6, l); fill(b, 3, 17, W - 6, 6, PLUM[5]);
       } else body(b, 20);
     }).canvas();
+  }
+  // What each box's lid has carved on it, seen only up close (the cabinet's cubbies show them plain, so the nights
+  // stay secret): the owner's name or initial, Marcus Bell's seal in deer leather on the sixth, and on the seventh
+  // coconut fronds over "FOR THE COURIER".
+  const CARVED = ['H', 'PIP', 'THEO', 'SAM', 'LEO', null, null];
+  const GLYPH = {
+    A: ['.#.', '#.#', '###', '#.#', '#.#'], B: ['##.', '#.#', '##.', '#.#', '##.'], C: ['.##', '#..', '#..', '#..', '.##'],
+    E: ['###', '#..', '##.', '#..', '###'], F: ['###', '#..', '##.', '#..', '#..'], H: ['#.#', '#.#', '###', '#.#', '#.#'],
+    I: ['###', '.#.', '.#.', '.#.', '###'], L: ['#..', '#..', '#..', '#..', '###'], M: ['#.#', '###', '###', '#.#', '#.#'],
+    O: ['.#.', '#.#', '#.#', '#.#', '.#.'], P: ['##.', '#.#', '##.', '#..', '#..'], R: ['##.', '#.#', '##.', '#.#', '#.#'],
+    S: ['.##', '#..', '.#.', '..#', '##.'], T: ['###', '.#.', '.#.', '.#.', '.#.'], U: ['#.#', '#.#', '#.#', '#.#', '.##'],
+  };
+  const textWidth = t => [...t].reduce((w, ch) => w + (ch === ' ' ? 2 : 4), 0) - 1;
+  // Letters cut into the wood: the cut dark, its lower lip catching the light.
+  function carve(b, text, cx, y, cut, lip) {
+    let x = Math.round(cx - textWidth(text) / 2);
+    for (const ch of text) {
+      if (ch === ' ') { x += 2; continue; }
+      GLYPH[ch].forEach((row, j) => [...row].forEach((on, i) => { if (on === '#') px(b, x + i, y + j, cut); }));
+      GLYPH[ch].forEach((row, j) => [...row].forEach((on, i) => { if (on === '#' && (GLYPH[ch][j + 1] || '...')[i] !== '#') px(b, x + i, y + j + 1, lip); }));
+      x += 4;
+    }
+  }
+  function lidMark(b, i, l, d) {
+    if (CARVED[i]) carve(b, CARVED[i], 28, 4, d, l);
+    if (i === 5) {
+      // a round seal of deer leather, stitched round its edge, M.B. pressed into it
+      for (let y = -5; y <= 5; y++) for (let x = -5; x <= 5; x++) {
+        const r = x * x + y * y;
+        if (r <= 26) px(b, 14 + x, 8 + y, r > 20 ? 'dirt4' : r > 14 && (x + y) % 2 === 0 ? 'cream1' : y < -2 ? 'dirt2' : 'dirt3');
+      }
+      carve(b, 'MB', 14, 6, 'wood5', 'dirt2');
+    }
+    if (i === 6) {
+      // two coconut fronds springing from the lid's middle, their leaflets hanging
+      for (const side of [-1, 1]) for (let t = 1; t < 20; t++) {
+        const x = 28 + side * t, y = 3 + Math.round(t * t / 60);
+        px(b, x, y, 'leaf3');
+        if (t % 2 === 0) { px(b, x, y + 1, 'leaf2'); px(b, x - side, y + 2, 'leaf2'); if (t < 16) px(b, x - side, y + 3, 'leaf4'); }
+      }
+    }
   }
   const boxItems = () => BOXES.flatMap((_, i) => [['xs', 'closed'], ['lg', 'closed'], ['lg', 'open'], ['lg', 'front']].map(([size, v]) => [`items/box_${i}_${size}_${v}.png`, boxItem(i, size, v)]));
   const ROOMS = {

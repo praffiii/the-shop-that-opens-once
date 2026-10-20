@@ -9,7 +9,8 @@
 
   // Extra colours, hue-shifted from the PX ramps (12).
   const XC = {
-    moss0: '#d6e38c', moss1: '#a8c25c', moss2: '#7c9b45', moss3: '#58733a',   // Marlow's waistcoat
+    moss0: '#d6e38c', moss1: '#a8c25c', moss2: '#7c9b45', moss3: '#58733a',
+    vest0: '#c9a27a', vest1: '#a07b58', vest2: '#7d5d43', vest3: '#5a4231',   // Marlow's worn waistcoat
     slate0: '#c6d2f2', slate1: '#97a9da', slate2: '#6f81b9',                  // Helen's cardigan
     plum0: '#b48ad6', plum1: '#8a5fb8', plum2: '#633f8f',                       // Nora's knitted wool shawl
     lilac0: '#e2d2ff', lilac2: '#9d84de', pink0: '#ffd4ea',
@@ -125,15 +126,15 @@
         { z: 'hat', at: [-1, -1], rows: ['..12222223.....', '.12ww222333....', '122wv2233333...', '444444444443333'], key: CAP },
       ],
     },
-    marlow: { sleeve: ['cream0', 'cream2'], polish: 'cup',
+    // Marlow: an old grey ant (GREY) in a worn brown waistcoat on the cream shirt, a bunch of brass keys at his waist,
+    // white hair round the back of his head; his eyes glow faintly
+    marlow: { sleeve: ['cream0', 'cream2'], polish: 'cup', body: 'grey',
       torso: { rows: ['.mMMvw.', 'mMMMMvw', 'mMMMnow', 'MMMMnvw', 'MMMnnow', 'MMnnnvv', '.nnNNv.', '..NNN..'],
-               key: { m: 'moss0', M: 'moss1', n: 'moss2', N: 'moss3', w: 'cream0', v: 'cream1', o: 'brass1' } },
+               key: { m: 'vest0', M: 'vest1', n: 'vest2', N: 'vest3', w: 'cream0', v: 'cream1', o: 'brass1' } },
       bent: 0, stoop: 1,
       parts: [
-        { z: 'face', ol: false, at: [6, 3], rows: ['.oo.', 'o..o', 'o..o', 'o..o', '.oo.'], key: { o: 'brass1' } },
-        { z: 'face', ol: false, at: [2, 4], rows: ['oooo'], key: { o: 'brass2' } },
-        { z: 'face', ol: false, at: [6, 8], rows: ['.www', 'wwws'], key: { w: 'white', s: 'stone1' } },
         { z: 'face', ol: false, at: [0, 5], rows: ['w', 'w', 's'], key: { w: 'white', s: 'stone1' } },
+        { z: 'body', ol: false, at: [4, 6], rows: ['ooo', 'o.o', 'ooo', 'y.y', 'y.k'], key: { o: 'brass2', y: 'brass1', k: 'brass0' } },
       ],
     },
     mother: { sleeve: ['cream1', 'cream2'],
@@ -437,15 +438,16 @@
         if (!back) for (const ex of [17, 22]) { rect(g, ex - 1, 14 + d, 3, 3, 'brass1'); dot(g, ex, 15 + d, 'water1'); }
       },
     },
-    // Marlow: the moss coat open on the cream shirt, the rose bow tie and the watch chain; the brass monocle, the
-    // bushy white brows and moustache, the white hair round the back of his head
+    // Marlow: the worn waistcoat open on the cream shirt, his keys at his waist, the bushy white brows, the white hair
+    // round the back of his head
     marlow: {
-      cloth: ['moss0', 'moss1', 'moss2'],
-      chest(g, d, back) { if (back) return; rect(g, 19, 23 + d, 3, 7, 'cream0'); rect(g, 19, 23 + d, 3, 1, 'rose'); line(g, 20, 27 + d, 23, 28 + d, 'brass2'); },
-      face(x, d) {
-        rect(x, 21, 16 + d, 4, 1, 'brass1'); rect(x, 21, 20 + d, 4, 1, 'brass1'); rect(x, 21, 17 + d, 1, 3, 'brass1'); rect(x, 24, 17 + d, 1, 3, 'brass1');
-        rect(x, 15, 15 + d, 4, 1, 'white'); rect(x, 21, 15 + d, 4, 1, 'white'); rect(x, 17, 21 + d, 7, 1, 'white'); dot(x, 16, 22 + d, 'white'); dot(x, 24, 22 + d, 'white');
+      cloth: ['vest0', 'vest1', 'vest2'],
+      chest(g, d, back) {
+        if (back) return;
+        rect(g, 19, 23 + d, 3, 7, 'cream0');
+        rect(g, 22, 29 + d, 3, 3, 'brass2'); dot(g, 23, 30 + d, 'vest1'); dot(g, 22, 32 + d, 'brass1'); dot(g, 24, 33 + d, 'brass0');   // the key ring
       },
+      face(x, d) { rect(x, 15, 15 + d, 4, 1, 'white'); rect(x, 21, 15 + d, 4, 1, 'white'); },
       hat(g, d, back) { rect(g, 14, 17 + d, 2, 3, 'white'); rect(g, 25, 17 + d, 2, 3, 'white'); if (back) rect(g, 15, 19 + d, 11, 2, 'white'); },
     },
     // Kapten Bram: the navy uniform with its white collar and brass buttons, the whistle on its chain, the white
@@ -566,8 +568,13 @@
   for (const id of IDS) {
     const s = ['idle', 'walk'];
     s.push('talk');
-    if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
-    if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
+    // handing things over, as the nights' errands and handovers do
+    const HANDS = ['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'baker', 'arlo', 'mender', 'gardener', 'pip'];
+    if ([...HANDS, 'helen'].includes(id)) s.push('receive');
+    if (HANDS.includes(id)) s.push('give');
+    // sitting on the nights' benches and steps, and moved when what was lost comes home
+    if (['nora', 'pip', 'leo', 'theo', 'bram', 'valdo'].includes(id)) s.push('sit');
+    if (['pip', 'theo', 'sam', 'leo', 'nora', 'mender'].includes(id)) s.push('moved');
     if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', 'lie', 'wake', 'write', 'drink', 'crouch', 'strike', 'wash');   // the nightly routine's too
     if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
@@ -1093,19 +1100,17 @@
         rect(g, 33, 12, 9, 3, 'cap2'); rect(g, 33, 12, 9, 1, 'cap1'); rect(g, 33, 14, 9, 1, 'cap3'); // visor
         rect(g, 13, 8, 5, 4, 'cream0'); rect(g, 14, 9, 3, 2, 'cream1'); dot(g, 15, 9, 'cap2');   // patch
       }); } },
-    marlow: { cloth: ['moss0', 'moss1', 'moss2'], stoop: 2, bent: 0,
+    marlow: { cloth: ['vest0', 'vest1', 'vest2'], stoop: 2, bent: 0,
       bust(g, P) {
         region(g, (x, y) => inBust(x, y) && x >= 25 && x - 25 <= (y - 33) * 0.9 + 4, (x, y) => (x > 31 ? 'cream1' : 'cream0'));  // shirt front
-        line(g, 25, 33, 21, 47, 'moss3'); for (const by of [38, 42, 46]) { dot(g, 23 + (46 - by) * 0.2 | 0, by, 'brass1'); }
-        line(g, 23, 40, 16, 43, 'brass2'); line(g, 16, 43, 12, 42, 'brass2'); dot(g, 12, 42, 'brass0');          // watch chain
-        rect(g, 27, 33, 5, 2, 'rose'); dot(g, 29, 33, 'roofR3');                                                  // bow tie
+        line(g, 25, 33, 21, 47, 'vest3'); for (const by of [38, 42, 46]) { dot(g, 23 + (46 - by) * 0.2 | 0, by, 'brass1'); }
+        // the bunch of brass keys at his waist, on its ring
+        for (const [i, j] of [[13, 41], [14, 40], [15, 40], [16, 41], [16, 42], [15, 43], [14, 43], [13, 42]]) dot(g, i, j, 'brass2');
+        line(g, 13, 44, 12, 47, 'brass1'); line(g, 15, 44, 15, 47, 'brass1'); line(g, 17, 43, 19, 46, 'brass0');
+        dot(g, 11, 47, 'brass1'); dot(g, 16, 47, 'brass1'); dot(g, 20, 46, 'brass0');
       },
       face(x, P) {
-        const ring = ['..ooooooo..', '.o.......o.', 'o.........o', 'o.........o', 'o.........o', 'o.........o', 'o.........o', 'o.........o', '.o.......o.', '..ooooooo..'];
-        G2(x, ring, { o: 'brass1' }, P.ex - 2, P.ey - 2);
-        line(x, P.ex - 3, P.ey + 2, P.ex - 10, P.ey + 1, 'brass2');
         plate(x, g => { rect(g, P.ex, P.ey - 5, 7, 2, 'white'); rect(g, P.ex - 2, P.ey - 4, 2, 1, 'stone0'); });   // bushy brows
-        plate(x, g => { region(g, (x, y) => inE(x, y, P.mx - 1, P.my + 1, 5, 2) || inE(x, y, P.mx - 5, P.my + 2, 2, 2), (x, y) => (y > P.my + 1 ? 'stone1' : 'white')); });
         region(x, (x, y) => inE(x, y, P.cx, P.cy, 12, 10) && x <= P.cx - 8 + (y % 3 === 0 ? 1 : 0) && y >= P.cy - 3 && y <= P.cy + 6,
           (x, y) => (x === P.cx - 8 + (y % 3 === 0 ? 1 : 0) ? 'stone1' : 'white'));
       } },
@@ -1348,11 +1353,28 @@
     return c;
   }
 
+  // Bodies of another colour, swapped into a finished frame: Marlow is an old grey ant, and his eyes glow faintly.
+  const BODIES = { grey: { ant0: 'stone1', ant1: 'stone2', ant2: 'stone3', ant3: 'stone4', ant4: 'stone5', pupil: 'light2' } };
+  const rgb = k => { const v = R(k).startsWith('#') ? R(k) : PX.PAL[k]; return [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)); };
+  function bodied(src, body) {
+    if (!body) return src;
+    const pairs = Object.entries(BODIES[body]).map(([a, b]) => [rgb(a), rgb(b)]);
+    const [c, x] = canvas(src.width, src.height);
+    x.drawImage(src, 0, 0);
+    const img = x.getImageData(0, 0, c.width, c.height), d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (!d[i + 3]) continue;
+      for (const [a, b] of pairs) if (d[i] === a[0] && d[i + 1] === a[1] && d[i + 2] === a[2]) { d[i] = b[0]; d[i + 1] = b[1]; d[i + 2] = b[2]; break; }
+    }
+    x.putImageData(img, 0, 0);
+    return c;
+  }
+
   /* ---------------- public API ---------------- */
   const wrap = (pose, frame) => { const n = POSES[pose]; return ((frame | 0) % n + n) % n; };
   function sprite40(id, pose, frame = 0) {
     const p = resolve(id, pose), f = wrap(p, frame);
-    return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return t ? renderTurned(id, t[0], f, t[1]) : p === 'lie' ? abed(render(id, p, f), f) : render(id, p, f); });
+    return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return bodied(t ? renderTurned(id, t[0], f, t[1]) : p === 'lie' ? abed(render(id, p, f), f) : render(id, p, f), CAST[id].body); });
   }
   // Every face can show every mood (the talk box asks for one per line).
   const MOODS = ['smile', 'moved', 'surprised', 'sad', 'cross'];
@@ -1381,7 +1403,7 @@
     portrait(id, frame = 0, mood = 'neutral') {
       if (!MOODS.includes(mood)) mood = 'neutral';
       frame = ((frame | 0) % 3 + 3) % 3;
-      return memo(`p|${id}|${frame}|${mood}`, () => renderPortrait(id, frame, mood));
+      return memo(`p|${id}|${frame}|${mood}`, () => bodied(renderPortrait(id, frame, mood), CAST[id].body));
     },
   };
 })();

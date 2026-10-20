@@ -1131,7 +1131,7 @@
       .ooo.
       .obo.`, BR), 4, 0);
     if (v === 'back') { rect(x, 4, 8, 2, 1, 'brass3'); dot(x, 4, 9, 'brass3'); dot(x, 5, 9, 'brass3'); rect(x, 7, 8, 3, 1, 'brass3'); dot(x, 8, 9, 'brass3'); dot(x, 8, 10, 'brass3'); dot(x, 4, 10, 'brass3'); dot(x, 5, 10, 'brass3'); }
-    else { line(x, 6, 9, 9, 10, 'ink2'); line(x, 6, 9, 6, 11, 'ink2'); dot(x, 6, 9, 'brass3'); dot(x, 4, 7, 'white'); }
+    else { line(x, 6, 9, 9, 10, 'ink2'); line(x, 6, 9, 4, 8, 'ink2'); dot(x, 6, 9, 'brass3'); dot(x, 4, 7, 'white'); }   // 10:17
     return c;
   };
   // foot: turned over, lying face down and seen from its feet; the mended ear (now on the left) shows its blue stitches,
@@ -1295,7 +1295,7 @@
   XS.watch = (v = 'front') => {
     const key = { o: 'brass4', a: 'brass0', b: 'brass1', c: 'brass2', d: 'brass3', f: 'cream0', k: 'ink2' };
     if (v === 'side') return sprite(['.o.', '.o.', 'obo', 'oac', 'oac', 'oac', 'oac', '.o.'], key);
-    const f = v === 'back' ? ['bbb', 'bdb', 'bbb'] : ['fff', 'fkk', 'fkf'];   // front: hands at 6:17
+    const f = v === 'back' ? ['bbb', 'bdb', 'bbb'] : ['kff', 'fkk', 'fff'];   // front: hands at 10:17
     return sprite(['..ooo..', '..obo..', '.oaabo.', `oa${f[0]}co`, `oa${f[1]}co`, `oa${f[2]}co`, '.obcco.', '..ooo..'], key);
   };
   XS.doll = v => v === 'foot' ? S(`
@@ -1405,16 +1405,16 @@
     if (v === 'back') {
       disc(x, cx, cy, R, (d, lit) => d > R - 0.9 ? 'brass4' : d > R - 3 ? brassLit(lit) : d > R - 3.8 ? 'brass3'
         : (Math.abs(d - 11.5) < 0.5 ? 'brass3' : Math.abs(d - 12.4) < 0.5 && lit < 0.2 ? 'brass0' : lit > 0.6 && d > 5 && d < 10 ? 'brass0' : lit > -0.2 ? 'brass1' : 'brass2'));
-      // ornament dots on the engraved ring, and the monogram A.T. engraved in the centre
+      // ornament dots on the engraved ring, and Marcus Bell's monogram M.B. engraved in the centre
       for (let k = 0; k < 24; k++) { const a = (k / 24) * Math.PI * 2; dot(x, Math.round(cx + Math.cos(a) * 13.9), Math.round(cy + Math.sin(a) * 13.9), 'brass3'); }
       engrave(x, [
-        '..#.......#####...',
-        '.#.#........#.....',
-        '.#.#........#.....',
-        '#...#.......#.....',
-        '#####.......#.....',
-        '#...#.##....#...##',
-        '#...#.##....#...##'], cx - 9, cy - 4, 'brass4', 'brass0');
+        '#...#....###....',
+        '##.##....#..#...',
+        '#.#.#....#..#...',
+        '#...#....###....',
+        '#...#....#..#...',
+        '#...#.##.#..#.##',
+        '#...#.##.###..##'], cx - 8, cy - 4, 'brass4', 'brass0');
       rect(x, cx - 7, cy + 5, 14, 1, 'brass3'); dot(x, cx - 8, cy + 4, 'brass3'); dot(x, cx + 7, cy + 4, 'brass3');
       return c;
     }
@@ -1426,8 +1426,8 @@
       if (h % 3) line(x, cx + s * 12.2, cy + co * 12.2, cx + s * 13.4, cy + co * 13.4, 'wood3');
     }
     text(x, '12', cx - 3, cy - 12, 'ink2'); text(x, '6', cx - 1, cy + 8, 'ink2'); text(x, '3', cx + 9, cy - 2, 'ink2'); text(x, '9', cx - 11, cy - 2, 'ink2');
-    // hands at 18:17 (6:17 on the dial)
-    const am = (17 / 60) * Math.PI * 2, ah = ((6 + 17 / 60) / 12) * Math.PI * 2;
+    // hands at 10:17, when it stopped
+    const am = (17 / 60) * Math.PI * 2, ah = ((10 + 17 / 60) / 12) * Math.PI * 2;
     const mx = Math.round(cx + Math.sin(am) * 11), my = Math.round(cy - Math.cos(am) * 11), hx = Math.round(cx + Math.sin(ah) * 7), hy = Math.round(cy - Math.cos(ah) * 7);
     line(x, cx, cy, mx, my, 'ink2'); line(x, cx, cy + 1, mx, my, 'ink2');
     line(x, cx, cy, hx, hy, 'ink2'); line(x, cx + 1, cy, hx + 1, hy, 'ink2');
