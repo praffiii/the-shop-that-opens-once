@@ -39,6 +39,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [30](30-suara-dialog.md) | 2026-10-20 | Suara dialog ala Animal Crossing: blip per huruf untuk tiap tokoh, sesuai tabel bible | |
 | [31](31-prolog-jadi-awal-game.md) | 2026-10-20 | Prolog menjadi awal game lewat Begin, tes yang memainkan Day 0 sampai akhir, dan penampilan Marlow | |
 | [32](32-jam-hari-dan-suasana.md) | 2026-10-20 | Waktu digerakkan cerita: jam hari dan fase di kiri atas, peralihan senja ke malam yang ditonton, dan suasana bunyi per fase | |
+| [33](33-jam-roda-dan-dialog-hidup.md) | 2026-10-20 | Jam hari berbentuk roda berjarum, dialog yang lebih hidup (jeda, penekanan, ekspresi, emote), dan semua teks dalam bahasa Inggris | |
 
 ## Format setiap entri
 
