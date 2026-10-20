@@ -30,6 +30,9 @@ namespace Shop
         static readonly int[] NightThree = { 3 }, NotNightThree = { 0, 1, 2, 4, 5, 6, 7, 8 }, FromNightThree = { 3, 4, 5, 6, 7, 8 };
         // Night 4 (the key with no engraving): the village hall's lobby and Sam's basement archive open from it on.
         static readonly int[] NightFour = { 4 }, NotNightFour = { 0, 1, 2, 3, 5, 6, 7, 8 }, FromNightFour = { 4, 5, 6, 7, 8 };
+        // Night 5 (the mismatched shoes): Leo limps instead of running his laps and waits for the sundown on his hill, not
+        // up on the lookout; Valdo measures the main road and the Baker's lad parks his bicycle on the square.
+        static readonly int[] NightFive = { 5 }, LeoRuns = { 0, 1, 2, 4, 6, 7, 8 }, LeoWatches = { 1, 2, 3, 4, 6, 7, 8 };
 
         // The coast's fisher carries the catch landed at the jetty's foot to the fish rack; the salt worker rakes the
         // salt pans and carries the sacks to the salt store.
@@ -509,6 +512,16 @@ namespace Shop
                     },
                     new Person
                     {
+                        Id = "valdo", At = V(760, 600), Label = "Valdo", Spot = V(28, 6), Pose = "write", Facing = -1, Chapters = NightFive, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Paving, here. A proper road, for proper cars. Mind the measuring tape." },
+                    },
+                    new Person
+                    {
+                        Id = "breadboy", At = V(520, 404), Label = "Baker's lad", Spot = V(-26, 0), Pose = "carry", Facing = 1, Chapters = NightFive, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Rolls for the hall, loaves for the station, buns for Grandma Nora. Then back for more." },
+                    },
+                    new Person
+                    {
                         Id = "mia", At = V(552, 570), Label = "Mia", Spot = V(10, 16), Facing = -1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
                         Lines = new[] { "Spinach, three bunches for a coin. Pip's at Grandma Nora's. He won't come out." },
                     },
@@ -678,7 +691,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "leo", Label = "Leo", Spot = V(0, 12), Chapters = NotNightThree, Phases = new[] { Phase.Morning },
+                        Id = "leo", Label = "Leo", Spot = V(0, 12), Chapters = LeoRuns, Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
@@ -701,9 +714,20 @@ namespace Shop
                             "Go on, ask me something. I'll pretend not to hear and you can pretend I'm busy.",
                         },
                     },
+                    // Night 5: limped up his hill at first light, and stood by the hut at sundown, his eyes on the old line
                     new Person
                     {
-                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Dusk },
+                        Id = "leo", At = V(856, 236), Label = "Leo", Spot = V(-20, 4), Pose = "look", Facing = -1, Chapters = NightFive, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Knees are bad this morning. Weather's turning. Go on, I'm only looking at the road." },
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(806, 238), Label = "Leo", Spot = V(30, 4), Pose = "look", Facing = -1, Chapters = NightFive, Phases = new[] { Phase.Dusk },
+                        Lines = new[] { "Sun's going down over the old line. It always did, from up here." },
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Chapters = LeoWatches, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
@@ -1211,7 +1235,7 @@ namespace Shop
                 {
                     new Person
                     {
-                        Id = "mender", Label = "Mender", Spot = V(16, 0), Chapters = ForgeDays, Phases = new[] { Phase.Midday },
+                        Id = "mender", Label = "Mender", Spot = V(18, 6), Chapters = ForgeDays, Phases = new[] { Phase.Midday },
                         Round = new[]
                         {
                             new Stop { At = V(514, 580), Pose = "tinker", Facing = 1, Wait = 9f },
