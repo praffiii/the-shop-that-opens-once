@@ -30,6 +30,8 @@ namespace Shop
             "But today, watching Pip hold that patchwork rabbit and smile in peace, I understood Mother's greatest legacy. Caring earns no applause and no big wage. It is being willing to sit quietly with someone who is afraid in the middle of a storm, and to stitch up the wounds no one can see with a thread of love.\n\n" +
             "Did I go all the way to the city only to run from the duty of caring for my own family's memories?";
         protected override string MorningLine => "Morning. Tea first. Then why this rabbit matters so much to Pip, without worrying his mother.";
+        protected override string DayErrand => "The square. Why does this rabbit matter so much to Pip?";
+        protected override string Breakfast => "On the step at dawn, a twist of Helen's tea leaves and a note in shaky ink: \"For the courier. With sugar. H.\" He makes it with sugar.";
 
         /// <summary>The rabbit as the day leaves it: torn, then mended.</summary>
         protected override string Keepsake => Game.Bag.Contains("rabbit_mended") ? "rabbit_mended" : "rabbit";

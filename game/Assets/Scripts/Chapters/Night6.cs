@@ -27,6 +27,7 @@ namespace Shop
         protected override bool FullRoutine => true; // Nights 6 and 7 play the routine as the script writes it
         protected override string WakeLine => "...Six. One more night after this one.";
         protected override string MorningLine => "No deliveries today. Father's radio... and whatever he hid behind it.";
+        protected override string DayErrand => "Father's radio, on the side table.";
 
         /// <summary>The ledger as it came out of the box, and once it is balanced.</summary>
         protected override string Keepsake => Game.Bag.Contains("ledger_balanced") ? "ledger_balanced" : "ledger";

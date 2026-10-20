@@ -32,6 +32,8 @@ namespace Shop
             "Preserving isn't hoarding dusty archives. It's a promise to look after the truth, so the ones who come after us don't grow up proud, and forget what was given up for them.";
         protected override string WakeLine => "...Four strokes. And rain on the tiles.";
         protected override string MorningLine => "Grey sky, and the drizzle still on the grass. Tea first. Then the village hall.";
+        protected override string DayErrand => "The village hall, on the square.";
+        protected override string Breakfast => "A packet by the door, out of the drizzle: smoked fish from the coast, and a sprig of Daniel's mint for the tea. No note. Theo doesn't write notes.";
 
         /// <summary>The key as the day leaves it: cold and rusty, then worn bright by the vault's tumblers.</summary>
         protected override string Keepsake => Game.Bag.Contains("key_turned") ? "key_turned" : "key";

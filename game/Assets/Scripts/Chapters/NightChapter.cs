@@ -42,6 +42,18 @@ namespace Shop
         /// <summary>What Satria thinks waking to the bell, and to the morning.</summary>
         protected virtual string WakeLine => "...The bell. Midnight again.";
         protected virtual string MorningLine => "Morning. Tea first. Then whoever this belongs to.";
+        /// <summary>Where the day starts, once the tea is drunk.</summary>
+        protected virtual string DayErrand => "Out into the village. Show it round.";
+        /// <summary>What the village left him for breakfast, taken with the tea on the nights the routine is a montage.</summary>
+        protected virtual string Breakfast => null;
+        /// <summary>What Satria thinks, the routine done once more, on Nights 2 to 5.</summary>
+        static readonly string[] Familiar =
+        {
+            "The same steps as last night. The house is starting to remember me.",
+            "Mat, table, jar, coil. My feet know the way before I do.",
+            "Funny. In the city I never once noticed going to bed.",
+            "Four nights of this. The quilt smells of home now, not of dust.",
+        };
 
         static readonly string[] Numbers = { "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight" };
 
@@ -242,7 +254,7 @@ namespace Shop
                     await SetDownBox();
                     await Wash();
                     await LightCoil();
-                    await Say("courier", "The same steps as last night. The house is starting to remember me.", "smile");
+                    await Say("courier", Familiar[(Night - 2) % Familiar.Length], "smile");
                     await Sleep();
                 });
                 return;
@@ -403,7 +415,7 @@ namespace Shop
             Sfx("scrub");
             await Wait(0.8f);
             courier.Pose = "idle";
-            await ShowText("He scrubs the night's damp off his feet on the coir mat, the way Mother made him, every single time.");
+            if (FullRoutine) await ShowText("He scrubs the night's damp off his feet on the coir mat, the way Mother made him, every single time.");
         }
 
         async Awaitable SetDownBox()
@@ -468,12 +480,14 @@ namespace Shop
             await Wait(1f);
             GetUp();
             await Say("courier", MorningLine);
-            Hint("Tea's on the stove.");
+            if (FullRoutine) Hint("Tea's on the stove.");
+            else await Tea(); // a morning he knows: straight to the stove, and the breakfast left for him
         }
 
-        // The morning's tea at the stove: the kettle, a cup, and the day can start.
+        // The morning's tea at the stove: the kettle, a cup (and on later nights the breakfast), and the day can start.
         async Awaitable Tea()
         {
+            Main.Talk.Close();
             var courier = Actor("courier");
             await Walk("courier", Main.Place.Find("stove").GlobalSpot);
             courier.FaceAway();
@@ -484,7 +498,8 @@ namespace Shop
             await Wait(1.2f);
             courier.Pose = "idle";
             Game.Mark("tea");
-            await ShowText("Sweet tea, too hot, drunk anyway. The way Father took it, standing at the stove.");
+            await ShowText(FullRoutine || Breakfast == null ? "Sweet tea, too hot, drunk anyway. The way Father took it, standing at the stove." : Breakfast);
+            Hint(DayErrand);
         }
     }
 }

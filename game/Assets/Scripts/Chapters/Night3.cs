@@ -32,6 +32,8 @@ namespace Shop
             "But tonight, watching Theo's projector and Father's smile on that white cloth, I understood that forgetting never heals grief. It only buries the wound alive.\n\n" +
             "Remembering takes a great deal of courage: the courage to look back at the faces of those who are gone without regret, and to be grateful they were here at all.";
         protected override string MorningLine => "Morning. Tea first. Then the coast, and a door that's been chained for five years.";
+        protected override string DayErrand => "The coast, and a door that's been chained for five years.";
+        protected override string Breakfast => "On the gatepost, wrapped in a cloth: half a carrot loaf from Mia. The knot is Pip's, and so is the rabbit drawn on the cloth.";
 
         /// <summary>The camera as the day leaves it: dusty and jammed, then its crank freed and its lens clean.</summary>
         protected override string Keepsake => Game.Bag.Contains("camera_clean") ? "camera_clean" : "camera";

@@ -29,6 +29,7 @@ namespace Shop
             "Waiting too long isn't faithfulness. It's how we run from the fact that life has to be lived. Tonight Helen made her peace. And for the first time in eleven years, I'm starting to see this house differently.";
         protected override string WakeLine => "...A bell? At this hour? There's a light out there, past the station.";
         protected override string MorningLine => "Morning. Tea first. Then find out who \"H\" is, quietly.";
+        protected override string DayErrand => "The square. Find out who \"H\" is, quietly.";
 
         /// <summary>The watch as the day has left it: burnt black, cleaned, then ticking.</summary>
         protected override string Keepsake => Game.Bag.Contains("watch_ticking") ? "watch_ticking" : Game.Bag.Contains("watch_clean") ? "watch_clean" : "watch";

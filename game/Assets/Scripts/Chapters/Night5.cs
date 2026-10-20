@@ -29,6 +29,8 @@ namespace Shop
             "Moving on isn't about how fast we leave the past behind. It's about being willing to carry it with us, in every step. Leo has stopped running from his past. Now he can walk on, in peace.";
         protected override string WakeLine => "...Five strokes. Under a full moon.";
         protected override string MorningLine => "Morning. Tea first. Then the square, and someone who knows these shoes.";
+        protected override string DayErrand => "The square, and someone who knows these shoes.";
+        protected override string Breakfast => "A seed loaf from the Baker, and with it a note from Sam, folded in three: \"Breakfast. Eaten properly. Sitting down. S.\" He sits down.";
 
         /// <summary>The shoes as the day leaves them: stiff and mossy, then resoled and shining.</summary>
         protected override string Keepsake => Game.Bag.Contains("shoes_mended") ? "shoes_mended" : "shoes";

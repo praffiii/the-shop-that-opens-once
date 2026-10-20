@@ -89,8 +89,8 @@ namespace Shop.Tests
             await Until(() => Exploring(main) && Game.Phase == Phase.Morning);
             Assert.AreEqual("morning", Game.Checkpoint);
 
-            await Use(main, "stove");
-            Assert.IsTrue(Game.Has("tea"));
+            if (night == 1) await Use(main, "stove");
+            Assert.IsTrue(Game.Has("tea"), "The morning's tea: at the stove the first night, with the breakfast left for him after");
 
             Game.Phase = Phase.Dusk;
             await Go(main, "station", "start");
