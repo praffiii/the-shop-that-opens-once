@@ -123,7 +123,54 @@ namespace Shop
         /// <summary>The night's own story at a hotspot or person; by default how a thing at home looks, or their own line.</summary>
         protected virtual async Awaitable Day(string id)
         {
-            if (!await AtHome(id) && !await Show(id)) await Chat(id);
+            if (await AtHome(id)) return;
+            var shown = await Show(id);
+            if (!await Deliver(id) && !shown) await Chat(id);
+        }
+
+        // The day's post (Post): something in the bag for them is handed over with their thanks; or they ask the courier
+        // to take something of theirs, the first time he comes to them by day on the night it is asked.
+        async Awaitable<bool> Deliver(string id)
+        {
+            foreach (var d in Post.All)
+            {
+                if (d.To == id && Game.Bag.Contains(d.Id))
+                {
+                    await Scene(async () =>
+                    {
+                        var courier = Actor("courier");
+                        var them = Actor(id);
+                        them.FaceTo(courier.Feet.x);
+                        courier.FaceTo(them.Feet.x);
+                        courier.Held = Keepsakes.Art(d.Id, "xs");
+                        courier.Pose = "give";
+                        await Wait(0.6f);
+                        courier.Held = null;
+                        courier.Pose = "idle";
+                        Game.Bag.Remove(d.Id);
+                        Game.Remember("delivered_" + d.Id);
+                        them.Held = Keepsakes.Art(d.Id, "xs");
+                        them.Pose = "receive";
+                        Sfx("pop");
+                        await Wait(0.6f);
+                        them.Held = null;
+                        them.Pose = "idle";
+                        await Main.Talk.Say(Main.Place.Find(id).Label, id, d.Thanks, "smile", them);
+                    });
+                    return true;
+                }
+                if (d.From == id && d.Night == Night && Game.Phase != Phase.Night && !Game.Has("asked_post_" + d.Id))
+                {
+                    Game.Mark("asked_post_" + d.Id);
+                    await Scene(async () =>
+                    {
+                        await Main.Talk.Say(Main.Place.Find(id).Label, id, d.Ask, "neutral", Actor(id));
+                        if (await Choose("I'll take it.", "Not today, sorry.") == 0) await Give(id, d.Id);
+                    });
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Tonight's keepsake shown by day to someone not yet asked about it: what they make of it, and any lead into the notes.

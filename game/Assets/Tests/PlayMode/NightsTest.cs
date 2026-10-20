@@ -23,6 +23,8 @@ namespace Shop.Tests
             Assert.IsTrue(Game.Has("rumour"), "The square's morning gossip");
             await Use(main, "valdo");
             await Use(main, "mia");
+            await Use(main, "mia");
+            CollectionAssert.Contains(Game.Bag, "post_mia", "Mia asks the courier to take her letter, and he does");
             await Go(main, "bakery", "door");
             Board.FailFirst = 1;
             await Use(main, "baker");
@@ -39,6 +41,11 @@ namespace Shop.Tests
             CollectionAssert.IsSupersetOf(Game.Bag, new[] { "watch_ticking", "oil_lantern" }, "The watch ticks, and the Mender lends his lantern");
             CollectionAssert.DoesNotContain(Game.Bag, "watch");
             Assert.AreEqual("dusk", Game.Checkpoint);
+
+            await Go(main, "east", "from_square");
+            await Use(main, "nora");
+            CollectionAssert.DoesNotContain(Game.Bag, "post_mia", "Mia's letter delivered to Nora");
+            Assert.IsTrue(Game.Has("delivered_post_mia"));
 
             await Go(main, "station", "from_square");
             for (var i = 0; i < 3; i++) await Use(main, $"lantern_post_{i}");

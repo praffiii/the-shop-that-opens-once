@@ -160,6 +160,18 @@
     obbwwwwbbbbocO
     obbbbbttbbboo.
     oooooooooooo..`.split('\n').map(s => s.trim().slice(0, 14)).join('\n'), { o: 'dirt4', a: 'dirt1', b: 'dirt2', c: 'dirt3', t: 'cream0', w: 'cream0', k: 'stone3', O: 'dirt4' });
+  // A village letter for the day's rounds: a plain envelope, two lines of address, a leaf stamp in its corner
+  SM.post = () => S(`
+    oooooooooooooo
+    owwwwwwwwwssso
+    owwwwwwwwwsgso
+    owwwwwwwwwssso
+    owwwwwwwwwwwwo
+    owwwkkkkkkwwwo
+    owwwwwwwwwwwwo
+    owwwkkkkkwwwwo
+    owwwwwwwwwwwwo
+    oooooooooooooo`, { o: 'dirt4', w: 'cream0', k: 'stone2', s: 'roofB2', g: 'leaf3' });
   /* ================================================================ HELD ITEMS (xs, 7-10 px, for ant hands) */
   XS.watch = (v = 'front') => {
     const key = { o: 'brass4', a: 'brass0', b: 'brass1', c: 'brass2', d: 'brass3', f: 'cream0', k: 'ink2' };
@@ -174,6 +186,13 @@
     owwwrwwwo
     owwwwwwwo
     ooooooooo`, { o: 'dirt4', w: 'cream0', f: 'cream2', r: 'red' });
+  XS.post = () => S(`
+    ooooooooo
+    owwwwwsso
+    owwwwwsgo
+    owkkkkwwo
+    owwkkkwwo
+    ooooooooo`, { o: 'dirt4', w: 'cream0', k: 'stone2', s: 'roofB2', g: 'leaf3' });
   XS.parcel = () => S(`
     oooooooo
     oaaataao
@@ -252,6 +271,18 @@
     rect(x, 5, 30, 5, 5, 'roofR2'); rect(x, 6, 31, 3, 3, 'rose'); dot(x, 7, 32, 'roofR2');
     // string tied round the box
     rect(x, 3, 22, 9, 1, 'wood3'); rect(x, 18, 22, 2, 1, 'wood3'); line(x, 33, 22, 41, 15, 'wood3');
+    return c;
+  };
+  LG.post = () => {
+    const [c, x] = canvas(44, 30);
+    x.drawImage(bevel(mask(44, 30, g => rect(g, 1, 2, 42, 27, '#000')), ENVELOPE, 1, 2), 0, 0);
+    // the stamp in its corner, perforated, a leaf on blue, and the postmark's rings half over it
+    rect(x, 32, 5, 8, 9, 'cream0'); for (let i = 32; i < 40; i += 2) { dot(x, i, 5, 'cream2'); dot(x, i, 13, 'cream2'); }
+    rect(x, 33, 6, 6, 7, 'roofB2'); rect(x, 34, 7, 4, 5, 'roofB1'); dot(x, 36, 8, 'leaf2'); dot(x, 35, 9, 'leaf3'); dot(x, 36, 9, 'leaf3'); dot(x, 36, 10, 'leaf4');
+    for (let a = 0; a < 12; a++) { const t = a / 12 * Math.PI * 2; dot(x, Math.round(30 + Math.cos(t) * 4), Math.round(11 + Math.sin(t) * 4), 'roofB3'); }
+    // the address, in a careful hand
+    rect(x, 9, 15, 20, 1, 'stone2'); rect(x, 9, 18, 16, 1, 'stone2'); rect(x, 9, 21, 18, 1, 'stone2');
+    rect(x, 3, 26, 38, 1, 'cream1');
     return c;
   };
   /* ================================================================ SATRIA'S OWN THINGS (the prologue's bag) and what the villagers carry */

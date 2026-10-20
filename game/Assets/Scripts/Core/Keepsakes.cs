@@ -21,6 +21,8 @@ namespace Shop
         public sealed class Keepsake
         {
             public string Name;
+            /// <summary>The item art it is drawn with, when not its own (the day's post shares the letter and the parcel).</summary>
+            public string Art;
             public Side[] Sides;
         }
 
@@ -252,9 +254,16 @@ namespace Shop
             },
         };
 
+        // the day's post goes in the bag like anything else
+        static Keepsakes()
+        {
+            foreach (var d in Post.All) All[d.Id] = new Keepsake { Name = d.Name, Art = d.Letter ? "post" : "parcel", Sides = new[] { new Side("", d.Seen) } };
+        }
+
         /// <summary>A keepsake's art at a size (xs in a hand, sm in the bag, lg up close), centred on its middle pixel.</summary>
         public static Sprite Art(string id, string size, string variant = "")
         {
+            if (All.TryGetValue(id, out var k) && k.Art != null) id = k.Art;
             var path = $"items/{id}_{size}_{variant}";
             var tex = Shop.Art.Texture(variant != "" && Shop.Art.Has(path) ? path : $"items/{id}_{size}");
             return Shop.Art.Sprite(tex, new RectInt(0, 0, tex.width, tex.height), new Vector2Int(tex.width / 2, tex.height / 2));
