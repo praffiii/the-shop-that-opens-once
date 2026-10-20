@@ -19,7 +19,7 @@
 
   // 16 bars of A minor; chords as [bass, ...voicing]. 'resolved' swaps Am->C, Em->G.
   const PROG = 'Am Am F C Dm Am Em Em Am Am F G C F Em Am'.split(' ');
-  const CHORDS = { Am: [45, 57, 60, 64], F: [41, 57, 60, 65], C: [48, 55, 60, 64], Dm: [38, 57, 62, 65], Em: [40, 55, 59, 64], G: [43, 55, 59, 62], Bb: [46, 58, 62, 65], Gm: [43, 58, 62, 67], A: [45, 57, 61, 64] };
+  const CHORDS = { Am: [45, 57, 60, 64], F: [41, 57, 60, 65], C: [48, 55, 60, 64], Dm: [38, 57, 62, 65], Em: [40, 55, 59, 64], G: [43, 55, 59, 62], Bb: [46, 58, 62, 65], Gm: [43, 58, 62, 67], A: [45, 57, 61, 64], D: [38, 54, 57, 62] };
   const MAJOR = { Am: 'C', Em: 'G' };
   const tune = (bars) => bars.replace(/\|/g, ' ').trim().split(/\s+/).map(midi);
   // Melody in eighths; opens with the 1-0-1-7 motif of 10:17 (A4 A3 A4 G5: the 0 the root an octave down).
@@ -62,6 +62,25 @@
                  C5 . . . F5 . | E5 . . . G5 . | F5 . D5 . Bb4 . | C5 . . . . . |
                  A4 . A3 . A4 . | G5 . . . E5 . | F5 . . . D5 . | C5 . . . A4 . |
                  Bb4 . . . D5 . | E5 . . . G5 . | F5 . . . . . | . . . . . .`),
+    },
+    // Quiet Station at Dawn, the village's mornings: a celesta over rolled piano chords in G major, sparse as first light.
+    dawn: {
+      lp: 1600, wet: 0.32, dens: 0, oct: 0, lead: CELESTA,
+      prog: 'G G Em Em C C D D G G Em Em C D G G'.split(' '),
+      mel: tune(`B4 . . . D5 . | G5 . . . . . | E5 . . . G5 . | B4 . . . . . |
+                 C5 . . . E5 . | G5 . . . E5 . | F#5 . . . D5 . | A4 . . . . . |
+                 B4 . . . D5 . | G5 . . . A5 . | B5 . . . G5 . | E5 . . . . . |
+                 E5 . . . C5 . | D5 . . . F#5 . | G5 . . . . . | . . . . . .`),
+    },
+    // Bellwood Marketplace, the village's middays: a nylon guitar picking the chords under a guitar line that keeps moving.
+    market: {
+      lp: 2400, wet: 0.18, dens: 2, oct: 0, arp: true,
+      lead: { type: 'triangle', partials: [[1, 1, 1], [2, 0.35, 0.4], [3, 0.12, 0.25]], lp: 2600, vol: 0.05, dec: 1.2, atk: 0.004 },
+      prog: 'C G Am F C G F G C G Am Em F G C C'.split(' '),
+      mel: tune(`E5 . G5 . C6 . | B5 . . . G5 . | A5 . G5 . E5 . | F5 . . . . . |
+                 E5 . G5 . C6 . | D6 . . . B5 . | A5 . G5 . F5 . | G5 . . . . . |
+                 G5 . E5 . G5 . | D5 . G5 . B5 . | C6 . B5 . A5 . | G5 . . . E5 . |
+                 F5 . A5 . C6 . | B5 . A5 . G5 . | E5 . D5 . C5 . | . . . . . .`),
     },
   };
 

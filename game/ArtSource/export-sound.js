@@ -8,7 +8,7 @@
   const STEP = 60 / 69 / 2, STEPS = 16 * 6;   // as in audio.js: an eighth at 69 bpm, and the music loops every 16 bars of 3/4
   const SETTLE = 0.25;                        // Sound eases into its mood's filter and echo over 10 ms; start once they're set
   const WIND = 2 / 0.07, FADE = 4;            // the wind loop: two periods of its 0.07 Hz swell, so its loudness lines up
-  const MOODS = ['dusk', 'shop', 'memory', 'resolved', 'coast', 'loom', 'letter'];
+  const MOODS = ['dusk', 'shop', 'memory', 'resolved', 'coast', 'loom', 'letter', 'dawn', 'market'];
   const EFFECTS = ['bell', 'tick', 'chime', 'motif', 'page', 'pop', 'wrong', 'right', 'whoosh', 'latch', 'bus_far', 'bus_stop', 'drop', 'gate', 'door', 'bed', 'blow', 'crickets', 'bell_toll', 'match', 'scrub', 'pour', 'hiss', 'kettle', 'pen', 'sift', 'thump', 'click', 'ting', 'ticktock', 'oil', 'flare', 'whistle', 'rain', 'clink', 'snip', 'rustle', 'whir', 'trrak', 'knot', 'spray', 'lullaby',
     'pump', 'squeal', 'gurgle', 'tumbler', 'blot', 'pinch', 'fan',
     'lantern_out', 'waves', 'chain', 'tea', 'projector', 'shutter', 'thunder', 'drip', 'vault', 'ledger', 'seal', 'unfold', 'run', 'start_whistle', 'radio_static', 'radio_hum', 'musicbox', 'tear', 'flutter', 'train', 'cheer', 'stamp',

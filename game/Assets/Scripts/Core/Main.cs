@@ -466,7 +466,7 @@ namespace Shop
                 else Place.Enter(courier, spawn);
             }
             Hud.Place = Place;
-            Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
+            Sound.Mood(Place.Def.Music, Place.Def.Indoors);
             View.backgroundColor = Grade.Of(Place.World.Bg);
             look = null;
             gliding = false;
@@ -544,7 +544,7 @@ namespace Shop
                 }
                 Place.Show();
                 View.backgroundColor = Grade.Of(Place.World.Bg);
-                Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
+                Sound.Mood(Place.Def.Music, Place.Def.Indoors);
                 return;
             }
             var player = courier.gameObject.activeSelf;

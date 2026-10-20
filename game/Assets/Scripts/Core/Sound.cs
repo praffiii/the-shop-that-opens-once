@@ -87,7 +87,7 @@ namespace Shop
             return clip;
         }
 
-        /// <summary>Cross-fades to a mood's music (dusk, shop, memory or resolved) and to the time of day's ambience. Indoors, the wind and the ambience drop.</summary>
+        /// <summary>Cross-fades to a mood's music (music_&lt;mood&gt;) and to the time of day's ambience. Indoors, the wind and the ambience drop.</summary>
         public static void Mood(string newMood, bool indoors)
         {
             if (Instance) Instance.SetMood(newMood, indoors);

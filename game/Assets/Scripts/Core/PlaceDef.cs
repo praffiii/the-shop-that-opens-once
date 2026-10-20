@@ -89,8 +89,10 @@ namespace Shop
         public string Id;
         /// <summary>The exported art variants (places/&lt;id&gt;/&lt;variant&gt;). The one named after the time of day is used, else the first.</summary>
         public string[] Variants = { "dusk" };
-        /// <summary>The music here: dusk, shop, memory or resolved.</summary>
-        public string Mood = "dusk";
+        /// <summary>A place's own music (shop, coast, loom); elsewhere the time of day's, see <see cref="Music"/>.</summary>
+        public string Mood;
+        /// <summary>The music playing here now: the place's own, else the morning's dawn, the midday market, or dusk into night.</summary>
+        public string Music => Mood ?? Game.Phase switch { Phase.Morning => "dawn", Phase.Midday => "market", _ => "dusk" };
         /// <summary>Indoors, the evening wind is quiet.</summary>
         public bool Indoors;
         /// <summary>A room cut open where its house stands in its area: the area round it is graded and sunlit as outdoors, while the room keeps its own light (Pixel.shader's _Room).</summary>

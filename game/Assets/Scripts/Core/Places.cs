@@ -867,6 +867,7 @@ namespace Shop
             {
                 Id = "coast",
                 Variants = new[] { "day" },
+                Mood = "coast",
                 People = new[]
                 {
                     // Night: Arlo fishes off the jetty's end by lantern; the fish bite best when the village is asleep.
@@ -1021,6 +1022,7 @@ namespace Shop
             {
                 Id = "satria_home",
                 Variants = new[] { "day" },
+                Mood = "loom",
                 Indoors = true,
                 Open = true,
                 WoodFloor = true,

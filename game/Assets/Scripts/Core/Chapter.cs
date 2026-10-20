@@ -216,7 +216,7 @@ namespace Shop
                 foreach (var ant in present)
                     if (ant) ant.gameObject.SetActive(true);
                 Main.Sepia = false;
-                Music(place.Def.Mood);
+                Music(place.Def.Music);
                 await Main.Fade(false);
             }
         }
