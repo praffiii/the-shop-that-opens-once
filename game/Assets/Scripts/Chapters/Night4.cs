@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -34,6 +35,31 @@ namespace Shop
 
         /// <summary>The key as the day leaves it: cold and rusty, then worn bright by the vault's tumblers.</summary>
         protected override string Keepsake => Game.Bag.Contains("key_turned") ? "key_turned" : "key";
+
+        protected override string Asking => "Do you know what door a key like this would open?";
+
+        // Asked round about the key: it is railway iron from a vault-maker, and Captain Bram knew every lock on the line.
+        static readonly Dictionary<string, Reaction> Asked = new()
+        {
+            ["neighbour_a"] = new("No mark on it at all? Every door in this hall takes a brass key. That's railway iron, that is.", "surprised", "A neighbour at the hall: its doors take brass keys. This key is railway iron."),
+            ["neighbour_b"] = new("Captain Bram would know it. He knew every lock on the old line, and he never lets you forget it.", "smile", "A neighbour at the hall: Captain Bram knew every lock on the old line."),
+            ["porter"] = new("Railway forging, that bit. The Captain's on the platform bench with his paper. He'll tell you more than you want to know.", "smile", "The porter: Captain Bram sits on the platform bench with his paper."),
+            ["mender"] = new("I didn't make that, and nobody on this island did. City iron, a vault-maker's. Fireproof doors took keys like it.", "neutral", "The Mender: a vault-maker's key, from a fireproof door."),
+            ["helen"] = new("Bram had a ring of keys like that once, when he ran the line. Heavy enough to sink him.", "smile"),
+            ["mia"] = new("Four notches... my grandmother's pantry had a key like that. No, hers had three. Ask someone older than me!", "smile"),
+            ["pip"] = new("Is it a treasure key? Mr Valdo said treasure. I heard him through the window.", "surprised"),
+            ["baker"] = new("Rain on the ovens and now a mystery key. Captain Bram's the one for railway iron, if that's what it is."),
+            ["florist"] = new("Cold as a fish, that. Whatever it opens has been shut a long time."),
+            ["shopper"] = new("With the hall flooding, love? Poor Sam's got enough to worry about without riddles."),
+            ["leo"] = new("Heavy iron. The old station had doors like that, down in the signal house. Ask the Captain.", "neutral", "Leo: the old station had iron doors like this. Ask the Captain."),
+            ["nora"] = new("Some keys wait for the right hands, child, same as thread does.", "smile"),
+            ["theo"] = new("A key with no name... Nobody marks a key when everybody knows its door.", "sad"),
+            ["arlo"] = new("Not a ship's key. A ship's key's brass, so the salt can't have it."),
+            ["fisher"] = new("Rust like that comes from damp, not sea. Somewhere underground, I'd say."),
+            ["salter"] = new("That's not from the coast. Ask up at the station."),
+            ["gardener"] = new("The rain's done my seedlings no favours, and now keys. Ask Bram, he's got keys for everything."),
+        };
+        protected override Dictionary<string, Reaction> Reactions => Asked;
 
         // The drizzle starts with the bell and lasts the night and the morning; it stops as the day turns to midday.
         public override Awaitable Start()
@@ -116,7 +142,7 @@ namespace Shop
                     await Say("neighbour_a", "Mr Sam's been running buckets down to the basement since yesterday... last night's rain's brought the groundwater up into the old archive vault!");
                     await Say("neighbour_b", "If that archive floods, the colony's founding records will be paper pulp...");
                     Note("In the hall: groundwater is seeping into the archive under it, and Sam has been carrying buckets down since yesterday.");
-                    Hint("Someone in the village might know what door this key is for.");
+                    Hint("Someone in the village might know what door this key is for. Show it round.");
                     break;
                 // the plea at the stair's foot: the pump jammed, the water rising, and the vault's key lost twenty years ago
                 case "hall_vault" when Game.Phase == Phase.Midday && !Game.Has("plea"):
@@ -182,7 +208,7 @@ namespace Shop
                 valdo.Pose = "write";
                 Note("Valdo took the key for a treasure-safe's and tried to keep it. A dead end.");
             });
-            Hint("Captain Bram knows the old iron of the line. The station platform.");
+            Hint("Valdo only wants it for himself. Someone who knows old railway iron, then.");
         }
 
         // Under his paper on the platform bench, Captain Bram knows the key: the day moves to midday, and the rain stops.

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -31,6 +32,30 @@ namespace Shop
 
         /// <summary>The watch as the day has left it: burnt black, cleaned, then ticking.</summary>
         protected override string Keepsake => Game.Bag.Contains("watch_ticking") ? "watch_ticking" : Game.Bag.Contains("watch_clean") ? "watch_clean" : "watch";
+
+        protected override string Asking => "Do you know whose watch this is?";
+
+        // Asked round about the watch: the railway men's friends point to the Baker, the line's old hands to the Mender.
+        static readonly Dictionary<string, Reaction> Asked = new()
+        {
+            ["pip"] = new("A railway watch! The Baker's always going on about the railway men from before. He'd know!", "surprised", "Pip: the Baker is always going on about the old railway men."),
+            ["sam"] = new("Platform service issue, by the case. The hall has the staff lists somewhere, but the Baker's family knew those men in person.", "neutral", "Sam: the Baker's family knew the railway men in person."),
+            ["florist"] = new("Phew. It smells like the night the substation went up. Burnt wire. Keep it away from my flowers, love."),
+            ["shopper"] = new("\"H\"? Half this village is H-something. The Baker's father fed every railwayman on the line, though. Ask him.", "smile", "The shopper: the Baker's father fed every railwayman on the line."),
+            ["breadboy"] = new("That's the smell from the bakery's back shed! The Baker keeps his father's old railway lamp in there.", "surprised"),
+            ["porter"] = new("Railway issue, that. Before my time. The Mender at the forge still keeps the old line's tools, though.", "neutral", "The porter: the Mender at the forge keeps the old line's tools."),
+            ["bram"] = new("A platform watch... We were all issued one. I handed mine back the day they closed the line.", "sad"),
+            ["leo"] = new("Ten-seventeen. That's when the night train used to come through. Strange hour for a watch to stop.", "sad"),
+            ["nora"] = new("Oh, child. The storm of fifty-two left a lot of things like that. A stopped clock in every house.", "sad"),
+            ["theo"] = new("...Put it away. I don't look at old things any more.", "sad"),
+            ["arlo"] = new("Burnt like that, it's been through a fire, or a storm. The sea gives back all sorts, but not that."),
+            ["fisher"] = new("Railway, that is. The line ran right down to the jetty once. Ask up at the station end."),
+            ["salter"] = new("The salt would've eaten it, if it had been down here. That's a fire's doing, not the sea's."),
+            ["gardener"] = new("Couldn't tell you, son. Ask someone who still rides the trains in his sleep. The Baker, say.", "smile"),
+            ["farmhand"] = new("Never owned a watch. The sun does me fine.", "smile"),
+            ["herder"] = new("My aphids keep better time than that thing.", "smile"),
+        };
+        protected override Dictionary<string, Reaction> Reactions => Asked;
 
         protected override string Sending => "Before the next dusk, mind. Every soul is given one chance to understand its homecoming.";
 
@@ -100,7 +125,7 @@ namespace Shop
                     Game.Mark("rumour");
                     await Say("mia", "They say the old station's rails still tremble on their own, some nights... and the last engine buried by the landslide twenty years ago!");
                     await Say("shopper", "Oh, that's only the tide hitting the cliff rocks, Mia.");
-                    Hint("Someone in the square might know whose watch this is.");
+                    Hint("Someone in the square might know whose watch this is. Show it round.");
                     break;
             }
         }

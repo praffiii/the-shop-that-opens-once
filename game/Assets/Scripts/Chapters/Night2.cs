@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -32,6 +33,32 @@ namespace Shop
 
         /// <summary>The rabbit as the day leaves it: torn, then mended.</summary>
         protected override string Keepsake => Game.Bag.Contains("rabbit_mended") ? "rabbit_mended" : "rabbit";
+
+        protected override string Asking => "Do you know whose rabbit this is?";
+
+        // Asked round about the rabbit: whose it was, whose stitches, and where Pip sits since the flood.
+        static readonly Dictionary<string, Reaction> Asked = new()
+        {
+            ["sam"] = new("A child's toy, sewn by hand. If it's a square child's, Mia will know whose. She knows every one of them.", "neutral", "Sam: Mia knows every child on the square."),
+            ["florist"] = new("Oh, the poor thing. Mia's boy had one just like it, years back, before the mud took it.", "sad", "The flower seller: Mia's boy Pip had a rabbit like this, before the mud flood."),
+            ["shopper"] = new("Polka-dot patchwork, stitches small as rice... that's Ratih's sewing, love. Nobody else stitched that small.", "moved", "The shopper: stitches that small are Mother's."),
+            ["baker"] = new("That's flood mud on it. Two years on, and it still turns up in my flour sacks.", "sad"),
+            ["helen"] = new("Ratih made a dozen of those after the whirlwind. One for every child who couldn't sleep.", "moved", "Helen: Mother sewed rabbits like this for the children after the whirlwind."),
+            ["mender"] = new("Cloth's not my trade. Mend it with the wrong thread and it's worse than torn."),
+            ["porter"] = new("Children's things wash up in the station ditch after every flood. That's a sad one."),
+            ["bram"] = new("My granddaughter had one like that. Or was it my daughter... It's a long time ago now.", "sad"),
+            ["leo"] = new("Pip used to carry one under his arm up my hill. I haven't seen it these two years.", "sad", "Leo: Pip carried a rabbit like this up his hill, till two years ago."),
+            ["nora"] = new("Ratih's stitches. I'd know them anywhere... The boy sits on my steps, most days. Mind how you go with him.", "moved", "Grandma Nora: Pip sits on her steps most days."),
+            ["gardener"] = new("Musty. Chamomile takes a smell like that out, steeped and misted on. Ratih knew the trick.", "smile", "The Gardener: steeped chamomile takes a musty smell out of cloth."),
+            ["breadboy"] = new("Is that Mochi? Pip cried for a week when he lost him. Don't let Kiko see it, he'll laugh.", "surprised"),
+            ["arlo"] = new("A rabbit? Out here we lose nets, not rabbits. Ask on the square, Satria."),
+            ["fisher"] = new("Not one of ours. The children on the square, maybe."),
+            ["salter"] = new("Poor stitched thing. The square's children, I'd say. Ours have all grown."),
+            ["theo"] = new("...Ratih's. Daniel filmed her sewing those, once. Go away, Satria.", "sad"),
+            ["farmhand"] = new("Not mine. I'd have sewn the ear back on with fishing line, mind.", "smile"),
+            ["herder"] = new("The aphids would eat that kapok in a night. Keep it away from my pen."),
+        };
+        protected override Dictionary<string, Reaction> Reactions => Asked;
 
         protected override async Awaitable AtShop()
         {
@@ -102,7 +129,7 @@ namespace Shop
                     Game.Mark("rumour");
                     await Say("shopper", "Poor little Pip, screaming for his mother half the night... Every time the sky goes dark he's scared stiff the whirlwind's come back, the one ten years ago.");
                     await Say("florist", "When Ratih was alive, that boy always slept sound, hugging the rabbit doll she made him...");
-                    Hint("Someone in the square might know about Pip and his rabbit.");
+                    Hint("Someone in the square might know about Pip and his rabbit. Show it round.");
                     break;
             }
         }

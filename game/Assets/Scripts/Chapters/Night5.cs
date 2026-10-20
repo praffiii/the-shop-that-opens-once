@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -31,6 +32,31 @@ namespace Shop
 
         /// <summary>The shoes as the day leaves them: stiff and mossy, then resoled and shining.</summary>
         protected override string Keepsake => Game.Bag.Contains("shoes_mended") ? "shoes_mended" : "shoes";
+
+        protected override string Asking => "Do you know whose shoes these are?";
+
+        // Asked round about the shoes: only one ant ever ran in shoes like these, and the Baker's lad knows every runner.
+        static readonly Dictionary<string, Reaction> Asked = new()
+        {
+            ["mia"] = new("Spiked shoes, two sizes... Only one ant on this island ever ran in shoes like those, Satria.", "surprised", "Mia: only one ant on the island ever ran in shoes like these."),
+            ["pip"] = new("Running shoes! Mr Leo says he used to be the fastest ant alive. I don't believe him. His knees go click.", "smile", "Pip: Leo says he was once the fastest ant alive."),
+            ["sam"] = new("There's a photograph in the hall: the island races, nineteen fifty-two. The winner's in shoes just like those.", "neutral", "Sam: the winner of the 1952 island races wore shoes like these."),
+            ["baker"] = new("My lad knows every runner on the island, past and present. Catch him on his rounds.", "smile", "The Baker: his lad knows every runner on the island."),
+            ["shopper"] = new("Hard as stone, that rubber. Whoever ran in those now would snap an ankle."),
+            ["helen"] = new("Someone ran the whole coast road to the station, the night of the storm. I never knew who.", "sad"),
+            ["mender"] = new("Canvas and spikes, rubber gone to stone. New damar would make them whole. Bring them to the forge if you want them mended.", "neutral", "The Mender: new damar would make the shoes whole again."),
+            ["bram"] = new("Those spikes chewed up my platform once. A lad ran in from the storm, shouting for the night train.", "moved"),
+            ["porter"] = new("Proper racing spikes. You'd not catch me running in those. Or at all."),
+            ["nora"] = new("Leo's feet bled on the coral that night, child. He's not run since.", "sad", "Grandma Nora: Leo's feet bled on the coral one night, and he has not run since."),
+            ["theo"] = new("I photographed a race once. The winner's shoes didn't match. He said it brought him luck.", "moved"),
+            ["arlo"] = new("Coral cut those soles. You can tell by the edges. Somebody ran the reef road."),
+            ["fisher"] = new("Somebody's legs did a lot of miles in those."),
+            ["salter"] = new("Rubber like that goes hard in the salt air, given twenty years."),
+            ["gardener"] = new("Those are a runner's. Leo's up on his hill every evening, if you're asking whose.", "neutral", "The Gardener: Leo is up on his hill every evening."),
+            ["farmhand"] = new("Spikes like that would ruin my rows. Keep off the field in them, mind.", "smile"),
+            ["herder"] = new("You'd scare every aphid in the pen, clattering about in those."),
+        };
+        protected override Dictionary<string, Reaction> Reactions => Asked;
 
         protected override async Awaitable AtShop()
         {
@@ -97,7 +123,7 @@ namespace Shop
                     await Say("florist", "Mr Leo was limping up his hill again this morning... his knees were shaking something awful!");
                     await Say("shopper", "And when he was young, no ant on this island could touch him in a sprint...");
                     Note("On the square: Leo limped up his hill this morning, his knees shaking. Once nobody could match his sprint.");
-                    Hint("Somebody on the square might know these shoes.");
+                    Hint("Somebody on the square might know these shoes. Show them round.");
                     break;
                 // the race against the sun up Leo's hill, and the shoes back to him at the top with the last light
                 case "east" when Game.Phase == Phase.Dusk && Game.Bag.Contains("shoes_mended") && !Game.Has("resolved"):

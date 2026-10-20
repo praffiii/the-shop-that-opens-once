@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -11,6 +12,8 @@ namespace Shop
     /// <see cref="Arrived"/>); the handover at dusk with the lantern going out in the shop (<see cref="Handover"/>);
     /// and the evening at home: the journal's page, the lamp out, and to bed. Every step of it that moves the story is a
     /// cutscene, and each turn of the clock saves (Morning: "morning", the handover: "resolved").
+    /// By day the courier shows the night's keepsake to whoever he talks to, the first time he comes to them with it, and
+    /// they say what they make of it (<see cref="Reactions"/>): asking round the village is how the night's way is found.
     /// </summary>
     public abstract class NightChapter : Chapter
     {
@@ -41,6 +44,18 @@ namespace Shop
         protected virtual string MorningLine => "Morning. Tea first. Then whoever this belongs to.";
 
         static readonly string[] Numbers = { "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight" };
+
+        /// <summary>What someone says, shown tonight's keepsake: their line, its mood, and a lead for the notes ("" for none).</summary>
+        protected readonly struct Reaction
+        {
+            public readonly string Line, Mood, Note;
+            public Reaction(string line, string mood = "neutral", string note = "") => (Line, Mood, Note) = (line, mood, note);
+        }
+
+        /// <summary>What the courier asks, showing tonight's keepsake.</summary>
+        protected virtual string Asking => "Have you seen this before?";
+        /// <summary>What the villagers make of tonight's keepsake, by who. The night's leads and its owner have their story instead.</summary>
+        protected virtual Dictionary<string, Reaction> Reactions => null;
 
         public override async Awaitable Start()
         {
@@ -108,7 +123,28 @@ namespace Shop
         /// <summary>The night's own story at a hotspot or person; by default how a thing at home looks, or their own line.</summary>
         protected virtual async Awaitable Day(string id)
         {
-            if (!await AtHome(id)) await Chat(id);
+            if (!await AtHome(id) && !await Show(id)) await Chat(id);
+        }
+
+        // Tonight's keepsake shown by day to someone not yet asked about it: what they make of it, and any lead into the notes.
+        async Awaitable<bool> Show(string id)
+        {
+            if (Reactions == null || !Reactions.TryGetValue(id, out var reaction) || Game.Phase == Phase.Night || !Game.Bag.Contains(Keepsake) || Game.Has("shown_" + id)) return false;
+            Game.Mark("shown_" + id);
+            await Scene(async () =>
+            {
+                var courier = Actor("courier");
+                var them = Actor(id);
+                them.FaceTo(courier.Feet.x);
+                courier.Held = Keepsakes.Art(Keepsake, "xs");
+                courier.Pose = "give";
+                await Say("courier", Asking);
+                courier.Held = null;
+                courier.Pose = "idle";
+                await Main.Talk.Say(Main.Place.Find(id).Label, id, reaction.Line, reaction.Mood, them);
+                if (reaction.Note != "") Note(reaction.Note);
+            });
+            return true;
         }
 
         /// <summary>What Marlow says as he hands over tonight's box, while he fetches it (a night has its own words).</summary>

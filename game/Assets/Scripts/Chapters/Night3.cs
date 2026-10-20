@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Shop
@@ -34,6 +35,31 @@ namespace Shop
 
         /// <summary>The camera as the day leaves it: dusty and jammed, then its crank freed and its lens clean.</summary>
         protected override string Keepsake => Game.Bag.Contains("camera_clean") ? "camera_clean" : "camera";
+
+        protected override string Asking => "This was Father's camera. Do you know how I'd get it to Theo?";
+
+        // Asked round about the camera: the coast points to Leo, who still calls at Theo's door, and to Arlo, who knows its rocks.
+        static readonly Dictionary<string, Reaction> Asked = new()
+        {
+            ["fisher"] = new("Daniel's camera... Theo was always at his elbow, holding the light. Leo still calls up at Theo's door on his morning run. Ask Leo.", "moved", "The fisher: Leo still calls at Theo's door on his morning run."),
+            ["salter"] = new("Arlo was with Daniel the night the bridge went. He knows every rock and rope on this coast, that one.", "sad", "The salt worker: Arlo knows every rock on the coast."),
+            ["arlo"] = new("Daniel's. I lent him my rope the night the bridge went, and never asked for it back... If you need anything climbed, lad, my rope's yours.", "sad", "Arlo: his rope is mine, if I need anything climbed."),
+            ["mender"] = new("A jammed crank wants patience, not force. And it's not my bench that film needs, it's Theo's darkroom.", "neutral", "The Mender: the camera's film needs Theo's darkroom."),
+            ["helen"] = new("Daniel never went anywhere without it. Theo hasn't come down off that bluff since the funeral.", "sad"),
+            ["bram"] = new("Daniel filmed my last run on the line. I never saw the film. Nobody did.", "sad"),
+            ["porter"] = new("Proper old kit. Theo up on the bluff would know it, if he'd open his door to anyone."),
+            ["mia"] = new("Your father's! He filmed the whole market once, everybody pulling faces at him.", "smile"),
+            ["pip"] = new("A real film camera! Can it film me? ...It's broken, isn't it.", "surprised"),
+            ["sam"] = new("The hall has his photographs of the opening day. Theo printed them. That was a long time ago."),
+            ["baker"] = new("Daniel's camera. He'd trade a reel of film for a sweet loaf, and I always let him.", "moved"),
+            ["florist"] = new("Oh, Daniel used to film my mother's roses. Said colour was wasted on black and white, and filmed them anyway.", "smile"),
+            ["shopper"] = new("Theo's door's been chained five years, love. You'll not get in with that alone."),
+            ["nora"] = new("Theo blames himself, child. A door shut from the inside only opens from the inside.", "sad"),
+            ["gardener"] = new("Mint. Daniel always had a sprig of wild mint behind his ear, from the bluff. Funny what you remember.", "smile"),
+            ["farmhand"] = new("Heavy, that. My arm'd drop off filming the harvest."),
+            ["herder"] = new("Never been filmed in my life. The aphids would hate it."),
+        };
+        protected override Dictionary<string, Reaction> Reactions => Asked;
 
         protected override async Awaitable AtShop()
         {
@@ -109,7 +135,7 @@ namespace Shop
                     await Say("salter", "Theo up in that studio, he's not come up to the village to buy so much as an onion in years... and his door's always padlocked with a ship's chain!");
                     await Say("fisher", "Back when Daniel was alive, the two of them filmed every cargo boat that tied up here. Every single one...");
                     Note("At the coffee stall: Theo's door has been chained with a ship's chain for years. He and Daniel used to film every boat that docked.");
-                    Hint("Someone on the coast might know how to get Theo to open up.");
+                    Hint("Someone on the coast might know how to get Theo to open up. Show them Father's camera.");
                     break;
             }
         }
@@ -134,7 +160,7 @@ namespace Shop
                     await Climb();
                     break;
                 case "mint_cliff" when Game.Has("asked_leo") && !Game.Has("climbed"):
-                    await Say("courier", "Too slick to climb bare-handed. Arlo would know the way up.");
+                    await Say("courier", "Too slick to climb bare-handed. I need a rope, and someone who knows this coast.");
                     break;
                 case "coffee_stall" when Game.Bag.Contains("mint"):
                     await Brew();
@@ -170,7 +196,7 @@ namespace Shop
                 leo.Pose = "stretch";
                 Note("Leo: Theo opens to nobody empty-handed. Daniel's mint tea, of wild mint from the bluff's rock face, set at his vent.", keep: true);
             });
-            Hint("Wild mint grows on the bluff's edge, over the rock face. Arlo knows the coast.");
+            Hint("Wild mint grows on the bluff's edge, over the rock face. Too slick to climb without a rope.");
         }
 
         // In the salt store Arlo, mending his nets, lends his hemp rope for the rock face; the day moves to midday.
