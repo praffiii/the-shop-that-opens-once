@@ -13,8 +13,9 @@ namespace Shop
         public static readonly Color Ink = Art.Color("#2a1b22");
         public static readonly Color Soft = Art.Color("#7a452e"); // wood4, for quieter text
         public static readonly Color Cream = Art.Color("#fff1d2"); // dirt0: the curtain and the cards
-        /// <summary>Pixelify Sans spaces its letters evenly here (at 12 the "a" runs wide).</summary>
-        public const int FontSize = 13;
+        /// <summary>Pixelify Sans is drawn on an 11 px grid: at this size each of its pixels is one canvas px, and with
+        /// the font imported as hinted raster (no smoothing) the letters stay crisp at any scale. Any other size smears them.</summary>
+        public const int FontSize = 11;
         /// <summary>Line pitch of text, in canvas px.</summary>
         public const int Line = 14;
 
