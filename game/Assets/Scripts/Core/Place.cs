@@ -116,11 +116,12 @@ namespace Shop
 
         static bool Now(Phase[] phases) => phases == null || Array.IndexOf(phases, Game.Phase) >= 0;
 
+        /// <summary>Shows what the story has changed in the place's art (call it again after changing a flag it reads).</summary>
         // Marlow's shop follows the story: a lantern goes out for each night resolved and the clock moves on a minute
         // from 10:17. Each night's box stays shut in the cabinet until Marlow hands it over; its cubby is empty while
         // the courier has it, and once the night is resolved it is back, open and empty. Satria's yard gate is shut
-        // until he first pushes it open, coming home on Day 0.
-        void FollowStory()
+        // until he first pushes it open, coming home on Day 0. At home the coil and the night's box follow the routine.
+        public void FollowStory()
         {
             var shut = Game.Chapter == 0 && !Game.Has("stepped_gate");
             World.ShowItemIfAny("satria_gate", shut);
@@ -134,6 +135,9 @@ namespace Shop
                 World.ShowItemIfAny($"box_open_{i}", i < Game.LanternsOut);
             }
             for (var m = 0; m < 8; m++) World.ShowItemIfAny($"clock_{1017 + m}", m == Game.LanternsOut);
+            // at home: the coil lit before sleep, and the night's box on the table once brought home
+            World.ShowItemIfAny("coil_lit", Game.Has("coil_lit"));
+            for (var i = 0; i < 7; i++) World.ShowItemIfAny($"box_on_table_{i}", i == Game.Chapter - 1 && Game.Has("box_home"));
         }
 
         /// <summary>Puts the courier at a spawn point, or else at an exported anchor of that name.</summary>

@@ -200,7 +200,7 @@
     ], { ...O, w: 'white', b: 'cream0', c: 'cream2' }), { hotspot: [3, 0] });
 
     dayDial(put);
-    put('title', TITLE.render(18 * 60 + 17));   // the clock in the O stopped at 18:17, as on the presentation's title
+    put('title', TITLE.render(10 * 60 + 17));   // the clock in the O stopped at 10:17, the hour the station's watch stopped
     json('ui/ui.json', spec);
     // Every PAL colour as #rrggbb; the translucent cast shadow becomes #rrggbbaa.
     const hex = v => (v[0] === '#' ? v : '#' + v.match(/[\d.]+/g).map((n, i) => Math.round(i < 3 ? n : n * 255).toString(16).padStart(2, '0')).join(''));

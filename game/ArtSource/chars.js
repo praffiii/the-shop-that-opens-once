@@ -556,8 +556,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3, lie: 1, wake: 1, write: 4, drink: 1, crouch: 3, strike: 2, wash: 1 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -568,7 +568,7 @@
     s.push('talk');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'helen'].includes(id)) s.push('receive');
     if (['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier'].includes(id)) s.push('give');
-    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run');
+    if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', 'lie', 'wake', 'write', 'drink', 'crouch', 'strike', 'wash');   // the nightly routine's too
     if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
@@ -632,6 +632,11 @@
     // arms are [hand] or [elbow, hand], relative to the shoulder
     const A0 = L.arm;
     let armN = [[1, A0]], armF = [[0, A0]];
+    // sitting, thighs lie along the seat and shins dangle over its edge (the anchor is the seat surface)
+    const seated = [
+      { hip: L.hipB, foot: [L.hipB[0] + 5, 39], knee: [L.hipB[0] + 5, L.hipB[1] + 1] },
+      { hip: L.hipF, foot: [L.hipF[0] + 5, 39], knee: [L.hipF[0] + 5, L.hipF[1] + 1] },
+    ];
 
     switch (pose) {
       case 'idle':
@@ -679,11 +684,7 @@
         break;
       case 'sit':
         r.dy = 4 + [0, -1][f];
-        // thighs lie along the seat, shins dangle over its edge (the anchor is the seat surface)
-        legs = [
-          { hip: L.hipB, foot: [L.hipB[0] + 5, 39], knee: [L.hipB[0] + 5, L.hipB[1] + 1] },
-          { hip: L.hipF, foot: [L.hipF[0] + 5, 39], knee: [L.hipF[0] + 5, L.hipF[1] + 1] },
-        ];
+        legs = seated;
         armN = [[1, 3], [5, 5]]; armF = [[2, 3], [7, 5]];
         if (f) r.eye = 'blink';
         break;
@@ -741,6 +742,35 @@
       case 'fish':   // the rod held out over the water, its tip nodding, the line drifting
         armN = [[3, 1], [7, -1]]; armF = [[3, 2], [6, 0]];
         r.rod = f;
+        break;
+      case 'lie':   // asleep, breathing slow (sprite40 draws the quilt up over him)
+        r.eye = 'closed'; r.droop = 1;
+        break;
+      case 'wake':   // sat up in bed: a stretch with both arms up and a yawn, then an eye rubbed
+        r.dy = 4; legs = seated;
+        armN = f ? [[2, 0], [5, -4]] : [[1, -4], [2, -10]]; armF = f ? [[2, 3], [5, 4]] : [[2, -4], [3, -10]];
+        r.mouth = f ? 'closed' : 'open'; r.eye = f ? 'squint' : 'closed';
+        break;
+      case 'write':   // bent over the journal at the desk, the pen running across the page and back
+        r.hy += 2; r.hx += 1; r.eye = 'squint';
+        armN = [[3, 3], [[7, 4], [8, 4], [9, 5], [8, 5]][f]]; armF = [[3, 3], [6, 5]];
+        r.pen = true;
+        break;
+      case 'drink':   // a cup of tea up to the mouth, tipped on the second frame
+        armN = f ? [[3, 1], [5, -3]] : [[3, 2], [6, 0]]; armF = [[2, 3], [4, 4]];
+        r.cup = f; r.eye = f ? 'closed' : 'open';
+        break;
+      case 'crouch':   // down low, a hand at the ground: feet scrubbed on the doormat, a latch lifted
+        r.dy = 4; r.hx += 2; r.hy += 2;
+        armN = [[3, 4], [7, 9 - f]]; armF = [[3, 4], [9, 8 + f]];
+        break;
+      case 'strike':   // a match struck along its box at the chest: it flares on the second frame
+        armN = [[3, 2], f ? [9, 0] : [6, 1]]; armF = [[3, 2], [6, 2]];
+        r.flare = f === 1; r.eye = f ? 'squint' : 'open';
+        break;
+      case 'wash':   // water scooped from the jar in the dipper, then splashed over the face
+        armN = f ? [[2, 0], [4, -4]] : [[3, 4], [8, 6]]; armF = f ? [[2, 1], [5, -3]] : [[2, 3], [4, 4]];
+        r.dipper = f; r.eye = f ? 'closed' : 'open';
         break;
       case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
         armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];
@@ -909,6 +939,14 @@
         line(g, cx2, cy2, cx2 + 4, cy2 + 2, 'iron2'); line(g, cx2 + 6, cy2 + 5, cx2 + 9, cy2 + 6, 'iron2'); rect(g, cx2 + 9, cy2 + 6, 2, 2, 'iron0');
       });
       for (const [ox, oy] of [[11, 9], [12, 11], [10, 12]]) { const y = cy2 + oy + (r.can * 2 + ox) % 4; if (y < 38) dot(x, cx2 + ox, y, ox === 12 ? 'water2' : 'water1'); }
+    }
+    if (r.pen) { const [ex, ey] = hand; line(x, ex, ey, ex + 3, ey - 3, 'ink'); dot(x, ex + 1, ey + 1, 'ink'); }   // the dip pen, its nib on the page
+    if (r.cup !== undefined) { const [ex, ey] = hand; plated(x, g => { rect(g, ex, ey - 3, 3, 3, 'white'); dot(g, ex + 3, ey - 2, 'white'); }); if (!r.cup) dot(x, ex + 1, ey - 5, 'cloud1'); }   // the cup, steam over it before the sip
+    if (r.flare) { const [ex, ey] = hand; dot(x, ex + 1, ey - 1, 'light0'); dot(x, ex + 2, ey - 2, 'yellow'); dot(x, ex, ey - 2, 'light1'); dot(x, ex + 1, ey - 3, 'light2'); }
+    if (r.dipper !== undefined) {   // the coconut-shell dipper on its handle; the splash off the face
+      const [ex, ey] = hand;
+      if (!r.dipper) plated(x, g => { rect(g, ex - 1, ey, 4, 2, 'wood2'); line(g, ex - 1, ey, ex - 4, ey - 3, 'wood3'); });
+      else [[2, -1], [3, 1], [1, -3], [4, -2]].forEach(([ox, oy]) => dot(x, hx + L.eye[0] + ox, hy + L.eye[1] + oy, 'water1'));
     }
     if (r.tear) { dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 4, 'water1'); dot(x, hx + L.eye[0] + 1, hy + L.eye[1] + 5, 'white'); }
     return c;
@@ -1292,11 +1330,29 @@
     return c;
   }
 
+  // Asleep in bed, seen from its foot as the bed runs back from the room: the sleeping face on the pillow and Mother's
+  // patchwork quilt (the bed's) drawn up to the chin over the rest, rising and falling with his breath.
+  const QUILT = ['roofR1', 'cream1', 'sky3', 'yellow', 'rose', 'roofG1'];
+  function abed(src, f) {
+    const [c, x] = canvas(40, 40);
+    x.drawImage(src, 0, 0);
+    const top = 24 - f, left = 7, right = 33;
+    x.clearRect(0, top, 40, 40 - top);
+    x.clearRect(0, 8, 12, top - 8);   // the pack off his back, laid by under the bed
+    for (let y = top; y < 40; y++) for (let i = left; i < right; i++) {
+      const edge = y === top || i === left || i === right - 1;
+      if (edge && y === top && (i === left || i === right - 1)) continue;   // its corners rounded
+      dot(x, i, y, edge ? 'ink' : (i - left) % 6 === 0 || (y - top) % 5 === 0 ? 'wall3' : QUILT[(((i - left) / 6 | 0) * 5 + ((y - top) / 5 | 0) * 3) % QUILT.length]);
+    }
+    rect(x, left + 1, top + 1, right - left - 2, 2, 'cream0');   // the sheet turned down over the quilt's top
+    return c;
+  }
+
   /* ---------------- public API ---------------- */
   const wrap = (pose, frame) => { const n = POSES[pose]; return ((frame | 0) % n + n) % n; };
   function sprite40(id, pose, frame = 0) {
     const p = resolve(id, pose), f = wrap(p, frame);
-    return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return t ? renderTurned(id, t[0], f, t[1]) : render(id, p, f); });
+    return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return t ? renderTurned(id, t[0], f, t[1]) : p === 'lie' ? abed(render(id, p, f), f) : render(id, p, f); });
   }
   // Every face can show every mood (the talk box asks for one per line).
   const MOODS = ['smile', 'moved', 'surprised', 'sad', 'cross'];

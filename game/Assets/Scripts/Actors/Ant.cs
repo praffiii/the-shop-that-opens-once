@@ -126,7 +126,7 @@ namespace Shop
             }
         }
 
-        /// <summary>How high the seat it sits on is, in art px; it is raised by that while it sits.</summary>
+        /// <summary>How high the seat it sits on (or the bed it lies in) is, in art px; it is raised by that while it sits or lies.</summary>
         public float Seat
         {
             get => seat;
@@ -328,7 +328,7 @@ namespace Shop
         void Place()
         {
             var world = transform.parent ? transform.parent.GetComponent<BakedArt>() : null;
-            transform.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + floor + (pose == "sit" ? seat : 0) + Nudge);
+            transform.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + floor + (pose is "sit" or "lie" or "wake" ? seat : 0) + Nudge);
         }
 
         void Refresh()

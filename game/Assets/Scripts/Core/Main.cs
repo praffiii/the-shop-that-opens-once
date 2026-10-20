@@ -75,6 +75,7 @@ namespace Shop
         public Hud Hud { get; private set; }
         public Bag Bag { get; private set; }
         public Card Cards { get; private set; }
+        public Journal Journal { get; private set; }
         public Reveal Reveal { get; private set; }
 
         RawImage screen;
@@ -173,6 +174,7 @@ namespace Shop
             Hud = Hud.Create(t);
             Bag = Bag.Create(t);
             Cards = Card.Create(t);
+            Journal = Journal.Create(t);
             Reveal = Reveal.Create(t);
             curtain = Look.Picture("Curtain", t);
             curtain.enabled = true;
@@ -293,9 +295,11 @@ namespace Shop
         public const string SystemsTest = "Systems test";
         const string ChapterSelect = "Chapter...";
 
-        // Starts a chapter's story, or picks it up at a checkpoint (Continue). A new chapter starts the clock at the
-        // chapter's own time and saves.
-        async Awaitable Begin(int chapter, string checkpoint = "", Func<Main, Chapter> make = null)
+        /// <summary>
+        /// Starts a chapter's story, or picks it up at a checkpoint (Continue). A new chapter starts the clock at the
+        /// chapter's own time and saves; one made by <paramref name="make"/> (the systems test's, a test's) does not.
+        /// </summary>
+        public async Awaitable Begin(int chapter, string checkpoint = "", Func<Main, Chapter> make = null)
         {
             Story = (make ?? Chapters[chapter])(this);
             if (checkpoint == "")
@@ -343,7 +347,8 @@ namespace Shop
             await step();
         }
 
-        public async Awaitable Go(string placeId, string spawn)
+        /// <summary>Takes the courier to a place, arriving at a spawn point, or at <paramref name="at"/> when given (back where they stood).</summary>
+        public async Awaitable Go(string placeId, string spawn, Vector2? at = null)
         {
             Talk.Close();
             var bell = Place && Place.Def.DoorBell;
@@ -352,7 +357,7 @@ namespace Shop
             // steps down. Along a road, or when the story moves the courier somewhere else, the view fades.
             var door = Place && (Place.Def.Indoors || Places.Get(placeId).Indoors) && Array.Exists(Place.Def.Hotspots, h => h.ExitTo?.Split('/')[0] == placeId);
             if (!door) await Fade(true);
-            Swap(placeId, spawn, door);
+            Swap(placeId, spawn, door, at);
             if (bell || Place.Def.DoorBell) Sound.Play("bell");
             if (door && spawn != "")
             {
@@ -369,7 +374,7 @@ namespace Shop
             if (Story == null) return;
             Story.Relabel();
             await Story.Entered(placeId);
-            if (held == 0) Story.Wrap(); // a scene the courier did not walk into (Release wraps those)
+            if (held == 0) Story?.Wrap(); // a scene the courier did not walk into (Release wraps those)
         }
 
         /// <summary>Glides the camera to show a world point, or back to the courier with null. Returns once it is there.</summary>
@@ -387,9 +392,16 @@ namespace Shop
             await Cards.Show(lines);
         }
 
+        /// <summary>The journal page Satria writes before bed (<see cref="Journal"/>).</summary>
+        public async Awaitable ShowJournal(string heading, string page)
+        {
+            Talk.Close();
+            await Journal.Show(heading, page);
+        }
+
         // Through a door only which place shows changes: both sides are built ahead, while a fade hides the work, and
         // kept until the courier leaves along a road or the chapter or time of day moves on.
-        void Swap(string placeId, string spawn, bool door = false)
+        void Swap(string placeId, string spawn, bool door = false, Vector2? at = null)
         {
             courier.transform.SetParent(transform, false);
             courier.gameObject.SetActive(false);
@@ -408,12 +420,13 @@ namespace Shop
                     if (to != null && (Place.Def.Indoors || Places.Get(to).Indoors)) Keep(to);
                 }
             Place.Show();
-            if (spawn != "")
+            if (spawn != "" || at != null)
             {
                 courier.gameObject.SetActive(true);
                 courier.Pose = "idle";
                 courier.Held = null;
-                Place.Enter(courier, spawn);
+                if (at is { } point) Place.Enter(courier, point);
+                else Place.Enter(courier, spawn);
             }
             Hud.Place = Place;
             Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
@@ -569,7 +582,7 @@ namespace Shop
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
             if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
-            var input = !(Cards.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle());
+            var input = !(Cards.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle());
             if (input && Hud.Handle())
             {
                 Run(OpenBag());

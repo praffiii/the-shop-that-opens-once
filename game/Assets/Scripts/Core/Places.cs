@@ -18,7 +18,7 @@ namespace Shop
         static Vector2 V(float x, float y) => new(x, y);
 
         // The Prologue's Day 0, and every chapter after it.
-        static readonly int[] DayZero = { 0 }, AfterDayZero = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        static readonly int[] DayZero = { 0 }, AfterDayZero = { 1, 2, 3, 4, 5, 6, 7, 8 }, Nights = { 1, 2, 3, 4, 5, 6, 7 };
 
         // Exits at an area's edges: a strip along the edge where a road leaves it, walked to just inside the edge.
         static Hotspot West(string id, float y, string label, string to) => new() { Id = id, At = V(0, y), Label = label, Area = R(0, -24, 24, 48), Spot = V(12, 0), ExitTo = to };
@@ -905,16 +905,24 @@ namespace Shop
                 Indoors = true,
                 Open = true,
                 WoodFloor = true,
+                // by the bed, where the night's bell wakes him
+                Spawns = new() { ["bed"] = V(799, 384) },
                 Hotspots = new[]
                 {
                     new Hotspot { Id = "door", At = V(877, 440), Label = "Outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "east/satria_home_door" },
-                    // what Satria finds of his family on Day 0: their photo over the sofa, Father's radio, Mother's sewing
-                    // machine, the kitchen's water jar, and the bed he sleeps in
-                    new Hotspot { Id = "photo", At = V(892, 349), Label = "Family photo", Area = R(-24, -86, 48, 32), Spot = V(0, 26), Chapters = DayZero },
-                    new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(0, 11), Chapters = DayZero },
-                    new Hotspot { Id = "sewing", At = V(785, 408), Label = "Sewing machine", Area = R(-24, -29, 48, 30), Spot = V(14, 10), Chapters = DayZero },
-                    new Hotspot { Id = "water_jar", At = V(979, 418), Label = "Water jar", Area = R(-10, -24, 20, 24), Spot = V(0, 10), Chapters = DayZero },
-                    new Hotspot { Id = "bed", At = V(785, 378), Label = "Bed", Area = R(-36, -56, 55, 54), Spot = V(14, 6), Chapters = DayZero },
+                    // what Satria finds of his family: their photo over the sofa, Father's radio, Mother's sewing
+                    // machine, the kitchen's water jar, and the bed he sleeps in; and what each night's routine uses: the
+                    // walnut table the night's box is set on, the coil lit before sleep, the desk where he writes his
+                    // journal, the stove where the morning's tea is made
+                    new Hotspot { Id = "photo", At = V(892, 349), Label = "Family photo", Area = R(-24, -86, 48, 32), Spot = V(0, 26) },
+                    new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(0, 11) },
+                    new Hotspot { Id = "sewing", At = V(785, 408), Label = "Sewing machine", Area = R(-24, -29, 48, 30), Spot = V(14, 10) },
+                    new Hotspot { Id = "water_jar", At = V(979, 418), Label = "Water jar", Area = R(-10, -24, 20, 24), Spot = V(0, 10) },
+                    new Hotspot { Id = "bed", At = V(785, 378), Label = "Bed", Area = R(-36, -56, 55, 54), Spot = V(14, 6) },
+                    new Hotspot { Id = "table", At = V(947, 396), Label = "Table", Area = R(-20, -24, 40, 24), Spot = V(0, 12), Chapters = Nights },
+                    new Hotspot { Id = "coil", At = V(805, 382), Label = "Mosquito coil", Area = R(-7, -9, 14, 10), Spot = V(10, 6), Chapters = Nights },
+                    new Hotspot { Id = "desk", At = V(822, 362), Label = "Desk", Area = R(-16, -24, 32, 24), Spot = V(0, 16), Chapters = Nights },
+                    new Hotspot { Id = "stove", At = V(975, 364), Label = "Stove", Area = R(-12, -26, 24, 26), Spot = V(0, 36), Chapters = Nights },
                 },
             },
             // Marlow's shop at the end of the grove path, cut open the same way: Marlow behind the counter, the clock

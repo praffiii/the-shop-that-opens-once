@@ -17,10 +17,10 @@
   const PROG = 'Am Am F C Dm Am Em Em Am Am F G C F Em Am'.split(' ');
   const CHORDS = { Am: [45, 57, 60, 64], F: [41, 57, 60, 65], C: [48, 55, 60, 64], Dm: [38, 57, 62, 65], Em: [40, 55, 59, 64], G: [43, 55, 59, 62] };
   const MAJOR = { Am: 'C', Em: 'G' };
-  // Melody in eighths; opens with the 1-8-1-7 motif (A4 A5 A4 G5).
-  const MEL = `A4 . A5 . A4 . | G5 . . . . . | . . F5 . E5 . | E5 . D5 . C5 . |
+  // Melody in eighths; opens with the 1-0-1-7 motif of 10:17 (A4 A3 A4 G5: the 0 the root an octave down).
+  const MEL = `A4 . A3 . A4 . | G5 . . . . . | . . F5 . E5 . | E5 . D5 . C5 . |
                D5 . . . F5 . | E5 . . . C5 . | B4 . . . . . | . . . . . . |
-               A4 . A5 . A4 . | G5 . . . E5 . | F5 . E5 . C5 . | D5 . . . B4 . |
+               A4 . A3 . A4 . | G5 . . . E5 . | F5 . E5 . C5 . | D5 . . . B4 . |
                E5 . . . . . | . . A4 . C5 . | B4 . . . G4 . | A4 . . . . .`
     .replace(/\|/g, ' ').trim().split(/\s+/).map(midi);
 
@@ -34,8 +34,8 @@
 
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
-    motif: 'Music box: 18:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', music: 'Quiet piano and music box',
+    motif: 'Music box: 10:17 motif', page: 'Paper rustle', pop: 'Soft blip',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', bell_toll: 'A great brass bell tolling', match: 'A match struck', scrub: 'Feet scrubbed on a coir mat', pour: 'Water poured from a jar', hiss: 'A mosquito coil hissing as it catches', kettle: 'A kettle coming to the boil', pen: 'A dip pen scratching', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -52,7 +52,7 @@
       s._note(t, s._n++ % 2 ? 2000 : 2400, { vol: 0.025, dec: 0.03, atk: 0.001 });
     },
     chime: (s, t) => [81, 76].forEach((m, i) => s._note(t + i * 0.24, hz(m), { partials: WARM, vol: 0.06, dec: 1.8 })),
-    motif: (s, t) => [69, 81, 69, 79].forEach((m, i) => s._note(t + i * STEP, hz(m), { partials: BOX, vol: 0.075, dec: i === 3 ? 3 : 2, atk: 0.003 })),
+    motif: (s, t) => [69, 57, 69, 79].forEach((m, i) => s._note(t + i * STEP, hz(m), { partials: BOX, vol: 0.075, dec: i === 3 ? 3 : 2, atk: 0.003 })),
     page: (s, t) => s._noise(t, { f: 2400, f2: 5200, q: 0.8, vol: 0.25, atk: 0.02, dur: 0.14 }),
     pop: (s, t) => s._note(t, 660, { vol: 0.045, dec: 0.12, atk: 0.003, glide: 1.5 }),
     wrong: (s, t) => [55, 52].forEach((m, i) => s._note(t + i * 0.28, hz(m), { type: 'triangle', lp: 700, vol: 0.08, dec: 0.6, atk: 0.02 })),
@@ -97,6 +97,33 @@
     bed: (s, t) => { creak(s, t, 0.5, 700, 560, 0.06); creak(s, t + 0.65, 0.3, 640, 600, 0.07); },
     // a soft breath, and the flame gone
     blow: (s, t) => s._noise(t, { f: 900, f2: 500, q: 0.6, vol: 0.3, atk: 0.08, dur: 0.5 }),
+    // the great brass bell at midnight, one stroke: a deep hum felt in the chest, its shimmer dying away slowly
+    bell_toll: (s, t) => {
+      s._note(t, 98, { partials: [[1, 1, 1], [2.0, 0.5, 0.8], [2.76, 0.35, 0.6], [5.4, 0.12, 0.3]], vol: 0.16, dec: 4.2, atk: 0.004 });
+      s._note(t, 49, { vol: 0.12, dec: 3, atk: 0.01 });
+      s._noise(t, { type: 'lowpass', f: 260, vol: 0.4, dur: 0.06, atk: 0.002 });
+    },
+    // a match dragged along the box (cresst), then the flare catching
+    match: (s, t) => {
+      s._noise(t, { f: 2600, f2: 5200, q: 1.4, vol: 0.3, atk: 0.01, dur: 0.16 });
+      s._noise(t + 0.16, { type: 'lowpass', f: 900, vol: 0.25, atk: 0.04, dur: 0.5 });
+    },
+    // feet scrubbed on the coir doormat, twice (srek-srek)
+    scrub: (s, t) => [0, 0.32].forEach(d => s._noise(t + d, { f: 1400, f2: 2200, q: 0.9, vol: 0.3, atk: 0.03, dur: 0.22 })),
+    // water poured from the clay jar into the dipper (syuuur)
+    pour: (s, t) => {
+      s._noise(t, { f: 700, f2: 1300, q: 1.6, vol: 0.32, atk: 0.12, dur: 1.1 });
+      for (let k = 0; k < 6; k++) s._note(t + 0.15 + k * 0.15, 900 + 140 * k, { vol: 0.012, dec: 0.08, atk: 0.005 });
+    },
+    // the mosquito coil's end catching: a soft hiss
+    hiss: (s, t) => s._noise(t, { type: 'highpass', f: 4200, vol: 0.12, atk: 0.1, dur: 0.9 }),
+    // the kettle on the stove, its whistle rising as it boils
+    kettle: (s, t) => {
+      s._noise(t, { type: 'lowpass', f: 500, vol: 0.12, atk: 0.4, dur: 1.4 });
+      s._note(t + 0.7, 1500, { vol: 0.03, dec: 1.2, atk: 0.4, glide: 1.25 });
+    },
+    // a dip pen across the page, three strokes (srek-srek)
+    pen: (s, t) => [0, 0.26, 0.5].forEach((d, i) => s._noise(t + d, { f: 3400 + 300 * i, q: 2.5, vol: 0.12, atk: 0.02, dur: 0.18 })),
     // crickets outside in the dark: two of them, a few chirps each, one a little farther off
     crickets: (s, t) => {
       for (let k = 0; k < 6; k++) for (const [at, f, v] of [[0, 4300, 0.03], [0.37, 4700, 0.018]])

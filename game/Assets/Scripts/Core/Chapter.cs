@@ -135,7 +135,7 @@ namespace Shop
         /// <summary>Glides the camera to show a point (such as an anchor), or back to the courier with null.</summary>
         protected Awaitable Look(Vector2? at) => Main.LookAt(at);
 
-        protected Awaitable Go(string place, string spawn) => Main.Go(place, spawn);
+        protected Awaitable Go(string place, string spawn, Vector2? at = null) => Main.Go(place, spawn, at);
 
         protected Awaitable Wait(float seconds) => Main.Wait(seconds);
 
@@ -221,9 +221,10 @@ namespace Shop
             Sfx("right");
         }
 
-        /// <summary>The keepsake is home: in Marlow's shop the clock moves on a minute, a lantern goes out, and its box is back in the cabinet, open and empty.</summary>
+        /// <summary>The keepsake is home: the view cuts to Marlow's shop, where the clock moves on a minute, a lantern goes out, and its box is back in the cabinet, open and empty; then back to where the courier stood.</summary>
         protected async Awaitable LanternGoesOut()
         {
+            var (place, feet) = (Main.Place.Def.Id, Actor("courier").Feet);
             await Go("shop", "counter");
             Music("resolved");
             await Look(Anchor("clock"));
@@ -239,6 +240,7 @@ namespace Shop
             Sfx("chime");
             Game.LanternsOut = lit + 1;
             await Wait(0.8f);
+            await Go(place, "", feet);
         }
     }
 }
