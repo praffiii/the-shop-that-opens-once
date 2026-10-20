@@ -76,6 +76,8 @@ namespace Shop
         public Bag Bag { get; private set; }
         public Card Cards { get; private set; }
         public Journal Journal { get; private set; }
+        /// <summary>The screen minigames are played on (<see cref="Shop.Board"/>).</summary>
+        public Board Board { get; private set; }
         public Reveal Reveal { get; private set; }
 
         RawImage screen;
@@ -170,6 +172,7 @@ namespace Shop
                 bar.color = Look.Ink;
                 bar.gameObject.SetActive(false);
             }
+            Board = Board.Create(t); // under the talk box, which speaks over it
             Talk = Talk.Create(t);
             Hud = Hud.Create(t);
             Bag = Bag.Create(t);
@@ -582,7 +585,7 @@ namespace Shop
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
             if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
-            var input = !(Cards.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle());
+            var input = !(Cards.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle() || Board.Handle());
             if (input && Hud.Handle())
             {
                 Run(OpenBag());

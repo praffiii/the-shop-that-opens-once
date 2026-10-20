@@ -155,6 +155,27 @@ namespace Shop
             finally { await Cinema(false); }
         }
 
+        /// <summary>A minigame played over the world till it is won: after a fail its mentor (or Satria) says that fail's line, and R starts it over.</summary>
+        protected async Awaitable Play(Minigame game)
+        {
+            Main.Talk.Close();
+            Main.Board.Show(game);
+            try
+            {
+                for (var outcome = await Main.Board.Round(); outcome != Minigame.Outcome.Won; outcome = await Main.Board.Round())
+                {
+                    var (who, line) = outcome == Minigame.Outcome.FailA ? game.FailA : game.FailB;
+                    await Say(who, line, who == "courier" ? "neutral" : "smile");
+                    Main.Talk.Close();
+                    await Main.Board.Retry();
+                }
+            }
+            finally
+            {
+                Main.Board.Close();
+            }
+        }
+
         /// <summary>Marlow fetches the night's box from the cabinet: he goes to it and takes it out of its cubby.</summary>
         protected async Awaitable FetchBox(int box)
         {

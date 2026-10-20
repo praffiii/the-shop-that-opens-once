@@ -78,6 +78,16 @@ namespace Shop
             return img;
         }
 
+        /// <summary>A solid block of colour covering <paramref name="rect"/>.</summary>
+        public static Image Block(string name, Transform parent, Rect rect, Color color)
+        {
+            var img = Picture(name, parent);
+            img.enabled = true;
+            img.color = color;
+            Place(img.rectTransform, rect);
+            return img;
+        }
+
         public static void SetSprite(Image img, Sprite sprite, int scale = 1)
         {
             img.sprite = sprite;

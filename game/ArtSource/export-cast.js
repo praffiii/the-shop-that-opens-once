@@ -120,6 +120,66 @@
     put('phase_glyph', strip(glyphs), { frames: 4 });
   }
 
+  /* The minigame bench (the Board): a workbench frame of wood with brass rivets round the paper; the title on a nailed
+     wood plate; the meter a brass-rimmed iron gauge with the sweet band glowing like hot iron, brass notches marking
+     the band's ends above and below (so it reads without its colour) and a brass-headed needle; the steps as iron
+     sockets that glow once done; and key caps for the keys the instructions name. */
+  function bench(put) {
+    const WOOD = { o: 'ink', fill: 'wood3', hi: 'wood2', lo: 'wood4' };
+    const [frame, fx] = canvas(30, 30);
+    fx.drawImage(box(30, 30, 2, WOOD), 0, 0);
+    fx.drawImage(box(22, 22, 1, { o: 'ink', fill: 'sky0', hi: 'cream1', lo: 'white' }), 4, 4);   // the paper, set in
+    for (const [i, j] of [[1, 1], [26, 1], [1, 26], [26, 26]]) { rect(fx, i + 1, j + 1, 2, 2, 'brass1'); dot(fx, i + 2, j + 2, 'brass3'); }
+    put('bench', frame, { margins: [7, 7, 7, 7], text: PAL.ink });
+
+    const [plate, px] = canvas(20, 14);
+    px.drawImage(box(20, 14, 1, WOOD), 0, 0);
+    rect(px, 1, 12, 18, 1, 'wood5');
+    for (const i of [2, 16]) { rect(px, i, 5, 2, 2, 'brass1'); dot(px, i + 1, 6, 'brass3'); }
+    put('plate', plate, { margins: [5, 4, 5, 4], text: PAL.cream0 });
+
+    const [gauge, gx] = canvas(16, 12);
+    gx.drawImage(box(16, 12, 1, { o: 'ink', fill: 'brass2', hi: 'brass1', lo: 'brass3' }), 0, 0);
+    gx.drawImage(box(12, 8, 0, { o: 'iron4', fill: 'iron3', hi: 'iron4', lo: 'iron2' }), 2, 2);   // the iron, recessed
+    put('gauge', gauge, { margins: [4, 4, 4, 4] });
+
+    const [glow, lx] = canvas(6, 8);
+    ['light3', 'light2', 'light1', 'light0', 'white', 'light0', 'light1', 'light2'].forEach((c, j) => rect(lx, 0, j, 6, 1, c));
+    put('glow', glow, { margins: [1, 4, 1, 4] });
+
+    const notch = sprite(['ooooo', '.obo.', '..o..'], { o: 'ink', b: 'brass1' });
+    const [up, ux] = canvas(5, 3); ux.translate(0, 3); ux.scale(1, -1); ux.drawImage(notch, 0, 0);
+    put('notch', strip([notch, up]), { frames: 2 });
+
+    put('needle', sprite([
+      'ooooooo',
+      'obbbbbo',
+      '.occco.',
+      '..oco..',
+      ...Array(15).fill('..owo..'),
+      '...o...',
+    ], { o: 'ink', b: 'brass1', c: 'brass2', w: 'cream0' }));
+
+    // a step's socket: dark iron to do, a glowing ember once done
+    const pip = shades => {
+      const [c, x] = canvas(9, 9);
+      const inside = (i, j) => i >= 0 && j >= 0 && i < 9 && j < 9 && (i - 4) ** 2 + (j - 4) ** 2 <= 18;
+      for (let j = 0; j < 9; j++) for (let i = 0; i < 9; i++) {
+        if (!inside(i, j)) continue;
+        const r = (i - 4) ** 2 + (j - 4) ** 2, edge = !(inside(i - 1, j) && inside(i + 1, j) && inside(i, j - 1) && inside(i, j + 1));
+        dot(x, i, j, edge ? 'ink' : shades[r < 3 ? 0 : r < 9 ? 1 : 2]);
+      }
+      return c;
+    };
+    put('pip', strip([pip(['iron4', 'iron3', 'iron2']), pip(['light0', 'light1', 'light2'])]), { frames: 2 });
+
+    // a key cap, its face over a deeper side
+    const [key, kx] = canvas(12, 13);
+    kx.drawImage(box(12, 13, 1, { o: 'ink', fill: 'cream0', hi: 'white', lo: 'cream1' }), 0, 0);
+    rect(kx, 1, 9, 10, 3, 'cream2'); rect(kx, 1, 9, 10, 1, 'stone2');
+    put('key', key, { margins: [3, 3, 3, 5], text: PAL.ink });
+  }
+
   function ui() {
     const O = { o: 'ink' }, PAPER = { o: 'ink', fill: 'sky0', hi: 'white', lo: 'cream1' }, spec = {};
     const put = (name, img, extra = {}) => { png(`ui/${name}.png`, img); spec[name] = { size: [img.width / (extra.frames || 1), img.height], ...extra }; };
@@ -200,6 +260,7 @@
     ], { ...O, w: 'white', b: 'cream0', c: 'cream2' }), { hotspot: [3, 0] });
 
     dayDial(put);
+    bench(put);
     put('title', TITLE.render(10 * 60 + 17));   // the clock in the O stopped at 10:17, the hour the station's watch stopped
     json('ui/ui.json', spec);
     // Every PAL colour as #rrggbb; the translucent cast shadow becomes #rrggbbaa.
