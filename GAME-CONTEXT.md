@@ -46,7 +46,9 @@ Every fact carries a source tag:
 
 **Engine and builds**
 - `[Decision]` The engine is Unity 6.6 (6000.6.6f1) with C#. It replaces Godot 4. The editor is VS Code. (2026-10-18)
-- `[Decision]` Build targets: Web first, then Windows. Those two build modules are installed. (2026-10-18)
+- `[Decision]` The game ships as desktop builds for Windows and macOS, into `game/Builds/Windows` and `game/Builds/macOS` (ignored by git). The web build is cancelled: with the full HD-2D look (Bokeh depth of field, bloom, HDR, shadows over a full-window view) it ran at about 6 fps in Chrome on an Apple M4, while the same scene costs about 2.4 ms a frame natively, and reaching 60 on the web would have meant rendering less. The user chose the full look over the web. (2026-10-20)
+- `[Decision]` Builds keep every post-processing effect: URP's stripping of unused post-processing variants is off, because the game builds its depth of field, bloom and vignette in code (`Main.Effects`), so no volume asset in the project shows them to the stripper and a build would drop them. (2026-10-20)
+- `[Decision]` Build targets: Web first, then Windows. Those two build modules are installed. (2026-10-18, superseded 2026-10-20)
 - `[Decision]` The Godot MVP is an archive and stays untouched. It lives in `archive/godot-mvp/`, and the git tag `godot-mvp` marks its last commit. Its web build stays live at https://the-shop-that-opens-once-game.vercel.app as a record. (2026-10-18)
 - `[Decision]` The Unity project lives in `game/`. It started from the Universal 2D template (URP with the 2D renderer), trimmed to sprites, the Input System, uGUI and the Test Framework. (2026-10-18)
 - `[Decision]` Before Unity: the engine was Godot 4.7.2 with GDScript, because C# projects in Godot 4 cannot export to the web. (2026-09-28, superseded 2026-10-18)
@@ -436,7 +438,6 @@ All of it is synthesized or recorded from scratch `[Decision]`, as the Godot bui
 ## Open questions
 
 **Technology and pipeline**
-- Under which URL does the Unity web build go live?
 - Camera: zoom in during conversations? The user wants this later, not now (2026-09-29).
 
 **Game design**
