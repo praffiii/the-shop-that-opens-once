@@ -413,6 +413,8 @@
         at('shop_gone', V.shopGone(), 300, 236, { clear: false });
         // the ancient tree the shop grew into: behind it, its roots over the roof, its crown over the ridge
         at('shop_tree', V.grandTree({ r: 66, seed: 9, leaf: 'deep', tall: 96 }), 300, 176, { sway: 1, clear: false });
+        // mushrooms in the tree's shade either side of its door
+        [[236, 266, 1], [272, 268, 2], [336, 252, 3], [362, 250, 2]].forEach(([x, y, seed], i) => at('door_mushrooms_' + i, V.mushrooms(seed), x, y, { walk: true }));
         // ancient trees along the way, just behind the path so their roots reach it, never in front of it: in the
         // 3D view a crown between the camera and the path would hide it
         [[600, 470, 56, 1, 'deep'], [250, 548, 58, 2, 'teal'], [150, 432, 50, 3, 'deep'], [604, 340, 54, 4, 'teal'], [118, 300, 60, 5, 'deep'], [378, 412, 46, 6, 'deep'], [60, 590, 58, 7, 'teal'], [566, 196, 52, 8, 'deep']]

@@ -623,21 +623,11 @@
     const lanterns = [-44, -30, -16, 0, 16, 30, 44].flatMap((x, i) => [[on, ''], [off, '_day']].map(([l, k]) =>
       card({ img: l.img, ax: l.ax, ay: lh - 1 }, x, -OV, { up: Math.round(under(x)) - lh, wall: true, walk: true, name: `lantern_${i}${k}`, ...(k ? { day: true } : { light: true }) })));
     const closed = V.closedCard();
-    // the roots that come down its corners run out over the ground either side of the door
-    const RW = 220, mat = inked(RW, 30, b => {
-      for (const sd of [-1, 1]) {
-        const x0 = (RW >> 1) + sd * 50;
-        V.root(b, [[x0, 2], [x0 + sd * 20, 8], [x0 + sd * 38, 12], [x0 + sd * 56, 20]], 14, 4, OLD, 30 + sd);
-        V.root(b, [[x0, 3], [x0 - sd * 6, 12], [x0 - sd * 10, 22]], 10, 3, OLD, 32 + sd);
-        V.root(b, [[x0 + sd * 18, 7], [x0 + sd * 30, 18], [x0 + sd * 34, 27]], 7, 3, OLD, 34 + sd);
-      }
-    });
     return {
       model: m, base: [X0 - 4, X1 + 4], depth: D, door: 0, w: X1 - X0 + 2 * OV, ay: 160,
       cards: [
         ...lanterns,
         card({ img: closed, ax: closed.width >> 1, ay: closed.height - 1 }, 0, 0, { up: 24, wall: true, walk: true, name: 'closed', day: true }),
-        card({ img: mat.canvas(), ax: (RW >> 1) + 1, ay: 0 }, 0, -1, { up: 1, walk: true, name: 'roots' }),   // lifted off the ground it lies on, along the camera's ray
         ...[[-62, 2, 12], [58, 4, 11], [-40, -4, 8], [44, -2, 9]].map(([x, back, r], i) => card(V.bush({ r, seed: 80 + i, leaf: 'deep' }), x, back, { name: 'bush_' + i })),
         ...[[-60, 6], [-50, -6], [-24, -8], [24, -8], [52, -6], [62, 8]].map(([x, back], i) => card(V.fern(i + 3), x, back, { walk: true, name: 'fern_' + i })),
         card(V.mossRock(4), -68, 14, { name: 'rock_0' }), card(V.mossRock(5), 66, 20, { name: 'rock_1' }),

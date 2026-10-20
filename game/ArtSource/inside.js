@@ -555,7 +555,8 @@
         [100, 0, 114, 6], [116, 0, 200, 10], [124, 46, 196, 54],
         [1, 64, 15, 80], [1, 90, 15, 106], [48, 86, 72, 96], [34, 88, 44, 96], [76, 88, 86, 96],
         [208, 0, 226, 12], [258, 18, 271, 60], [258, 72, 271, 106], [214, 52, 240, 62], [236, 74, 254, 86],
-        [220, 92, 244, 104], [208, 108, 222, 116], [176, 78, 200, 90], [98, 100, 110, 108], [113, 118, 123, 126]],
+        [220, 92, 244, 104], [208, 108, 222, 116], [176, 78, 200, 90], [98, 100, 110, 108], [113, 118, 123, 126],
+        [194, 48, 206, 56], [211, 18, 227, 26]],
       // the customer's side of the counter, the clock, Marlow's place behind the counter, and before each box
       anchors: { counter: [160, 64], clock: [107, 16], marlow: [160, 36], ...Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map(i => ['box_' + i, [Math.min(122 + 12 * i, 190), 18]])) },
       // faded plum paper with a gold sprig, over a wainscot painted the shopfront's bottle green
@@ -567,19 +568,14 @@
         fill(b, 0, h - 2, w, 2, 'wood5');
         fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'wood5'); fill(b, 0, 0, w, 1, 'wood3');
       },
-      paint(b, R, at) {
+      paint(b, R) {
         // the red rug under the round table, Marlow's worn one by his armchair, the runner from the door to the
-        // counter, the doormat, and the tree's roots out from under the back wall
+        // counter and the doormat
         const red = (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 1 ? 'roofR4' : e < 3 ? 'brass2' : e < 4 ? 'roofR3' : (x + y) % 6 === 0 || (x - y + 120) % 6 === 0 ? 'roofR1' : 'roofR2'; };
         R(24, 68, 96, 114, (x, y, w, h) => (((x - w / 2) / (w / 2)) ** 2 + ((y - h / 2) / (h / 2)) ** 2 > 1.02 ? 0 : red(x, y, w, h)));
         R(32, 28, 72, 52, (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 1 ? PLUM[4] : e < 2 ? 'brass3' : (x >> 2) % 2 === (y >> 2) % 2 ? PLUM[1] : PLUM[2]; });
         R(140, 56, 160, 126, red);
         R(136, 126, 164, 136, (x, y, w, h) => (Math.min(x, y, w - 1 - x, h - 1 - y) < 1 ? 'dirt3' : y % 2 ? 'dirt2' : 'dirt1'));
-        const root = (pts, w0, w1, seed) => V.root(b, pts.map(([x, y]) => at(x, y)), w0, w1, V.OLD, seed);
-        root([[96, 0], [92, 8], [80, 16], [68, 20]], 12, 4, 1);
-        root([[100, 0], [104, 10], [98, 22]], 8, 3, 2);
-        root([[206, 0], [212, 10], [224, 16]], 11, 4, 3);
-        root([[202, 0], [198, 12], [200, 24]], 8, 3, 4);
       },
       back(b, w, h) {
         // posts where the bays meet; the roots over the wall down the partitions, the tree's leaves spilling over its
@@ -707,10 +703,15 @@
           [[3, 8, 'brass1'], [7, 9, 'rose'], [11, 8, 'roofB2'], [4, 19, 'roofG2'], [9, 19, 'brass2'], [13, 18, 'cream0']].forEach(([x, y, k]) => x < w - 3 && fill(b, x, y, 2, 3, k));
           px(b, 3, 3, 'white'); px(b, 4, 3, 'white');
         }));
-        // the store: crates by the back door, shelves of jars and parcels along the east wall, a trunk, a stack of
-        // crates, barrels and sacks
+        // the store: crates by the back door and the post waiting before them, string-tied, shelves of jars and parcels
+        // along the east wall, a trunk, a stack of crates, barrels and sacks
         const crate = PROPS.crate;
         T.box('crate_0', 208, 0, 226, 12, 0, 14, crate); T.box('crate_1', 210, 1, 222, 10, 14, 25, crate);
+        T.card('parcels', sprite(16, 14, b => {
+          fill(b, 0, 8, 16, 6, 'dirt2'); fill(b, 0, 8, 16, 1, 'dirt1'); fill(b, 0, 13, 16, 1, 'dirt3'); fill(b, 6, 8, 1, 6, 'cream0'); fill(b, 10, 10, 4, 2, 'cream0');
+          fill(b, 3, 2, 10, 6, 'dirt1'); fill(b, 3, 2, 10, 1, 'cream1'); fill(b, 3, 7, 10, 1, 'dirt3'); fill(b, 7, 2, 1, 6, 'roofR3'); fill(b, 3, 4, 10, 1, 'roofR3');
+          px(b, 6, 1, 'roofR3'); px(b, 8, 1, 'roofR3'); px(b, 5, 0, 'roofR3'); px(b, 9, 0, 'roofR3');
+        }), 219, 26);
         T.box('crate_2', 236, 74, 254, 86, 0, 16, crate); T.box('crate_3', 238, 76, 250, 84, 16, 27, crate);
         const shelves = (b, w, h, l, which) => {
           fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
@@ -741,6 +742,8 @@
         T.card('books', sprite(12, 10, b => { [['roofR2', 0, 12], ['roofB2', 3, 10], ['roofG2', 6, 11], ['brass2', 8, 9]].forEach(([c, y, w]) => { fill(b, 0, y, w, 2, c); fill(b, 0, y, w, 1, 'cream0'); }); }), 106, 62);
         // by the door, ferns grown in from the grove
         T.card('fern_l', V.fern(3), 128, 132); T.card('fern_r', V.fern(6), 172, 132);
+        // and a potted palm closing the counter's end by the store
+        T.card('palm', PROPS.plant(), 200, 56);
       },
     },
     // Theo's studio on the bluff (Night 3), cut open: the darkroom in the west behind its red curtain (the bench of
@@ -1186,7 +1189,18 @@
     for (const [k, c] of Object.entries(E.clips)) S.clips[k] = { ...c, draw: dimDraw(c.draw) };
     const standsIn = (x, y) => x > fx0 - 4 && x < fx1 + 4 && y > y0 - back - 4 && y < y1 + FLOOR + 4;
     const covered = it => { const [bx, , bw] = it.box; return it.name.startsWith(id) || standsIn(bx + bw / 2, it.y); };
-    S.decals.below = E.decals.below.filter(([k, x, y]) => { const c = E.clips[k]; return c.ay === undefined || !standsIn(x + c.w / 2, y + c.ay - 1); });
+    // The game stands a decal on the bottom row of what it draws, every column of it upright there: one standing at the
+    // room's depth with any of it across the room (a tree beside it or behind it whose roots reach over its floor) goes.
+    const drawn = new Map(), span = c => drawn.get(c) || drawn.set(c, (() => {
+      const cv = document.createElement('canvas'); cv.width = c.w; cv.height = c.h;
+      const g = cv.getContext('2d'); c.draw(g, 0);
+      const a = g.getImageData(0, 0, c.w, c.h).data;
+      let l = c.w, r = -1, bottom = -1;
+      for (let j = 0; j < c.h; j++) for (let i = 0; i < c.w; i++) if (a[(j * c.w + i) * 4 + 3]) { l = Math.min(l, i); r = Math.max(r, i); bottom = j; }
+      return [l, r, bottom];
+    })()).get(c);
+    const across = (x, y, c) => { const [l, r, bottom] = span(c); return x + r > fx0 - 4 && x + l < fx1 + 4 && standsIn(fx0, y + bottom); };
+    S.decals.below = E.decals.below.filter(([k, x, y]) => { const c = E.clips[k]; return c.ay === undefined || !across(x, y, c); });
     for (const it of E.items) if (!covered(it)) S.items.push(it.track ? { ...it, track: { ...it.track, frames: it.track.frames.map(f => dim(new ImageData(new Uint8ClampedArray(f.data), f.width, f.height))) } } : { ...it, draw: dimDraw(it.draw) });
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const cg = cv.getContext('2d'); cg.filter = `brightness(${SHADE})`; cg.drawImage(E.ground, 0, 0); cg.filter = 'none';
