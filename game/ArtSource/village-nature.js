@@ -622,6 +622,26 @@
     return done(o, cx, gy, { base: [-4, 4], foot: 3, lit: [rect1(glass)], shadow: [5, 2] });
   }
 
+  /* The children's marble ring scratched in the bare earth of a lawn (Night 2): a worn patch, the ring's line, the
+     marbles of clay and glass inside and the big shooter outside. Flat on the ground, so it is drawn from its top row
+     and anyone standing on or below it draws over it. */
+  function marbleRing() {
+    const W = 56, H = 22, cx = W / 2, cy = H / 2, b = new Buf(W, H);
+    // the line scratched through the grass with a stick, broken where the grass grew back; inside it the grass worn
+    // thin in clumps by knees and elbows, so the lawn still shows through
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const e = ((x + 0.5 - cx) / 26) ** 2 + ((y + 0.5 - cy) / 10) ** 2, n = hash(x, y, 31), wear = KIT.vnoise(x / 5, y / 3, 7);
+      if (e > 0.7 && e < 0.86) { if (hash(Math.floor(x / 3), 0, 5) > 0.15) px(b, x, y, n < 0.7 ? 'dirt4' : 'dirt3'); }
+      else if (e <= 0.7 && wear * (1.2 - e) > 0.45) px(b, x, y, n < 0.3 ? 'dirt2' : 'dirt3');
+    }
+    // the marbles: glass with a lit fleck, and one clay; the shooter waiting outside the line
+    const marble = (x, y, c, d) => { fill(b, x, y, 2, 2, c); px(b, x + 1, y + 1, d); px(b, x, y, 'white'); };
+    [[20, 7, 'sky1', 'water3'], [28, 10, 'roofR1', 'roofR3'], [33, 6, 'yellow', 'orange'], [24, 13, 'grass1', 'grass3'], [32, 13, 'lilac', 'dusk5'], [16, 11, 'dirt1', 'dirt4']]
+      .forEach(([x, y, c, d]) => marble(x, y, c, d));
+    fill(b, 47, 17, 3, 3, 'water2'); px(b, 47, 17, 'white'); fill(b, 48, 19, 2, 1, 'water4'); px(b, 49, 18, 'water4');
+    return { img: b.canvas(), ax: Math.round(cx), ay: 0, below: H + 24 };
+  }
+
   /* A wooden bucket with iron bands, a wire handle and water in it. */
   function bucket() {
     const W = 12, H = 13, gy = H - 1;
@@ -776,5 +796,5 @@
     return { img: frames[0], frames, fps: 8, ax: tx, ay: ty, light: true };
   }
 
-  Object.assign(VIL, { oak, birch, blossom, fruitTree, willow, deadTree, fern, reeds, lilyPad, mushrooms, flowerClump, hedge, vegRow, boulder, log, logPile, stumpBig, bench2, crateStack, sacks, cart, beetleCart, woodFence, pickets, gateArch, wellRoofed, streetLamp, bucket, broom, flowerPot, windowBox, ladybug, snail, butterfly, beetle, dragonfly, firefly });
+  Object.assign(VIL, { oak, birch, blossom, fruitTree, willow, deadTree, fern, reeds, lilyPad, mushrooms, flowerClump, hedge, vegRow, boulder, log, logPile, stumpBig, bench2, crateStack, sacks, cart, beetleCart, woodFence, pickets, gateArch, wellRoofed, streetLamp, bucket, broom, marbleRing, flowerPot, windowBox, ladybug, snail, butterfly, beetle, dragonfly, firefly });
 })();

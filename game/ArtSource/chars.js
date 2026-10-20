@@ -400,6 +400,17 @@
   };
   // Helen in 1952, for the memory of the platform: the same, her hair still dark.
   CAST.young_helen = { ...CAST.helen, body: 'young' };
+  // The marble trio on the square's lawn (Night 2), nothing like Pip: Gigi in a green pinafore with a yellow bow, Kiko
+  // in an orange shirt and a straw cap, and Lulu, Nora's granddaughter, in pink with her two bows.
+  CAST.gigi = { kid: true, sleeve: ['grass1', 'grass2', true], lash: true,
+    torso: { dx: -1, rows: ['..RPPw..', '.RPPPPw.', '.RPPPPQ.', '.PPPPQQ.', 'PPPPPQQQ', 'PPPPQQQQ', '.PQQQQQ.'], key: { R: 'grass1', P: 'grass2', Q: 'grass3', w: 'white' } },
+    parts: [{ z: 'hat', at: [0, -2], rows: ['YY.YY', 'YyOyY'], key: { Y: 'yellow', y: 'light3', O: 'orange' } }] };
+  CAST.kiko = { kid: true, sleeve: ['orange', 'roofR2', true],
+    torso: { rows: ['.cccc.', 'ooooOO', 'oooooO', 'ooooOO', '.oooO.', '..oO..'], key: { c: 'white', o: 'orange', O: 'roofR2' } },
+    parts: [{ z: 'hat', at: [-3, -1], rows: ['....11111...', '...1222223..', '3322222233..'], key: { 1: 'dirt0', 2: 'dirt1', 3: 'dirt2' } }] };
+  CAST.lulu = CAST.grandkid;
+  // Pip ten years ago, in the storm's emergency tent (Night 2's memory): small as he is now
+  CAST.young_pip = CAST.pip;
   const IDS = Object.keys(CAST);
 
   /* How each character that turns looks from the front and from the back, over the shared ant body (drawn round x 20,
@@ -559,6 +570,7 @@
     },
   };
   TURN.young_helen = TURN.helen;
+  if (TURN.pip) TURN.young_pip = TURN.pip;
 
   /* ---------------- poses ---------------- */
   const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2, knead: 4, tinker: 4 };
@@ -573,14 +585,15 @@
     s.push('talk');
     // handing things over, as the nights' errands and handovers do
     const HANDS = ['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'baker', 'arlo', 'mender', 'gardener', 'pip'];
-    if ([...HANDS, 'helen', 'young_helen'].includes(id)) s.push('receive');
+    if ([...HANDS, 'helen', 'young_helen', 'young_pip'].includes(id)) s.push('receive');
     if (HANDS.includes(id)) s.push('give');
     // sitting on the nights' benches and steps, and moved when what was lost comes home
-    if (['nora', 'pip', 'leo', 'theo', 'bram', 'valdo'].includes(id)) s.push('sit');
-    if (['pip', 'theo', 'sam', 'leo', 'nora', 'mender'].includes(id)) s.push('moved');
+    if (['nora', 'pip', 'young_pip', 'leo', 'theo', 'bram', 'valdo'].includes(id)) s.push('sit');
+    if (['pip', 'young_pip', 'theo', 'sam', 'leo', 'nora', 'mender'].includes(id)) s.push('moved');
     if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', 'lie', 'wake', 'write', 'drink', 'crouch', 'strike', 'wash');   // the nightly routine's too
     if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'young_helen') s.push('moved');
+    if (['gigi', 'kiko', 'lulu'].includes(id)) s.push('crouch');   // flicking marbles
     if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer', 'tinker');
@@ -1308,6 +1321,15 @@
       }); } },
   };
   PORT.young_helen = PORT.helen;
+  PORT.gigi = { cloth: ['grass1', 'grass2', 'grass3'], kid: true, lash: true,
+    bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 7, 2), () => 'white'); },
+    hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 5, P.cy - 12, 4, 3) || inE(x, y, P.cx + 3, P.cy - 12, 4, 3), (x, y) => (y < P.cy - 12 ? 'light3' : 'yellow')); rect(g, P.cx - 2, P.cy - 14, 3, 4, 'orange'); }); } };
+  PORT.kiko = { cloth: ['orange', 'orange', 'roofR2'], kid: true,
+    bust(g) { region(g, (x, y) => inE(x, y, 26, 35, 8, 2), () => 'white'); },
+    hat(x, P) { plate(x, g => { region(g, (x, y) => inE(x, y, P.cx - 1, P.cy - 6, 13, 7) && y <= P.cy - 5, (x, y) => band((x - P.cx) + (y - P.cy) * 1.5, -20, -4, ['dirt0', 'dirt1', 'dirt2']));
+      rect(g, P.cx - 16, P.cy - 6, 30, 2, 'dirt2'); }); } };
+  PORT.lulu = PORT.grandkid;
+  PORT.young_pip = PORT.pip;
 
   function renderPortrait(id, frame, mood) {
     const d = PORT[id] || { cloth: [CAST[id].sleeve[0], CAST[id].sleeve[0], CAST[id].sleeve[1]] };

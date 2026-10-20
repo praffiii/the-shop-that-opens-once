@@ -16,8 +16,6 @@ namespace Shop
     {
         /// <summary>Helen's bench on the platform, where Satria sits beside her, and the memory's places on it in 1952.</summary>
         static readonly Vector2 BesideHelen = new(452, 277), Platform = new(470, 296);
-        /// <summary>Where the courier stands to someone at their work: a step to their right and a little nearer.</summary>
-        static readonly Vector2 Beside = new(30, 4);
 
         public Night1(Main main) : base(main) { }
 
@@ -185,13 +183,7 @@ namespace Shop
                 await Say("baker", "Well done! Quick hands, courier's hands!", "smile");
                 await Say("baker", "Now, that watch. The black on its back is no ordinary dirt. It's burnt cable resin, and only damar oil softens it.");
                 courier.FaceTo(baker.Feet.x);
-                courier.Held = Keepsakes.Art("bread", "xs");
-                courier.Pose = "receive";
-                Sfx("pop");
-                await Wait(0.7f);
-                courier.Held = null;
-                courier.Pose = "idle";
-                Game.Bag.Add("bread");
+                await Receive("bread");
                 await Say("baker", "Take this sweet loaf, still warm, to Arlo at the jetty and trade it for a bottle of his damar oil. Then take the watch to the Mender at the railway forge.");
                 Note("The Baker: trade his sweet loaf with Arlo at the jetty for damar oil, then take the watch to the Mender.");
             });
@@ -249,13 +241,7 @@ namespace Shop
                 mender.Held = null;
                 mender.FaceTo(courier.Feet.x);
                 courier.FaceTo(mender.Feet.x);
-                courier.Held = Keepsakes.Art("oil_lantern", "xs");
-                courier.Pose = "receive";
-                Sfx("pop");
-                await Wait(0.7f);
-                courier.Held = null;
-                courier.Pose = "idle";
-                Game.Bag.Add("oil_lantern");
+                await Receive("oil_lantern");
                 await Say("mender", "Take this oil lantern. The platform's been pitch dark since the storm brought its poles down, twenty years back.");
                 Note("Helen sits on the bench at the platform's end every evening at dusk.", keep: true);
             });
@@ -342,52 +328,5 @@ namespace Shop
             await Say("helen", "Satria? What are you doing at this dead station so late, love? It's cold here. It gets into your joints.", "surprised");
             await Say("courier", "I've something for you. It was entrusted to me.");
         });
-
-        // Someone steps to their work place and the courier comes up beside them, the two turned to each other.
-        async Awaitable Meet(string id, Vector2 at)
-        {
-            var stepping = Walk(id, at);
-            await Walk("courier", at + Beside);
-            await stepping;
-            Actor(id).FaceTo(Actor("courier").Feet.x);
-            Actor("courier").FaceTo(at.x);
-        }
-
-        // The courier hands one thing over and gets another back.
-        async Awaitable Trade(string id, string give, string get)
-        {
-            var owner = Actor(id);
-            var courier = Actor("courier");
-            owner.FaceTo(courier.Feet.x);
-            courier.FaceTo(owner.Feet.x);
-            courier.Held = Keepsakes.Art(give, "xs");
-            courier.Pose = "give";
-            await Wait(0.7f);
-            courier.Held = null;
-            courier.Pose = "idle";
-            Game.Bag.Remove(give);
-            owner.Held = Keepsakes.Art(give, "xs");
-            owner.Pose = "receive";
-            await Wait(0.5f);
-            owner.Held = Keepsakes.Art(get, "xs");
-            owner.Pose = "give";
-            await Wait(0.6f);
-            owner.Held = null;
-            owner.Pose = "idle";
-            courier.Held = Keepsakes.Art(get, "xs");
-            courier.Pose = "receive";
-            Sfx("pop");
-            await Wait(0.7f);
-            courier.Held = null;
-            courier.Pose = "idle";
-            Game.Bag.Add(get);
-        }
-
-        // The watch changes in the bag where it lies.
-        static void Swap(string from, string to)
-        {
-            var at = Game.Bag.IndexOf(from);
-            if (at >= 0) Game.Bag[at] = to;
-        }
     }
 }

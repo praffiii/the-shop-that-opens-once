@@ -1902,6 +1902,284 @@
     return c;
   };
 
+  // Mochi, Pip's patchwork rabbit (Night 2): pink polka-dot cotton with a sky-blue patch down its right side, sewn by
+  // Ratih. Torn, as the box gives it: the left ear ripped half off and drooping with its stuffing out, the left eye
+  // gone to a frayed hole, and two years of mud-flood dust in the weave. Mended (rabbit_mended): the ear sewn back
+  // with big red cross stitches, Nora's wooden button for the eye, and a red heart patched on its back.
+  const rabbitKey = { o: 'roofR3', a: 'pink', b: 'rose', w: 'white', q: 'sky1', Q: 'sky2', e: 'ink', x: 'cream2', s: 'cream0', n: 'roofR2', r: 'red', B: 'wood2', h: 'red', W: 'cream0' };
+  XS.rabbit = (v = 'front') => v === 'back' ? S(`
+    ........
+    ....oo..
+    oo..oao.
+    saooaao.
+    .oaaaaao
+    .oaasaao
+    ..oaxao.
+    .oaaaaqo
+    .oaaWWqo
+    ..oo.WW.`, rabbitKey) : S(`
+    ........
+    ....oo..
+    oo..oao.
+    saooaao.
+    .oaaaaao
+    .oxaeaqo
+    ..oanqo.
+    .oawaqqo
+    .oaaaqqo
+    ..oo.oo.`, rabbitKey);
+  XS.rabbit_mended = (v = 'front') => v === 'back' ? S(`
+    .o...o..
+    oro.oao.
+    oao.oao.
+    .oaoaao.
+    .oaaaaao
+    .oaaaaao
+    ..oaaao.
+    .oahhaqo
+    .oahhWWo
+    ..oo.WW.`, rabbitKey) : S(`
+    .o...o..
+    oro.oao.
+    oao.oao.
+    .oaoaao.
+    .oaaaaao
+    .oBaeaqo
+    ..oanqo.
+    .oawaqqo
+    .oaaaqqo
+    ..oo.oo.`, rabbitKey);
+  SM.rabbit = (v = 'front') => v === 'back' ? S(`
+    ............
+    .......oo...
+    ......oaao..
+    ......oaao..
+    .oo...oaao..
+    saaoooaao...
+    .ooaaaaaaoo.
+    ..oaaawaaaao
+    ..oawaaaawao
+    ..oaaaaaaaao
+    ...oaasaaao.
+    ...oaxsxaqo.
+    ..oaaasaaqqo
+    ..oawaaaWWqo
+    ...oaaaaWWo.
+    ....ooo.ooo.`, rabbitKey) : S(`
+    ............
+    .......oo...
+    ......oapo..
+    ......oapo..
+    .oo...oapo..
+    saaoooaao...
+    .ooaaaaaaoo.
+    ..oaaawaaaqo
+    ..oaxaaeaqqo
+    ..oaaanaaqqo
+    ...oaaaaqqo.
+    ...oaawaqqo.
+    ..oaawaaqqqo
+    ..oaaaaqqqqo
+    ...oaaaqqqo.
+    ....ooo.ooo.`, { ...rabbitKey, p: 'pink' });
+  SM.rabbit_mended = (v = 'front') => v === 'back' ? S(`
+    ...oo..oo...
+    ..oaro.oaao.
+    ..orao.oaao.
+    ..oaro.oaao.
+    ...oao.oao..
+    ...oaooaao..
+    ..oaaaaaaao.
+    .oaaawaaaaao
+    .oawaaaaawao
+    .oaaaaaaaaao
+    ..oaaaaaaao.
+    ..oahhahhao.
+    .oaahhhhhaqo
+    .oaaahhhaqqo
+    ..oaaahaWWo.
+    ...ooo.oWWo.`, rabbitKey) : S(`
+    ...oo..oo...
+    ..oaro.oapo.
+    ..orao.oapo.
+    ..oaro.oapo.
+    ...oao.oao..
+    ...oaooaao..
+    ..oaaaaaaao.
+    .oaaaawaaaqo
+    .oaBaaeaaqqo
+    .oaaanaaaqqo
+    ..oaaaaaqqo.
+    ..oaawaaqqo.
+    .oaawaaqqqqo
+    .oaaaaaqqqqo
+    ..oaaaaqqqo.
+    ...ooo.ooo..`, { ...rabbitKey, p: 'pink' });
+  // LG: built from bevelled pieces like the old doll, then the polka dots, stitches, eye and (torn) dust laid over them.
+  const rabbit = (mended, back) => {
+    const [c, x] = canvas(40, 48);
+    const cotton = { o: 'roofR3', ol: 'roofR2', h: '#ffd0e8', b: 'pink', s: 'rose' };
+    const sky = { o: 'roofB3', ol: 'roofB2', h: 'sky0', b: 'sky1', s: 'sky2' };
+    const piece = (f, ramp, hl = 1, sh = 1) => {
+      const p = bevel(mask(40, 48, f), ramp, hl, sh), g = p.getContext('2d'), w = 40, h = 48;
+      if (ramp === cotton) {
+        // white polka dots on the cotton, kept off the outline
+        const d = g.getImageData(0, 0, w, h).data, on = (i, j) => d[(j * w + i) * 4 + 3] > 0;
+        for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++)
+          if ((i + (Math.floor(j / 4) % 2) * 3) % 6 === 0 && j % 4 === 1 && on(i, j) && on(i - 1, j) && on(i + 1, j) && on(i, j - 1) && on(i, j + 1)) dot(g, i, j, 'white');
+      }
+      x.drawImage(p, 0, 0);
+    };
+    const cross = (sx, sy, k = 'red') => { dot(x, sx - 1, sy - 1, k); dot(x, sx + 1, sy + 1, k); dot(x, sx + 1, sy - 1, k); dot(x, sx - 1, sy + 1, k); dot(x, sx, sy, k); };
+    // ears: the right one upright; the left drooping, ripped half off (torn), or sewn back on with red crosses (mended)
+    const rightEar = g => lens(g, back ? 15 : 25, 19, back ? -1.72 : -1.42, 18, 4.2, '#000');
+    const leftEar = mended ? g => lens(g, back ? 25 : 15, 19, back ? -1.42 : -1.72, 18, 4.2, '#000')
+      : g => lens(g, droop.x, droop.y, droop.a, 11, 4, '#000');
+    const droop = { x: back ? 27 : 13, y: 20, a: back ? 0.45 : Math.PI - 0.45 };
+    piece(rightEar, cotton); piece(leftEar, cotton);
+    if (!back) lens(x, 25, 17, -1.42, 13, 1.6, 'sky1');
+    if (mended) {
+      // a cream band where the ear was sewn back on, crossed with red
+      const ear = back ? g => lens(g, 25, 19, -1.42, 18, 4.2, '#000') : g => lens(g, 15, 19, -1.72, 18, 4.2, '#000');
+      x.drawImage(bevel(mask(40, 48, g => { ear(g); g.globalCompositeOperation = 'source-in'; g.fillRect(0, 9, 40, 5); }), { o: 'roofR3', h: 'white', b: 'cream0', s: 'cream1' }, 1, 1), 0, 0);
+      for (const sx of back ? [24, 27] : [13, 16]) cross(sx, 11);
+    } else {
+      // the torn end: stuffing bursting out and a loose thread hanging
+      const ex = Math.round(droop.x + 11 * Math.cos(droop.a)), ey = Math.round(droop.y + 11 * Math.sin(droop.a)), sx = Math.sign(Math.cos(droop.a));
+      for (const [a, b] of [[0, 0], [1, -1], [1, 1], [0, -2], [0, 2], [-1, 0]]) dot(x, ex + a * sx, ey + b, (a + b) % 2 ? 'cream0' : 'white');
+      line(x, ex, ey + 2, ex + sx, ey + 7, 'cream2');
+    }
+    // body: front, the pink cotton with a sky patch down its right side; from behind, all cotton with a cotton tail
+    piece(g => { ellipse(g, 20, 37, 10, 8, '#000'); rect(g, 12, 31, 16, 6, '#000'); }, cotton, 1, 2);
+    if (!back) {
+      x.drawImage(bevel(mask(40, 48, g => { ellipse(g, 20, 37, 10, 8, '#000'); rect(g, 12, 31, 16, 6, '#000'); g.globalCompositeOperation = 'source-in'; g.fillRect(22, 0, 18, 48); }), sky, 1, 2), 0, 0);
+      for (let j = 32; j < 45; j += 2) dot(x, 21, j, 'white');
+    }
+    piece(g => { ellipse(g, 9, 34, 3, 4, '#000'); ellipse(g, 31, 34, 3, 4, '#000'); ellipse(g, 14, 45, 4, 2, '#000'); ellipse(g, 26, 45, 4, 2, '#000'); }, cotton);
+    // head
+    piece(g => ellipse(g, 20, 24, 11, 8, '#000'), cotton, 1, 2);
+    if (back) {
+      for (let j = 17; j < 31; j += 2) dot(x, 20, j, 'roofR2');
+      if (mended) {
+        // the red heart on its back, cross-stitched round in cream
+        const heart = mask(40, 48, g => { disc(g, 17.5, 34.5, 3, () => '#000'); disc(g, 22.5, 34.5, 3, () => '#000'); poly(g, [[14.5, 35.5], [25.5, 35.5], [20, 41]], '#000'); });
+        x.drawImage(bevel(heart, { o: 'roofR4', ol: 'roofR3', h: 'rose', b: 'red', s: 'roofR2' }, 1, 1), 0, 0);
+        for (const [a, b] of [[15, 32], [18, 31], [20, 33], [22, 31], [25, 32], [23, 38], [17, 38]]) dot(x, a, b, 'cream0');
+      } else {
+        // the back seam split, its stuffing showing
+        rect(x, 19, 33, 3, 6, 'cream0'); dot(x, 20, 34, 'white'); dot(x, 19, 37, 'white');
+        for (let j = 33; j < 39; j += 2) { dot(x, 18, j, 'roofR3'); dot(x, 22, j, 'roofR3'); }
+      }
+      disc(x, 20.5, 43.5, 2.8, (d, lit) => d > 2.2 ? 'cream2' : lit > 0.3 ? 'white' : 'cream0');
+    } else {
+      // eyes: the right a black bead; the left a frayed hole (torn) or Nora's wooden button sewn on with red (mended)
+      rect(x, 25, 23, 2, 2, 'ink'); dot(x, 25, 23, 'white');
+      if (mended) {
+        disc(x, 14, 24, 2.6, (d, lit) => d > 2 ? 'wood4' : lit > 0.3 ? 'wood1' : 'wood2');
+        dot(x, 13, 23, 'red'); dot(x, 14, 24, 'red'); dot(x, 15, 25, 'red');
+      } else {
+        dot(x, 13, 23, 'cream2'); dot(x, 14, 24, 'rose'); dot(x, 15, 23, 'cream2'); line(x, 14, 25, 13, 28, 'cream2');
+      }
+      rect(x, 19, 26, 3, 1, 'roofR2'); dot(x, 20, 27, 'roofR2');
+      rect(x, 10, 26, 2, 1, 'rose'); rect(x, 28, 26, 2, 1, 'rose');
+    }
+    if (!mended) {
+      // two years of mud-flood dust in the weave
+      const d = x.getImageData(0, 0, 40, 48).data, n = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+      for (let j = 0; j < 48; j++) for (let i = 0; i < 40; i++)
+        if (d[(j * 40 + i) * 4 + 3] > 0 && n(Math.floor(i / 2), Math.floor(j / 2)) < 0.1 && n(i, j) < 0.6 && j > 14) dot(x, i, j, n(j, i) < 0.5 ? 'dirt1' : 'dirt2');
+    }
+    return c;
+  };
+  LG.rabbit = (v = 'front') => rabbit(false, v === 'back');
+  LG.rabbit_mended = (v = 'front') => rabbit(true, v === 'back');
+
+  // The Gardener's chamomile: four full white blooms with yellow hearts, their stems tied in a twist of grass.
+  XS.chamomile = () => S(`
+    ow.wo.
+    wyw.wy
+    .w.wyw
+    ..gw..
+    ..gg..
+    .gg...`, { o: 'cream2', w: 'white', y: 'yellow', g: 'leaf3' });
+  SM.chamomile = () => S(`
+    .w....w..w..
+    wyw..wyw.yw.
+    .w.w..w.ww..
+    ..wyw.g.g...
+    ...wg.g.g...
+    ....g.gg....
+    .....ggg....
+    .....ddd....
+    .....ggg....
+    ....gg.g....
+    ....g...g...`, { w: 'white', y: 'yellow', g: 'leaf3', d: 'cream2' });
+  LG.chamomile = () => {
+    const [c, x] = canvas(36, 40);
+    const bloom = (bx, by) => {
+      for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; lens(x, bx, by, a, 6, 1.4, k % 2 ? 'cream0' : 'white'); }
+      disc(x, bx, by, 2.4, (d, lit) => d > 1.9 ? 'orange' : lit > 0.2 ? 'light0' : 'yellow');
+    };
+    for (const [a, b, e, f] of [[8, 9, 17, 30], [27, 8, 18, 30], [12, 20, 17, 30], [24, 19, 18, 30]]) line(x, a, b, e, f, 'leaf4');
+    line(x, 17, 30, 15, 38, 'leaf4'); line(x, 18, 30, 20, 38, 'leaf4'); line(x, 18, 30, 18, 38, 'leaf3');
+    for (const [a, b] of [[8, 9], [27, 8], [12, 20], [24, 19]]) bloom(a, b);
+    rect(x, 15, 29, 6, 3, 'cream2'); rect(x, 15, 29, 6, 1, 'cream0'); line(x, 20, 31, 24, 34, 'cream2');
+    return c;
+  };
+  // Ratih's red thread from Nora's sewing box: a wooden spool wound with red cotton, the needle stuck in it.
+  XS.red_thread = () => S(`
+    oooooo
+    .rRrr.
+    .rrRr.
+    .rRrr.
+    oooooo`, { o: 'wood3', r: 'red', R: 'roofR2' });
+  SM.red_thread = () => S(`
+    ..........i.
+    oooooooooi..
+    owwwwwwwwo..
+    .ornrrrrro..
+    .orrnrrrro..
+    .ornrrrrri..
+    .orrnrrrio..
+    .ornrrrrro..
+    owwwwwwwwo..
+    oooooooooo..`, { o: 'wood4', w: 'wood1', r: 'red', n: 'roofR2', i: 'iron1' });
+  LG.red_thread = () => {
+    const [c, x] = canvas(32, 36);
+    // the spool's two wooden flanges and the red cotton wound between them, light from the top left
+    const flange = y => { ellipse(x, 15, y + 1, 13, 3, 'wood4'); ellipse(x, 15, y, 12, 2.5, 'wood1'); ellipse(x, 15, y, 4, 1.2, 'wood3'); };
+    flange(30);
+    for (let y = 9; y < 30; y++) { rect(x, 5, y, 20, 1, y % 2 ? 'red' : 'roofR2'); dot(x, 6, y, 'rose'); dot(x, 7, y, 'rose'); rect(x, 22, y, 3, 1, 'roofR3'); }
+    rect(x, 4, 9, 1, 21, 'roofR4'); rect(x, 25, 9, 1, 21, 'roofR4');
+    flange(7);
+    // the needle through the thread, and a loose end trailing off
+    line(x, 26, 2, 18, 22, 'iron1'); dot(x, 26, 2, 'iron3'); line(x, 25, 20, 30, 26, 'red'); line(x, 30, 26, 29, 33, 'red');
+    return c;
+  };
+  // Nora's wooden button for Mochi's missing eye: a small round of polished teak with two holes.
+  XS.button = () => S(`
+    .oo.
+    oabo
+    obbo
+    .oo.`, { o: 'wood4', a: 'wood1', b: 'wood2' });
+  SM.button = () => S(`
+    ..oooo..
+    .oaabbo.
+    oaabbbco
+    oab.b.co
+    oabbbbco
+    obbbbcco
+    .occcco.
+    ..oooo..`, { o: 'wood4', a: 'wood0', b: 'wood1', c: 'wood2' });
+  LG.button = () => {
+    const [c, x] = canvas(28, 28);
+    // a disc of teak, a raised rim, its grain, and two thread holes
+    disc(x, 14, 14, 12, (d, lit) => d > 11 ? 'wood4' : d > 9 ? (lit > 0.3 ? 'wood0' : lit > -0.3 ? 'wood1' : 'wood3') : lit > 0.4 ? 'wood1' : 'wood2');
+    for (const hx of [11, 16]) { rect(x, hx, 12, 2, 4, 'wood4'); rect(x, hx, 13, 2, 2, 'ink'); }
+    line(x, 6, 7, 9, 4, 'white');
+    return c;
+  };
+
   // The key to Satria's home: an old brass key, mossy from two years under the geranium pot.
   SM.homekey = () => S(`
     .oooo..........

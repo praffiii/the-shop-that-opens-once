@@ -17,6 +17,8 @@ namespace Shop
         /// <summary>The bed's middle, where he lies, and how high its mattress is.</summary>
         static readonly Vector2 InBed = new(782, 366);
         const float Mattress = 12f;
+        /// <summary>Where the courier stands to someone at their work: a step to their right and a little nearer.</summary>
+        protected static readonly Vector2 Beside = new(30, 4);
 
         protected NightChapter(Main main) : base(main) { }
 
@@ -100,8 +102,11 @@ namespace Shop
         /// <summary>The night's own story where the courier arrives; nothing by default.</summary>
         protected virtual Awaitable Arrived(string place) => Done();
 
-        /// <summary>The night's own story at a hotspot or person; by default their own line.</summary>
-        protected virtual Awaitable Day(string id) => Chat(id);
+        /// <summary>The night's own story at a hotspot or person; by default how a thing at home looks, or their own line.</summary>
+        protected virtual async Awaitable Day(string id)
+        {
+            if (!await AtHome(id)) await Chat(id);
+        }
 
         /// <summary>What Marlow says as he hands over tonight's box, while he fetches it (a night has its own words).</summary>
         protected virtual async Awaitable AtShop()
@@ -115,6 +120,9 @@ namespace Shop
 
         /// <summary>What Marlow says once the box is open, sending the courier on.</summary>
         protected virtual string Sending => "Before the next dusk, mind. It has waited long enough.";
+
+        /// <summary>What is said once the box is open; by default Marlow sends the courier on.</summary>
+        protected virtual Awaitable Opened() => Say("marlow", Sending);
 
         // The shop at midnight: Marlow leaves what he was doing for the counter as the courier comes up to it, fetches
         // the night's box, and the courier opens it.
@@ -130,7 +138,7 @@ namespace Shop
                 await stepping;
                 await AtShop();
                 await OpenBox(Night - 1, Keepsake);
-                await Say("marlow", Sending);
+                await Opened();
                 await Look(null);
             });
             Hint("Home to bed. It will keep till morning.");
@@ -157,7 +165,7 @@ namespace Shop
             Hint("Before bed: the box on the table, a wash at the water jar, the coil lit.");
         }
 
-        // The routine's hotspots at home, and the evening's desk; false for anything that is the night's own.
+        // The routine's steps at home, at night and in the morning; false for anything else.
         async Awaitable<bool> Routine(string id)
         {
             var home = Game.Phase == Phase.Night && Game.Has("boxed") && !Game.Has("slept");
@@ -175,6 +183,15 @@ namespace Shop
                     else await Scene(Sleep);
                     return true;
                 case "stove" when Game.Phase == Phase.Morning && !Game.Has("tea"): await Scene(Tea); return true;
+                default: return false;
+            }
+        }
+
+        // How the things at home look, when the routine and the night's story have nothing for them; false for anything else.
+        async Awaitable<bool> AtHome(string id)
+        {
+            switch (id)
+            {
                 case "table": await ShowText(Game.Has("box_home") ? "The night's box on the walnut table, its lid shut." : "Mother's walnut table. Two chairs, one of them always pulled out a little."); return true;
                 case "coil": await ShowText(Game.Phase == Phase.Night ? "A coil on its tin stand by the bed." : "The coil's grey ash on its tin stand. It burned the whole night through."); return true;
                 case "desk": await ShowText("His journal, open at the next clean page, and the oil lamp. He writes in it each night before bed."); return true;
@@ -227,6 +244,60 @@ namespace Shop
                 await Wait(1.5f);
             });
             await Main.EndChapter();
+        }
+
+        /// <summary>Someone steps to their work place and the courier comes up beside them, the two turned to each other.</summary>
+        protected async Awaitable Meet(string id, Vector2 at)
+        {
+            var stepping = Walk(id, at);
+            await Walk("courier", at + Beside);
+            await stepping;
+            Actor(id).FaceTo(Actor("courier").Feet.x);
+            Actor("courier").FaceTo(at.x);
+        }
+
+        /// <summary>The courier takes something given him, and it goes into the bag.</summary>
+        protected async Awaitable Receive(string item)
+        {
+            var courier = Actor("courier");
+            courier.Held = Keepsakes.Art(item, "xs");
+            courier.Pose = "receive";
+            Sfx("pop");
+            await Wait(0.7f);
+            courier.Held = null;
+            courier.Pose = "idle";
+            Game.Bag.Add(item);
+        }
+
+        /// <summary>The courier hands one thing over and gets another back.</summary>
+        protected async Awaitable Trade(string id, string give, string get)
+        {
+            var owner = Actor(id);
+            var courier = Actor("courier");
+            owner.FaceTo(courier.Feet.x);
+            courier.FaceTo(owner.Feet.x);
+            courier.Held = Keepsakes.Art(give, "xs");
+            courier.Pose = "give";
+            await Wait(0.7f);
+            courier.Held = null;
+            courier.Pose = "idle";
+            Game.Bag.Remove(give);
+            owner.Held = Keepsakes.Art(give, "xs");
+            owner.Pose = "receive";
+            await Wait(0.5f);
+            owner.Held = Keepsakes.Art(get, "xs");
+            owner.Pose = "give";
+            await Wait(0.6f);
+            owner.Held = null;
+            owner.Pose = "idle";
+            await Receive(get);
+        }
+
+        /// <summary>A keepsake changes in the bag where it lies, as the day mends it.</summary>
+        protected static void Swap(string from, string to)
+        {
+            var at = Game.Bag.IndexOf(from);
+            if (at >= 0) Game.Bag[at] = to;
         }
 
         /// <summary>The great brass bell, <paramref name="strokes"/> times, deep enough to feel in the chest.</summary>

@@ -35,7 +35,7 @@
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
     motif: 'Music box: 10:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', bell_toll: 'A great brass bell tolling', match: 'A match struck', scrub: 'Feet scrubbed on a coir mat', pour: 'Water poured from a jar', hiss: 'A mosquito coil hissing as it catches', kettle: 'A kettle coming to the boil', pen: 'A dip pen scratching', sift: 'Flour shaken through a sieve', thump: 'Dough pressed on the table', click: 'A gear clicking round', ting: 'A spring pinging loose', ticktock: 'A watch ticking again', oil: 'Oil rubbed in with a rag', flare: 'A lantern wick catching', whistle: 'A steam whistle', rain: 'Heavy rain', music: 'Quiet piano and music box',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', bell_toll: 'A great brass bell tolling', match: 'A match struck', scrub: 'Feet scrubbed on a coir mat', pour: 'Water poured from a jar', hiss: 'A mosquito coil hissing as it catches', kettle: 'A kettle coming to the boil', pen: 'A dip pen scratching', sift: 'Flour shaken through a sieve', thump: 'Dough pressed on the table', click: 'A gear clicking round', ting: 'A spring pinging loose', ticktock: 'A watch ticking again', oil: 'Oil rubbed in with a rag', flare: 'A lantern wick catching', whistle: 'A steam whistle', rain: 'Heavy rain', clink: 'Marbles clinking', snip: 'Shears snipping a stem', rustle: 'Brambles rustling', whir: 'A treadle sewing machine running', trrak: 'A needle jamming on the plate', knot: 'Thread pulled tight', spray: 'A mist spray', lullaby: 'A music-box lullaby', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -140,6 +140,34 @@
     whistle: (s, t) => { for (const m of [74, 78]) s._note(t, hz(m), { partials: WARM, vol: 0.05, dec: 1.4, atk: 0.12 }); s._noise(t, { type: 'highpass', f: 2600, vol: 0.12, atk: 0.1, dur: 1.6 }); },
     // the storm's rain on the platform roof, a few seconds of it
     rain: (s, t) => { s._noise(t, { f: 1600, f2: 2600, q: 0.5, vol: 0.3, atk: 0.5, dur: 3.2 }); s._noise(t + 1.2, { type: 'lowpass', f: 140, vol: 0.3, atk: 0.4, dur: 1.4 }); },
+    // marbles knocking together in the ring (klik-tik)
+    clink: (s, t) => [0, 0.09].forEach((d, i) => { s._noise(t + d, { type: 'highpass', f: 3800, vol: 0.1, dur: 0.01, atk: 0.001 }); s._note(t + d, i ? 2950 : 3400, { partials: BOX, vol: 0.035, dec: 0.18, atk: 0.001 }); }),
+    // the Gardener's little shears closing on a stem (snip)
+    snip: (s, t) => { s._noise(t, { f: 4200, q: 3, vol: 0.18, dur: 0.03, atk: 0.001 }); s._note(t + 0.01, 3100, { vol: 0.02, dec: 0.08, atk: 0.001 }); },
+    // thorny brambles shaken, petals falling (kresek)
+    rustle: (s, t) => [0, 0.12, 0.27].forEach((d, i) => s._noise(t + d, { f: 2600 - 400 * i, q: 0.9, vol: 0.22, atk: 0.02, dur: 0.16 })),
+    // the treadle going and the needle running (drrrt)
+    whir: (s, t) => {
+      for (let k = 0; k < 14; k++) s._noise(t + k * 0.07, { f: 1700, q: 2, vol: 0.12, dur: 0.025, atk: 0.002 });
+      s._note(t, 70, { type: 'triangle', vol: 0.06, dec: 1, atk: 0.1, glide: 1.3 });
+    },
+    // the needle striking the throat plate and the thread snarling in the bobbin (TRRAK)
+    trrak: (s, t) => {
+      s._noise(t, { type: 'highpass', f: 2000, vol: 0.32, dur: 0.04, atk: 0.001 });
+      s._note(t, 1900, { partials: BOX, vol: 0.05, dec: 0.4, atk: 0.001, glide: 0.8 });
+      for (let k = 1; k < 7; k++) s._noise(t + k * 0.035, { f: 900, q: 1.5, vol: 0.2 / k, dur: 0.03, atk: 0.002 });
+    },
+    // red thread drawn tight through the button and knotted
+    knot: (s, t) => { s._noise(t, { f: 1800, f2: 3600, q: 2, vol: 0.14, atk: 0.04, dur: 0.22 }); s._note(t + 0.24, 880, { vol: 0.04, dec: 0.12, atk: 0.003, glide: 1.3 }); },
+    // the chamomile water misted over the cloth, twice (pss, pss)
+    spray: (s, t) => [0, 0.36].forEach(d => s._noise(t + d, { type: 'highpass', f: 5200, vol: 0.12, atk: 0.02, dur: 0.24 })),
+    // Ratih's lullaby, the one she hummed at the treadle, on a music box: a slow rocking line and its root under it
+    lullaby: (s, t) => {
+      const B = 0.3;
+      [['G4', 2], ['E5', 1], ['D5', 2], ['C5', 1], ['A4', 2], ['D5', 1], ['C5', 3]]
+        .reduce((at, [n, len]) => { s._note(t + at * B, hz(midi(n)), { partials: BOX, vol: 0.06, dec: Math.min(len * 0.5, 1.1), atk: 0.003 }); return at + len; }, 0);
+      [[0, 48], [6, 53], [9, 48]].forEach(([at, m]) => s._note(t + at * B, hz(m), { partials: PIANO, vol: 0.035, dec: 1.1, atk: 0.01 }));
+    },
     // a dip pen across the page, three strokes (srek-srek)
     pen: (s, t) => [0, 0.26, 0.5].forEach((d, i) => s._noise(t + d, { f: 3400 + 300 * i, q: 2.5, vol: 0.12, atk: 0.02, dur: 0.18 })),
     // crickets outside in the dark: two of them, a few chirps each, one a little farther off

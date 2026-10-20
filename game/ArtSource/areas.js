@@ -129,7 +129,7 @@
     const room = (x, y) => [[0, 0], [-16, 0], [16, 0], [0, -24], [0, 12], [-12, -12], [12, -12]].every(([i, j]) => open(x + i, y + j));
     const clear = (x, y) => things.every(({ s, x: tx, y: ty }) => {
       const w = (s.img ? s.img.width : s.w || 40) / 2 + 14, h = s.ay || s.h || 30;
-      return Math.abs(tx - x) > w || y < ty - h - 6 || y > ty + 18;
+      return Math.abs(tx - x) > w || y < ty - h - 6 || y > ty + (s.below || 18);   // a flat thing keeps the grass off it (below)
     });
     KIT.scatter(S.w * 7 + 5, 36, [0, 0, S.w, S.h], (x, y) => room(x, y) && clear(x, y), 3).forEach(([x, y, r, q], k) => {
       const s = r < 0.5 ? V.reeds(k % 9 + 1) : r < 0.92 ? V.flowerClump(k + 200, MEADOW[(q * 6) | 0]) : V.mushrooms(k % 3 + 1);
@@ -558,6 +558,7 @@
         at('weaver_line', V.clothesline(), 196, 712); at('weaver_basket', V.sacks(3), 238, 716); at('well_bucket', V.bucket(), 356, 770);
         at('beetle_cart', V.beetleCart(), 58, 700);
         at('apple_e', V.fruitTree(5, 'apple'), 1210, 700, { sway: 1 }); at('swing_e', V.swing(), 1190, 846);
+        at('marble_ring', V.marbleRing(), 1100, 880, { walk: true, lift: 1, on: [1100, 880] });   // Night 2's marble game (Place.FollowStory)
         [['cabbage', 958], ['carrot', 976]].forEach(([k, y], i) => at('lane_veg_w' + i, V.vegRow(k, 64), 330, y, { walk: true }));
         [['carrot', 958], ['cabbage', 976]].forEach(([k, y], i) => at('lane_veg_e' + i, V.vegRow(k, 56), 690, y, { walk: true }));
         at('lane_stump', V.stumpBig(2), 930, 964); at('lane_logs', V.logPile(), 976, 960);

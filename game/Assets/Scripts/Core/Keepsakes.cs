@@ -61,6 +61,29 @@ namespace Shop
             ["bread"] = new Keepsake { Name = "Sweet loaf", Sides = new[] { new Side("", "A sweet loaf, still warm from the Baker's oven. For Arlo at the jetty, in trade for his damar oil.") } },
             ["damar_oil"] = new Keepsake { Name = "Damar oil", Sides = new[] { new Side("", "Arlo's damar oil, amber and resinous in its little bottle. It softens burnt soot, the Baker says.") } },
             ["oil_lantern"] = new Keepsake { Name = "Oil lantern", Sides = new[] { new Side("", "The Mender's oil lantern, its wick trimmed. Enough to light the dark platform's lanterns.") } },
+            // Night 2's rabbit, torn as it comes out of the box and mended at Mother's sewing machine
+            ["rabbit"] = new Keepsake
+            {
+                Name = "Patchwork rabbit",
+                Sides = new[]
+                {
+                    new Side("front", "A patchwork rabbit in faded polka dots. The left ear is torn half off and drooping, and the left eye is only a few frayed threads. It smells musty, of years under mud and dust.", "The rabbit: left ear torn, left eye gone, musty."),
+                    new Side("back", "Its back seam has split, and the kapok inside has gone lumpy. Someone sewed it by hand, long ago, in small careful stitches."),
+                },
+            },
+            ["rabbit_mended"] = new Keepsake
+            {
+                Name = "Patchwork rabbit",
+                Sides = new[]
+                {
+                    new Side("front", "The ear holds fast in big red cross-stitches, and Nora's teak button looks out where the eye was. It smells of chamomile, warm and calm."),
+                    new Side("back", "A red heart patched over the split seam, cross-stitched round in cream. Mother's red thread."),
+                },
+            },
+            // what Night 2's day passes through his hands
+            ["chamomile"] = new Keepsake { Name = "Chamomile", Sides = new[] { new Side("", "Four full chamomile blooms from the Gardener's field, tied with a twist of grass. Sweet, and calming.") } },
+            ["red_thread"] = new Keepsake { Name = "Red thread", Sides = new[] { new Side("", "Mother's red embroidery thread, from Grandma Nora's sewing box. Kept ten years for the right hands.") } },
+            ["button"] = new Keepsake { Name = "Teak button", Sides = new[] { new Side("", "A teak button from Grandma Nora, polished smooth. An eye for a rabbit that lost one.") } },
             // what Satria comes home with, and Mr Baker's welcome
             ["shirt"] = new Keepsake { Name = "Spare shirt", Sides = new[] { new Side("", "A clean city shirt, pressed and folded. It looks out of place here already.") } },
             ["purse"] = new Keepsake { Name = "Coin purse", Sides = new[] { new Side("", "What is left of the fare: a few coins rattling at the bottom.") } },

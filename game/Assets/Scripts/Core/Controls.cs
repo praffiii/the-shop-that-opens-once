@@ -28,6 +28,8 @@ namespace Shop
         public static bool Click => Pointer != null && Pointer.leftButton.wasPressedThisFrame;
         /// <summary>Space or Enter: use what is close, show the whole line, pick the choice.</summary>
         public static bool Interact => Pressed(Key.Space, Key.Enter, Key.NumpadEnter);
+        /// <summary>Space or Enter held down, as a treadle is pumped (Night 2's sewing).</summary>
+        public static bool Holding => Held(Key.Space, Key.Enter);
         public static bool Bag => Pressed(Key.E);
         public static bool Inspect => Pressed(Key.I);
         public static bool Cancel => Pressed(Key.Escape);

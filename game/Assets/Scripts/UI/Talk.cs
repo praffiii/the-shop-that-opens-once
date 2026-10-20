@@ -23,7 +23,10 @@ namespace Shop
             ["courier"] = .035f, ["marlow"] = .055f, ["helen"] = .040f, ["pip"] = .025f, ["nora"] = .048f, ["theo"] = .038f,
             ["sam"] = .032f, ["leo"] = .028f, ["mender"] = .050f, ["baker"] = .028f, ["gardener"] = .042f, ["arlo"] = .045f,
             ["bram"] = .052f, ["mia"] = .033f, ["valdo"] = .034f, ["kid"] = .020f, ["grandkid"] = .020f,
+            ["gigi"] = .020f, ["kiko"] = .020f, ["lulu"] = .020f, ["young_helen"] = .040f, ["young_pip"] = .025f,
         };
+        /// <summary>Those who speak in someone else's blip: the village's children in the kid's, Helen and Pip in memories in their own.</summary>
+        static readonly Dictionary<string, string> Blips = new() { ["grandkid"] = "kid", ["gigi"] = "kid", ["kiko"] = "kid", ["lulu"] = "kid", ["young_helen"] = "helen", ["young_pip"] = "pip" };
         const float VillagerPace = .036f;
         /// <summary>How long the typing waits after a comma and after the end of a sentence, in seconds.</summary>
         const float CommaPause = .12f, StopPause = .32f;
@@ -295,7 +298,7 @@ namespace Shop
         {
             pitch = 1f;
             if (id == "") (voice, speed) = ("", Speed);
-            else if (Voices.TryGetValue(id, out var pace)) (voice, speed) = (id == "grandkid" ? "kid" : id, 1f / pace);
+            else if (Voices.TryGetValue(id, out var pace)) (voice, speed) = (Blips.GetValueOrDefault(id, id), 1f / pace);
             else
             {
                 (voice, speed) = ("villager", 1f / VillagerPace);

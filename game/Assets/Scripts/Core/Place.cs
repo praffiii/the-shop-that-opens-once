@@ -139,6 +139,8 @@ namespace Shop
             // the platform's oil lanterns, dark since the storm until Satria lights them (lantern_post_<i>); from Night 2
             // Helen keeps the one by her bench lit
             for (var i = 0; i < 3; i++) World.ShowItemIfAny($"lantern_post_{i}_lit_0", Game.Has($"lantern_post_{i}") || (i == 1 && Game.Chapter >= 2));
+            // Night 2's marble game on the square's east lawn
+            World.ShowItemIfAny("marble_ring", Game.Chapter == 2);
             // at home: the coil lit before sleep, and the night's box on the table once brought home
             World.ShowItemIfAny("coil_lit", Game.Has("coil_lit"));
             for (var i = 0; i < 7; i++) World.ShowItemIfAny($"box_on_table_{i}", i == Game.Chapter - 1 && Game.Has("box_home"));

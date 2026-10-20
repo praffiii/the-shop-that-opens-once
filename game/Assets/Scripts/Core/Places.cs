@@ -19,6 +19,9 @@ namespace Shop
 
         // The Prologue's Day 0, and every chapter after it.
         static readonly int[] DayZero = { 0 }, AfterDayZero = { 1, 2, 3, 4, 5, 6, 7, 8 }, Nights = { 1, 2, 3, 4, 5, 6, 7 };
+        // Night 2 keeps Pip at Grandma Nora's all day, Mia at her stall and the Gardener at his chamomile; the other days
+        // they go about as usual
+        static readonly int[] NightTwo = { 2 }, NotNightTwo = { 0, 1, 3, 4, 5, 6, 7, 8 };
         // the days the story takes the Mender into his forge at midday (Night 1's watch, Night 5's shoes); the others he
         // tinkers with the old engine on the platform
         static readonly int[] ForgeDays = { 1, 5 }, EngineDays = { 0, 2, 3, 4, 6, 7, 8 };
@@ -288,7 +291,7 @@ namespace Shop
                     // dark, and Sam locks the hall.
                     new Person
                     {
-                        Id = "mia", Label = "Mia", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Id = "mia", Label = "Mia", Spot = V(0, 12), Chapters = NotNightTwo, Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(950, 628), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
@@ -303,7 +306,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "pip", Label = "Pip", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Chapters = NotNightTwo, Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(310, 628), Pose = "lift", Facing = -1, Wait = 2f, Carry = true },
@@ -380,7 +383,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Phases = new[] { Phase.Dusk },
+                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Chapters = NotNightTwo, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Mum says we go in before the sky goes grey. I don't mind. Much.",
@@ -459,6 +462,33 @@ namespace Shop
                             "The investors want the boundary to the inch, Mr Satria. An inch is money.",
                             "Coffee in the country is like everything else here: slow, and slightly cold.",
                         },
+                    },
+                    // Night 2's morning: Valdo outside the hall with his papers, Mia tying spinach at her stall, and the
+                    // marble trio crouched round their ring on the east lawn.
+                    new Person
+                    {
+                        Id = "valdo", At = V(668, 404), Label = "Valdo", Spot = V(18, -4), Pose = "talk", Facing = 1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Papers, Mr Satria. Boundaries, certificates, signatures. The real world." },
+                    },
+                    new Person
+                    {
+                        Id = "mia", At = V(552, 570), Label = "Mia", Spot = V(10, 16), Facing = -1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Spinach, three bunches for a coin. Pip's at Grandma Nora's. He won't come out." },
+                    },
+                    new Person
+                    {
+                        Id = "gigi", At = V(1068, 892), Label = "Gigi", Spot = V(-24, 6), Pose = "crouch", Facing = 1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Shh! Kiko's aiming. If he misses, it's my go." },
+                    },
+                    new Person
+                    {
+                        Id = "kiko", At = V(1126, 890), Label = "Kiko", Spot = V(4, 14), Pose = "crouch", Facing = -1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "That big blue one's my shooter. Nobody touches it." },
+                    },
+                    new Person
+                    {
+                        Id = "lulu", At = V(1110, 916), Label = "Lulu", Spot = V(0, 16), Pose = "crouch", Facing = 1, Chapters = NightTwo, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "I'm not playing. I'm the judge. Judges don't lose." },
                     },
                     // Day 0's dusk: Helen buying the last loaves at the bread stall and Leo chatting by the bench under the
                     // oak, there when Satria comes home.
@@ -560,6 +590,18 @@ namespace Shop
                             "I'm too old to sleep early. Sleep's for people with less to remember.",
                         },
                     },
+                    // Night 2: Pip huddled on Grandma Nora's steps all day, hugging his knees; at midday the Gardener at
+                    // the gate of his chamomile field.
+                    new Person
+                    {
+                        Id = "pip", At = V(345, 424), Seat = 8, Label = "Pip", Spot = V(20, 20), Pose = "sit", Facing = -1, Chapters = NightTwo, Phases = new[] { Phase.Morning, Phase.Midday, Phase.Dusk },
+                        Lines = new[] { "...Go away. The storm's coming back. I can hear it in the pines." },
+                    },
+                    new Person
+                    {
+                        Id = "gardener", At = V(392, 294), Label = "Gardener", Spot = V(20, 4), Facing = -1, Chapters = NightTwo, Phases = new[] { Phase.Midday },
+                        Lines = new[] { "Chamomile for sleep, for frights, for the smell of a house that's missed someone." },
+                    },
                     new Person
                     {
                         Id = "gardener", Label = "Gardener", Spot = V(0, 12), Phases = new[] { Phase.Morning },
@@ -578,7 +620,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "gardener", At = V(790, 604), Label = "Gardener", Spot = V(18, 0), Pose = "tend", Facing = -1, Phases = new[] { Phase.Midday },
+                        Id = "gardener", At = V(790, 604), Label = "Gardener", Spot = V(18, 0), Pose = "tend", Facing = -1, Chapters = NotNightTwo, Phases = new[] { Phase.Midday },
                         Lines = new[]
                         {
                             "Tomatoes under glass, cabbages out here. Everything mends at its own pace. People too.",
@@ -716,7 +758,7 @@ namespace Shop
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {
-                        Id = "pip", Label = "Pip", Spot = V(0, 12), Phases = new[] { Phase.Midday },
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Chapters = NotNightTwo, Phases = new[] { Phase.Midday },
                         Round = new[]
                         {
                             new Stop { At = V(360, 628), Facing = 1, Wait = 3f, Run = true },

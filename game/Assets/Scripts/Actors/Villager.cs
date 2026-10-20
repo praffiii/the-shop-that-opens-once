@@ -64,7 +64,7 @@ namespace Shop
             ant.FaceTo(courierX);
         }
 
-        /// <summary>Stops their activity where they are and stands by, for a scene to move them.</summary>
+        /// <summary>Stops their activity where they are and stands by, for a scene to move them; someone sitting stays seated.</summary>
         public void Cue()
         {
             if (talking) return;
@@ -73,7 +73,7 @@ namespace Shop
             aside = 0;
             ant.Stop();
             ant.Running = false;
-            ant.Pose = listening = ant.Carrying ? "carry" : "idle";
+            ant.Pose = listening = ant.Carrying ? "carry" : ant.Pose == "sit" ? "sit" : "idle";
         }
 
         /// <summary>Back to their activity from the nearest stop, unless the story has given them another pose meanwhile.</summary>

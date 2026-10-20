@@ -99,8 +99,9 @@ namespace Shop.Tests
             Assert.AreEqual(Phase.Night, Game.Phase);
             Assert.AreEqual("station", main.Place.Def.Id, "Back where the courier stood");
 
+            var story = main.Story;
             await Go(main, "satria_home", "door");
-            await Until(() => Game.SavedChapter() == night + 1 && main.Story == null);
+            await Until(() => Game.SavedChapter() == night + 1 && main.Story != story); // over, and the next night begun or saved for later
         }
 
         // Takes the courier somewhere as the story would, and gives back the controls once there, as stepping through

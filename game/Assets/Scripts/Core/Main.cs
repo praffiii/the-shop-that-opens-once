@@ -56,6 +56,7 @@ namespace Shop
         {
             [0] = main => new Prologue(main),
             [1] = main => new Night1(main),
+            [2] = main => new Night2(main),
         };
 
         public static Main Instance { get; private set; }

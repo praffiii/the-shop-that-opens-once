@@ -47,6 +47,39 @@ namespace Shop.Tests
             CollectionAssert.DoesNotContain(Game.Bag, "watch_ticking");
         });
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night2PlaysThrough() => Run(2, async main =>
+        {
+            await Go(main, "square", "from_east");
+            Assert.IsTrue(Game.Has("rumour"), "The square's morning gossip");
+            await Use(main, "valdo");
+            await Use(main, "kiko");
+            await Use(main, "mia");
+            Assert.AreEqual(Phase.Midday, Game.Phase, "Mia sends him to mend the rabbit");
+
+            await Go(main, "east", "from_square");
+            await Use(main, "pip");
+            CollectionAssert.Contains(Game.Bag, "rabbit", "Pip isn't given his rabbit broken");
+            await Use(main, "nora");
+            CollectionAssert.IsSupersetOf(Game.Bag, new[] { "red_thread", "button" });
+            Board.FailFirst = 1;
+            await Use(main, "gardener");
+            CollectionAssert.Contains(Game.Bag, "chamomile");
+
+            await Go(main, "satria_home", "door");
+            Board.FailFirst = 1;
+            await Use(main, "sewing");
+            Assert.AreEqual(Phase.Dusk, Game.Phase);
+            CollectionAssert.Contains(Game.Bag, "rabbit_mended", "Mochi mended at Mother's machine");
+            CollectionAssert.IsEmpty(Game.Bag.FindAll(k => k is "rabbit" or "red_thread" or "button" or "chamomile"), "The thread, button and chamomile used up");
+            Assert.AreEqual("dusk", Game.Checkpoint);
+
+            await Go(main, "east", "home");
+            await Use(main, "pip");
+            Assert.AreEqual(2, Game.LanternsOut, "Pip has his rabbit");
+            CollectionAssert.DoesNotContain(Game.Bag, "rabbit_mended");
+        });
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
         // story, and home to the journal, which ends the night.
         static IEnumerator Run(int night, Func<Main, Awaitable> day)
@@ -89,8 +122,9 @@ namespace Shop.Tests
             await Until(() => Exploring(main) && Game.Phase == Phase.Morning);
             await Use(main, "stove");
             await day(main);
+            var story = main.Story;
             await Go(main, "satria_home", "door");
-            await Until(() => Game.SavedChapter() == night + 1 && main.Story == null);
+            await Until(() => Game.SavedChapter() == night + 1 && main.Story != story); // over, and the next night begun or saved for later
         }
 
         // Takes the courier somewhere as the story would, and once there closes the talk and gives back the controls, as

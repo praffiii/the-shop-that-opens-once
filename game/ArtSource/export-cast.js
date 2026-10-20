@@ -2,7 +2,7 @@
 /* Cast part: the ant sheets and portraits (chars.js), the title (title.js), the palette (px.js) and a
    small pixel UI kit authored here with the PX palette. Writes chars/ and ui/ under game/Assets/Resources/Art. */
 (() => {
-  const { PAL, sprite, col, rect, dot } = PX;
+  const { PAL, sprite, col, rect, dot, line } = PX;
   const { canvas, png, json } = BAKE;
   const CELL = 40, FEET = [20, 37], FLIPPED_X = 19, PORTRAIT = 48, PFRAMES = 3;
   const MOODS = ['smile', 'moved', 'surprised', 'sad', 'cross'];   // every mood chars.js draws; an id without one gets its neutral face back
@@ -305,6 +305,108 @@
     })), { frames: 7 });
   }
 
+  /* Minigame 2A, the Gardener's chamomile: the field's earth under a grassy edge (the furrows are laid over it in the
+     game, so they don't stretch), a chamomile stem as a bud, in full bloom and snipped, the thorny brambles still and
+     shaken, and the Gardener's little shears open and shut, pointing right along the row. */
+  function harvest(put) {
+    const [g, gx] = canvas(24, 24);
+    gx.drawImage(box(24, 24, 1, { o: 'ink', fill: 'dirt2', hi: 'dirt1', lo: 'dirt3' }), 0, 0);
+    rect(gx, 1, 1, 22, 5, 'grass2'); rect(gx, 1, 1, 22, 1, 'grass1'); rect(gx, 1, 5, 22, 1, 'grass3');
+    put('garden', g, { margins: [4, 7, 4, 4] });
+
+    const [bw, bh] = [16, 24];
+    const stem = (x, top) => {
+      for (let j = top; j < bh; j++) { dot(x, 7, j, 'ink'); dot(x, 8, j, 'leaf3'); dot(x, 9, j, 'ink'); }
+      if (top < 14) for (const [i, j, k] of [[4, 17, -1], [11, 15, 1]]) { rect(x, i, j, 3, 2, 'leaf2'); dot(x, i + (k > 0 ? 2 : 0), j - 1, 'leaf2'); }
+    };
+    const flower = full => {
+      const [c, x] = canvas(bw, bh);
+      stem(x, 8);
+      if (full) {
+        x.drawImage(shape(15, 13, (i, j) => (i - 7) ** 2 + (j - 6) ** 2 * 1.3 <= 40, (i, j) => ((i + j) % 4 === 0 ? 'cream0' : 'white')), 0, 0);
+        x.drawImage(shape(7, 7, (i, j) => (i - 3) ** 2 + (j - 3) ** 2 <= 8, (i, j) => (i + j < 4 ? 'light0' : i + j > 6 ? 'orange' : 'yellow')), 4, 3);
+      } else {
+        x.drawImage(shape(9, 11, (i, j) => ((i - 4) / 4) ** 2 + ((j - 6) / 5) ** 2 <= 1, (i, j) => (j < 4 ? 'cream0' : i < 4 ? 'leaf1' : 'leaf2')), 4, 1);
+      }
+      return c;
+    };
+    const [cut, cx] = canvas(bw, bh); stem(cx, 15); rect(cx, 7, 14, 3, 1, 'ink'); dot(cx, 8, 15, 'leaf1');
+    put('bloom', strip([flower(false), flower(true), cut]), { frames: 3 });
+
+    const bramble = shake => {
+      const [c, x] = canvas(26, 24);
+      // three arching canes, thorns along them, leaves and a few dark berries
+      for (const [x0, h, bend] of [[5, 20, 9], [12, 22, -7], [19, 18, -9]]) {
+        let last = null;
+        for (let t = 0; t <= 1; t += 0.03) {
+          const i = Math.round(x0 + bend * Math.sin(t * Math.PI * 0.8) + shake * t * 2), j = Math.round(23 - h * t);
+          dot(x, i, j, 'ink'); dot(x, i + 1, j, 'roofR3');
+          if (Math.round(t * 33) % 5 === 0 && last !== j) { dot(x, i + 2, j - 1, 'ink'); dot(x, i - 1, j - 1, 'ink'); last = j; }
+        }
+      }
+      for (const [i, j] of [[3, 9], [15, 5], [21, 12], [9, 15], [17, 17]]) { rect(x, i + shake, j, 4, 3, 'leaf3'); rect(x, i + shake, j, 2, 1, 'leaf1'); dot(x, i + 3 + shake, j + 2, 'leaf5'); }
+      for (const [i, j] of [[8, 6], [20, 8], [13, 12]]) { rect(x, i + shake, j, 2, 2, 'dusk5'); dot(x, i + shake, j, 'lilac'); }
+      return c;
+    };
+    put('bramble', strip([bramble(0), bramble(1)]), { frames: 2 });
+
+    const shears = open => {
+      const [c, x] = canvas(24, 13);
+      // two red-painted handle loops on the left, the brass pivot, and the two steel blades (2 px, a lit edge on top)
+      for (const j of [0, 8]) { rect(x, 0, j, 7, 5, 'ink'); rect(x, 1, j + 1, 5, 3, 'roofR2'); rect(x, 1, j + 1, 5, 1, 'roofR1'); rect(x, 2, j + 2, 3, 1, 'ink'); }
+      line(x, 6, 3, 9, 6, 'ink'); line(x, 6, 9, 9, 6, 'ink');
+      for (const sgn of [-1, 1]) for (let t = 0; t <= 13; t++) {
+        const i = 9 + t, j = Math.round(6 + sgn * (open ? t * 0.38 : 0)) + (open ? 0 : sgn > 0 ? 1 : 0);
+        dot(x, i, j - 1, 'ink'); dot(x, i, j, t > 9 ? 'iron0' : 'iron1'); dot(x, i, j + 1, 'ink');
+      }
+      rect(x, 8, 5, 3, 3, 'ink'); dot(x, 9, 6, 'brass1');
+      return c;
+    };
+    put('shears', strip([shears(true), shears(false)]), { frames: 2 });
+  }
+
+  /* Minigame 2B, Ratih's treadle sewing machine: the patchwork cotton under the needle (its polka dots are laid over it
+     in the game, so they don't stretch), the machine's black cast-iron arm with its gold scrolls, the needle up and
+     down, the hand wheel turning and the iron treadle rocking. */
+  function stitching(put) {
+    const [cl, clx] = canvas(24, 24);
+    clx.drawImage(box(24, 24, 1, { o: 'roofR3', fill: 'pink', hi: '#ffd0e8', lo: 'rose' }), 0, 0);
+    put('cloth', cl, { margins: [3, 3, 3, 3] });
+
+    const [mw, mh] = [104, 44];
+    put('machine', strip([0, 1].map(down => {
+      const [c, x] = canvas(mw, mh);
+      // the pillar down to the bed on the right, the arm across, the head over the needle on the left
+      x.drawImage(shape(mw, mh, (i, j) => (i >= 76 && i < 96 && j >= 10 && j < 44) || (i >= 8 && i < 98 && j >= 4 && j < 17) || (i >= 2 && i < 30 && j >= 2 && j < 26 && !(i < 5 && j < 5)),
+        (i, j) => (j < 6 || i < 4 ? 'iron3' : (i >= 76 && i > 92) || j > 22 ? 'ink' : 'iron4')), 0, 0);
+      for (let i = 34; i < 74; i += 4) { dot(x, i, 8, 'brass1'); dot(x, i + 1, 9, 'brass2'); dot(x, i + 2, 8, 'brass0'); }   // the gold scrolls
+      rect(x, 80, 20, 12, 2, 'brass1'); rect(x, 80, 26, 12, 1, 'brass2'); rect(x, 8, 12, 14, 1, 'brass1');
+      // the tension discs on the head's face, the red thread from them down to the needle
+      rect(x, 22, 6, 4, 4, 'iron1'); dot(x, 23, 7, 'white');
+      const n = down ? 4 : 0;
+      line(x, 24, 9, 17, 27 + n, 'red');
+      // the needle bar, the presser foot, the needle
+      rect(x, 13, 26, 4, 7 + n, 'iron2'); rect(x, 13, 26, 1, 7 + n, 'iron1');
+      rect(x, 10, 35, 10, 3, 'iron3'); rect(x, 10, 35, 10, 1, 'iron1');
+      rect(x, 14, 33 + n, 2, 5, 'iron0'); dot(x, 14, 38 + n > 43 ? 43 : 38 + n, 'white');
+      return c;
+    })), { frames: 2 });
+
+    put('flywheel', strip(Array.from({ length: 4 }, (_, f) => {
+      const turn = f * Math.PI / 8;
+      return shape(23, 23, (i, j) => { const d = Math.hypot(i - 11, j - 11); return d <= 11 && (d > 8 || d < 3 || [0, 1, 2, 3].some(k => Math.abs(Math.sin(Math.atan2(j - 11, i - 11) - turn - k * Math.PI / 2)) * d < 1.2)); },
+        (i, j) => { const d = Math.hypot(i - 11, j - 11); return d < 3 ? 'brass1' : d > 8 ? ((i + j) < 20 ? 'iron2' : 'iron4') : 'iron3'; });
+    })), { frames: 4 });
+
+    put('treadle', strip([-1, 0, 1].map(tilt => shape(38, 16, (i, j) => {
+      const y = j - 8 - tilt * (i - 19) / 7;
+      return Math.abs(y) <= 3 && i > 0 && i < 37;
+    }, (i, j) => {
+      const y = j - 8 - tilt * (i - 19) / 7;
+      return (i % 5 === 2 && Math.abs(y) < 2) ? 'iron4' : y < -1 ? 'iron2' : 'iron3';
+    }))), { frames: 3 });
+  }
+
   function ui() {
     const O = { o: 'ink' }, PAPER = { o: 'ink', fill: 'sky0', hi: 'white', lo: 'cream1' }, spec = {};
     const put = (name, img, extra = {}) => { png(`ui/${name}.png`, img); spec[name] = { size: [img.width / (extra.frames || 1), img.height], ...extra }; };
@@ -388,6 +490,8 @@
     bench(put);
     kneading(put);
     clockwork(put);
+    harvest(put);
+    stitching(put);
     put('title', TITLE.render(10 * 60 + 17));   // the clock in the O stopped at 10:17, the hour the station's watch stopped
     json('ui/ui.json', spec);
     // Every PAL colour as #rrggbb; the translucent cast shadow becomes #rrggbbaa.
