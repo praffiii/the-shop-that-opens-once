@@ -35,6 +35,7 @@ namespace Shop
         bool restAway, restWatch;
         float beat, aside, greeted = -GreetAgain, since;
         Ant company;
+        readonly Dictionary<int, GameObject> setDown = new(); // the loads they left lying, by the stop they left them at
 
         public static void Add(Ant ant, Person def, Place place)
         {
@@ -113,8 +114,12 @@ namespace Shop
             if (!walking && def.Round != null && (wait -= Time.deltaTime) <= 0)
             {
                 aside = 0;
-                ant.Carrying = def.Round[at].Carry;
-                ant.Running = def.Round[at].Run;
+                var stop = def.Round[at];
+                // what they set down stays lying there, and what they lift there again goes with them
+                if (stop.Pose == "lift" && !stop.Carry && !setDown.ContainsKey(at)) setDown[at] = ant.SetDown(restFacing);
+                else if (stop.Carry && setDown.Remove(at, out var load)) Destroy(load);
+                ant.Carrying = stop.Carry;
+                ant.Running = stop.Run;
                 at = (at + 1) % def.Round.Length;
                 Go();
             }

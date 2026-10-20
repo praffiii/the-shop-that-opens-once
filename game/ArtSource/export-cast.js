@@ -33,6 +33,7 @@
       });
       check(id, sheet, poses);
       png(`chars/${id}.png`, sheet);
+      if (names.includes('lift')) png(`chars/loads/${id}.png`, CH.ground(id));   // what they leave lying where they set it down
 
       const moods = ['neutral', ...MOODS.filter(m => !same(CH.portrait(id, 0, m), CH.portrait(id, 0)))];
       const [pc, pg] = canvas(PFRAMES * PORTRAIT, moods.length * PORTRAIT);

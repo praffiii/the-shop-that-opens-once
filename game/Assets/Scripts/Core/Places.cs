@@ -49,7 +49,7 @@ namespace Shop
         {
             new Stop { At = V(186, 528), Pose = "rake", Facing = 1, Wait = 5f },
             new Stop { At = V(242, 530), Pose = "rake", Facing = 1, Wait = 5f, Carry = true },
-            new Stop { At = V(236, 470), Pose = "lift", Facing = 1, Wait = 3f },
+            new Stop { At = V(244, 452), Pose = "lift", Facing = 1, Wait = 3f },
         };
         static readonly string[] FisherLines =
         {
@@ -147,7 +147,7 @@ namespace Shop
                         Round = new[]
                         {
                             new Stop { At = V(432, 432), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
-                            new Stop { At = V(252, 326), Pose = "lift", Facing = -1, Wait = 2.5f },
+                            new Stop { At = V(234, 314), Pose = "lift", Facing = -1, Wait = 2.5f },
                         },
                         Lines = new[]
                         {
@@ -320,7 +320,7 @@ namespace Shop
                         Round = new[]
                         {
                             new Stop { At = V(262, 654), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
-                            new Stop { At = V(438, 404), Pose = "lift", Facing = -1, Wait = 3f },
+                            new Stop { At = V(462, 398), Pose = "lift", Facing = -1, Wait = 3f },
                         },
                         Lines = new[]
                         {
@@ -331,7 +331,7 @@ namespace Shop
                     },
                     // Morning: the Baker is at work in his bakery (see "bakery"), Mia carries crates from home to set
                     // out her vegetable stall, Pip runs letters from the shut post office's
-                    // steps to the neighbours' doors, and Sam sweeps outside the hall's door.
+                    // steps and slips them under the neighbours' doors, and Sam sweeps outside the hall's door.
                     // Midday: the Baker trades gossip at Mia's stall, Sam reads the notice board (Pip is at the east's
                     // playground). Dusk: the Baker sweeps before the bakery, Mia and Pip are at their door before
                     // dark, and Sam locks the hall.
@@ -356,9 +356,9 @@ namespace Shop
                         Round = new[]
                         {
                             new Stop { At = V(310, 628), Pose = "lift", Facing = -1, Wait = 2f, Carry = true },
-                            new Stop { At = V(1110, 628), Pose = "lift", Facing = -1, Wait = 2f },
+                            new Stop { At = V(1110, 602), Pose = "crouch", Facing = -1, Wait = 2f },
                             new Stop { At = V(310, 628), Pose = "lift", Facing = 1, Wait = 2f, Carry = true },
-                            new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 2f },
+                            new Stop { At = V(140, 602), Pose = "crouch", Facing = -1, Wait = 2f },
                         },
                         Lines = new[]
                         {
@@ -490,7 +490,7 @@ namespace Shop
                         Round = new[]
                         {
                             new Stop { At = V(520, 750), Pose = "lift", Facing = 1, Wait = 3f, Carry = true },
-                            new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 3f },
+                            new Stop { At = V(140, 602), Pose = "lift", Facing = -1, Wait = 3f },
                         },
                         Lines = new[]
                         {

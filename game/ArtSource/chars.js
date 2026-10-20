@@ -1698,6 +1698,8 @@
     frames: (id, pose) => POSES[resolve(id, pose)],
     fps: pose => FPS[pose] || 6,
     sprite: sprite40,
+    // the load alone, lying where the lift pose sets it down, in a cell like the sheets' (feet at 20,37)
+    ground: id => memo('ground|' + id, () => { const [c, x] = canvas(40, 40), L = load(id); put(x, L, 26, 39 - L.height); return bodied(c, CAST[id].body); }),
     hand(id, pose, frame = 0) {
       const p = resolve(id, pose), f = wrap(p, frame), t = turned(p);
       if (t) { const [hx, hy] = turnedHand(CAST[id], t[0], f); return [hx - 20, hy - 37]; }

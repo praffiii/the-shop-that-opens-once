@@ -179,6 +179,23 @@ namespace Shop
             return item.gameObject;
         }
 
+        /// <summary>Leaves its load (Art/chars/loads/&lt;id&gt;) lying where the lift pose sets it down, turned to <paramref name="side"/>.</summary>
+        public GameObject SetDown(int side)
+        {
+            var load = new GameObject("load").transform;
+            load.SetParent(transform.parent, false);
+            load.localRotation = Art.Leaning;
+            load.localScale = Art.LeaningScale;
+            var world = transform.parent.GetComponent<BakedArt>();
+            load.localPosition = Art.World(feet, (world ? world.Relief.Stand(feet, Tall) : 0) + floor); // behind an ant on the same spot
+            var art = Part("art", load);
+            var cell = Vector2Int.RoundToInt(Art.Point(Cast["cell"]));
+            art.sprite = Art.Sprite(Art.Texture($"chars/loads/{Id}"), new RectInt(Vector2Int.zero, cell), Vector2Int.RoundToInt(Art.Point(Cast["feet"])));
+            art.transform.localScale = new Vector3(side, 1, 1);
+            art.transform.localPosition = new Vector3(side < 0 ? 1 : 0, 0); // mirrored like the body
+            return load.gameObject;
+        }
+
         /// <summary>Picks up something it dropped and holds it again.</summary>
         public void PickUp(GameObject dropped)
         {
