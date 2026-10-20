@@ -41,6 +41,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [32](32-jam-hari-dan-suasana.md) | 2026-10-20 | Waktu digerakkan cerita: jam hari dan fase di kiri atas, peralihan senja ke malam yang ditonton, dan suasana bunyi per fase | |
 | [33](33-jam-roda-dan-dialog-hidup.md) | 2026-10-20 | Jam hari berbentuk roda berjarum, dialog yang lebih hidup (jeda, penekanan, ekspresi, emote), dan semua teks dalam bahasa Inggris | |
 | [34](34-simpanan-dan-tas.md) | 2026-10-20 | Simpanan yang bertahan antarbab dan checkpoint per fase, pengaman agar kurir tak pernah membeku, dan tas yang lebih jelas | |
+| [35](35-warga-hidup-dan-padang.md) | 2026-10-20 | Warga yang hidup dalam kegiatannya (langkah sendiri, jeda, menoleh, bergantian bicara, menyapa kurir) dan halaman yang tak lagi kosong | |
 
 ## Format setiap entri
 
