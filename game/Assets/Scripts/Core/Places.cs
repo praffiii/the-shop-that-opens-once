@@ -1250,10 +1250,11 @@ namespace Shop
                 {
                     new Person
                     {
-                        Id = "baker", Label = "Baker", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Id = "baker", Label = "Baker", Spot = V(0, 30), Phases = new[] { Phase.Morning },
+                        // he kneads from behind the dough table, his hands on its top; he is spoken to from in front of it
                         Round = new[]
                         {
-                            new Stop { At = V(431, 360), Pose = "knead", Facing = 1, Wait = 8f },
+                            new Stop { At = V(431, 332), Pose = "knead", Facing = 1, Wait = 8f },
                             new Stop { At = V(380, 346), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
                             new Stop { At = V(483, 324), Pose = "lift", Facing = 1, Wait = 2.5f },
                         },
