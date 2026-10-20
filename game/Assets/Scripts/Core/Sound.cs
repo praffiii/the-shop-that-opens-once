@@ -63,12 +63,22 @@ namespace Shop
             voice = Source(false);
             voice.volume = 1f;
             for (var i = 0; i < 6; i++) effects.Add(Source(false));
+            AudioSettings.OnAudioConfigurationChanged += Restart;
         }
 
         void OnDestroy()
         {
+            AudioSettings.OnAudioConfigurationChanged -= Restart;
             if (Instance == this) Instance = null;
             AudioListener.volume = 1f;
+        }
+
+        // A change of audio device (headphones in or out, the output switched) resets Unity's audio and stops every
+        // source: the music, the wind and the ambience that should be sounding start again.
+        void Restart(bool deviceWasChanged)
+        {
+            for (var i = 0; i < beds.Length; i++)
+                if (beds[i].clip && target[i] > 0f && !beds[i].isPlaying) beds[i].Play();
         }
 
         AudioSource Source(bool loop)
