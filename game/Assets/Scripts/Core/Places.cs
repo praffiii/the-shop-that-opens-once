@@ -1082,14 +1082,14 @@ namespace Shop
                     // walnut table the night's box is set on, the coil lit before sleep, the desk where he writes his
                     // journal, the stove where the morning's tea is made
                     new Hotspot { Id = "photo", At = V(892, 349), Label = "Family photo", Area = R(-24, -86, 48, 32), Spot = V(0, 26) },
-                    new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(0, 11) },
+                    new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(-15, 11) },
                     new Hotspot { Id = "sewing", At = V(785, 408), Label = "Sewing machine", Area = R(-24, -29, 48, 30), Spot = V(14, 10) },
-                    new Hotspot { Id = "water_jar", At = V(979, 418), Label = "Water jar", Area = R(-10, -24, 20, 24), Spot = V(0, 10) },
+                    new Hotspot { Id = "water_jar", At = V(979, 418), Label = "Water jar", Area = R(-10, -24, 20, 24), Spot = V(0, 6) },
                     new Hotspot { Id = "bed", At = V(785, 378), Label = "Bed", Area = R(-36, -56, 55, 54), Spot = V(14, 6) },
-                    new Hotspot { Id = "table", At = V(947, 396), Label = "Table", Area = R(-20, -24, 40, 24), Spot = V(0, 12), Chapters = Nights },
+                    new Hotspot { Id = "table", At = V(942, 396), Label = "Table", Area = R(-15, -24, 30, 24), Spot = V(0, 12), Chapters = Nights },
                     new Hotspot { Id = "coil", At = V(805, 382), Label = "Mosquito coil", Area = R(-7, -9, 14, 10), Spot = V(10, 6), Chapters = Nights },
                     new Hotspot { Id = "desk", At = V(822, 362), Label = "Desk", Area = R(-16, -24, 32, 24), Spot = V(0, 16), Chapters = Nights },
-                    new Hotspot { Id = "stove", At = V(975, 364), Label = "Stove", Area = R(-12, -26, 24, 26), Spot = V(0, 36), Chapters = Nights },
+                    new Hotspot { Id = "stove", At = V(975, 364), Label = "Stove", Area = R(-12, -26, 24, 26), Spot = V(0, 10), Chapters = Nights },
                 },
             },
             // Marlow's shop at the end of the grove path, cut open the same way: Marlow behind the counter, the clock

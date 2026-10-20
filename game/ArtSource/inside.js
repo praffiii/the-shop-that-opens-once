@@ -270,8 +270,8 @@
       bays: [[76, 50], [150, 50]],
       solid: [[4, 0, 36, 30], [42, 0, 72, 14], [46, 14, 58, 24], [1, 36, 17, 62], [22, 52, 50, 60], [9, 62, 19, 68],
         [79, 0, 95, 8], [98, 0, 148, 20], [100, 32, 124, 42], [132, 36, 148, 50],
-        [154, 0, 222, 16], [164, 30, 200, 48], [154, 40, 166, 46], [198, 40, 210, 46], [204, 60, 224, 70],
-        [82, 80, 94, 90], [130, 80, 142, 90], [140, 54, 152, 62], [78, 52, 90, 60], [151, 64, 163, 72], [208, 50, 224, 58]],
+        [154, 0, 222, 16], [164, 30, 190, 48], [154, 40, 166, 46], [188, 40, 200, 46], [204, 60, 224, 70],
+        [82, 80, 94, 90], [130, 80, 142, 90], [140, 54, 152, 62], [78, 52, 90, 60], [151, 64, 163, 72], [208, 82, 224, 90]],
       paint(b, R) {
         // the bedroom's braided rag rug and the family room's woven one, the doormat
         R(22, 28, 70, 50, (x, y, w, h) => { const d = Math.min(x, y, w - 1 - x, h - 1 - y); return ((x - w / 2) / (w / 2)) ** 2 + ((y - h / 2) / (h / 2)) ** 2 > 1.02 ? 0 : ['rose', 'cream1', 'sky3', 'cream1', 'roofR1'][d % 5]; });
@@ -295,11 +295,11 @@
       left(b, w, h, win) { win(b, 70, 14, 16, 16); },
       right(b, w, h, win) { win(b, 30, 14, 16, 16); hooks(b, 56, 14, ['ladle', 'ladle', 'apron']); pans(b, 6, 12, 2); },
       things(T) {
-        // Ratih's basket of wool by the sofa, a palm by the partition, Satria's slippers by the bed, the rice sack and
-        // the firewood by the kitchen's door
+        // Ratih's basket of wool by the sofa, a palm by the partition, Satria's slippers by the bed, the rice sack by
+        // the kitchen, and the firewood in its front corner, clear of the way to the stove
         T.card('wool', PROPS.basket('yarn'), 146, 60); T.card('palm', PROPS.plant(), 84, 58);
         T.card('slippers', sprite(12, 4, b => { for (const x of [0, 7]) { fill(b, x, 0, 5, 4, 'roofB2'); fill(b, x + 1, 0, 3, 1, 'roofB1'); } }), 22, 36);
-        T.card('rice_sack', PROPS.sack(), 157, 70); T.card('firewood', sprite(16, 10, b => { for (const [y, n] of [[5, 3], [0, 2]]) for (let i = 0; i < n; i++) { const x = i * 5 + (n === 2 ? 3 : 0); V.disc(b, x + 2, y + 2, 2, 2, 'wood2'); fill(b, x + 2, y, 3, 5, 'wood3'); px(b, x + 2, y + 2, 'wood4'); } }), 216, 56);
+        T.card('rice_sack', PROPS.sack(), 157, 70); T.card('firewood', sprite(16, 10, b => { for (const [y, n] of [[5, 3], [0, 2]]) for (let i = 0; i < n; i++) { const x = i * 5 + (n === 2 ? 3 : 0); V.disc(b, x + 2, y + 2, 2, 2, 'wood2'); fill(b, x + 2, y, 3, 5, 'wood3'); px(b, x + 2, y + 2, 'wood4'); } }), 216, 90);
         // the bed: a low frame, the kapok mattress, Ratih's patchwork quilt over most of it, a pillow, the headboard
         T.box('bed_frame', 4, 0, 36, 30, 0, 7, (b, w, h) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); fill(b, 0, h - 1, w, 1, 'wood4'); });
         T.box('bed_quilt', 6, 3, 34, 28, 7, 11, (b, w, h, l, which) => {
@@ -373,14 +373,14 @@
         T.box('stove_pipe', 206, 0, 212, 4, 18, WALL - 2, (b, w, h) => { fill(b, 0, 0, w, h, 'iron3'); fill(b, 0, 0, 1, h, 'iron2'); for (let y = 6; y < h; y += 12) fill(b, 0, y, w, 1, 'iron4'); });
         T.card('kettle', sprite(10, 8, b => { fill(b, 1, 2, 8, 6, 'brass2'); fill(b, 2, 1, 6, 1, 'brass2'); fill(b, 3, 0, 4, 1, 'brass3'); fill(b, 2, 3, 2, 3, 'brass0'); fill(b, 8, 3, 2, 2, 'brass3'); }), 215, 10, 18);
         const walnut = (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3'); if (which === 'top') for (let y = 2; y < h; y += 4) fill(b, 1, y, w - 2, 1, 'wood5'); };
-        T.box('table_top', 164, 30, 200, 48, 12, 15, walnut);
-        for (const [x, y] of [[166, 32], [195, 32], [166, 44], [195, 44]]) T.box(`table_leg_${x}_${y}`, x, y, x + 3, y + 3, 0, 12, (b, w, h) => fill(b, 0, 0, w, h, 'wood5'));
+        T.box('table_top', 164, 30, 190, 48, 12, 15, walnut);
+        for (const [x, y] of [[166, 32], [185, 32], [166, 44], [185, 44]]) T.box(`table_leg_${x}_${y}`, x, y, x + 3, y + 3, 0, 12, (b, w, h) => fill(b, 0, 0, w, h, 'wood5'));
         const chair = flip => sprite(12, 22, b => { const bx = flip ? 9 : 0; fill(b, bx, 0, 3, 14, 'wood4'); fill(b, bx, 0, 3, 1, 'wood3'); fill(b, 0, 12, 12, 3, 'wood3'); fill(b, 0, 12, 12, 1, 'wood2'); for (const x of [1, 9]) fill(b, x, 15, 2, 7, 'wood4'); });
         const lantern = lit => sprite(8, 12, b => { fill(b, 3, 0, 2, 1, 'iron3'); fill(b, 1, 1, 6, 2, 'iron3'); fill(b, 1, 3, 6, 6, lit ? 'light1' : 'cream0'); fill(b, 2, 4, 4, 4, lit ? 'light0' : 'cream1'); fill(b, 1, 3, 1, 6, 'iron3'); fill(b, 6, 3, 1, 6, 'iron3'); fill(b, 0, 9, 8, 3, 'iron3'); fill(b, 0, 9, 8, 1, 'iron2'); });
-        T.card('lantern', lantern(false), 182, 40, 15); T.card('lantern_lit', lantern(true), 182, 40, 15, true);
+        T.card('lantern', lantern(false), 180, 40, 15); T.card('lantern_lit', lantern(true), 180, 40, 15, true);
         // the night's keepsake box, brought home from the shop and set on the table (one per night; the story shows it)
-        BOXES.forEach((_, i) => T.card(`box_on_table_${i}`, { img: boxItem(i, 'xs', 'closed'), ax: 5, ay: 8 }, 172, 38, 15));
-        T.card('chair_l', chair(false), 160, 46); T.card('chair_r', chair(true), 204, 46);
+        BOXES.forEach((_, i) => T.card(`box_on_table_${i}`, { img: boxItem(i, 'xs', 'closed'), ax: 5, ay: 8 }, 170, 38, 15));
+        T.card('chair_l', chair(false), 160, 46); T.card('chair_r', chair(true), 194, 46);
         T.card('water_jar', sprite(20, 22, b => {
           V.disc(b, 10, 12, 9, 9, 'roofR3'); V.disc(b, 9, 11, 8, 8, 'roofR2'); V.disc(b, 7, 9, 3, 3, 'roofR1'); fill(b, 4, 18, 12, 3, 'roofR4');
           fill(b, 3, 0, 14, 4, 'wood3'); fill(b, 3, 0, 14, 1, 'wood2'); fill(b, 9, 0, 2, 1, 'wood4');
