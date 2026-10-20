@@ -646,6 +646,28 @@
     };
   }
 
+  /* Day 8: where the shop stood, the gap in the roots closed for good: a curtain of the ancient tree's aerial roots
+     grown down to the ground, thickest where the door was, mossy, with wildflowers in bloom along their foot. */
+  function shopGone() {
+    const W = 128, H = 100;
+    const roots = inked(W, H, b => {
+      [[[10, 0], [6, 34], [12, 70], [8, H - 1], 9, 12], [[30, 0], [34, 28], [26, 60], [30, H - 1], 7, 10], [[50, 0], [46, 30], [54, 66], [50, H - 1], 11, 14],
+        [[64, 0], [68, 24], [62, 58], [66, H - 1], 12, 15], [[80, 0], [76, 36], [82, 70], [78, H - 1], 11, 13], [[98, 0], [102, 30], [94, 62], [98, H - 1], 8, 11],
+        [[118, 0], [114, 40], [120, 72], [116, H - 1], 9, 12]]
+        .forEach(([...r], i) => { const w1 = r.pop(), w0 = r.pop(); hangRoot(b, r, w0, w1, 20 + i); });
+      // the thin ones between and across, binding them shut
+      [[[40, 0], [58, 44], [72, H - 1]], [[88, 0], [70, 40], [56, H - 1]], [[20, 6], [38, 50], [42, H - 1]], [[108, 4], [90, 52], [88, H - 1]]]
+        .forEach((r, i) => hangRoot(b, r, 4, 5, 40 + i));
+      for (const [x, y, n] of [[14, 8, 10], [56, 4, 14], [92, 10, 12], [36, 40, 8], [76, 46, 9], [110, 36, 8]]) moss(b, x, y, n, x + y, 3);
+    });
+    const [c, x] = PX.canvas(W + 2, H + 2);
+    x.drawImage(roots.canvas(), 0, 0);
+    // the wildflowers along their foot
+    [[2, 'rose', 51], [18, 'yellow', 52], [34, 'white', 53], [50, 'rose', 54], [66, 'yellow', 55], [82, 'white', 56], [98, 'rose', 57], [110, 'yellow', 58]]
+      .forEach(([fx, colour, seed]) => { const f = V.flowerClump(seed, colour); x.drawImage(f.img, fx, H + 2 - f.img.height); });
+    return { img: c, ax: (W >> 1) + 1, ay: H + 1 };
+  }
+
   /* The card in the shop's window by day. */
   function closedCard() {
     const w = PX.textWidth('CLOSED') + 6;
@@ -800,5 +822,5 @@
     });
   }
 
-  Object.assign(VIL, { station, sleepers, stoneCottage, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, closedCard, lantern, clock, hangRoot, helenHouse, menderHouse, bramHome });
+  Object.assign(VIL, { station, sleepers, stoneCottage, platform, rails, teaStall, locomotive, wagon, waterTower, tunnelPortal, forge, marlowShop, shopGone, closedCard, lantern, clock, hangRoot, helenHouse, menderHouse, bramHome });
 })();

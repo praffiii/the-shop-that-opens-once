@@ -274,6 +274,39 @@ namespace Shop
             Game.Bag.Add(keepsake);
         }
 
+        /// <summary>The courier takes something given him, and it goes into the bag.</summary>
+        protected async Awaitable Receive(string item)
+        {
+            var courier = Actor("courier");
+            courier.Held = Keepsakes.Art(item, "xs");
+            courier.Pose = "receive";
+            Sfx("pop");
+            await Wait(0.7f);
+            courier.Held = null;
+            courier.Pose = "idle";
+            Game.Bag.Add(item);
+        }
+
+        /// <summary>Someone gives the courier a thing they hold, and it goes into the bag.</summary>
+        protected async Awaitable Give(string id, string item)
+        {
+            var owner = Actor(id);
+            owner.FaceTo(Actor("courier").Feet.x);
+            owner.Held = Keepsakes.Art(item, "xs");
+            owner.Pose = "give";
+            await Wait(0.6f);
+            owner.Held = null;
+            owner.Pose = "idle";
+            await Receive(item);
+        }
+
+        /// <summary>A keepsake changes in the bag where it lies, as the day mends it.</summary>
+        protected static void Swap(string from, string to)
+        {
+            var at = Game.Bag.IndexOf(from);
+            if (at >= 0) Game.Bag[at] = to;
+        }
+
         /// <summary>The courier gives a keepsake to its owner, who takes it and keeps holding it.</summary>
         protected async Awaitable GiveKeepsake(string id, string keepsake)
         {

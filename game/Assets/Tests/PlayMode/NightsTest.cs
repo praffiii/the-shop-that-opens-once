@@ -221,10 +221,24 @@ namespace Shop.Tests
             await Go(main, "east", "satria_home_door");
         }, boxFirst: false);
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator EpiloguePlaysThrough() => Run(Game.Epilogue, async main =>
+        {
+            // the grove, the square and the torn contract play from the chapter's start, to the village at the gate
+            CollectionAssert.Contains(Game.Bag, "contract_torn", "The contract torn before the hall");
+            CollectionAssert.DoesNotContain(Game.Bag, "contract");
+            Assert.AreEqual("east", main.Place.Def.Id, "Up the east road to Satria's gate");
+            await Use(main, "mender");
+            Assert.IsTrue(Game.Has("board_up"), "The new board on the railings");
+            // the Baker's bread, then the porch and the credits, to the title
+            Assert.IsTrue(await main.Place.WalkAndUse("baker"), "Could not reach baker");
+        }, boxFirst: false, carrying: new[] { "contract" });
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
         // story, and home to the journal, which ends the night. Night 7 plays its day first: `day` is all of it, to the
-        // door at dawn.
-        static IEnumerator Run(int night, Func<Main, Awaitable> day, bool boxFirst = true)
+        // door at dawn. The Epilogue ends with the credits and the title. carrying: what the courier brings in from the
+        // nights before.
+        static IEnumerator Run(int night, Func<Main, Awaitable> day, bool boxFirst = true, string[] carrying = null)
         {
             var saved = Game.Raw;
             Main main = null;
@@ -234,7 +248,7 @@ namespace Shop.Tests
                 Time.timeScale = 8f;
                 main = new GameObject("Main").AddComponent<Main>();
                 main.Talk.Picks.Enqueue("Quit"); // leaves the title, for the night to begin
-                var playing = Play(main, night, day, boxFirst);
+                var playing = Play(main, night, day, boxFirst, carrying ?? Array.Empty<string>());
                 var end = Time.realtimeSinceStartup + TimeLimit;
                 while (!playing.IsCompleted)
                 {
@@ -253,10 +267,11 @@ namespace Shop.Tests
             }
         }
 
-        static async Awaitable Play(Main main, int night, Func<Main, Awaitable> day, bool boxFirst)
+        static async Awaitable Play(Main main, int night, Func<Main, Awaitable> day, bool boxFirst, string[] carrying)
         {
             await Until(() => main.Talk.Picks.Count == 0);
             Game.NewGame();
+            Game.Bag.AddRange(carrying);
             await main.Begin(night);
             if (boxFirst)
             {
@@ -269,7 +284,8 @@ namespace Shop.Tests
             var story = main.Story;
             await day(main);
             if (boxFirst) await Go(main, "satria_home", "door");
-            await Until(() => Game.SavedChapter() == night + 1 && main.Story != story); // over, and the next night begun or saved for later
+            // over, and the next night begun or saved for later; the last, back to the title
+            await Until(() => main.Story != story && (night == Game.Epilogue ? main.Story == null : Game.SavedChapter() == night + 1));
         }
 
         // Takes the courier somewhere as the story would, and once there closes the talk and gives back the controls, as

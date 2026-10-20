@@ -239,6 +239,21 @@
     return { img: out.canvas(), ax: (W >> 1) + 1, ay: G + 1 };
   }
 
+  /* Day 8: the new teak board Satria and the Mender nail to the railings by his gate, carved SATRIA'S POST, FOR ALL
+     THE COLONY, wired on at the top (Place.FollowStory shows it once it is up). */
+  function postBoard() {
+    const LINES = ["SATRIA'S POST", 'FOR ALL', 'THE COLONY'], W = PX.textWidth(LINES[0]) + 8, H = 28;
+    const write = (b, t, y, c) => { const x = (W - PX.textWidth(t)) >> 1; PX.text({ fillRect: (i, j) => px(b, i, j + 1, 'wood1') }, t, x, y, c); PX.text({ fillRect: (i, j) => px(b, i, j, c) }, t, x, y, c); };
+    const out = inked(W, H, b => {
+      fill(b, 0, 0, W, H, 'wood4'); fill(b, 1, 1, W - 2, H - 2, 'wood2'); fill(b, 1, 1, W - 2, 1, 'wood1'); fill(b, 1, H - 2, W - 2, 1, 'wood3');
+      for (const y of [10, 18]) for (let x = 3; x < W - 3; x += 7) px(b, x, y, 'wood3');
+      write(b, LINES[0], 3, '#c43a4a'); write(b, LINES[1], 11, 'wood5'); write(b, LINES[2], 19, 'wood5');
+      // the wire twists that hold it to the railings
+      for (const x of [4, W - 5]) { fill(b, x, 0, 1, 2, 'iron2'); px(b, x, 2, 'iron3'); }
+    });
+    return { img: out.canvas(), ax: (W >> 1) + 1, ay: H + 1 };
+  }
+
   /* Ratih's flower beds, left to grow over in the two years since she died: a bed edged with stones, its chamomile and
      lavender lost in waist-high grass and weeds. len: its width. */
   function overgrownBed(seed = 1, len = 56) {
@@ -372,5 +387,5 @@
     return { img: frames[0], frames, fps: 2, ax: W / 2 + 1, ay: G + 1, base: [-W / 2, W / 2], foot: G - back, gate: [39 + 1 - (W / 2 + 1), 0] };
   }
 
-  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, litterBin, ironFence, yardGate, overgrownBed, swing, playground, chamomile, fieldFence, aphidPen });
+  Object.assign(VIL, { noraHouse, satriaHome, clothesline, gardenerHome, glasshouse, leoHut, busStop, litterBin, ironFence, yardGate, postBoard, overgrownBed, swing, playground, chamomile, fieldFence, aphidPen });
 })();

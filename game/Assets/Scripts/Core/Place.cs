@@ -176,6 +176,13 @@ namespace Shop
                 World.ShowItemIfAny("lamp_lit", Game.Has("lit_lamp"));
                 World.ShowItemIfAny("stove_fire", Game.Has("lit_fire"));
             }
+            // Day 8: the shop gone from the grove, the roots grown shut where it stood; the new board on Satria's railings
+            // once he and the Mender nail it up
+            var gone = Game.Chapter == Game.Epilogue;
+            foreach (var part in new[] { "shop", "shop_closed", "shop_lit", "shop_smoke_0" }) World.ShowItemIfAny(part, !gone);
+            for (var i = 0; i < 7; i++) World.ShowItemIfAny($"shop_lantern_{i}_day", !gone);
+            World.ShowItemIfAny("shop_gone", gone);
+            World.ShowItemIfAny("post_board", gone && Game.Has("board_up"));
         }
 
         /// <summary>Puts the courier at a spawn point, or else at an exported anchor of that name.</summary>

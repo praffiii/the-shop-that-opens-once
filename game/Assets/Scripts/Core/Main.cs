@@ -62,6 +62,7 @@ namespace Shop
             [5] = main => new Night5(main),
             [6] = main => new Night6(main),
             [7] = main => new Night7(main),
+            [Game.Epilogue] = main => new Epilogue(main),
         };
 
         public static Main Instance { get; private set; }
@@ -82,6 +83,7 @@ namespace Shop
         public Hud Hud { get; private set; }
         public Bag Bag { get; private set; }
         public Card Cards { get; private set; }
+        public Credits Credits { get; private set; }
         public Journal Journal { get; private set; }
         /// <summary>The screen minigames are played on (<see cref="Shop.Board"/>).</summary>
         public Board Board { get; private set; }
@@ -211,6 +213,7 @@ namespace Shop
             Hud = Hud.Create(t);
             Bag = Bag.Create(t);
             Cards = Card.Create(t);
+            Credits = Credits.Create(t);
             Journal = Journal.Create(t);
             Reveal = Reveal.Create(t);
             curtain = Look.Picture("Curtain", t);
@@ -431,6 +434,13 @@ namespace Shop
             await Cards.Show(lines);
         }
 
+        /// <summary>The credits roll over the last shot, at the end of Day 8 (<see cref="Shop.Credits"/>).</summary>
+        public async Awaitable ShowCredits()
+        {
+            Talk.Close();
+            await Credits.Show();
+        }
+
         /// <summary>The journal page Satria writes before bed (<see cref="Journal"/>); without the pen, a letter's page read as it is.</summary>
         public async Awaitable ShowJournal(string heading, string page, bool pen = true)
         {
@@ -621,7 +631,7 @@ namespace Shop
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
             if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
-            var input = !(Cards.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle() || Board.Handle());
+            var input = !(Cards.Handle() || Credits.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle() || Board.Handle());
             if (input && Hud.Handle())
             {
                 Run(OpenBag());

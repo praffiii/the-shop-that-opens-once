@@ -409,6 +409,8 @@
         // where the road leaves: a waymark naming where it leads, its lantern lit at night
         at('way_station', V.waysign('STATION', 1), 614, 486);
         at('shop', V.marlowShop(), 300, 236, { clear: false });
+        // Day 8: the shop gone, and the gap where it stood closed by the tree's roots (shown only then)
+        at('shop_gone', V.shopGone(), 300, 236, { clear: false });
         // the ancient tree the shop grew into: behind it, its roots over the roof, its crown over the ridge
         at('shop_tree', V.grandTree({ r: 66, seed: 9, leaf: 'deep', tall: 96 }), 300, 176, { sway: 1, clear: false });
         // ancient trees along the way, just behind the path so their roots reach it, never in front of it: in the
@@ -606,6 +608,7 @@
         // pushes it open: satria_gate_open), bushes closing its sides up to the house, wild grass grown up to the steps
         at('yard_fence_0', V.ironFence(10), 806, 470); at('yard_fence_1', V.ironFence(10), 893, 470);
         at('satria_gate', V.yardGate(false), 877, 470, { walk: true }); at('satria_gate_open', V.yardGate(true), 877, 470, { walk: true });
+        at('post_board', V.postBoard(), 816, 472, { walk: true });   // Day 8's new board on the railings, once it is up (Place.FollowStory)
         [[800, 452], [800, 462], [952, 452], [952, 462]].forEach(([x, y], i) => at('yard_bush_' + i, V.bush({ r: 5, seed: 60 + i }), x, y, { foot: 8 }));
         [[836, 458, 3], [858, 464, 7], [922, 462, 9]].forEach(([x, y, k], i) => at('yard_grass_' + i, V.reeds(k), x, y, { walk: true }));
         [['cabbage', 452], ['carrot', 462]].forEach(([k, y], i) => at('satria_veg_' + i, V.vegRow(k, 40), 770, y, { walk: true }));

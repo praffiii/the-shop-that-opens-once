@@ -258,32 +258,6 @@ namespace Shop
             Actor("courier").FaceTo(at.x);
         }
 
-        /// <summary>The courier takes something given him, and it goes into the bag.</summary>
-        protected async Awaitable Receive(string item)
-        {
-            var courier = Actor("courier");
-            courier.Held = Keepsakes.Art(item, "xs");
-            courier.Pose = "receive";
-            Sfx("pop");
-            await Wait(0.7f);
-            courier.Held = null;
-            courier.Pose = "idle";
-            Game.Bag.Add(item);
-        }
-
-        /// <summary>Someone gives the courier a thing they hold, and it goes into the bag.</summary>
-        protected async Awaitable Give(string id, string item)
-        {
-            var owner = Actor(id);
-            owner.FaceTo(Actor("courier").Feet.x);
-            owner.Held = Keepsakes.Art(item, "xs");
-            owner.Pose = "give";
-            await Wait(0.6f);
-            owner.Held = null;
-            owner.Pose = "idle";
-            await Receive(item);
-        }
-
         /// <summary>The courier hands one thing over and gets another back.</summary>
         protected async Awaitable Trade(string id, string give, string get)
         {
@@ -306,13 +280,6 @@ namespace Shop
             owner.Held = null;
             owner.Pose = "idle";
             await Receive(get);
-        }
-
-        /// <summary>A keepsake changes in the bag where it lies, as the day mends it.</summary>
-        protected static void Swap(string from, string to)
-        {
-            var at = Game.Bag.IndexOf(from);
-            if (at >= 0) Game.Bag[at] = to;
         }
 
         /// <summary>The great brass bell, <paramref name="strokes"/> times, deep enough to feel in the chest.</summary>
