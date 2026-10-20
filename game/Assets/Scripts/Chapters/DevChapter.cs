@@ -16,7 +16,7 @@ namespace Shop
         {
             await Card("Systems test", "Not part of the story.");
             await Go("station", "start");
-            Hint("Click to walk, or use WASD (hold Shift to run). Space uses what is close.");
+            Tip("Click to walk, or use WASD (hold Shift to run). Space uses what is close.");
         }
 
         public override async Awaitable Entered(string place)
@@ -41,7 +41,7 @@ namespace Shop
             await Say("marlow", "It belongs to someone waiting on the old platform. Take it to them.");
             await Cinema(false);
             await Look(null);
-            Hint("Press E to look in your bag.");
+            Tip("Press E to look in your bag.");
         }
 
         // Marlow's door is open whenever the run comes by.

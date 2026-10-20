@@ -145,9 +145,19 @@ namespace Shop
                 Look.SetText(itemName, $"{k.Name}\n<color=#7a452e>{k.Sides[0].Seen}</color>");
             }
             for (var i = notes.childCount - 1; i >= 0; i--) Destroy(notes.GetChild(i).gameObject);
+            // what the courier means to do next, over the notes
+            var top = 0f;
+            if (Game.Errand != "")
+            {
+                var errand = Look.Label($"<color=#7a452e>Now:</color> {Game.Errand}", notes, new Rect(0, 0, NotesWidth, 0));
+                var h = Mathf.Max(Look.Line, Mathf.Ceil(errand.preferredHeight));
+                Look.Resize(errand.rectTransform, new Vector2(NotesWidth, h));
+                Look.Block("rule", notes, new Rect(0, h + 4, 40, 1), Look.Soft);
+                top = h + 10;
+            }
             // the newest notes that fit, oldest of them at the top
             var labels = new List<Text>();
-            var room = notes.sizeDelta.y;
+            var room = notes.sizeDelta.y - top;
             for (var i = Game.Notes.Count - 1; i >= 0; i--)
             {
                 var l = Look.Label(Game.Notes[i], notes, new Rect(0, 0, NotesWidth, 0));
@@ -161,13 +171,13 @@ namespace Shop
                 room -= h + 5;
                 labels.Insert(0, l);
             }
-            var y = 0f;
+            var y = top;
             foreach (var l in labels)
             {
                 Look.Move(l.rectTransform, new Vector2(0, y));
                 y += l.rectTransform.sizeDelta.y + 5;
             }
-            if (Game.Notes.Count == 0) Look.Label("Nothing noted yet.", notes, default, Look.Soft);
+            if (Game.Notes.Count == 0) Look.Move(Look.Label("Nothing noted yet.", notes, default, Look.Soft).rectTransform, new Vector2(0, top));
         }
     }
 }

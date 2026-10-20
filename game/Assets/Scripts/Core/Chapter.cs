@@ -118,7 +118,15 @@ namespace Shop
         /// <summary>Changes the music: dusk, shop, memory or resolved.</summary>
         protected void Music(string mood) => Sound.Mood(mood, Main.Place.Def.Indoors);
 
-        protected void Hint(string text) => Main.Hud.Toast(text);
+        /// <summary>Where the story points next: shown for a moment, and kept as the courier's errand in the bag.</summary>
+        protected void Hint(string text)
+        {
+            Game.Errand = text;
+            Main.Hud.Toast(text);
+        }
+
+        /// <summary>How to play, shown for a moment only.</summary>
+        protected void Tip(string text) => Main.Hud.Toast(text);
 
         /// <summary>Someone in the current place, taken into the scene: a villager leaves their activity until it ends.</summary>
         protected Ant Actor(string id)

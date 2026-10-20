@@ -30,6 +30,8 @@ namespace Shop
         public static readonly List<string> Bag = new();
         /// <summary>What the courier has noticed, oldest first.</summary>
         public static readonly List<string> Notes = new();
+        /// <summary>What the courier means to do next: the story's last hint, kept at the top of the bag's notes.</summary>
+        public static string Errand = "";
         static readonly HashSet<string> flags = new(), kept = new(), keptNotes = new();
 
         public static event Action<string> Noted;
@@ -58,6 +60,7 @@ namespace Shop
             LanternsOut = Mathf.Clamp(n - 1, 0, 7);
             Phase = phase;
             Checkpoint = "";
+            Errand = "";
             flags.Clear();
             Notes.RemoveAll(note => !keptNotes.Contains(note));
         }
