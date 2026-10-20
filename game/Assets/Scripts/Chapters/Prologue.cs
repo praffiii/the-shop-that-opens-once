@@ -14,6 +14,8 @@ namespace Shop
     {
         public Prologue(Main main) : base(main) { }
 
+        public override Phase StartPhase => Phase.Dusk;
+
         public override async Awaitable Start()
         {
             // Satria knows everyone here: he grew up with them
@@ -279,7 +281,7 @@ namespace Shop
             await Say("valdo", "The draft agreement is already in your bag. Sign the stamped page, and the transfer clears every instalment on your courier's motorbike in the city. Clear out the house, pack what matters, and we sign the day after tomorrow. Agreed?", "smile");
             await Say("courier", "Give me a few days to put my mother's things in order, Mr Valdo.");
             await Say("valdo", "Of course. But remember the deadline: the morning of Day Eight. Don't let a *golden chance* slip away because the country air has lulled you.", "cross");
-            Note("Valdo wants the sale contract signed by the morning of Day Eight.");
+            Note("Valdo wants the sale contract signed by the morning of Day Eight.", keep: true);
             await Cinema(false);
             await Look(null);
         }

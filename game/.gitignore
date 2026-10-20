@@ -13,3 +13,8 @@
 *.slnx
 *.pidb
 *.userprefs
+
+# Unity scene recovery and crash dumps
+/Assets/_Recovery/
+/Assets/_Recovery.meta
+mono_crash.*.json

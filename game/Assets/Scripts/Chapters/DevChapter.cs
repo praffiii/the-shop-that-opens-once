@@ -10,6 +10,8 @@ namespace Shop
     {
         public DevChapter(Main main) : base(main) { }
 
+        public override Phase StartPhase => Phase.Dusk;
+
         public override async Awaitable Start()
         {
             await Card("Systems test", "Not part of the story.");

@@ -26,7 +26,7 @@ namespace Shop.Tests
         // Starts the game, picks `option` on the title, and plays it with `play`. Leaves the save as it found it.
         static IEnumerator Run(Func<Main, Awaitable> play, string option = "Begin")
         {
-            var saved = Game.SavedChapter();
+            var saved = Game.Raw;
             Main main = null;
             try
             {
@@ -48,8 +48,7 @@ namespace Shop.Tests
                 if (main) UnityEngine.Object.Destroy(main.gameObject);
                 Time.timeScale = 1f;
                 Main.Auto = false;
-                if (saved < 0) Game.DeleteSave();
-                else Game.Save(saved);
+                Game.Raw = saved;
             }
         }
 
@@ -70,6 +69,8 @@ namespace Shop.Tests
             await Until(() => Game.Has("monologue") && Exploring(main, "satria_home"));
             await Use(main, "bed");
             await Until(() => Game.SavedChapter() == 1 && main.Story == null);
+            CollectionAssert.Contains(Game.Bag, "contract", "What Satria brought home goes on into Night 1");
+            StringAssert.Contains("Day Eight", string.Join(" ", Game.Notes), "Valdo's deadline stays in the notes");
         }
 
         static async Awaitable SystemsTest(Main main)
@@ -94,9 +95,9 @@ namespace Shop.Tests
                 await Walk(main, exit, to);
             main.Talk.Picks.Enqueue("Show the watch");
             Assert.IsTrue(await main.Place.WalkAndUse("helen"), "The courier can walk up to Helen");
-            await Until(() => Game.SavedChapter() == 1 && main.Story == null);
-            Assert.AreEqual(1, Game.LanternsOut, "A lantern goes out");
+            await Until(() => Game.LanternsOut == 1); // a lantern goes out
             Assert.AreEqual(Phase.Night, Game.Phase, "The handover turns dusk to night");
+            await Until(() => Game.SavedChapter() == 1 && main.Story == null);
             CollectionAssert.DoesNotContain(Game.Bag, "watch", "Helen keeps the watch");
         }
 

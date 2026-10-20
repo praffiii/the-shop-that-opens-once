@@ -5,7 +5,7 @@ namespace Shop
 {
     /// <summary>
     /// The day dial at the top left (GDD 10.2), in the kit's own look: a brass-rimmed wheel of the four phases with its
-    /// hand, worn like a medallion on a paper panel, the day on a wood tag over the panel's edge (as a speaker's name
+    /// hand, worn like a medallion on a paper panel, the day on a wood nameTag over the panel's edge (as a speaker's name
     /// sits on the talk box), and the phase's picture and name. When the story moves the time on, the hand sweeps round
     /// clockwise, ticking, the new quarter clears and the phase's name turns over. Hovering it says what it shows.
     /// </summary>
@@ -18,7 +18,7 @@ namespace Shop
         const float PanelX = 14f, PanelY = 7f, PanelHeight = 24f;
 
         RectTransform root, line;
-        Image face, hand, panel, tag, glyph;
+        Image face, hand, panel, nameTag, glyph;
         Text day, phase;
         int handAt = -1, chapter = -1; // the hand's step (0 is straight up, clockwise), and the day shown
         Phase lit;
@@ -33,8 +33,8 @@ namespace Shop
             dial.line = Look.Node("phase", dial.panel.transform);
             dial.glyph = Look.Picture("glyph", dial.line);
             dial.phase = Look.Label("", dial.line);
-            dial.tag = Look.Panel("name", t);
-            dial.day = Look.Label("", dial.tag.transform, default, Art.Color((string)Look.Ui["name"]["text"]));
+            dial.nameTag = Look.Panel("name", t);
+            dial.day = Look.Label("", dial.nameTag.transform, default, Art.Color((string)Look.Ui["name"]["text"]));
             dial.face = Look.Picture("face", t);
             dial.hand = Look.Picture("hand", t);
             return dial;
@@ -43,7 +43,7 @@ namespace Shop
         /// <summary>Where the dial is on screen, for hints to keep clear of and for hovering.</summary>
         public Rect Area => new(Look.Pos(root), new Vector2(PanelX + panel.rectTransform.sizeDelta.x, PanelY + PanelHeight));
 
-        /// <summary>What the dial shows, for the name tag by the cursor when it is hovered.</summary>
+        /// <summary>What the dial shows, for the name nameTag by the cursor when it is hovered.</summary>
         public string Tip => $"{Game.Phase}, Day {Game.Chapter}. Time moves on with the story.";
 
         static int StepOf(Phase p) => (12 + 4 * (int)p) % 16; // morning to the left, midday at the top, clockwise
@@ -100,12 +100,12 @@ namespace Shop
             Layout();
         }
 
-        // The panel fits the wider of the day's tag and the phase's line; the tag hangs over its top edge.
+        // The panel fits the wider of the day's nameTag and the phase's line; the nameTag hangs over its top edge.
         void Layout()
         {
             var width = Mathf.Max(Look.Width(phase) + 11, Look.Width(day) + 10) + 26;
             Look.Place(panel.rectTransform, new Rect(PanelX, PanelY, width, PanelHeight));
-            Look.Place(tag.rectTransform, new Rect(PanelX + 16, PanelY - 8, Look.Width(day) + 10, 14));
+            Look.Place(nameTag.rectTransform, new Rect(PanelX + 16, PanelY - 8, Look.Width(day) + 10, 14));
             Look.Place(line, new Rect(18, 9, width - 18, 12));
             Look.Move(glyph.rectTransform, new Vector2(0, 3));
             Look.Move(phase.rectTransform, new Vector2(10, 0));

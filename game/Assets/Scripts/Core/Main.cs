@@ -261,39 +261,70 @@ namespace Shop
             var saved = Game.SavedChapter();
             if (saved > 0 && Chapters.ContainsKey(saved)) options.Add("Continue");
             if (Application.platform != RuntimePlatform.WebGLPlayer) options.Add("Quit");
-            if (Application.isEditor) options.Add(SystemsTest); // the run through every system, for the tests, until Night 1 takes it over
+            if (Application.isEditor) options.Add(SystemsTest); // the run through every system, for the tests
+            if (Application.isEditor && Chapters.Count > 1) options.Add(ChapterSelect); // any chapter made so far, to try it out
             var pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))];
             logo.gameObject.SetActive(false);
             switch (pick)
             {
-                case "Begin": await Begin(0); break;
-                case "Continue": await Begin(saved); break;
+                case "Begin":
+                    Game.NewGame();
+                    await Begin(0);
+                    break;
+                case "Continue":
+                    Game.Load();
+                    await Begin(Game.Chapter, Game.Checkpoint);
+                    break;
                 case "Quit": Application.Quit(); break;
-                case SystemsTest: await Begin(0, main => new DevChapter(main)); break;
+                case SystemsTest:
+                    Game.NewGame();
+                    await Begin(0, "", main => new DevChapter(main));
+                    break;
+                case ChapterSelect:
+                    var made = new List<int>(Chapters.Keys);
+                    made.Sort();
+                    var n = made[await Talk.Choose(made.ConvertAll(c => c == 0 ? "Prologue" : c == Game.Epilogue ? "Epilogue" : $"Night {c}").ToArray(), new Vector2(Size.x / 2, Size.y - 140))];
+                    Game.NewGame();
+                    await Begin(n);
+                    break;
             }
         }
 
         public const string SystemsTest = "Systems test";
+        const string ChapterSelect = "Chapter...";
 
-        async Awaitable Begin(int chapter, Func<Main, Chapter> make = null)
+        // Starts a chapter's story, or picks it up at a checkpoint (Continue). A new chapter starts the clock at the
+        // chapter's own time and saves.
+        async Awaitable Begin(int chapter, string checkpoint = "", Func<Main, Chapter> make = null)
         {
-            Game.StartChapter(chapter);
             Story = (make ?? Chapters[chapter])(this);
+            if (checkpoint == "")
+            {
+                Game.StartChapter(chapter, Story.StartPhase);
+                if (make == null) Game.Save();
+            }
             Hold();
-            await Story.Start();
-            Release();
+            try
+            {
+                await (checkpoint == "" ? Story.Start() : Story.Resume(checkpoint));
+            }
+            finally
+            {
+                Release();
+            }
         }
 
-        /// <summary>Saves the next chapter and starts it, or thanks the player if it isn't made yet.</summary>
+        /// <summary>Starts the next chapter (which saves), or saves it for later and thanks the player if it isn't made yet.</summary>
         public async Awaitable EndChapter()
         {
             var next = Game.Chapter + 1;
-            Game.Save(next);
             Story = null;
             if (Chapters.ContainsKey(next))
                 Run(Later(() => Begin(next)));
             else
             {
+                Game.StartChapter(next, Phase.Night);
+                Game.Save();
                 await ShowCard("Thank you for playing.", $"{(next == Game.Epilogue ? "The epilogue" : $"Night {next}")} is still being made.");
                 Finish();
             }
@@ -405,6 +436,22 @@ namespace Shop
         async Awaitable Use(Hotspot h)
         {
             Hold();
+            Villager villager = null;
+            try
+            {
+                villager = await Using(h);
+            }
+            finally
+            {
+                Release(); // even when a story step fails, the courier is never left frozen
+                // after the talk box has closed and let go of the speaker's pose
+                if (villager) villager.Done();
+            }
+        }
+
+        // Uses a hotspot; returns the villager talked to, if any.
+        async Awaitable<Villager> Using(Hotspot h)
+        {
             var villager = h.Owner ? h.Owner.GetComponent<Villager>() : null;
             if (h.ExitTo != null && Story?.Closed(h.Id) is { } why)
             {
@@ -424,9 +471,7 @@ namespace Shop
                 if (villager) villager.Talk(courier.Feet.x);
                 await Story.Interact(h.Id);
             }
-            Release();
-            // after the talk box has closed and let go of the speaker's pose
-            if (villager) villager.Done();
+            return villager;
         }
 
         /// <summary>

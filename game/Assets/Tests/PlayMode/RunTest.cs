@@ -13,7 +13,7 @@ namespace Shop.Tests
         [UnityTest]
         public IEnumerator ShiftRuns()
         {
-            var saved = Game.SavedChapter();
+            var saved = Game.Raw;
             // The editor may be unfocused while tests run; let the virtual keyboard reach the game anyway.
             var settings = InputSystem.settings;
             var (editor, background) = (settings.editorInputBehaviorInPlayMode, settings.backgroundBehavior);
@@ -49,8 +49,7 @@ namespace Shop.Tests
                 settings.editorInputBehaviorInPlayMode = editor;
                 settings.backgroundBehavior = background;
                 Main.Auto = false;
-                if (saved < 0) Game.DeleteSave();
-                else Game.Save(saved);
+                Game.Raw = saved;
             }
         }
     }

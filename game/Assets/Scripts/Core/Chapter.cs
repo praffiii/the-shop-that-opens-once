@@ -29,8 +29,17 @@ namespace Shop
             return done.Awaitable;
         }
 
+        /// <summary>The time of day the chapter begins at: a night begins at the midnight bell.</summary>
+        public virtual Phase StartPhase => Phase.Night;
+
         /// <summary>Runs once when the chapter begins.</summary>
         public virtual Awaitable Start() => Done();
+
+        /// <summary>Picks the chapter up at a checkpoint it saved (<see cref="Checkpoint"/>) when the player continues; by default it starts over.</summary>
+        public virtual Awaitable Resume(string checkpoint) => Start();
+
+        /// <summary>Saves the game here, for Continue to pick up at (<see cref="Resume"/>).</summary>
+        protected static void Checkpoint(string id) => Game.Save(id);
 
         /// <summary>Runs every time the courier arrives in a place, before they can move.</summary>
         public virtual Awaitable Entered(string place) => Done();
@@ -47,7 +56,7 @@ namespace Shop
         /// keepsake is home.
         /// </summary>
         public virtual string Closed(string id) =>
-            id == "shop_door" && (Game.Phase != Phase.Night || Game.Has("handed_over")) ? "Just roots and shadow. The fog only comes at midnight." : null;
+            id == "shop_door" && (Game.Phase != Phase.Night || Game.Has("handed_over")) ? "CLOSED, says the card on the door. It has hung there as long as anyone can remember." : null;
 
         /// <summary>Learns someone's name: the talk box and their hotspot use it from now on.</summary>
         protected void Known(string id, string displayName)
@@ -76,6 +85,7 @@ namespace Shop
         protected Awaitable Chat(string id)
         {
             var line = Main.Place.Who(id)?.Line;
+            if (line == null && !Debug.isDebugBuild) return Done(); // a player never meets a placeholder
             return line == null ? ShowText($"Nothing written here yet ({id}).") : Main.Talk.Say(Main.Place.Find(id).Label, id, line, "neutral", Actor(id));
         }
 
@@ -84,7 +94,7 @@ namespace Shop
 
         protected Awaitable<int> Choose(params string[] options) => Main.Talk.Choose(options);
 
-        protected static void Note(string text) => Game.Note(text);
+        protected static void Note(string text, bool keep = false) => Game.Note(text, keep);
 
         protected static void Sfx(string name) => Sound.Play(name);
 
