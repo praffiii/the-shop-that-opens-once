@@ -62,6 +62,8 @@ namespace Shop
         public Stop[] Round;
         /// <summary>What they say when the chapter has nothing for them: the first line, then the next each time they are talked to again, round.</summary>
         public string[] Lines;
+        /// <summary>A keepsake of theirs they keep in hand (Pip and Mochi), or null.</summary>
+        public string Holds;
     }
 
     /// <summary>A stop on someone's round: they walk there and keep a pose for a while.</summary>

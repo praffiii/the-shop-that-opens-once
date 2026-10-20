@@ -44,6 +44,7 @@ namespace Shop
             var v = ant.gameObject.AddComponent<Villager>();
             (v.def, v.ant, v.place) = (def, ant, place);
             ant.Pace = Young.Contains(def.Id) ? 1.2f : Old.Contains(def.Id) ? .8f : Random.Range(.9f, 1.05f);
+            if (def.Holds != null) ant.Held = Keepsakes.Art(def.Holds, "xs");
             if (def.Round == null)
             {
                 ant.Feet = def.At;

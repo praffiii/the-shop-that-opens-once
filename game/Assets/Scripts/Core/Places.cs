@@ -32,8 +32,12 @@ namespace Shop
         static readonly int[] NightFour = { 4 }, NotNightFour = { 0, 1, 2, 3, 5, 6, 7, 8 }, FromNightFour = { 4, 5, 6, 7, 8 };
         // Night 5 (the mismatched shoes): Leo limps instead of running his laps and waits for the sundown on his hill, not
         // up on the lookout; Valdo measures the main road and the Baker's lad parks his bicycle on the square.
-        static readonly int[] NightFive = { 5 }, LeoRuns = { 0, 1, 2, 4, 6, 7, 8 }, LeoWatches = { 1, 2, 3, 4, 6, 7, 8 };
+        static readonly int[] NightFive = { 5 }, LeoRuns = { 0, 1, 2, 4 }, LeoWatches = { 1, 2, 3, 4, 6, 7, 8 };
         static readonly int[] NightSeven = { 7 };
+        // once a night's keepsake is home, its owner shows it: Pip keeps Mochi in hand, Theo's darkroom is open again and
+        // Leo runs his laps flat out
+        static readonly int[] BeforeMochi = { 0, 1 }, WithMochi = { 3, 4, 5, 6, 7 }, FromNightThreeOn = { 3, 4, 5, 6, 7, 8 };
+        static readonly int[] BeforeNightThree = { 0, 1, 2 }, LeoSprints = { 6, 7, 8 };
         // Day 8, the epilogue: the whole village gathers before the hall in the morning, and at Satria's gate at midday,
         // instead of their everyday mornings on the square and middays at home; the shop in the grove is gone
         static readonly int[] DayEight = { 8 }, BeforeDayEight = { 0, 1, 2, 3, 4, 5, 6, 7 }, NotNightTwoNorEight = { 0, 1, 3, 4, 5, 6, 7 }, NotNightFourNorEight = { 0, 1, 2, 3, 5, 6, 7 };
@@ -429,12 +433,22 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Chapters = NotNightTwo, Phases = new[] { Phase.Dusk },
+                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Chapters = BeforeMochi, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Mum says we go in before the sky goes grey. I don't mind. Much.",
                             "Do couriers ever get scared of thunder? Not that I am. I'm just asking.",
                             "Tomorrow I'll carry twice as many letters. You'll see.",
+                        },
+                    },
+                    new Person
+                    {
+                        Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Chapters = FromNightThreeOn, Phases = new[] { Phase.Dusk }, Holds = "rabbit_mended",
+                        Lines = new[]
+                        {
+                            "Mum says we go in before the sky goes grey. Mochi doesn't mind the grey any more. Nor do I.",
+                            "Mochi and me aren't scared of thunder now. Well. Mochi never was. He was only pretending, for me.",
+                            "Tomorrow I'll carry twice as many letters. Mochi will count them.",
                         },
                     },
                     new Person
@@ -530,7 +544,7 @@ namespace Shop
                     new Person { Id = "leo", At = V(754, 406), Label = "Leo", Spot = V(20, 0), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "Stand tall, lad. Like a runner on the line." } },
                     new Person { Id = "nora", At = V(556, 476), Label = "Grandma Nora", Spot = V(-20, 4), Facing = 1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "My shuttles can wait a morning. Ratih's boy cannot." } },
                     new Person { Id = "mia", At = V(588, 480), Label = "Mia", Spot = V(0, 12), Facing = 1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "Pip wouldn't eat his breakfast till we came." } },
-                    new Person { Id = "pip", At = V(618, 472), Label = "Pip", Spot = V(-16, 8), Facing = 1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "Mochi says don't sign. Mochi is never wrong." } },
+                    new Person { Id = "pip", At = V(618, 472), Label = "Pip", Spot = V(-16, 8), Facing = 1, Chapters = DayEight, Holds = "rabbit_mended", Phases = new[] { Phase.Morning }, Lines = new[] { "Mochi says don't sign. Mochi is never wrong." } },
                     new Person { Id = "theo", At = V(676, 476), Label = "Theo", Spot = V(0, 12), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "I brought your father's camera. Some mornings want keeping." } },
                     new Person { Id = "mender", At = V(704, 480), Label = "Mender", Spot = V(20, 4), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Morning }, Lines = new[] { "Whatever happens, I've a board carved for you. Teak." } },
                     // Day 7's morning: Valdo pacing before the hall's door, his last push ready
@@ -736,6 +750,21 @@ namespace Shop
                     },
                     new Person
                     {
+                        Id = "leo", Label = "Leo", Spot = V(0, 12), Chapters = LeoSprints, Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
+                            new Stop { At = V(880, 482), Facing = -1, Wait = 2f, Run = true },
+                        },
+                        Lines = new[]
+                        {
+                            "Lap one! Flat out, this time. Still the fastest legs in Bellwood. Ask anyone. Ask Pip.",
+                            "Lap two! The knees complain. I've stopped listening to them.",
+                            "Go on, time me. Sam does, with the hall clock. I'm getting faster. Don't tell him I said so.",
+                        },
+                    },
+                    new Person
+                    {
                         Id = "leo", At = V(856, 236), Label = "Leo", Spot = V(-20, 4), Pose = "look", Facing = -1, Chapters = BeforeDayEight, Phases = new[] { Phase.Midday },
                         Lines = new[]
                         {
@@ -850,7 +879,7 @@ namespace Shop
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
                     {
-                        Id = "pip", Label = "Pip", Spot = V(0, 12), Chapters = NotNightTwoNorEight, Phases = new[] { Phase.Midday },
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Chapters = BeforeMochi, Phases = new[] { Phase.Midday },
                         Round = new[]
                         {
                             new Stop { At = V(360, 628), Facing = 1, Wait = 3f, Run = true },
@@ -863,11 +892,26 @@ namespace Shop
                             "When I'm big I'll run the post office. Mum says somebody has to open it.",
                         },
                     },
+                    new Person
+                    {
+                        Id = "pip", Label = "Pip", Spot = V(0, 12), Chapters = WithMochi, Phases = new[] { Phase.Midday }, Holds = "rabbit_mended",
+                        Round = new[]
+                        {
+                            new Stop { At = V(360, 628), Facing = 1, Wait = 3f, Run = true },
+                            new Stop { At = V(474, 622), Facing = -1, Wait = 4f, Run = true },
+                        },
+                        Lines = new[]
+                        {
+                            "Mochi's on his break too. He likes the slide best. He's very brave on the slide.",
+                            "Push me on the swing? Mochi holds on. Couriers are strong.",
+                            "When I'm big I'll run the post office. Mochi will do the stamps.",
+                        },
+                    },
                     // Day 8's midday: the whole village come up the east road to Satria's gate, for the new board and the
                     // Baker's sweet bread (Epilogue)
                     new Person { Id = "mender", At = V(850, 502), Label = "Mender", Spot = V(-20, 2), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "Teak, from the old bridge's offcuts. It'll outlast the both of us." } },
                     new Person { Id = "helen", At = V(906, 494), Label = "Helen", Spot = V(20, 2), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "Your mother's gate, and your name beside it. There." } },
-                    new Person { Id = "pip", At = V(930, 504), Label = "Pip", Spot = V(18, 4), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "Can I be your first parcel? Mochi can be the stamp." } },
+                    new Person { Id = "pip", At = V(930, 504), Label = "Pip", Spot = V(18, 4), Facing = -1, Chapters = DayEight, Holds = "rabbit_mended", Phases = new[] { Phase.Midday }, Lines = new[] { "Can I be your first parcel? Mochi can be the stamp." } },
                     new Person { Id = "mia", At = V(954, 494), Label = "Mia", Spot = V(18, 2), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "A post office in the village again. Ratih would laugh to see it." } },
                     new Person { Id = "baker", At = V(944, 524), Label = "Baker", Spot = V(20, 2), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "Sweet bread for the new post office! First one's free. So's the second." } },
                     new Person { Id = "theo", At = V(976, 510), Label = "Theo", Spot = V(-18, 2), Facing = -1, Chapters = DayEight, Phases = new[] { Phase.Midday }, Lines = new[] { "One more for the album: the courier at his own gate." } },
@@ -950,12 +994,22 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Chapters = NotNightThree, Phases = new[] { Phase.Dusk },
+                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Chapters = BeforeNightThree, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Sunsets are easy to photograph. That's why I keep trying to get one right.",
                             "Hold still. No, the sun, not you.",
                             "The darkroom's locked. It stays locked. Don't ask about the darkroom.",
+                        },
+                    },
+                    new Person
+                    {
+                        Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Chapters = FromNightFour, Phases = new[] { Phase.Dusk },
+                        Lines = new[]
+                        {
+                            "Sunsets are easy to photograph. That's why I keep trying to get one right.",
+                            "The darkroom's open again. Come by one evening. The light in there is red, but it's honest.",
+                            "Daniel's camera sits on my shelf where I can see it. On Sundays I take it out and film the boats, for him.",
                         },
                     },
                     new Person

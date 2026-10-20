@@ -95,10 +95,11 @@ namespace Shop
             return Main.Talk.Say(names.GetValueOrDefault(who, ""), who, text, mood, speaker);
         }
 
-        /// <summary>Someone's own line when the chapter has nothing for them, under the name on their hotspot, or what the courier sees in a thing.</summary>
+        /// <summary>Someone's own line when the chapter has nothing for them, under the name on their hotspot, or what the courier sees in a thing; first, any news of the days gone by (Gossip).</summary>
         protected Awaitable Chat(string id)
         {
             if (Main.Place.Find(id)?.Text is { } seen) return ShowText(seen);
+            if (Gossip.Next(id) is { } news) return Main.Talk.Say(Main.Place.Find(id).Label, id, news, "smile", Actor(id));
             var lines = Main.Place.Who(id)?.Lines;
             if (lines == null) return Debug.isDebugBuild ? ShowText($"Nothing written here yet ({id}).") : Done(); // a player never meets a placeholder
             var n = chats.GetValueOrDefault(lines);
