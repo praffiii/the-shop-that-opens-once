@@ -180,6 +180,131 @@
     put('key', key, { margins: [3, 3, 3, 5], text: PAL.ink });
   }
 
+  // Fills every pixel where inside(i, j) holds with colour(i, j), outlined in ink where it meets the outside.
+  function shape(w, h, inside, colour) {
+    const [c, x] = canvas(w, h);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      if (!inside(i, j)) continue;
+      const edge = !(inside(i - 1, j) && inside(i + 1, j) && inside(i, j - 1) && inside(i, j + 1));
+      dot(x, i, j, edge ? 'ink' : colour(i, j));
+    }
+    return c;
+  }
+  // A ring of radius r round the middle of a w x w frame, its bands from the outside in.
+  function ring(w, r, bands) {
+    const [c, x] = canvas(w, w), m = (w - 1) / 2;
+    for (let j = 0; j < w; j++) for (let i = 0; i < w; i++) {
+      const k = Math.floor(r + 0.5 - Math.hypot(i - m, j - m));
+      if (k >= 0 && k < bands.length) dot(x, i, j, bands[k]);
+    }
+    return c;
+  }
+
+  /* Minigame 1A, the Baker's sifting and kneading: a brass-armed metronome on a walnut base keeping the 75 BPM beat
+     (its arm in nine steps from the left to the right), the round sieve tipped left, level and right, the spruce
+     basin the flour heaps up in (empty to full), the dough lumped, pressed flat and folded over, and the kneading
+     rings: one closing in (from wide to tight, a frame per 2 px) on the glowing ring of the sweet spot. */
+  function kneading(put) {
+    const [mw, mh] = [21, 34];
+    put('metronome', strip(Array.from({ length: 9 }, (_, f) => {
+      const [c, x] = canvas(mw, mh);
+      x.drawImage(shape(mw, 14, (i, j) => Math.abs(i - 10) <= 4 + j * 0.45, (i, j) => (i < 8 ? 'wood2' : i > 13 ? 'wood4' : 'wood3')), 0, mh - 14);
+      rect(x, 8, mh - 6, 5, 2, 'brass1');   // the brass name plate
+      const a = (f / 8 - 0.5) * 0.9, px0 = 10, py0 = mh - 9;
+      for (let t = 0; t <= 22; t += 0.5) { const i = Math.round(px0 + Math.sin(a) * t), j = Math.round(py0 - Math.cos(a) * t); dot(x, i - 1, j, 'ink'); dot(x, i + 1, j, 'ink'); dot(x, i, j, 'brass1'); }
+      const bi = Math.round(px0 + Math.sin(a) * 15), bj = Math.round(py0 - Math.cos(a) * 15);   // the sliding weight
+      rect(x, bi - 2, bj - 2, 5, 4, 'ink'); rect(x, bi - 1, bj - 1, 3, 2, 'brass0');
+      rect(x, px0 - 1, py0 - 1, 3, 3, 'ink'); dot(x, px0, py0, 'brass2');
+      return c;
+    })), { frames: 9 });
+
+    const [sw, sh] = [46, 18];
+    put('sieve', strip([-1, 0, 1].map(tilt => shape(sw, sh, (i, j) => {
+      const y = j - 9 - tilt * (i - 23) / 8;   // the rim tipped toward the side shaken
+      return ((i - 23) / 22) ** 2 + (y / 6) ** 2 <= 1;
+    }, (i, j) => {
+      const y = j - 9 - tilt * (i - 23) / 8, r = ((i - 23) / 22) ** 2 + (y / 6) ** 2;
+      return r > 0.62 ? (y < 0 ? 'wood2' : 'wood4') : (i + j) % 2 ? 'stone2' : 'cream1';   // the bentwood rim round the mesh
+    }))), { frames: 3 });
+
+    const [bw, bh] = [66, 26];
+    put('basin', strip([0, 1, 2, 3, 4].map(full => {
+      const [c, x] = canvas(bw, bh);
+      if (full) x.drawImage(shape(bw, bh, (i, j) => j >= 8 - full * 2 && Math.abs(i - 33) <= 28 - (8 - j) * (6 - full) && j < 10, () => 'white'), 0, 0);   // the flour heaped in it
+      x.drawImage(shape(bw, bh, (i, j) => j >= 6 && j < bh && Math.abs(i - 33) <= 32 - (j - 6) * 0.35, (i, j) =>
+        j <= 8 ? (j === 7 ? 'wood2' : 'wood3') : i % 11 === 4 ? 'wood5' : j > bh - 5 ? 'wood4' : i < 20 ? 'wood2' : 'wood3'), 0, 0);   // staves under a hoop
+      rect(x, 4, 14, bw - 8, 1, 'iron3');
+      if (full) for (let i = 8; i < 58; i += 3) dot(x, i, 7, (i / 3) % 2 ? 'cream0' : 'white');
+      return c;
+    })), { frames: 5 });
+
+    const [dw, dh] = [38, 18];
+    const dough = (rx, ry, fold) => shape(dw, dh, (i, j) => ((i - 19) / rx) ** 2 + ((j - dh + 1 + ry) / ry) ** 2 <= 1 && j < dh,
+      (i, j) => (fold && Math.abs(j - (dh - ry)) < 1 && i > 6 && i < 32 ? 'cream2' : j < dh - ry * 1.4 ? 'white' : ((i - 13) / rx) ** 2 + ((j - dh + ry * 1.6) / ry) ** 2 < 0.25 ? 'white' : 'cream0'));
+    put('dough', strip([dough(12, 8, false), dough(17, 5, false), dough(14, 7, true)]), { frames: 3 });
+
+    // the Baker's scrubbed table: planks running its length (they stretch with it), its front edge in shadow
+    const [tt, tx] = canvas(24, 18);
+    tx.drawImage(box(24, 18, 1, { o: 'ink', fill: 'wood2', hi: 'wood1', lo: 'wood3' }), 0, 0);
+    for (const j of [5, 9]) rect(tx, 1, j, 22, 1, 'wood3');
+    rect(tx, 1, 13, 22, 4, 'wood4'); rect(tx, 1, 13, 22, 1, 'wood5');
+    put('tabletop', tt, { margins: [4, 4, 4, 7] });
+
+    put('ring', strip(Array.from({ length: 12 }, (_, f) => ring(62, 6 + f * 2, ['ink', 'cream0', 'ink']))), { frames: 12 });
+    put('ring_sweet', ring(62, 15, ['light3', 'light1', 'light0', 'light1', 'light3']));
+  }
+
+  /* Minigame 1B, the clockwork: three brass gears from the watch (the great wheel, the third wheel and the escape
+     wheel), each in twelve steps of a turn with its red seating mark, which must point up at the plate's arrow; brass
+     corner brackets round the gear in hand; and the pendulum swinging in seven steps. */
+  function clockwork(put) {
+    const gear = (r, teeth) => strip(Array.from({ length: 12 }, (_, f) => {
+      const w = 2 * r + 7, m = (w - 1) / 2, turn = f * Math.PI / 6;
+      const at = (i, j) => [Math.hypot(i - m, j - m), Math.atan2(i - m, -(j - m)) - turn];
+      const img = shape(w, w, (i, j) => {
+        const [d, a] = at(i, j);
+        const tooth = Math.cos(a * teeth) > 0.1;
+        if (d > r + (tooth ? 3 : 0)) return false;
+        if (d < 2) return false;   // the arbor hole
+        const spoke = Math.min(...[0, 1, 2, 3].map(k => Math.abs(Math.sin(a - k * Math.PI / 2 + Math.PI / 4)))) * d;
+        return !(d > 4.5 && d < r - 3.5 && r > 9 && spoke > 3);   // windows between four crossed spokes
+      }, (i, j) => {
+        const [d] = at(i, j), lit = (i - m) + (j - m);
+        return d > r - 1.5 ? (lit < -3 ? 'brass0' : lit > 4 ? 'brass3' : 'brass1') : lit < 0 ? 'brass1' : 'brass2';
+      });
+      const x = img.getContext('2d'), mk = r - 4;
+      rect(x, Math.round(m + Math.sin(turn) * mk) - 1, Math.round(m - Math.cos(turn) * mk) - 1, 3, 3, 'red');   // the seating mark
+      return img;
+    }));
+    put('gear_great', gear(20, 14), { frames: 12 });
+    put('gear_third', gear(14, 10), { frames: 12 });
+    put('gear_escape', gear(9, 8), { frames: 12 });
+
+    const [k, kx] = canvas(12, 12);
+    for (const [i, j, fi, fj] of [[0, 0, 1, 1], [8, 0, -1, 1], [0, 8, 1, -1], [8, 8, -1, -1]]) {
+      const ci = fi > 0 ? i : i + 3, cj = fj > 0 ? j : j + 3;
+      rect(kx, i, cj, 4, 1, 'ink'); rect(kx, ci, j, 1, 4, 'ink');
+      rect(kx, i + (fi > 0 ? 1 : 0), cj + fj, 3, 1, 'brass1'); rect(kx, ci + fi, j + (fj > 0 ? 1 : 0), 1, 3, 'brass1');
+    }
+    put('bracket', k, { margins: [5, 5, 5, 5] });
+
+    // the green baize of the Mender's gear bench in its brass-edged frame
+    const [bz, bx] = canvas(24, 24);
+    bx.drawImage(box(24, 24, 1, { o: 'ink', fill: 'brass1', hi: 'brass0', lo: 'brass2' }), 0, 0);
+    bx.drawImage(box(20, 20, 0, { o: 'brass3', fill: 'roofG2', hi: 'roofG3', lo: 'roofG1' }), 2, 2);
+    put('baize', bz, { margins: [5, 5, 5, 5] });
+
+    const [pw, ph] = [35, 46];
+    put('pendulum', strip(Array.from({ length: 7 }, (_, f) => {
+      const [c, x] = canvas(pw, ph), a = (f / 6 - 0.5) * 0.7, top = 3;
+      for (let t = 0; t <= 34; t += 0.5) { const i = Math.round(17 + Math.sin(a) * t), j = Math.round(top + Math.cos(a) * t); dot(x, i, j, 'ink'); dot(x, i + 1, j, 'brass2'); }
+      const bi = Math.round(17 + Math.sin(a) * 36), bj = Math.round(top + Math.cos(a) * 36);
+      x.drawImage(shape(11, 11, (i, j) => (i - 5) ** 2 + (j - 5) ** 2 <= 26, (i, j) => (i + j < 8 ? 'brass0' : i + j > 12 ? 'brass3' : 'brass1')), bi - 5, bj - 5);
+      rect(x, 14, 0, 7, 4, 'ink'); rect(x, 15, 1, 5, 2, 'iron2');   // the suspension block
+      return c;
+    })), { frames: 7 });
+  }
+
   function ui() {
     const O = { o: 'ink' }, PAPER = { o: 'ink', fill: 'sky0', hi: 'white', lo: 'cream1' }, spec = {};
     const put = (name, img, extra = {}) => { png(`ui/${name}.png`, img); spec[name] = { size: [img.width / (extra.frames || 1), img.height], ...extra }; };
@@ -261,6 +386,8 @@
 
     dayDial(put);
     bench(put);
+    kneading(put);
+    clockwork(put);
     put('title', TITLE.render(10 * 60 + 17));   // the clock in the O stopped at 10:17, the hour the station's watch stopped
     json('ui/ui.json', spec);
     // Every PAL colour as #rrggbb; the translucent cast shadow becomes #rrggbbaa.

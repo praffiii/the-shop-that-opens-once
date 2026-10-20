@@ -39,6 +39,7 @@ namespace Shop
 
         public override async Awaitable Start()
         {
+            Know();
             await Card($"Night {Night}: {Title}");
             await Go("satria_home", "bed");
             await Scene(async () =>
@@ -57,6 +58,7 @@ namespace Shop
         /// <summary>Picks the night up where it was saved: the morning at home, or the evening after the handover; by default it starts over.</summary>
         public override async Awaitable Resume(string checkpoint)
         {
+            Know();
             switch (checkpoint)
             {
                 case "morning":
@@ -67,9 +69,19 @@ namespace Shop
                     await Go("satria_home", "door");
                     break;
                 default:
-                    await Start();
+                    await ResumeDay(checkpoint);
                     break;
             }
+        }
+
+        /// <summary>Picks the night up at a checkpoint of its own day (Night 1's "midday"); by default it starts over.</summary>
+        protected virtual Awaitable ResumeDay(string checkpoint) => Start();
+
+        // The village, and Marlow once he has said his name on the first night.
+        void Know()
+        {
+            KnowVillage();
+            if (Night > 1) Known("marlow", "Marlow");
         }
 
         public sealed override async Awaitable Entered(string place)
@@ -176,11 +188,12 @@ namespace Shop
             }
         }
 
-        /// <summary>The handover: the courier gives the keepsake to its owner, they say what they say (<paramref name="scene"/>), the light turns to night round them, and in Marlow's shop a lantern goes out. Saves at "resolved".</summary>
-        protected async Awaitable Handover(string owner, System.Func<Awaitable> scene)
+        /// <summary>The handover: what leads up to it (<paramref name="before"/>), the courier gives the keepsake to its owner, they say what they say (<paramref name="scene"/>), the light turns to night round them, and in Marlow's shop a lantern goes out. Saves at "resolved".</summary>
+        protected async Awaitable Handover(string owner, System.Func<Awaitable> scene, System.Func<Awaitable> before = null)
         {
             await Scene(async () =>
             {
+                if (before != null) await before();
                 await GiveKeepsake(owner, Keepsake);
                 await scene();
                 await MovePhase(Phase.Night, watched: true);

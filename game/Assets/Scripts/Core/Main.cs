@@ -55,6 +55,7 @@ namespace Shop
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
         {
             [0] = main => new Prologue(main),
+            [1] = main => new Night1(main),
         };
 
         public static Main Instance { get; private set; }
@@ -100,7 +101,13 @@ namespace Shop
         {
             Instance = null;
             Auto = false;
+            Sepia = false;
         }
+
+        static readonly int SepiaId = Shader.PropertyToID("_Sepia");
+
+        /// <summary>The world washed to sepia, for a memory of 1952 (Pixel.shader's _Sepia).</summary>
+        public static bool Sepia { set => Shader.SetGlobalFloat(SepiaId, value ? 1 : 0); }
 
         /// <summary>Runs a story step that nobody awaits, and reports its errors.</summary>
         public static async void Run(Awaitable step)
@@ -741,8 +748,8 @@ namespace Shop
             foreach (var bar in bars) bar.gameObject.SetActive(h > 0);
         }
 
-        // Covers the screen in warm cream (or uncovers it) in four soft steps.
-        async Awaitable Fade(bool cover)
+        /// <summary>Covers the screen in warm cream (or uncovers it) in four soft steps.</summary>
+        public async Awaitable Fade(bool cover)
         {
             curtain.gameObject.SetActive(true);
             for (var t = 0f; t < FadeSeconds; t += Time.deltaTime)

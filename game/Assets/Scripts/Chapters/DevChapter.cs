@@ -4,7 +4,7 @@ namespace Shop
 {
     /// <summary>
     /// Not part of the story: a short run through every system (walking, places, talking, choices, the bag, handing
-    /// over a keepsake as the light turns to night, a lantern going out, saving, a minigame at the Mender's forge), from the title's editor-only option. Night 1 replaces it.
+    /// over a keepsake as the light turns to night, a lantern going out, a minigame at the Mender's forge), from the title's editor-only option, for the tests that want those away from the story.
     /// </summary>
     public sealed class DevChapter : Chapter
     {
@@ -58,7 +58,8 @@ namespace Shop
                     await Say("helen", "Oh. Where did you find this?", "moved");
                     await MovePhase(Phase.Night, watched: true);
                     await LanternGoesOut();
-                    await Main.EndChapter();
+                    await Card("Systems test complete.");
+                    Main.Finish();
                     break;
                 case "mender":
                     await Say("mender", "Hold the hinge to the anvil and strike when it glows. Three good ones.");

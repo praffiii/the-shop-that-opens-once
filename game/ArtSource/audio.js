@@ -35,7 +35,7 @@
   const CAPTIONS = {
     bell: 'Shop bell', step: 'Footsteps', tick: 'Clock ticking', chime: 'Soft chime',
     motif: 'Music box: 10:17 motif', page: 'Paper rustle', pop: 'Soft blip',
-    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', bell_toll: 'A great brass bell tolling', match: 'A match struck', scrub: 'Feet scrubbed on a coir mat', pour: 'Water poured from a jar', hiss: 'A mosquito coil hissing as it catches', kettle: 'A kettle coming to the boil', pen: 'A dip pen scratching', music: 'Quiet piano and music box',
+    wrong: 'Gentle "hmm"', right: 'Rising notes', whoosh: 'Soft whoosh', latch: 'Box latch', bus_far: 'A bus far off, driving away', bus_stop: 'A bus pulling up and opening its door', drop: 'A basket dropped on the ground', gate: 'A rusty gate creaking open', door: 'A key turning, a heavy door creaking open', bed: 'An old bed creaking', blow: 'A lamp blown out', crickets: 'Crickets', bell_toll: 'A great brass bell tolling', match: 'A match struck', scrub: 'Feet scrubbed on a coir mat', pour: 'Water poured from a jar', hiss: 'A mosquito coil hissing as it catches', kettle: 'A kettle coming to the boil', pen: 'A dip pen scratching', sift: 'Flour shaken through a sieve', thump: 'Dough pressed on the table', click: 'A gear clicking round', ting: 'A spring pinging loose', ticktock: 'A watch ticking again', oil: 'Oil rubbed in with a rag', flare: 'A lantern wick catching', whistle: 'A steam whistle', rain: 'Heavy rain', music: 'Quiet piano and music box',
   };
 
   const FX = {
@@ -122,6 +122,24 @@
       s._noise(t, { type: 'lowpass', f: 500, vol: 0.12, atk: 0.4, dur: 1.4 });
       s._note(t + 0.7, 1500, { vol: 0.03, dec: 1.2, atk: 0.4, glide: 1.25 });
     },
+    // flour shaken through the sieve, one shake (shh)
+    sift: (s, t) => s._noise(t, { f: 3000, f2: 5200, q: 0.8, vol: 0.2, atk: 0.03, dur: 0.16 }),
+    // the heels of the hands pushing into the dough on the table (thump)
+    thump: (s, t) => { s._noise(t, { type: 'lowpass', f: 300, vol: 0.5, dur: 0.07, atk: 0.004 }); s._note(t, 80, { vol: 0.1, dec: 0.12, atk: 0.003 }); },
+    // a brass gear turned one tooth on (click)
+    click: (s, t) => { s._noise(t, { type: 'highpass', f: 3600, vol: 0.12, dur: 0.012, atk: 0.001 }); s._note(t, 1250, { vol: 0.03, dec: 0.04, atk: 0.001 }); },
+    // a gear slipping and its spring pinging off (tinggg)
+    ting: (s, t) => { s._noise(t, { type: 'highpass', f: 2400, vol: 0.14, dur: 0.03, atk: 0.001 }); s._note(t + 0.02, 2600, { partials: BOX, vol: 0.05, dec: 1.6, atk: 0.002, glide: 0.92 }); },
+    // the old watch going again: tick, tock, tick, tock
+    ticktock: (s, t) => { for (let k = 0; k < 6; k++) { s._noise(t + k * 0.42, { type: 'highpass', f: k % 2 ? 2400 : 3200, vol: 0.12, dur: 0.016, atk: 0.001 }); s._note(t + k * 0.42, k % 2 ? 1500 : 2100, { vol: 0.03, dec: 0.05, atk: 0.001 }); } },
+    // damar oil worked into the soot with a rag (srrk, srrk)
+    oil: (s, t) => [0, 0.5].forEach(d => s._noise(t + d, { f: 1800, f2: 1100, q: 1.1, vol: 0.22, atk: 0.12, dur: 0.38 })),
+    // an oil lantern's wick taking the flame: a soft rising whump
+    flare: (s, t) => { s._noise(t, { type: 'lowpass', f: 380, f2: 900, vol: 0.32, atk: 0.06, dur: 0.45 }); s._note(t + 0.05, 220, { vol: 0.03, dec: 0.4, atk: 0.05, glide: 1.4 }); },
+    // the night train's steam whistle, 1952: two notes together, long, over the hiss of steam
+    whistle: (s, t) => { for (const m of [74, 78]) s._note(t, hz(m), { partials: WARM, vol: 0.05, dec: 1.4, atk: 0.12 }); s._noise(t, { type: 'highpass', f: 2600, vol: 0.12, atk: 0.1, dur: 1.6 }); },
+    // the storm's rain on the platform roof, a few seconds of it
+    rain: (s, t) => { s._noise(t, { f: 1600, f2: 2600, q: 0.5, vol: 0.3, atk: 0.5, dur: 3.2 }); s._noise(t + 1.2, { type: 'lowpass', f: 140, vol: 0.3, atk: 0.4, dur: 1.4 }); },
     // a dip pen across the page, three strokes (srek-srek)
     pen: (s, t) => [0, 0.26, 0.5].forEach((d, i) => s._noise(t + d, { f: 3400 + 300 * i, q: 2.5, vol: 0.12, atk: 0.02, dur: 0.18 })),
     // crickets outside in the dark: two of them, a few chirps each, one a little farther off

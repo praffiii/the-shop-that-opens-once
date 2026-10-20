@@ -1781,6 +1781,127 @@
     return c;
   };
 
+  // Night 1's watch through the day: as it comes out of the box its back is burnt black with soot (scorched); the
+  // damar oil lifts it to show the M.B. (the plain back); set going, its back opens on Marcus's words to Helen (open).
+  // watch_clean and watch_ticking are the same watch at its later states, so each state has its own bag entry.
+  const soot = src => {
+    const [c, x] = canvas(src.width, src.height), w = src.width, h = src.height;
+    x.drawImage(src, 0, 0);
+    const d = x.getImageData(0, 0, w, h).data, on = (i, j) => i >= 0 && j >= 0 && i < w && j < h && d[(j * w + i) * 4 + 3] > 0;
+    const n = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+    const k = w > 20 ? 3 : 2, top = Math.round(h * 0.3);
+    // soot in clots, the case's rim still showing brass through it in places
+    for (let j = top; j < h; j++) for (let i = 0; i < w; i++) {
+      if (!on(i, j) || !on(i - 1, j) || !on(i + 1, j) || !on(i, j - 1) || !on(i, j + 1)) continue;
+      const v = n(Math.floor(i / k), Math.floor(j / k)) * 0.7 + n(i, j) * 0.3;
+      if (v < 0.78) dot(x, i, j, v < 0.4 ? 'ink2' : v < 0.62 ? 'stone4' : 'dirt4');
+    }
+    return c;
+  };
+  for (const T of [LG, SM, XS]) {
+    const base = T.watch;
+    T.watch = (v = 'front') => v === 'scorched' ? soot(base('back')) : v === 'open' ? (T === LG ? openBack() : base('back')) : base(v);
+    T.watch_clean = T.watch_ticking = T.watch;
+  }
+  // The back swung open: the inside of the lid, engraved FOR HELEN over the lines of Marcus's message, signed M.
+  function openBack() {
+    const [c, x] = canvas(44, 48), cx = 22, cy = 29, R = 18.5;
+    disc(x, 22, 5.5, 5.5, (d, lit) => d < 2.6 ? null : d > 4.7 || d < 3.3 ? 'brass4' : brassLit(lit));
+    rect(x, 18, 9, 9, 6, 'brass4'); for (let i = 19; i < 26; i++) rect(x, i, 10, 1, 4, i % 2 ? 'brass2' : 'brass0');
+    disc(x, cx, cy, R, (d, lit) => d > R - 0.9 ? 'brass4' : d > R - 2.5 ? brassLit(lit) : d > R - 3.3 ? 'brass3' : lit > 0.5 && d > 9 ? 'brass0' : 'brass1');
+    text(x, 'FOR', cx - 5, cy - 11, 'brass4'); text(x, 'HELEN', cx - 9, cy - 5, 'brass4');
+    for (const [y, w] of [[2, 22], [5, 18], [8, 20]]) for (let i = 0; i < w; i += 3) rect(x, cx - (w >> 1) + i, cy + y, 2, 1, 'brass3');
+    text(x, '-M.', cx + 2, cy + 11, 'brass4');
+    line(x, cx - 12, cy - 13, cx - 9, cy - 16, 'white');
+    return c;
+  }
+
+  // Mr Baker's sweet bread, warm, for Arlo: a round glazed bun with a split top and sugar on it.
+  XS.bread = () => S(`
+    .oooo.
+    oabbao
+    oaWbco
+    .occo.`, { o: 'dirt4', a: 'orange', b: 'light2', c: 'roofR3', W: 'cream0' });
+  SM.bread = () => S(`
+    ...oooooo...
+    ..oabbbbao..
+    .oabWbbWbbo.
+    oabbbccbbbco
+    oabWbcWcbbco
+    oabbbbbbbbco
+    .occcccccco.
+    ..oooooooo..`, { o: 'dirt4', a: 'light1', b: 'orange', c: 'roofR3', W: 'cream0' });
+  LG.bread = () => {
+    const [c, x] = canvas(40, 36);
+    // a domed bun on its darker baked foot, lit from the top left, glazed, split along its top and sugared
+    ellipse(x, 20, 26, 16, 7, 'dirt4'); ellipse(x, 20, 25, 15, 6, 'roofR3');
+    disc(x, 20, 19, 14, (d, lit, dx, dy) => { const l = Math.hypot(dx + 5, dy + 6); return d > 13 ? 'dirt4' : l < 5 ? 'light0' : l < 10 ? 'light1' : l < 17 ? 'orange' : 'roofR2'; });
+    line(x, 11, 19, 29, 15, 'roofR3'); line(x, 12, 20, 28, 16, 'cream0');
+    for (const [a, b] of [[16, 9], [23, 10], [27, 20], [11, 24], [19, 25], [25, 25]]) { dot(x, a, b, 'white'); dot(x, a + 1, b, 'cream0'); }
+    return c;
+  };
+  // Arlo's damar oil: a little bottle of amber resin oil, corked, string round its neck and a tag.
+  XS.damar_oil = () => S(`
+    .oo.
+    .oo.
+    oaao
+    obco
+    oooo`, { o: 'dirt4', a: 'light2', b: 'orange', c: 'roofR3' });
+  SM.damar_oil = () => S(`
+    ...oo....
+    ..obbo...
+    ..oooo...
+    ..oyyo...
+    .oaWaao..
+    oaWabbco.
+    oabbbbcoo
+    oabbbbcoW
+    oabbbbco.
+    .occcco..
+    ..oooo...`, { o: 'dirt4', a: 'light1', b: 'orange', c: 'roofR3', y: 'cream2', W: 'cream0' });
+  LG.damar_oil = () => {
+    const [c, x] = canvas(32, 44);
+    rect(x, 12, 2, 8, 6, 'wood4'); rect(x, 13, 2, 6, 5, 'dirt2'); rect(x, 13, 2, 6, 1, 'dirt1');
+    rect(x, 11, 8, 10, 3, 'dirt4'); rect(x, 12, 9, 8, 1, 'cream2');
+    disc(x, 16, 28, 11, (d, lit) => d > 10 ? 'dirt4' : lit > 0.6 && d > 5 ? 'light0' : lit > 0 ? 'light2' : lit > -0.5 ? 'orange' : 'roofR3');
+    rect(x, 13, 11, 6, 7, 'light2'); rect(x, 12, 11, 1, 7, 'dirt4'); rect(x, 19, 11, 1, 7, 'dirt4');
+    line(x, 20, 10, 26, 18, 'cream2'); rect(x, 24, 18, 7, 9, 'cream0'); rect(x, 24, 18, 7, 1, 'cream2'); for (const y of [21, 23]) rect(x, 25, y, 5, 1, 'stone2');
+    line(x, 9, 22, 11, 19, 'white');
+    return c;
+  };
+  // The Mender's oil lantern for the dark platform: an iron frame round its glass, a wire handle, the wick low.
+  XS.oil_lantern = () => S(`
+    .oo.
+    o..o
+    oooo
+    oabo
+    oabo
+    oooo`, { o: 'iron4', a: 'cream0', b: 'light2' });
+  SM.oil_lantern = () => S(`
+    ...ooo...
+    ..o...o..
+    ..o...o..
+    ..ooooo..
+    .ooiiioo.
+    .oaWbbco.
+    .oabldco.
+    .oabddco.
+    .oaaaaco.
+    .ooiiioo.
+    oiiiiiiio
+    ooooooooo`, { o: 'iron4', i: 'iron2', a: 'cream0', b: 'cream1', c: 'cream2', W: 'white', l: 'light1', d: 'orange' });
+  LG.oil_lantern = () => {
+    const [c, x] = canvas(32, 46);
+    // wire handle and its ring, the cap, the glass chimney between four iron bars with the flame low inside, the font
+    line(x, 8, 10, 16, 2, 'iron3'); line(x, 24, 10, 16, 2, 'iron3'); rect(x, 15, 0, 3, 3, 'iron4');
+    rect(x, 9, 9, 14, 4, 'iron4'); rect(x, 10, 9, 12, 1, 'iron2'); rect(x, 12, 13, 8, 2, 'iron3');
+    rect(x, 9, 15, 14, 18, 'cream0'); rect(x, 10, 15, 4, 18, 'white'); rect(x, 19, 15, 4, 18, 'cream1');
+    rect(x, 14, 22, 4, 7, 'light1'); rect(x, 15, 20, 2, 3, 'light0'); rect(x, 15, 28, 2, 4, 'dirt3');
+    for (const i of [8, 15, 23]) rect(x, i, 14, 1, 20, 'iron3');
+    rect(x, 6, 33, 20, 5, 'iron4'); rect(x, 7, 33, 18, 1, 'iron2'); rect(x, 4, 38, 24, 4, 'iron3'); rect(x, 4, 38, 24, 1, 'iron2'); rect(x, 4, 41, 24, 1, 'iron4');
+    return c;
+  };
+
   // The key to Satria's home: an old brass key, mossy from two years under the geranium pot.
   SM.homekey = () => S(`
     .oooo..........

@@ -63,6 +63,10 @@ Shader "Shop/Pixel"
         float4 _Feet[16];       // world position under each character, and the spot's half width
         float _FeetCount;
         float4 _Rim;             // the rim light's colour (sRGB) and strength
+        float _Sepia;            // 1 in a memory of 1952: everything washed to old-photograph brown
+
+        // Washed toward sepia by _Sepia.
+        float3 Sepia(float3 s) { return lerp(s, dot(s, float3(0.299, 0.587, 0.114)) * float3(1.08, 0.9, 0.66) + float3(0.05, 0.03, 0), _Sepia); }
 
         // rect: the piece's own texels in the atlas (u0, v top, u1, v bottom); sway: (amplitude in texels, phase,
         // how much darker this face is).
@@ -143,7 +147,7 @@ Shader "Shop/Pixel"
             {
                 half4 c = Texel(i);
                 Cut(i, c.a);
-                if (_Light > 0.5) return half4(c.rgb * 2, c.a); // over 1, so the bloom picks lights out
+                if (_Light > 0.5) return half4(SRGBToLinear(Sepia(LinearToSRGB(c.rgb))) * 2, c.a); // over 1, so the bloom picks lights out
                 float3 s = LinearToSRGB(c.rgb);
                 float shade = 1 - dot(s, float3(0.299, 0.587, 0.114));
                 float2 floorAt = float2(i.art.x, -i.art.z);
@@ -175,7 +179,7 @@ Shader "Shop/Pixel"
                 for (int l = 0; l < _LampCount; l++) glow += saturate(1 - distance(texel, _Lamps[l].xyz) / _Lamps[l].w);
                 glow = floor(saturate(glow) * 4) / 4 * _LampTint.a;
                 s = s * (1 + _LampTint.rgb * glow * 0.8) + _LampTint.rgb * glow * 0.04;
-                return half4(SRGBToLinear(saturate(s)), 1);
+                return half4(SRGBToLinear(saturate(Sepia(s))), 1);
             }
             ENDHLSL
         }

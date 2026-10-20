@@ -1,0 +1,121 @@
+using System;
+using System.Collections;
+using System.Runtime.CompilerServices;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+namespace Shop.Tests
+{
+    /// <summary>
+    /// Each night's own story from the bell to bed, with no one at the keyboard: its leads, its minigames (each failed
+    /// once, then won), the keepsake changing in the bag as the day goes, and the handover at dusk.
+    /// </summary>
+    public sealed class NightsTest
+    {
+        const float TimeLimit = 170f; // real seconds, under the runner's own timeout
+        static int waitingAt;
+
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night1PlaysThrough() => Run(1, async main =>
+        {
+            await Go(main, "square", "from_station");
+            Assert.IsTrue(Game.Has("rumour"), "The square's morning gossip");
+            await Use(main, "valdo");
+            await Use(main, "mia");
+            await Go(main, "bakery", "door");
+            Board.FailFirst = 1;
+            await Use(main, "baker");
+            Assert.AreEqual(Phase.Midday, Game.Phase, "The Baker's minigame moves the day on");
+            CollectionAssert.Contains(Game.Bag, "bread");
+
+            await Go(main, "coast", "from_square");
+            await Use(main, "arlo");
+            CollectionAssert.AreEqual(new[] { "watch", "damar_oil" }, Game.Bag.FindAll(k => k is "watch" or "damar_oil" or "bread"), "The loaf traded for the oil");
+            await Go(main, "forge", "door");
+            Board.FailFirst = 1;
+            await Use(main, "mender");
+            Assert.AreEqual(Phase.Dusk, Game.Phase);
+            CollectionAssert.IsSupersetOf(Game.Bag, new[] { "watch_ticking", "oil_lantern" }, "The watch ticks, and the Mender lends his lantern");
+            CollectionAssert.DoesNotContain(Game.Bag, "watch");
+            Assert.AreEqual("dusk", Game.Checkpoint);
+
+            await Go(main, "station", "from_square");
+            for (var i = 0; i < 3; i++) await Use(main, $"lantern_post_{i}");
+            await Use(main, "helen");
+            Assert.AreEqual(1, Game.LanternsOut, "Helen has her watch");
+            CollectionAssert.DoesNotContain(Game.Bag, "watch_ticking");
+        });
+
+        // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
+        // story, and home to the journal, which ends the night.
+        static IEnumerator Run(int night, Func<Main, Awaitable> day)
+        {
+            var saved = Game.Raw;
+            Main main = null;
+            try
+            {
+                Main.Auto = true;
+                Time.timeScale = 8f;
+                main = new GameObject("Main").AddComponent<Main>();
+                main.Talk.Picks.Enqueue("Quit"); // leaves the title, for the night to begin
+                var playing = Play(main, night, day);
+                var end = Time.realtimeSinceStartup + TimeLimit;
+                while (!playing.IsCompleted)
+                {
+                    Assert.Less(Time.realtimeSinceStartup, end, $"The night timed out waiting at line {waitingAt}");
+                    yield return null;
+                }
+                playing.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                Board.FailFirst = 0;
+                if (main) UnityEngine.Object.Destroy(main.gameObject);
+                Time.timeScale = 1f;
+                Main.Auto = false;
+                Game.Raw = saved;
+            }
+        }
+
+        static async Awaitable Play(Main main, int night, Func<Main, Awaitable> day)
+        {
+            await Until(() => main.Talk.Picks.Count == 0);
+            Game.NewGame();
+            await main.Begin(night);
+            await Go(main, "shop", "door");
+            await Go(main, "satria_home", "door");
+            foreach (var step in new[] { "table", "water_jar", "coil", "bed" }) await Use(main, step);
+            await Until(() => Exploring(main) && Game.Phase == Phase.Morning);
+            await Use(main, "stove");
+            await day(main);
+            await Go(main, "satria_home", "door");
+            await Until(() => Game.SavedChapter() == night + 1 && main.Story == null);
+        }
+
+        // Takes the courier somewhere as the story would, and once there closes the talk and gives back the controls, as
+        // stepping through an exit does.
+        static async Awaitable Go(Main main, string place, string spawn)
+        {
+            await main.Go(place, spawn);
+            main.Talk.Close();
+            main.Story?.Wrap();
+            if (main.Story != null) main.Place.Controls = true;
+        }
+
+        // Uses a hotspot as a click would, and waits for its scene to be over.
+        static async Awaitable Use(Main main, string id, [CallerLineNumber] int line = 0)
+        {
+            Assert.IsTrue(await main.Place.WalkAndUse(id), $"Could not reach {id}");
+            await Until(() => Exploring(main), line);
+        }
+
+        static bool Exploring(Main main) => main.Place && main.Place.Controls && !main.Talk.Open && !main.Board.Open;
+
+        static async Awaitable Until(Func<bool> done, [CallerLineNumber] int line = 0)
+        {
+            waitingAt = line;
+            while (!done()) await Awaitable.NextFrameAsync();
+        }
+    }
+}

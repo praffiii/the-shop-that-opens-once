@@ -18,10 +18,7 @@ namespace Shop
 
         public override async Awaitable Start()
         {
-            // Satria knows everyone here: he grew up with them
-            foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Grandma Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
-                         ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder"), ("valdo", "Valdo") })
-                Known(id, name);
+            KnowVillage();
             Game.Bag.AddRange(new[] { "shirt", "purse", "contract" });
             await Card("Prologue: The Boy Who Left", "16:30, the bus stop on the road into Bellwood");
             // the empty stop at dusk; the bus is heard pulling up out of sight round the bend, and Satria walks out of

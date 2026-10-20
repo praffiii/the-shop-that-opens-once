@@ -398,6 +398,8 @@
       ],
     },
   };
+  // Helen in 1952, for the memory of the platform: the same, her hair still dark.
+  CAST.young_helen = { ...CAST.helen, body: 'young' };
   const IDS = Object.keys(CAST);
 
   /* How each character that turns looks from the front and from the back, over the shared ant body (drawn round x 20,
@@ -556,6 +558,7 @@
       },
     },
   };
+  TURN.young_helen = TURN.helen;
 
   /* ---------------- poses ---------------- */
   const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2, knead: 4, tinker: 4 };
@@ -570,13 +573,14 @@
     s.push('talk');
     // handing things over, as the nights' errands and handovers do
     const HANDS = ['nora', 'mia', 'grandkid', 'theo', 'leo', 'sam', 'mother', 'marlow', 'courier', 'baker', 'arlo', 'mender', 'gardener', 'pip'];
-    if ([...HANDS, 'helen'].includes(id)) s.push('receive');
+    if ([...HANDS, 'helen', 'young_helen'].includes(id)) s.push('receive');
     if (HANDS.includes(id)) s.push('give');
     // sitting on the nights' benches and steps, and moved when what was lost comes home
     if (['nora', 'pip', 'leo', 'theo', 'bram', 'valdo'].includes(id)) s.push('sit');
     if (['pip', 'theo', 'sam', 'leo', 'nora', 'mender'].includes(id)) s.push('moved');
     if (id === 'courier') s.push('carry', 'carryWalk', 'inspect', 'wave', 'sit', 'moved', 'run', 'lie', 'wake', 'write', 'drink', 'crouch', 'strike', 'wash');   // the nightly routine's too
     if (id === 'helen') s.push('sit', 'moved', 'brew');
+    if (id === 'young_helen') s.push('moved');
     if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
     if (id === 'mender') s.push('hammer', 'tinker');
@@ -1303,6 +1307,7 @@
         rect(g, P.cx - 6, P.cy - 13, 5, 4, 'cream0'); rect(g, P.cx - 5, P.cy - 12, 3, 2, 'cream1');
       }); } },
   };
+  PORT.young_helen = PORT.helen;
 
   function renderPortrait(id, frame, mood) {
     const d = PORT[id] || { cloth: [CAST[id].sleeve[0], CAST[id].sleeve[0], CAST[id].sleeve[1]] };
@@ -1364,7 +1369,7 @@
   }
 
   // Bodies of another colour, swapped into a finished frame: Marlow is an old grey ant, and his eyes glow faintly.
-  const BODIES = { grey: { ant0: 'stone1', ant1: 'stone2', ant2: 'stone3', ant3: 'stone4', ant4: 'stone5', pupil: 'light2' } };
+  const BODIES = { grey: { ant0: 'stone1', ant1: 'stone2', ant2: 'stone3', ant3: 'stone4', ant4: 'stone5', pupil: 'light2' }, young: { stone0: 'wood3', stone1: 'wood4', stone2: 'wood5' } };
   const rgb = k => { const v = R(k).startsWith('#') ? R(k) : PX.PAL[k]; return [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)); };
   function bodied(src, body) {
     if (!body) return src;

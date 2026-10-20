@@ -68,7 +68,7 @@ namespace Shop.Tests
             await Use(main, "photo");
             await Until(() => Game.Has("monologue") && Exploring(main, "satria_home"));
             await Use(main, "bed");
-            await Until(() => Game.SavedChapter() == 1 && main.Story == null);
+            await Until(() => main.Story is Night1 && Game.SavedChapter() == 1);
             CollectionAssert.Contains(Game.Bag, "contract", "What Satria brought home goes on into Night 1");
             StringAssert.Contains("Day Eight", string.Join(" ", Game.Notes), "Valdo's deadline stays in the notes");
         }
@@ -84,7 +84,7 @@ namespace Shop.Tests
             main.Bag.LookAt("watch");
             main.Bag.Turn(1);
             main.Bag.LookAt("");
-            Assert.IsTrue(Game.Has("seen_watch_back"), "Turning the watch over shows its back");
+            Assert.IsTrue(Game.Has("seen_watch_scorched"), "Turning the watch over shows its burnt back");
             Assert.AreEqual(2, Game.Notes.Count, "Each side with something to notice adds a note");
 
             await main.Place.WalkAndUse("door");
@@ -97,7 +97,7 @@ namespace Shop.Tests
             Assert.IsTrue(await main.Place.WalkAndUse("helen"), "The courier can walk up to Helen");
             await Until(() => Game.LanternsOut == 1); // a lantern goes out
             Assert.AreEqual(Phase.Night, Game.Phase, "The handover turns dusk to night");
-            await Until(() => Game.SavedChapter() == 1 && main.Story == null);
+            await Until(() => main.Story == null);
             CollectionAssert.DoesNotContain(Game.Bag, "watch", "Helen keeps the watch");
         }
 

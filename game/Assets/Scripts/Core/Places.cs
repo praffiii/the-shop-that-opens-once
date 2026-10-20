@@ -23,6 +23,13 @@ namespace Shop
         // tinkers with the old engine on the platform
         static readonly int[] ForgeDays = { 1, 5 }, EngineDays = { 0, 2, 3, 4, 6, 7, 8 };
 
+        // One of the platform's oil lanterns on its post, the post's foot at x.
+        static Hotspot Lantern(int i, float x) => new()
+        {
+            Id = $"lantern_post_{i}", At = V(x, 262), Label = "Lantern", Area = R(-8, -40, 16, 42), Spot = V(0, 16),
+            Text = "An old oil lantern on an iron post. Its glass is clean: someone still wipes it, though it hasn't been lit since the storm.",
+        };
+
         // Exits at an area's edges: a strip along the edge where a road leaves it, walked to just inside the edge.
         static Hotspot West(string id, float y, string label, string to) => new() { Id = id, At = V(0, y), Label = label, Area = R(0, -24, 24, 48), Spot = V(12, 0), ExitTo = to };
         static Hotspot East(string id, float w, float y, string label, string to) => new() { Id = id, At = V(w, y), Label = label, Area = R(-24, -24, 24, 48), Spot = V(-12, 0), ExitTo = to };
@@ -227,6 +234,8 @@ namespace Shop
                     West("to_grove", 690, "Into the trees", "grove/from_station"),
                     East("to_square", 960, 686, "To the square", "square/from_station"),
                     new Hotspot { Id = "forge_door", At = V(504, 630), Label = "Forge", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "forge/door", Chapters = AfterDayZero },
+                    // the platform's three oil lanterns on their posts, dark since the storm (Night 1 lights them)
+                    Lantern(0, 352), Lantern(1, 470), Lantern(2, 660),
                     new Hotspot { Id = "station_clock", At = V(810, 221), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 120) },
                     new Hotspot { Id = "info_board", At = V(640, 306), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
@@ -439,6 +448,16 @@ namespace Shop
                             "Pots in for the night. They'd keep out here, but I sleep better with them indoors.",
                             "Smell that? Night-scented stock. It saves itself for the evening.",
                             "One more trip and I'm done. My back says two is too many.",
+                        },
+                    },
+                    // Night 1's morning: Valdo on the bench under the oak with his coffee and his land plans.
+                    new Person
+                    {
+                        Id = "valdo", At = V(1040, 755), Seat = 8, Label = "Valdo", Spot = V(0, 20), Pose = "sit", Facing = 1, Chapters = new[] { 1 }, Phases = new[] { Phase.Morning },
+                        Lines = new[]
+                        {
+                            "The investors want the boundary to the inch, Mr Satria. An inch is money.",
+                            "Coffee in the country is like everything else here: slow, and slightly cold.",
                         },
                     },
                     // Day 0's dusk: Helen buying the last loaves at the bread stall and Leo chatting by the bench under the

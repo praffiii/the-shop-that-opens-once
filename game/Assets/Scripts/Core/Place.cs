@@ -158,6 +158,20 @@ namespace Shop
         /// <summary>Someone in this place by id ("courier" is the player), or null.</summary>
         public Ant Actor(string id) => id == "courier" ? Player : people.TryGetValue(id, out var ant) ? ant : null;
 
+        /// <summary>Someone brought into the place for a scene, a memory's people say, until <see cref="Leave"/>; no hotspot, no activity.</summary>
+        public Ant Bring(string id, Vector2 at)
+        {
+            var ant = Ant.Create(id, World.transform);
+            ant.Feet = at;
+            people[id] = ant;
+            return ant;
+        }
+
+        public void Leave(string id)
+        {
+            if (people.Remove(id, out var ant)) Destroy(ant.gameObject);
+        }
+
         /// <summary>Everyone in this place but the courier.</summary>
         public IEnumerable<Ant> People => people.Values;
 

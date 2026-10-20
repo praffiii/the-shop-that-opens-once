@@ -26,16 +26,41 @@ namespace Shop
 
         public static readonly Dictionary<string, Keepsake> All = new()
         {
+            // Night 1's watch, as it is cleaned and set going: soot-black, then clean, then ticking with its back sprung open
             ["watch"] = new Keepsake
             {
                 Name = "Brass pocket watch",
                 Sides = new[]
                 {
                     new Side("front", "A railway service watch. The hands stopped at 10:17.", "The pocket watch stopped at 10:17."),
-                    new Side("back", "Initials are engraved on the back.", "The pocket watch has initials engraved on the back."),
+                    new Side("scorched", "The back is burnt black, crusted hard, as if lightning had found it. It smells of sulphur and scorched wire.", "The watch's back is burnt black."),
                     new Side("side", "The crown is pulled out, as if someone stopped it on purpose."),
                 },
             },
+            ["watch_clean"] = new Keepsake
+            {
+                Name = "Brass pocket watch",
+                Sides = new[]
+                {
+                    new Side("front", "Clean now, the glass clear. The hands still stand at 10:17, and it makes no sound at all."),
+                    new Side("back", "Under the soot there were initials: M.B.", "The watch is engraved M.B. on its back."),
+                    new Side("side", "The crown is pulled out, as if someone stopped it on purpose."),
+                },
+            },
+            ["watch_ticking"] = new Keepsake
+            {
+                Name = "Brass pocket watch",
+                Sides = new[]
+                {
+                    new Side("front", "It ticks again. The hands start from 10:17, as if no time had passed."),
+                    new Side("open", "Inside the sprung back: \"For Helen. Don't wait for me at the station if the storm won't ease. M.\"", "The watch is Helen's, from M.: \"Don't wait for me at the station if the storm won't ease.\""),
+                    new Side("side", "The crown pushed home. Tick, tock, under his thumb."),
+                },
+            },
+            // what Night 1's day passes through his hands
+            ["bread"] = new Keepsake { Name = "Sweet loaf", Sides = new[] { new Side("", "A sweet loaf, still warm from the Baker's oven. For Arlo at the jetty, in trade for his damar oil.") } },
+            ["damar_oil"] = new Keepsake { Name = "Damar oil", Sides = new[] { new Side("", "Arlo's damar oil, amber and resinous in its little bottle. It softens burnt soot, the Baker says.") } },
+            ["oil_lantern"] = new Keepsake { Name = "Oil lantern", Sides = new[] { new Side("", "The Mender's oil lantern, its wick trimmed. Enough to light the dark platform's lanterns.") } },
             // what Satria comes home with, and Mr Baker's welcome
             ["shirt"] = new Keepsake { Name = "Spare shirt", Sides = new[] { new Side("", "A clean city shirt, pressed and folded. It looks out of place here already.") } },
             ["purse"] = new Keepsake { Name = "Coin purse", Sides = new[] { new Side("", "What is left of the fare: a few coins rattling at the bottom.") } },

@@ -18,6 +18,8 @@ namespace Shop
         readonly Dictionary<string, string> names = new();
         /// <summary>The villagers taken into the scene, back to their activity once it ends.</summary>
         readonly HashSet<Villager> cued = new();
+        /// <summary>The people a memory brought in, gone when it ends.</summary>
+        readonly List<string> brought = new();
         // how often each villager's lines have been heard this chapter, so the next talk says the next one
         readonly Dictionary<string[], int> chats = new();
 
@@ -65,6 +67,14 @@ namespace Shop
         {
             names[id] = displayName;
             Relabel();
+        }
+
+        /// <summary>Satria knows everyone in Bellwood: he grew up with them (and Valdo met his bus).</summary>
+        protected void KnowVillage()
+        {
+            foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Grandma Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
+                         ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder"), ("valdo", "Valdo"), ("arlo", "Arlo"), ("mender", "Mender"), ("bram", "Captain Bram") })
+                Known(id, name);
         }
 
         /// <summary>Gives the people in the current place the names learned so far (Main calls it on arrival).</summary>
@@ -175,6 +185,47 @@ namespace Shop
             {
                 Main.Board.Close();
             }
+        }
+
+        /// <summary>
+        /// A memory of 1952 played where it happened: through the cream curtain the light turns sepia, the memory's
+        /// music plays and everyone of the present is gone; the scene plays with the people it brings
+        /// (<see cref="Bring"/>), and through the curtain again all is as it was.
+        /// </summary>
+        protected async Awaitable Memory(System.Func<Awaitable> scene)
+        {
+            var place = Main.Place;
+            var present = new List<Ant>(place.People) { place.Player };
+            present.RemoveAll(ant => !ant.gameObject.activeSelf);
+            Main.Talk.Close();
+            await Main.Fade(true);
+            foreach (var ant in present) ant.gameObject.SetActive(false);
+            Main.Sepia = true;
+            Music("memory");
+            await Main.Fade(false);
+            try
+            {
+                await scene();
+            }
+            finally
+            {
+                Main.Talk.Close();
+                await Main.Fade(true);
+                foreach (var id in brought) place.Leave(id);
+                brought.Clear();
+                foreach (var ant in present)
+                    if (ant) ant.gameObject.SetActive(true);
+                Main.Sepia = false;
+                Music(place.Def.Mood);
+                await Main.Fade(false);
+            }
+        }
+
+        /// <summary>Someone in a memory, standing at a point till it ends.</summary>
+        protected Ant Bring(string id, Vector2 at)
+        {
+            brought.Add(id);
+            return Main.Place.Bring(id, at);
         }
 
         /// <summary>Marlow fetches the night's box from the cabinet: he goes to it and takes it out of its cubby.</summary>
