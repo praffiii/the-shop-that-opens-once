@@ -52,7 +52,7 @@ Shared core: `px.js` defines `window.PX`. It holds the palette (`PX.PAL`), `canv
 
 Quality bar, as the user put it: "the color more bright and light, make the environment looks alive", not blurry, not AI slop.
 
-## Scene contract (interiors.js, toyshop.js)
+## Scene contract (areas.js, inside.js)
 
 ```js
 const scene = createX(opts);
@@ -60,7 +60,7 @@ scene.w, scene.h                 // world size in art px
 scene.bg                         // colour for any area outside the world (hex)
 scene.anchors = { name: [x, y] } // actor feet positions and points of interest
 scene.paths   = { name: [[x,y],...] }    // walkable polylines (the outdoor world)
-scene.hotspots = { name: [x, y, w, h] }  // clickable rects (the station, the toy shop)
+scene.hotspots = { name: [x, y, w, h] }  // clickable rects
 scene.draw(ctx, view, actors)
 ```
 
@@ -85,7 +85,7 @@ scene.draw(ctx, view, actors)
 ## Items contract (in interiors.js, `window.IT`)
 
 - `IT.item(name, size = 'xs' | 'sm' | 'lg', variant)` returns a transparent canvas: about 7-10 px for `xs` (held in a hand), 12-16 px for `sm` and 40-48 px for `lg`.
-- Items: `watch` (`front` with hands at 18:17, `back` engraved `A.T.`, `side`), `doll` (`foot`: turned over, an `N` stitched on its sole), `camera`, `key`, `shoes`, `book`, `letter`, `musicbox` (`closed`, `open`), `parcel`, `suitcase`.
+- Items: the seven keepsakes, their mended states, and what Satria and the villagers carry. `ITEMS` in `export-rooms.js` lists every name and its variants.
 - `IT.icon(name)` returns a 16x16 UI icon: `bag`, `look`, `talk`, `hand`, `lantern`, `clock`, `heart`, `note`, `sound-on`, `sound-off`.
 
 ## The world: Bellwood
@@ -139,5 +139,3 @@ are items and sort with the courier.
 Marlow's shop is an old shopfront at the end of the grove path, grown into the ancient tree behind it: roots over its
 roof and down its corners, ivy, moss and ferns. Seven lanterns hang from its front verges, and one goes out for each
 night resolved; by day its door is closed with a CLOSED card.
-
-Behind the scissors sign on Nora's house in the East is her toy shop (`toyshop.js`, Night 2): a timber-framed room with a powder-blue wainscot, a cabinet of plush rabbits, bolts of fabric and her workbench.

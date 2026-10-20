@@ -13,7 +13,7 @@ code. Nothing is AI-generated. `export.py` renders it all into `../Assets/Resour
 | `village-grove.js` | The banyan grove: ancient trees, ferns, logs, mossy rocks and the hidden banyan with Marlow's door |
 | `village-nature.js` | Trees, plants, rocks, yard props and bugs |
 | `areas.js` | Bellwood outdoors as five small areas (station, grove, square, east, coast), each laid out and dressed |
-| `interiors.js`, `toyshop.js` | Rooms |
+| `interiors.js` | The keepsakes, the things the cast carry, and the UI icons |
 | `title.js` | The title lettering |
 | `audio.js` | Music, wind and sound effects |
 | `ART.md` | The art style rules. Read it before drawing. |
