@@ -167,6 +167,29 @@ namespace Shop.Tests
             CollectionAssert.DoesNotContain(Game.Bag, "shoes_mended");
         });
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night6PlaysThrough() => Run(6, async main =>
+        {
+            await Use(main, "radio");
+            Assert.IsTrue(Game.Has("valdo_refused"), "Valdo turned away at the door");
+            Assert.AreEqual(Phase.Midday, Game.Phase);
+            Board.FailFirst = 1;
+            await Use(main, "radio");
+            CollectionAssert.Contains(Game.Bag, "savings_book", "Behind the radio");
+            Board.FailFirst = 1;
+            await Use(main, "table");
+            CollectionAssert.Contains(Game.Bag, "ledger_balanced", "Paid in full");
+            Assert.AreEqual(Phase.Dusk, Game.Phase);
+
+            await Use(main, "bed");
+            Assert.AreEqual(Phase.Night, Game.Phase, "The evening waited out at home");
+            await Go(main, "shop", "door");
+            await Until(() => Exploring(main));
+            Assert.AreEqual(6, Game.LanternsOut, "Marlow has his ledger");
+            CollectionAssert.DoesNotContain(Game.Bag, "ledger_balanced");
+            CollectionAssert.Contains(Game.Bag, "savings_book");
+        });
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
         // story, and home to the journal, which ends the night.
         static IEnumerator Run(int night, Func<Main, Awaitable> day)
