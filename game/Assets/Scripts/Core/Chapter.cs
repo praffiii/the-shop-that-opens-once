@@ -35,6 +35,8 @@ namespace Shop
 
         /// <summary>The time of day the chapter begins at: a night begins at the midnight bell.</summary>
         public virtual Phase StartPhase => Phase.Night;
+        /// <summary>The keepsake on the chapter card's stamp; with none, Marlow's lantern is on it.</summary>
+        public virtual string Stamp => null;
 
         /// <summary>Runs once when the chapter begins.</summary>
         public virtual Awaitable Start() => Done();

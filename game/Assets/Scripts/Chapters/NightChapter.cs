@@ -28,6 +28,7 @@ namespace Shop
         protected abstract string Title { get; }
         /// <summary>The keepsake in tonight's box.</summary>
         protected abstract string Keepsake { get; }
+        public override string Stamp => Keepsake;
         /// <summary>The journal page's word for the day ("Waiting"), and what Satria writes on it.</summary>
         protected abstract string Word { get; }
         protected abstract string Page { get; }
@@ -44,7 +45,7 @@ namespace Shop
         public override async Awaitable Start()
         {
             Know();
-            await Card($"Night {Night}: {Title}");
+            await Card($"Night {Night}: {Title}", $"Day {Night}, midnight.");
             await Go("satria_home", "bed");
             await Scene(async () =>
             {

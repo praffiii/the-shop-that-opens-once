@@ -87,6 +87,8 @@ namespace Shop
     public sealed class PlaceDef
     {
         public string Id;
+        /// <summary>What the sign shows as the courier comes in.</summary>
+        public string Name;
         /// <summary>The exported art variants (places/&lt;id&gt;/&lt;variant&gt;). The one named after the time of day is used, else the first.</summary>
         public string[] Variants = { "dusk" };
         /// <summary>A place's own music (shop, coast, loom); elsewhere the time of day's, see <see cref="Music"/>.</summary>

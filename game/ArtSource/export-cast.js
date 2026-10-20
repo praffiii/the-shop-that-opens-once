@@ -1910,6 +1910,105 @@
     }))), { frames: 8 });
   }
 
+  /* The chapter card as a courier's postcard (Card): cream card stock in an airmail border of red and blue slants on a
+     hard shadow, a dotted line down its middle under the printed POST CARD, and the address side's three ruled lines.
+     The stamp is white and perforated, a little sky and hill framed in red over BELLWOOD; the game sets the night's
+     keepsake in it. The postmark is a rubber stamp in blue ink, a ring round BELLWOOD (the game writes the day
+     under it) with three wavy lines of cancellation trailing off to the right. */
+  function post(put) {
+    const W = 336, H = 192, SH = 3;
+    const [c, x] = canvas(W + SH, H + SH);
+    rect(x, SH, SH, W, H, 'dirt2');
+    rect(x, 0, 0, W, H, 'ink');
+    for (let j = 1; j < H - 1; j++) for (let i = 1; i < W - 1; i++) {
+      const depth = Math.min(i, j, W - 1 - i, H - 1 - j), s = (i + j) % 16;
+      dot(x, i, j, depth <= 5 ? (s < 5 ? 'red' : s < 8 || s >= 13 ? 'cream0' : 'roofB2') : depth === 6 ? 'cream2' : 'cream0');
+    }
+    const MID = 196;
+    for (let j = 26; j < H - 22; j += 2) dot(x, MID, j, 'cream2');
+    PX.text(x, 'POST CARD', MID - Math.floor(PX.textWidth('POST CARD') / 2), 13, 'stone3');
+    for (const j of [130, 148, 166]) rect(x, MID + 14, j, W - MID - 34, 1, 'cream2');
+    put('postcard', c);
+
+    const [s, sx] = canvas(41, 49);
+    rect(sx, 1, 1, 40, 48, 'cream2');                         // its shadow on the card
+    for (let j = 0; j < 48; j++) for (let i = 0; i < 40; i++)
+      if (!((i === 0 || j === 0 || i === 39 || j === 47) && (i + j) % 2)) dot(sx, i, j, 'white');   // perforated edge
+    rect(sx, 3, 3, 34, 34, 'roofR3');
+    rect(sx, 4, 4, 32, 32, 'sky1');
+    rect(sx, 4, 28, 32, 8, 'grass2'); rect(sx, 4, 28, 32, 1, 'grass1');
+    for (let i = 4; i < 36; i++) if (Math.abs(i - 22) < 9) dot(sx, i, 27 - (Math.abs(i - 22) < 5 ? 1 : 0), 'grass2');   // a soft hill
+    PX.text(sx, 'BELLWOOD', 20 - Math.ceil(PX.textWidth('BELLWOOD') / 2), 40, 'roofR3');
+    put('stamp', s);
+
+    const R = 21, D = 2 * R + 1, [m, mx] = canvas(D + 32, D), worn = PX.rng(1017);
+    for (let j = 0; j < D; j++) for (let i = 0; i < D; i++) {
+      const r = Math.hypot(i - R, j - R);
+      if (r > R - 1.6 && r <= R + 0.4 && worn() > 0.06) dot(mx, i, j, 'roofB3');
+    }
+    PX.text(mx, 'BELLWOOD', R - Math.floor(PX.textWidth('BELLWOOD') / 2), R - 8, 'roofB3');
+    for (const dy of [-6, 0, 6]) for (let i = D + 2; i < D + 32; i++) if (worn() > 0.05) dot(mx, i, R + dy + Math.round(2 * Math.sin((i - D) * Math.PI / 6)), 'roofB3');
+    put('postmark', m, { text: PAL.roofB3 });
+  }
+
+  /* The HUD's living pieces. Marlow's seven lanterns, as they hang in the banyan, on a branch under the day dial:
+     lit (two flicker frames) and out, cold glass, with a wisp of smoke as one goes out. The place sign, a nailed plank
+     of the name tag's wood on two ropes from the top of the screen. The bag's dot for something new in it. */
+  function hudKit(put) {
+    // the branch: thick at the trunk end on the left, knobbly, tapering to a twig that turns up at the right
+    const BW = 72, BH = 10, wood = new Set(), at = (i, j) => wood.has(`${i},${j}`);
+    for (let i = 1; i < BW - 4; i++) {
+      const top = 4 + (i > 46 ? 1 : 0) - ([11, 12, 13, 36, 37].includes(i) ? 1 : 0), bottom = i < 22 ? 7 : 6;
+      for (let j = top; j <= bottom; j++) wood.add(`${i},${j}`);
+    }
+    for (const [i, j] of [[BW - 5, 4], [BW - 4, 3], [BW - 3, 2], [BW - 3, 1], [BW - 4, 4]]) wood.add(`${i},${j}`);
+    const [b, bx] = canvas(BW, BH);
+    for (let j = 0; j < BH; j++) for (let i = 0; i < BW; i++) {
+      if (at(i, j)) dot(bx, i, j, !at(i, j - 1) ? 'wood2' : !at(i, j + 1) ? 'wood4' : 'wood3');
+      else if (at(i - 1, j) || at(i + 1, j) || at(i, j - 1) || at(i, j + 1)) dot(bx, i, j, 'ink');
+    }
+    for (const i of [18, 43]) dot(bx, i, 6, 'wood5');   // knots
+    for (const [i, j, k] of [[7, 1, 'leaf2'], [29, 1, 'leaf3'], [55, 2, 'leaf2'], [BW - 3, 0, 'leaf2']]) {
+      rect(bx, i, j, 3, 2, k); dot(bx, i, j, 'leaf1'); dot(bx, i + 2, j + 1, 'leaf4');
+    }
+    put('branch', b);
+
+    const LANTERN = [
+      '...w...',
+      '...w...',
+      '..ooo..',
+      '.obbbo.',
+      'oyWWWyo',
+      'oyWFWyo',
+      'oyyFyyo',
+      'oyyyyyo',
+      '.obbbo.',
+      '..ooo..',
+    ];
+    const lit = { o: 'ink', w: 'wood4', b: 'brass1', y: 'light1', W: 'light0', F: 'light3' };
+    put('hud_lantern', strip([
+      sprite(LANTERN, lit),
+      sprite(LANTERN, { ...lit, W: 'light1', F: 'light4' }),
+      sprite(LANTERN, { ...lit, b: 'brass2', y: 'stone3', W: 'stone2', F: 'stone4' }),
+    ]), { frames: 3 });
+    // the wisp from a lantern going out: a curl of smoke rising off its cap, drifting right and thinning away
+    const SMOKE = { s: 'stone2', c: 'cloud0' };
+    put('hud_smoke', strip([
+      ['.........', '.........', '.........', '.........', '.........', '.........', '.........', '.........', '....s....', '...scs...', '....s....', '.........'],
+      ['.........', '.........', '.........', '.........', '....s....', '...scs...', '...sccs..', '....ss...', '...s.....', '....s....', '.........', '.........'],
+      ['.........', '.....s...', '....scs..', '....scs..', '.....s...', '....s....', '.....s...', '.........', '.........', '.........', '.........', '.........'],
+      ['......s..', '.....s.s.', '......s..', '.....s...', '.........', '.........', '.........', '.........', '.........', '.........', '.........', '.........'],
+    ].map(rows => sprite(rows, SMOKE))), { frames: 4 });
+
+    const plank = box(24, 18, 1, { o: 'ink', fill: 'wood3', hi: 'wood2', lo: 'wood4' });
+    const px = plank.getContext('2d');
+    for (const [i, j] of [[3, 3], [20, 3], [3, 14], [20, 14]]) dot(px, i, j, 'brass1');
+    put('sign', plank, { margins: [5, 5, 5, 5], text: PAL.cream0 });
+    put('sign_rope', sprite(Array.from({ length: 12 }, (_, j) => j % 2 ? 'obo' : 'oao'), { o: 'ink', a: 'wood1', b: 'wood2' }));
+
+    put('badge', sprite(['.ooo.', 'orwro', 'orrro', 'orrro', '.ooo.'], { o: 'ink', r: 'red', w: 'white' }));
+  }
+
   function ui() {
     const O = { o: 'ink' }, PAPER = { o: 'ink', fill: 'sky0', hi: 'white', lo: 'cream1' }, spec = {};
     const put = (name, img, extra = {}) => { png(`ui/${name}.png`, img); spec[name] = { size: [img.width / (extra.frames || 1), img.height], ...extra }; };
@@ -1990,6 +2089,8 @@
     ], { ...O, w: 'white', b: 'cream0', c: 'cream2' }), { hotspot: [3, 0] });
 
     dayDial(put);
+    post(put);
+    hudKit(put);
     rain(put);
     bench(put);
     kneading(put);

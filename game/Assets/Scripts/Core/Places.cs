@@ -82,6 +82,7 @@ namespace Shop
             ["station"] = new PlaceDef
             {
                 Id = "station",
+                Name = "Bellwood Station",
                 Variants = new[] { "day" },
                 People = new[]
                 {
@@ -290,6 +291,7 @@ namespace Shop
             ["square"] = new PlaceDef
             {
                 Id = "square",
+                Name = "The Market Square",
                 Variants = new[] { "day" },
                 People = new[]
                 {
@@ -610,6 +612,7 @@ namespace Shop
             ["east"] = new PlaceDef
             {
                 Id = "east",
+                Name = "The East Gardens",
                 Variants = new[] { "day" },
                 People = new[]
                 {
@@ -891,6 +894,7 @@ namespace Shop
             ["eastroad"] = new PlaceDef
             {
                 Id = "eastroad",
+                Name = "The East Road",
                 Variants = new[] { "day" },
                 // round the bend in the trees past the area's east edge, where the bus pulls up out of sight
                 Spawns = new() { ["off_bus"] = V(1090, 234) },
@@ -905,6 +909,7 @@ namespace Shop
             ["coast"] = new PlaceDef
             {
                 Id = "coast",
+                Name = "The South Coast",
                 Variants = new[] { "day" },
                 Mood = "coast",
                 People = new[]
@@ -1049,6 +1054,7 @@ namespace Shop
             ["grove"] = new PlaceDef
             {
                 Id = "grove",
+                Name = "The Banyan Grove",
                 Variants = new[] { "day" },
                 Hotspots = new[]
                 {
@@ -1060,6 +1066,7 @@ namespace Shop
             ["satria_home"] = new PlaceDef
             {
                 Id = "satria_home",
+                Name = "Satria's House",
                 Variants = new[] { "day" },
                 Mood = "loom",
                 Indoors = true,
@@ -1091,6 +1098,7 @@ namespace Shop
             ["shop"] = new PlaceDef
             {
                 Id = "shop",
+                Name = "Marlow's Curios",
                 Variants = new[] { "day" },
                 Mood = "shop",
                 Indoors = true,
@@ -1128,6 +1136,7 @@ namespace Shop
             ["theo_studio"] = new PlaceDef
             {
                 Id = "theo_studio",
+                Name = "Theo's Studio",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
@@ -1153,6 +1162,7 @@ namespace Shop
             ["salt_store"] = new PlaceDef
             {
                 Id = "salt_store",
+                Name = "The Salt Store",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
@@ -1176,6 +1186,7 @@ namespace Shop
             ["hall"] = new PlaceDef
             {
                 Id = "hall",
+                Name = "The Village Hall",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
@@ -1202,6 +1213,7 @@ namespace Shop
             ["hall_vault"] = new PlaceDef
             {
                 Id = "hall_vault",
+                Name = "The Hall Archive",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
@@ -1229,6 +1241,7 @@ namespace Shop
             ["bakery"] = new PlaceDef
             {
                 Id = "bakery",
+                Name = "The Bakery",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
@@ -1269,6 +1282,7 @@ namespace Shop
             ["forge"] = new PlaceDef
             {
                 Id = "forge",
+                Name = "The Forge",
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
