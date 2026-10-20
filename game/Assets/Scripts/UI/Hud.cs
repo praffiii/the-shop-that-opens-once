@@ -34,6 +34,10 @@ namespace Shop
         int fresh;
         // a villager's bubble and how long it has shown (Villager: a note as they hum, a "!" as the courier comes by)
         readonly Dictionary<Ant, (Image image, float age)> bubbles = new();
+        // a villager's word in passing, in its balloon (Villager: a hello as the courier comes by); two at most at once
+        readonly Dictionary<Ant, (Image image, float age)> barks = new();
+        const float BarkSeconds = 2.6f;
+        const int BarksAtOnce = 2;
 
         public static Hud Create(Transform parent)
         {
@@ -81,19 +85,41 @@ namespace Shop
             bubbles[ant] = (image, 0f);
         }
 
+        /// <summary>A word over someone's head for a moment, in a small paper balloon round it.</summary>
+        public void Bark(Ant ant, string text)
+        {
+            if (!barks.TryGetValue(ant, out var b) && barks.Count >= BarksAtOnce) return;
+            var box = b.image ? b.image : Look.Panel("bark", transform);
+            var label = box.GetComponentInChildren<Text>() ?? Look.Label("", box.transform, default, Art.Color((string)Look.Ui["bark"]["text"]));
+            var tail = box.transform.Find("tail") ?? Look.Picture("tail", box.transform, Look.Piece("bark_tail")).transform;
+            Look.SetText(label, text);
+            var size = new Vector2(Look.Width(label) + 10, Look.Line + 4);
+            Look.Resize(box.rectTransform, size);
+            Look.Move(label.rectTransform, new Vector2(5, 2));
+            Look.Move((RectTransform)tail, new Vector2(Mathf.Floor(size.x / 2) - 1, size.y - 1));
+            barks[ant] = (box, 0f);
+        }
+
         void Bubbles(bool exploring)
         {
-            foreach (var ant in new List<Ant>(bubbles.Keys))
+            Show(bubbles, Talk.EmoteSeconds, exploring);
+            Show(barks, BarkSeconds, exploring);
+        }
+
+        // Keeps each bubble over its head while it lasts, and only while the courier is free to walk.
+        void Show(Dictionary<Ant, (Image image, float age)> shown, float seconds, bool exploring)
+        {
+            foreach (var ant in new List<Ant>(shown.Keys))
             {
-                var (image, age) = bubbles[ant];
+                var (image, age) = shown[ant];
                 age += Time.deltaTime;
-                if (!ant || age > Talk.EmoteSeconds)
+                if (!ant || age > seconds)
                 {
                     Destroy(image.gameObject);
-                    bubbles.Remove(ant);
+                    shown.Remove(ant);
                     continue;
                 }
-                bubbles[ant] = (image, age);
+                shown[ant] = (image, age);
                 image.gameObject.SetActive(exploring && ant.isActiveAndEnabled);
                 Talk.Over(image, ant, age);
             }

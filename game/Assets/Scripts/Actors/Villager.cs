@@ -23,6 +23,15 @@ namespace Shop
         /// <summary>Poses at work: they stop for a breath now and then.</summary>
         static readonly HashSet<string> Work = new() { "brew", "hammer", "polish", "sweep", "weave", "tend", "water", "rake", "fish", "photo", "peer", "look", "knead", "tinker" };
         static readonly HashSet<string> Young = new() { "pip", "kid", "grandkid", "leo" }, Old = new() { "nora", "bram", "helen", "marlow" };
+        /// <summary>A hello in passing, by the time of day; the children's own, and the rain's.</summary>
+        static readonly Dictionary<Phase, string[]> Hellos = new()
+        {
+            [Phase.Morning] = new[] { "Morning, Satria!", "Morning, courier.", "Up with the bread?", "Lovely morning." },
+            [Phase.Midday] = new[] { "Afternoon, Satria.", "Warm one, eh?", "Busy, busy!", "Mind the sun, lad." },
+            [Phase.Dusk] = new[] { "Evening, Satria.", "Home before dark, mind.", "Lovely light tonight.", "Evening, courier." },
+            [Phase.Night] = new[] { "Still up, courier?", "Mind your step.", "Quiet night.", "Night, Satria." },
+        };
+        static readonly string[] ChildHellos = { "Hi, courier!", "Satria! Hi!", "Race you!", "Got any post?" }, RainHellos = { "Wet one, isn't it?", "Mind the puddles!" };
 
         Person def;
         Ant ant;
@@ -204,14 +213,16 @@ namespace Shop
             Beat();
         }
 
-        // The courier comes close: they look up from what they are doing and turn to them, now and then with a note
-        // of hello.
+        // The courier comes close: they look up from what they are doing and turn to them, now and then with a word or a
+        // note of hello.
         bool Notice(Ant courier)
         {
             if (since < Settling || Time.time - greeted < GreetAgain || Vector2.Distance(courier.Feet, ant.Feet) > NoticeNear) return false;
             greeted = Time.time;
             Aside(rest == "sit" || !Work.Contains(rest) ? rest : "idle", courier.Feet.x, 1.6f);
-            if (Random.value < .5f) Bubble("smile");
+            var r = Random.value;
+            if (r < .4f && Main.Instance && Main.Instance.Hud) Main.Instance.Hud.Bark(ant, Hello());
+            else if (r < .7f) Bubble("smile");
             return true;
         }
 
@@ -247,6 +258,14 @@ namespace Shop
             if (ant.Has(pose)) ant.Pose = pose;
             ant.FaceTo(x);
             aside = seconds;
+        }
+
+        string Hello()
+        {
+            var hellos = def.Id is "pip" or "kid" or "grandkid" or "gigi" or "kiko" or "lulu" ? ChildHellos
+                : Main.Raining && Game.Phase != Phase.Night && Random.value < .5f ? RainHellos
+                : Hellos[Game.Phase];
+            return hellos[Random.Range(0, hellos.Length)];
         }
 
         void Bubble(string mood)

@@ -2060,6 +2060,11 @@
     });
     put('emote', strip(emotes), { frames: 6, anchor: [5, 9] });
 
+    // A villager's word in passing (Hud.Bark): the same paper, stretched round the words, and its tail on its own,
+    // set under the middle so its top row stands in for the box's bottom edge.
+    nine('bark', 12, 10, 2, PAPER, { text: PAL.ink });
+    put('bark_tail', sprite(['oco', 'oco', '.o.'], { ...O, c: 'cream1' }));
+
     put('cursor', sprite([
       'o.........',
       'oo........',
