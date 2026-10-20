@@ -5,10 +5,10 @@
    keeps the presentation's levels (through its master gain) and goes out as a float WAV, which export.py encodes. */
 (() => {
   const RATE = 44100;
-  const STEP = 60 / 69 / 2, STEPS = 16 * 6;   // as in audio.js: an eighth at 69 bpm, and the music loops every 16 bars of 3/4
   const SETTLE = 0.25;                        // Sound eases into its mood's filter and echo over 10 ms; start once they're set
+  const LOUD = -38;                           // every mood's loudness (RMS, dBFS), the dusk theme's, so none sounds faint by the others
   const WIND = 2 / 0.07, FADE = 4;            // the wind loop: two periods of its 0.07 Hz swell, so its loudness lines up
-  const MOODS = ['dusk', 'shop', 'memory', 'resolved', 'coast', 'loom', 'letter', 'dawn', 'market'];
+  const MOODS = ['dusk', 'night', 'shop', 'memory', 'resolved', 'coast', 'loom', 'letter', 'dawn', 'market'];
   const EFFECTS = ['bell', 'tick', 'chime', 'motif', 'page', 'pop', 'wrong', 'right', 'whoosh', 'latch', 'bus_far', 'bus_stop', 'drop', 'gate', 'door', 'bed', 'blow', 'crickets', 'bell_toll', 'match', 'scrub', 'pour', 'hiss', 'kettle', 'pen', 'sift', 'thump', 'click', 'ting', 'ticktock', 'oil', 'flare', 'whistle', 'rain', 'clink', 'snip', 'rustle', 'whir', 'trrak', 'knot', 'spray', 'lullaby',
     'pump', 'squeal', 'gurgle', 'tumbler', 'blot', 'pinch', 'fan',
     'lantern_out', 'waves', 'chain', 'tea', 'projector', 'shutter', 'thunder', 'drip', 'vault', 'ledger', 'seal', 'unfold', 'run', 'start_whistle', 'radio_static', 'radio_hum', 'musicbox', 'tear', 'flutter', 'train', 'cheer', 'stamp',
@@ -42,14 +42,19 @@
 
   // One loop of a mood, seamless: its eighths play once from the first bar, and what still rings past the loop's end
   // (note decays, the echo) is folded back onto its start, as it sounds once the music has been playing a while.
+  // Each mood loops at its own tempo and bar (Sound.meter), and is evened out to LOUD.
   async function music(mood) {
-    const at = Math.round(SETTLE * RATE), n = Math.round(STEPS * STEP * RATE);
+    const { step, steps } = Sound.meter(mood), at = Math.round(SETTLE * RATE), n = Math.round(steps * step * RATE);
     const d = await render((at + 2 * n) / RATE, s => {
       s.mus.gain.value = 1;   // the music already up, not fading in
-      for (let i = 0; i < STEPS; i++) s._play(i, at / RATE + i * STEP);
+      for (let i = 0; i < steps; i++) s._play(i, at / RATE + i * step);
     }, mood);
     const loop = d.slice(at, at + n);
     for (let i = 0; i < n; i++) loop[i] += d[at + n + i];
+    let sq = 0;
+    for (let i = 0; i < n; i++) sq += loop[i] * loop[i];
+    const k = 10 ** (LOUD / 20) / Math.sqrt(sq / n);
+    for (let i = 0; i < n; i++) loop[i] *= k;
     return loop;
   }
 

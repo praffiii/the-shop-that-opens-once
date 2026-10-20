@@ -1,7 +1,7 @@
 /* The Shop That Opens Once — synthesized ambience + small sounds (Web Audio, decorative only). */
 (() => {
   const LEVEL = 0.5;                 // master gain; voices are already subtle
-  const STEP = 60 / 69 / 2;          // eighth note at 69 bpm, 6 per 3/4 bar
+  const BPM = 69, STEP = 60 / BPM / 2; // eighth note at 69 bpm, 6 per 3/4 bar (a scene may keep its own tempo and bar)
   const AHEAD = 0.3, BARS = 16;      // look-ahead window (s), loop length
   const MUSIC_CAP = 20, FX_CAP = 28; // max simultaneous voices
   const hz = (m) => 440 * 2 ** ((m - 69) / 12);
@@ -19,7 +19,7 @@
 
   // 16 bars of A minor; chords as [bass, ...voicing]. 'resolved' swaps Am->C, Em->G.
   const PROG = 'Am Am F C Dm Am Em Em Am Am F G C F Em Am'.split(' ');
-  const CHORDS = { Am: [45, 57, 60, 64], F: [41, 57, 60, 65], C: [48, 55, 60, 64], Dm: [38, 57, 62, 65], Em: [40, 55, 59, 64], G: [43, 55, 59, 62], Bb: [46, 58, 62, 65], Gm: [43, 58, 62, 67], A: [45, 57, 61, 64], D: [38, 54, 57, 62] };
+  const CHORDS = { Am: [45, 57, 60, 64], F: [41, 57, 60, 65], C: [48, 55, 60, 64], Dm: [38, 57, 62, 65], Em: [40, 55, 59, 64], G: [43, 55, 59, 62], Bb: [46, 58, 62, 65], Gm: [43, 58, 62, 67], A: [45, 57, 61, 64], D: [38, 54, 57, 62], E: [40, 56, 59, 64] };
   const MAJOR = { Am: 'C', Em: 'G' };
   const tune = (bars) => bars.replace(/\|/g, ' ').trim().split(/\s+/).map(midi);
   // Melody in eighths; opens with the 1-0-1-7 motif of 10:17 (A4 A3 A4 G5: the 0 the root an octave down).
@@ -30,15 +30,49 @@
 
   const SCENES = {
     dusk:     { lp: 1500, wet: 0.22, dens: 1, oct: 0 },
-    shop:     { lp: 2000, wet: 0.16, dens: 2, oct: 0 },
-    memory:   { lp: 1000, wet: 0.4,  dens: 0, oct: 12 },
+    /* The Shop at Midnight: the dusk theme's music box turned to clockwork, a plucked waltz under it (the bass on the
+       one, the chord on two and three) and the pendulum's tick-tock on every beat. */
+    shop: {
+      lp: 2000, wet: 0.16, oct: 0,
+      comp(v) {
+        if (v.s === 0) v.note(v.bass, { type: 'triangle', partials: PIANO, vol: 0.055, dec: 0.8, atk: 0.004 });
+        if (v.s === 2 || v.s === 4) v.ch.forEach(m => v.note(m, { type: 'triangle', partials: WARM, vol: 0.016, dec: 0.45, atk: 0.004 }));
+        if (v.s % 2 === 0) v.hit({ type: 'highpass', f: (v.bar * 3 + v.s / 2) % 2 ? 2600 : 3400, vol: 0.05, dur: 0.025, atk: 0.001 });
+      },
+    },
+    // A memory: the music box an octave up, slow, over chords that swell in and hang in the echo.
+    memory: {
+      lp: 1000, wet: 0.4, oct: 12, bpm: 60,
+      comp(v) { if (v.s === 0) [v.bass, ...v.ch].forEach((m, k) => v.note(m, { partials: WARM, vol: k ? 0.018 : 0.03, atk: 0.9, dec: 4.5 })); },
+    },
     plan:     { lp: 1300, wet: 0.18, dens: 1, oct: 0, thin: true },  // melody only on motif bars
-    resolved: { lp: 2400, wet: 0.25, dens: 2, oct: 0, major: true },
-    /* The GDD's own themes (13.2), on the same 16 bars at 69 bpm, each with its chords, line and lead voice; bow adds a
-       cello under each bar, arp a guitar picking the chord on the other eighths. The Cliff of Lingering Waves: a celesta
-       over the guitar and the cello, in D minor, rising and falling like the swell. */
+    resolved: { lp: 2400, wet: 0.25, dens: 2, oct: 0, major: true, bpm: 72, bow: true, arp: true },
+    /* The night: slower, the cello holding each bar's root low, the music box keeping only the 10:17 motif and a few
+       notes after it, a chord now and then, and a celesta's star high over it. */
+    night: {
+      lp: 1200, wet: 0.36, oct: 0, bpm: 60, lead: { partials: BOX, vol: 0.055, dec: 3.2, atk: 0.003 },
+      prog: 'Am Am F F Dm Dm E E Am Am F F Dm E Am Am'.split(' '),
+      mel: tune(`A4 . A3 . A4 . | G5 . . . . . | . . . . . . | . . E5 . . . |
+                 F5 . . . . . | . . . . D5 . | E5 . . . . . | . . . . . . |
+                 A4 . A3 . A4 . | G5 . . . . . | . . . . C5 . | A4 . . . . . |
+                 . . D5 . . . | B4 . . . G#4 . | A4 . . . . . | . . . . . .`),
+      comp(v) {
+        if (v.s === 0) v.note(v.bass, { ...CELLO, vol: 0.036, atk: 0.6, dec: 5 });
+        if (v.s === 0 && v.bar % 2 === 0) v.ch.forEach((m, k) => v.key(m, 0.016, 0.14 * k));
+        if (v.s === 3 && v.bar % 2) v.note(v.ch[(v.bar >> 1) % 3] + 12, { ...CELESTA, vol: 0.035, dec: 2.8 });
+      },
+    },
+    /* The GDD's own themes (13.2), 16 bars a loop, each with its chords, line, lead voice, tempo and bar; bow adds a
+       cello under each bar, arp a guitar picking the chord on the other eighths. The Cliff of Lingering Waves: in 6/8,
+       a celesta over the guitar rolling through the chord every eighth like the swell, the bass on both beats and the
+       cello under it, in D minor. */
     coast: {
-      lp: 1800, wet: 0.34, dens: 0, oct: 0, lead: CELESTA, arp: true, bow: true,
+      lp: 1800, wet: 0.34, oct: 0, lead: CELESTA, bpm: 80,
+      comp(v) {
+        if (v.s === 0) { v.key(v.bass, 0.05); v.note(v.bass, CELLO); }
+        if (v.s === 3) v.key(v.bass + 12, 0.03);
+        v.note([v.ch[0], v.ch[1], v.ch[2], v.ch[0] + 12, v.ch[2], v.ch[1]][v.s], GUITAR);
+      },
       prog: 'Dm Dm Bb F C C Dm A Dm Dm Bb F Gm A Dm Dm'.split(' '),
       mel: tune(`A5 . . . . . | F5 . E5 . D5 . | D5 . . . F5 . | C5 . . . . . |
                  E5 . . . G5 . | E5 . D5 . C5 . | D5 . . . . . | C#5 . . . E5 . |
@@ -47,7 +81,9 @@
     },
     // Mother's Loom and Memories: solo piano, Satria's home, built on Ratih's lullaby (G E D C A D C).
     loom: {
-      lp: 1700, wet: 0.2, dens: 2, oct: 0, lead: { type: 'triangle', partials: PIANO, vol: 0.06, dec: 2.6, atk: 0.008 },
+      lp: 1700, wet: 0.2, oct: 0, bpm: 60, lead: { type: 'triangle', partials: PIANO, vol: 0.06, dec: 2.6, atk: 0.008 },
+      // the left hand breaking each chord up and back down, as a lullaby rocks
+      comp(v) { v.key([v.bass, v.ch[0], v.ch[1], v.ch[2], v.ch[1], v.ch[0]][v.s], v.s ? 0.024 : 0.055); },
       prog: 'C Am F G C Am Dm G F G Em Am Dm G C C'.split(' '),
       mel: tune(`G4 . . . E5 . | D5 . . . C5 . | A4 . . . D5 . | C5 . . . B4 . |
                  G4 . . . E5 . | D5 . . . C5 . | A4 . . . F5 . | E5 . . . D5 . |
@@ -56,31 +92,43 @@
     },
     // Uncut Letter, for the epilogue and the credits: piano, guitar and a cello carrying the 10:17 motif home in F major.
     letter: {
-      lp: 2200, wet: 0.24, dens: 1, oct: 0, lead: { ...CELLO, lp: 1600, vol: 0.045, dec: 2.4, atk: 0.12 }, arp: true, bow: true,
+      lp: 2200, wet: 0.24, dens: 1, oct: 0, bpm: 63, lead: { ...CELLO, lp: 1600, vol: 0.045, dec: 2.4, atk: 0.12 }, arp: true, bow: true,
       prog: 'F C Dm Bb F C Bb C Dm Am Bb F Gm C F F'.split(' '),
       mel: tune(`A4 . A3 . A4 . | G5 . . . E5 . | F5 . E5 . D5 . | D5 . . . . . |
                  C5 . . . F5 . | E5 . . . G5 . | F5 . D5 . Bb4 . | C5 . . . . . |
                  A4 . A3 . A4 . | G5 . . . E5 . | F5 . . . D5 . | C5 . . . A4 . |
                  Bb4 . . . D5 . | E5 . . . G5 . | F5 . . . . . | . . . . . .`),
     },
-    // Quiet Station at Dawn, the village's mornings: a celesta over rolled piano chords in G major, sparse as first light.
+    // Quiet Station at Dawn, the village's mornings: a celesta over rolled piano chords in G major, sparse as first light,
+    // the piano rolling up through each bar's chord, and now and then a bird's two notes high over it.
     dawn: {
-      lp: 1600, wet: 0.32, dens: 0, oct: 0, lead: CELESTA,
+      lp: 1600, wet: 0.32, oct: 0, lead: CELESTA, bpm: 76,
+      comp(v) {
+        v.key([v.bass, v.ch[0], v.ch[1], v.ch[2], v.ch[0] + 12, v.ch[1] + 12][v.s], v.s ? 0.022 : 0.05);
+        if (v.s === 5 && v.bar % 4 === 3) [0, 0.6].forEach((dt, k) => v.note(v.ch[2 - k] + 24, { ...CELESTA, vol: 0.03, dec: 0.5 }, dt * v.step));
+      },
       prog: 'G G Em Em C C D D G G Em Em C D G G'.split(' '),
       mel: tune(`B4 . . . D5 . | G5 . . . . . | E5 . . . G5 . | B4 . . . . . |
                  C5 . . . E5 . | G5 . . . E5 . | F#5 . . . D5 . | A4 . . . . . |
                  B4 . . . D5 . | G5 . . . A5 . | B5 . . . G5 . | E5 . . . . . |
                  E5 . . . C5 . | D5 . . . F#5 . | G5 . . . . . | . . . . . .`),
     },
-    // Bellwood Marketplace, the village's middays: a nylon guitar picking the chords under a guitar line that keeps moving.
+    /* Bellwood Marketplace, the village's middays: in 4/4, the busiest of them, a nylon guitar's bass on one and three
+       (the root, then its fifth) and its strum on two and four, a shaker on every eighth, under a guitar line that keeps
+       moving. */
     market: {
-      lp: 2400, wet: 0.18, dens: 2, oct: 0, arp: true,
-      lead: { type: 'triangle', partials: [[1, 1, 1], [2, 0.35, 0.4], [3, 0.12, 0.25]], lp: 2600, vol: 0.05, dec: 1.2, atk: 0.004 },
+      lp: 2400, wet: 0.18, oct: 0, bpm: 80, beats: 8,
+      lead: { type: 'triangle', partials: [[1, 1, 1], [2, 0.35, 0.4], [3, 0.12, 0.25]], lp: 2600, vol: 0.05, dec: 0.9, atk: 0.004 },
       prog: 'C G Am F C G F G C G Am Em F G C C'.split(' '),
-      mel: tune(`E5 . G5 . C6 . | B5 . . . G5 . | A5 . G5 . E5 . | F5 . . . . . |
-                 E5 . G5 . C6 . | D6 . . . B5 . | A5 . G5 . F5 . | G5 . . . . . |
-                 G5 . E5 . G5 . | D5 . G5 . B5 . | C6 . B5 . A5 . | G5 . . . E5 . |
-                 F5 . A5 . C6 . | B5 . A5 . G5 . | E5 . D5 . C5 . | . . . . . .`),
+      mel: tune(`E5 . G5 . C6 . G5 . | B5 . . . G5 . D5 . | C6 . B5 . A5 . E5 . | F5 . . . A5 . . . |
+                 G5 . E5 . G5 . C6 . | D6 . . . B5 . G5 . | A5 . G5 . F5 . A5 . | G5 . . . . . . . |
+                 E5 . G5 . C6 . E6 . | D6 . B5 . G5 . B5 . | C6 . A5 . E5 . A5 . | B5 . . . G5 . . . |
+                 A5 . C6 . A5 . F5 . | G5 . B5 . D6 . B5 . | C6 . . . G5 . E5 . | C5 . . . . . . .`),
+      comp(v) {
+        if (v.s === 0 || v.s === 4) v.note(v.bass + (v.s && 7), { ...GUITAR, lp: 1200, vol: 0.05, dec: 0.5 });
+        if (v.s === 2 || v.s === 6) v.ch.forEach((m, k) => v.note(m, { ...GUITAR, vol: 0.02, dec: 0.35 }, 0.012 * k));
+        v.hit({ type: 'highpass', f: 6500, vol: v.s % 2 ? 0.05 : 0.028, dur: 0.05, atk: 0.004 });
+      },
     },
   };
 
@@ -710,6 +758,8 @@
     static get voices() { return Object.keys(VOICES); }
     static get ambiences() { return Object.keys(AMBIENCE); }
     static get ambienceLength() { return AMB; }
+    // A mood's eighth (s) and its loop in eighths: 16 bars of its own bar.
+    static meter(mood) { const sc = SCENES[mood]; return { step: 60 / (sc.bpm || BPM) / 2, steps: BARS * (sc.beats || 6) }; }
     // Queues one loop of a phase's ambience from t, its events placed by a hash seeded with `seed`.
     _ambience(name, t, seed) {
       let a = seed;
@@ -726,7 +776,7 @@
       this.mus = gain(0); this.mus.connect(this.master);
       this.pno = c.createBiquadFilter(); this.pno.connect(this.mus);       // piano "pad colour"
       // Soft dotted-eighth echo on the music bus, darkened in the feedback loop.
-      const dly = c.createDelay(1), fb = gain(0.3), tone = c.createBiquadFilter();
+      const dly = this.dly = c.createDelay(1), fb = gain(0.3), tone = c.createBiquadFilter();
       this.wet = gain(0); dly.delayTime.value = STEP * 1.5; tone.frequency.value = 2200;
       this.mus.connect(this.wet).connect(dly).connect(tone).connect(fb).connect(dly);
       tone.connect(this.master);
@@ -778,30 +828,36 @@
       const sc = SCENES[this._scene], t = this.ctx.currentTime;
       this.pno.frequency.setTargetAtTime(sc.lp, t, tc);
       this.wet.gain.setTargetAtTime(sc.wet, t, tc);
+      this.dly.delayTime.setTargetAtTime(Sound.meter(this._scene).step * 1.5, t, tc);
     }
 
     // Look-ahead scheduler: only ever ~0.3s ahead of ctx time, so suspend() truly freezes it.
     _tick() {
       if (this.ctx.state !== 'running' || document.hidden) return;
-      const now = this.ctx.currentTime;
+      const now = this.ctx.currentTime, { step } = Sound.meter(this._scene);
       if (this._next < now) {                          // fell behind (hidden tab / throttling): skip, don't burst
-        const n = Math.ceil((now - this._next) / STEP);
-        this._step += n; this._next += n * STEP;
+        const n = Math.ceil((now - this._next) / step);
+        this._step += n; this._next += n * step;
       }
-      while (this._next < now + AHEAD) { this._play(this._step++, this._next); this._next += STEP; }
+      while (this._next < now + AHEAD) { this._play(this._step++, this._next); this._next += step; }
     }
+    // One eighth of the music: i counts eighths in the mood's bar (a mood switched to mid-bar starts at the next bar).
     _play(i, t) {
-      const s = i % 6, bar = Math.floor(i / 6) % BARS;
+      const beats = SCENES[this._scene].beats || 6, s = i % beats, bar = Math.floor(i / beats) % BARS;
       if (s === 0) this._cur = SCENES[this._scene];
       const sc = this._cur, name = (sc.prog || PROG)[bar];
       const [bass, ...ch] = CHORDS[(sc.major && MAJOR[name]) || name];
       const key = (m, vol, dt = 0) => this._note(t + dt, hz(m), { type: 'triangle', partials: PIANO, vol, atk: 0.012, dec: 2.6, bus: this.pno });
-      if (s === 0) { key(bass, 0.06); if (!sc.dens) ch.forEach((m, k) => key(m, 0.03, 0.05 * (k + 1))); }
-      if (s === 2 && sc.dens) ch.forEach((m, k) => key(m, 0.03, 0.015 * k));
-      if (s === 4 && sc.dens > 1) ch.slice(1).forEach((m, k) => key(m, 0.022, 0.015 * k));
+      // a mood's own accompaniment, else the dusk theme's waltz of piano chords, thicker with dens
+      if (sc.comp) sc.comp({ s, bar, bass, ch, key, step: Sound.meter(this._scene).step, note: (m, o, dt = 0) => this._note(t + dt, hz(m), { ...o, bus: this.pno }), hit: o => this._noise(t, { ...o, bus: this.mus }) });
+      else {
+        if (s === 0) { key(bass, 0.06); if (!sc.dens) ch.forEach((m, k) => key(m, 0.03, 0.05 * (k + 1))); }
+        if (s === 2 && sc.dens) ch.forEach((m, k) => key(m, 0.03, 0.015 * k));
+        if (s === 4 && sc.dens > 1) ch.slice(1).forEach((m, k) => key(m, 0.022, 0.015 * k));
+      }
       if (s === 0 && sc.bow) this._note(t, hz(bass), { ...CELLO, bus: this.pno });
       if (s && sc.arp) this._note(t, hz(ch[[0, 0, 1, 2, 1, 2][s]]), { ...GUITAR, bus: this.pno });
-      const m = (sc.mel || MEL)[bar * 6 + s];
+      const m = (sc.mel || MEL)[bar * beats + s];
       if (m && (!sc.thin || bar % 8 < 2)) this._note(t, hz(m + sc.oct), sc.lead ? { ...sc.lead, bus: this.mus } : { partials: BOX, vol: sc.oct ? 0.05 : 0.07, dec: 2.4, atk: 0.003, bus: this.mus });
     }
 
@@ -824,7 +880,7 @@
       }
       this._track(last, nodes);
     }
-    _noise(t, { f = 1000, f2 = f, q = 1, type = 'bandpass', vol = 0.3, atk = 0.004, dur = 0.08, off = 0 }) {
+    _noise(t, { f = 1000, f2 = f, q = 1, type = 'bandpass', vol = 0.3, atk = 0.004, dur = 0.08, off = 0, bus = this.fx }) {
       if (this._voices >= FX_CAP) return;
       const c = this.ctx, src = c.createBufferSource(), bq = c.createBiquadFilter(), g = c.createGain();
       src.buffer = this.noise; bq.type = type; bq.Q.value = q;
@@ -833,7 +889,7 @@
       g.gain.setValueAtTime(0, t);
       g.gain.linearRampToValueAtTime(vol, t + atk);
       g.gain.exponentialRampToValueAtTime(1e-4, t + dur);
-      src.connect(bq).connect(g).connect(this.fx); src.start(t, off); src.stop(t + dur + 0.02);
+      src.connect(bq).connect(g).connect(bus); src.start(t, off); src.stop(t + dur + 0.02);
       this._track(src, [src, bq, g]);
     }
     _track(src, nodes) {
