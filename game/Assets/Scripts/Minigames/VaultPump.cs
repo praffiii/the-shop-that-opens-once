@@ -28,7 +28,7 @@ namespace Shop
 
         RectTransform pumping, locking;
         Image pump, flood, water, flow, door, key;
-        Image[] glints, pins;
+        Image[] glints, pins, ripples;
         Meter meter;
         Pips clicked;
         float t, pressure, level = Full, stroked, rested, opened;
@@ -55,6 +55,8 @@ namespace Shop
             for (var i = 0; i < glints.Length; i++) glints[i] = Look.Block("glint", flow.transform, new Rect(0, 0, 3, 1), Look.Cream);
             pump = Look.Picture("pump", pumping, Look.Frame("pump", 0));
             water = Look.Block("water", pumping, default, Art.Color("#3db3e0"));
+            ripples = new Image[9];
+            for (var i = 0; i < ripples.Length; i++) ripples[i] = Look.Block("ripple", water.transform, new Rect(0, 0, 5 + i % 3 * 2, 1), Art.Color(i % 3 == 0 ? "#8ce4f2" : "#2f96c8"));
             flood = Look.Picture("flood", pumping, Look.Frame("flood", 0));
             meter = new Meter(pumping, new Vector2(0, 78), Size.x) { Sweet = Steady };
             locking = Look.Node("locking", area);
@@ -90,7 +92,15 @@ namespace Shop
             Look.SetSprite(pump, Look.Frame("pump", stroked < 0.12f ? 2 : stroked < 0.24f ? 1 : 0));
             Look.Move(flood.rectTransform, new Vector2(0, top));
             Look.SetSprite(flood, Look.Frame("flood", (int)(t * 6)));
-            Look.Place(water.rectTransform, new Rect(0, top + 4, Size.x, Mathf.Max(0, 74 - top - 4)));
+            var deep = Mathf.Max(0, 74 - top - 4);
+            Look.Place(water.rectTransform, new Rect(0, top + 4, Size.x, deep));
+            // ripples drifting slowly in the murk, fewer as the water goes down
+            for (var i = 0; i < ripples.Length; i++)
+            {
+                var y = 3 + i * 7 % 26;
+                ripples[i].gameObject.SetActive(y < deep - 2);
+                Look.Move(ripples[i].rectTransform, new Vector2(Mathf.Round(Mathf.Repeat(i * 47 + t * (i % 2 == 0 ? 5 : -4), Size.x - 9)), y));
+            }
             meter.Value = pressure;
             // the water runs down the gutter while the pump draws it, its glints going along to the drain
             flow.gameObject.SetActive(meter.InSweet);

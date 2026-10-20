@@ -62,7 +62,7 @@ namespace Shop
             place.Def = def;
             // its houses are shaded by the sun of its own grade
             Grade.Apply(Game.Phase, def.Indoors && !def.Open);
-            place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform);
+            place.World = BakedArt.Build(def.ArtDir(Game.Phase), place.transform, def.Underground);
             place.Walk = new WalkMap(Art.Texture($"places/{def.Id}/walk"));
             foreach (var p in def.People)
             {
@@ -155,6 +155,18 @@ namespace Shop
             World.ShowItemIfAny("theo_studio_chain", Game.Chapter < 3 || (Game.Chapter == 3 && !Game.Has("studio_open")));
             World.ShowItemIfAny("theo_studio_cup", Game.Chapter == 3 && Game.Has("tea_set"));
             for (var k = 0; k < Film; k++) World.ShowItemIfAny($"screen_film_{k}", false); // the screening runs them (ShowFilm)
+            // the hall: its stair roped off till Captain Bram names the door the key is for; the roof drips into the
+            // buckets while it rains; under it the seep water stands till the pump drains it, and vault No. 7 is shut
+            // till the key turns, its archive box on Sam's table after
+            var drained = Game.Chapter > 4 || Game.Has("drained");
+            World.ShowItemIfAny("stair_rope", Game.Chapter < 4 || (Game.Chapter == 4 && !Game.Has("bram_lead")));
+            for (var i = 0; i < 3; i++) World.ShowItemIfAny($"drip_{i}", Main.Raining);
+            World.ShowItemIfAny("flood_0", !drained);
+            World.ShowItemIfAny("flood_1", !drained);
+            World.ShowItemIfAny("vault_shut", !drained);
+            World.ShowItemIfAny("vault_open", drained);
+            World.ShowItemIfAny("vault_open_door", drained);
+            World.ShowItemIfAny("archive_box", drained);
             // at home: the coil lit before sleep, and the night's box on the table once brought home
             World.ShowItemIfAny("coil_lit", Game.Has("coil_lit"));
             for (var i = 0; i < 7; i++) World.ShowItemIfAny($"box_on_table_{i}", i == Game.Chapter - 1 && Game.Has("box_home"));

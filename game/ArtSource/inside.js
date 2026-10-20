@@ -45,6 +45,42 @@
       }
     }
   }
+  // Tiles laid in a check, terracotta and cream, a lit edge to each and a dark grout line: a hall's floor.
+  function tiles(b, x0, y0, x1, y1, seed) {
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      const gx = (x - x0) % 8, gy = (y - y0) % 6, dark = (((x - x0) >> 3) + (((y - y0) / 6) | 0)) % 2, h = hash(x >> 1, y, seed);
+      px(b, x, y, gx === 7 || gy === 5 ? 'wood4' : gy === 0 ? (dark ? 'roofR1' : 'cream0') : h < 0.05 ? (dark ? 'roofR3' : 'cream2') : dark ? 'roofR2' : 'cream1');
+    }
+  }
+  // Flagstones, big and uneven, worn pale where feet go: a cellar's floor.
+  function flagstones(b, x0, y0, x1, y1, seed) {
+    for (let y = y0; y < y1; y++) {
+      const row = ((y - y0) / 10) | 0, off = (hash(row, 0, seed) * 20) | 0;
+      for (let x = x0; x < x1; x++) {
+        const col = ((x - x0 + off) / 18) | 0, edge = (x - x0 + off) % 18 === 0 || (y - y0) % 10 === 9, k = hash(col, row, seed + 1);
+        px(b, x, y, edge ? 'stone5' : (y - y0) % 10 === 0 ? 'stone2' : hash(x >> 1, y >> 1, seed + 2) < 0.06 ? 'stone4' : k < 0.4 ? 'stone3' : 'stone2');
+      }
+    }
+  }
+  // Rough-cut stone blocks, damp toward the floor, a timber beam along the top: a cellar's walls.
+  function masonry(b, w, h, seed) {
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const row = (y / 7) | 0, seam = y % 7 === 6 || (x + (row % 2) * 8) % 16 === 0, k = hash((x + (row % 2) * 8) >> 4, row, seed);
+      px(b, x, y, seam ? 'stone5' : y > h - 12 && hash(x, y, 3) < 0.3 ? 'stone4' : k < 0.35 ? 'stone4' : hash(x, y, seed) < 0.05 ? 'stone2' : 'stone3');
+    }
+    fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'wood5'); fill(b, 0, 0, w, 1, 'wood3');
+  }
+  // The 1950 master map of Bellwood on a sheet of birch bark: the bark's dark lenticels, the two rivers down to the
+  // estuary, the rail line, the town's blocks and the bridge, pinned at its corners.
+  function drawMap(b, x, y, w, h) {
+    fill(b, x, y, w, h, 'cream1');
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) if (hash(i >> 2, j, 6) < 0.08) px(b, x + i, y + j, 'wood4'); else if (hash(i, j, 7) < 0.06) px(b, x + i, y + j, 'cream2');
+    for (let i = 0; i < w; i++) { px(b, x + i, y + 4 + Math.round(Math.sin(i / 5) * 2 + i / 4), 'water4'); if (i > w / 2) px(b, x + i, y + h - 4 - Math.round((i - w / 2) / 5), 'water4'); }
+    for (let i = 2; i < w - 2; i++) if (i % 2) px(b, x + i, y + 10, 'roofR3');
+    for (const [i, j] of [[10, 13], [16, 15], [22, 13], [28, 16]]) fill(b, x + i, y + j, 4, 3, 'wood3');
+    fill(b, x + 30, y + 19, 6, 1, 'wood4');
+    for (const [i, j] of [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]]) px(b, x + i, y + j, 'brass2');
+  }
   // A wall's inside: plaster over a wainscot of upright boards, a beam along the top, a rail and a skirting board.
   function plaster(b, w, h, seed) {
     fill(b, 0, 0, w, h, 'wall1');
@@ -97,6 +133,9 @@
     else if (k === 'rope') { for (let j = 0; j < 4; j++) { V.disc(b, cx, y + 9, 5 - (j & 1), 6 - (j & 1), j % 2 ? 'dirt2' : 'dirt3'); } V.disc(b, cx, y + 9, 2, 3, 'wall2'); fill(b, cx - 1, y + 2, 2, 2, 'dirt3'); }
     else if (k === 'net') { for (let j = 0; j < 16; j++) for (let i = -4; i <= 4; i++) if ((i + j) % 3 === 0 || (i - j + 30) % 3 === 0) { if (Math.abs(i) <= 2 + (j >> 2)) px(b, cx + i, y + 3 + j, 'dirt2'); } px(b, cx - 3, y + 12, 'roofR2'); px(b, cx + 2, y + 15, 'roofR2'); }
     else if (k === 'apron') { fill(b, cx - 3, y + 3, 7, 13, 'white'); fill(b, cx - 3, y + 3, 7, 1, 'cream1'); fill(b, cx - 1, y + 8, 3, 3, 'cream1'); } }); };
+
+  // A stack of n paper folders tied with red tape, for desks and tables.
+  const folders = n => sprite(12, n * 2 + 2, b => { for (let i = 0; i < n; i++) { fill(b, i % 2, n * 2 - i * 2, 11, 2, ['dirt2', 'cream1', 'dirt3', 'roofB2'][i % 4]); px(b, 5 + (i % 2), n * 2 - i * 2, 'roofR2'); } });
 
   /* ---------- the rooms ---------- */
   // Marlow's shop's paint: its shopfront's bottle green, and faded plum.
@@ -872,6 +911,242 @@
         T.card('broom', PROPS.broom(), 46, 70); T.card('bucket', sprite(10, 11, b => { fill(b, 1, 2, 8, 9, 'wood3'); fill(b, 0, 2, 10, 2, 'iron3'); fill(b, 2, 2, 6, 1, 'water2'); }), 58, 74);
       },
     },
+    // The village hall on the square (Night 4), cut open: the wet tiled lobby where the old roof drips into tin
+    // buckets; the mahogany registration counter in the middle with the pigeonholes of files behind it and the brass
+    // pendulum clock over them; Sam's typewriter desk under its folders and the filing cabinets in the east; the
+    // waiting benches and the coat hooks in the west, and in the back corner the head of the stone stair down to the
+    // archive, roped off.
+    hall: {
+      area: 'square', seed: 37, room: [240, 96], door: 120, bays: [], floor: tiles,
+      solid: [[4, 0, 50, 32], [84, 20, 156, 34], [88, 0, 152, 6], [176, 10, 218, 26], [222, 0, 238, 12], [158, 0, 172, 8],
+        [4, 44, 14, 84], [172, 70, 214, 78], [62, 46, 72, 54], [156, 38, 166, 46], [200, 56, 210, 64], [94, 84, 106, 92], [150, 84, 162, 92], [80, 84, 90, 92]],
+      anchors: { stair: [42, 40], counter: [120, 44], desk: [196, 36], board: [226, 52], buckets: [160, 54] },
+      paint(b, R) {
+        // the stairwell: steps going down toward the back, darker as they go, the shaft's walls either side
+        R(4, 2, 48, 30, (x, y, w, h) => {
+          if (x < 2 || x > w - 3) return 'stone5';
+          const k = ((h - 1 - y) / 4) | 0, r = (h - 1 - y) % 4, tone = ['stone2', 'stone3', 'stone3', 'stone4', 'stone4', 'stone5', 'stone5', 'ink2'][Math.min(7, k)];
+          return r === 3 ? 'stone1' : r === 0 ? 'stone5' : hash(x, y, 4) < 0.08 ? 'stone4' : tone;
+        });
+        R(4, 0, 48, 2, () => 'ink2');
+        // rain on the floor round the buckets, the tiles dark and shining
+        for (const [cx, cy, rx, ry] of [[66, 54, 14, 6], [160, 46, 12, 5], [204, 64, 13, 5]])
+          R(cx - rx, cy - ry, cx + rx, cy + ry, (x, y, w, h) => {
+            const dx = (x - rx) / rx, dy = (y - ry) / ry;
+            if (dx * dx + dy * dy > 1 - hash(x, y, 9) * 0.25) return 0;
+            const ax = cx - rx + x, ay = cy - ry + y, dark = (ax >> 3) + ((ay / 6) | 0);
+            if (ax % 8 === 7 || ay % 6 === 5) return 0; // the grout stays
+            return hash(x, y, 2) < 0.05 ? 'white' : hash(x >> 1, y, 4) < 0.12 ? 'sky2' : dark % 2 ? 'roofR3' : 'stone1';
+          });
+        // the coir mat at the door, and the runner from it to the counter
+        R(104, 84, 136, 96, (x, y, w, h) => (Math.min(x, y, w - 1 - x, h - 1 - y) < 1 ? 'dirt4' : (x + y) % 3 ? 'dirt3' : 'dirt2'));
+        R(108, 36, 132, 84, (x, y, w, h) => (x < 2 || x > w - 3 ? 'roofG4' : x < 3 || x > w - 4 ? 'brass2' : (y % 8 < 1) ? 'roofG2' : 'roofG3'));
+      },
+      back(b, w, h, win) {
+        win(b, 56, 8, 16, 22); win(b, 168, 8, 16, 22);
+        // the red banners either side, the Bellwood bell on them in gold
+        for (const bx of [28, 202]) {
+          fill(b, bx - 1, 5, 14, 2, 'brass3'); fill(b, bx, 7, 12, 26, 'red'); fill(b, bx, 7, 2, 26, 'roofR1'); fill(b, bx + 10, 7, 2, 26, 'roofR3');
+          for (let j = 0; j < 4; j++) for (let i = 4 - j; i < 8 + j; i++) if (j < 3 || i < 5 || i > 6) px(b, bx + i, 30 + j, 0);
+          stamp(b, bx + 3, 13, ['..11..', '.1221.', '.1221.', '122221', '..33..'], { 1: 'yellow', 2: 'light1', 3: 'brass3' });
+        }
+        // the pendulum clock over the pigeonholes: its case, the brass face, the pendulum behind its glass
+        fill(b, 112, 2, 16, 34, 'wood4'); fill(b, 112, 2, 16, 1, 'wood3'); fill(b, 113, 3, 1, 32, 'wood3'); fill(b, 110, 1, 20, 2, 'wood5');
+        V.disc(b, 120, 10, 6, 6, 'brass2'); V.disc(b, 120, 10, 5, 5, 'cream0'); for (const [i, j] of [[0, -4], [4, 0], [0, 4], [-4, 0]]) px(b, 120 + i, 10 + j, 'iron4');
+        fill(b, 120, 6, 1, 5, 'iron4'); fill(b, 120, 10, 3, 1, 'iron4'); px(b, 120, 10, 'red');
+        fill(b, 115, 18, 10, 16, 'ink2'); fill(b, 116, 19, 1, 14, 'stone3'); fill(b, 120, 18, 1, 11, 'brass3'); V.disc(b, 120, 30, 3, 3, 'brass1'); px(b, 119, 29, 'brass0');
+        // a calendar and the founders' photograph either side of it
+        calendar(b, 94, 8); photo(b, 136, 6, 18, 14, [[5, 2], [9, 2], [13, 2]]);
+        // the hall's notices by Sam's desk: rules pinned in a row
+        for (let i = 0; i < 3; i++) { fill(b, 184 + i * 11, 10 + (i % 2), 9, 12, 'cream0'); fill(b, 184 + i * 11, 10 + (i % 2), 9, 2, i === 1 ? 'roofB2' : 'roofR2'); px(b, 188 + i * 11, 9 + (i % 2), 'iron3'); for (let j = 15; j < 21; j += 2) fill(b, 185 + i * 11, j + (i % 2), 7, 1, 'stone3'); }
+      },
+      left(b, w, h, win) {
+        win(b, 54, 12, 14, 18);
+        hooks(b, 18, 12, ['coat', 'cap', 'coat']);
+        for (let i = 0; i < 2; i++) { fill(b, 76 + i * 10, 14 + i * 2, 8, 10, 'cream0'); px(b, 79 + i * 10, 13 + i * 2, 'roofR2'); for (let j = 17; j < 23; j += 2) fill(b, 77 + i * 10, j + i * 2, 6, 1, 'stone3'); }
+      },
+      right(b, w, h, win) {
+        // the residents' directory: a framed board of name slips under its painted heading
+        fill(b, 18, 6, 44, 30, 'wood4'); fill(b, 18, 6, 44, 1, 'wood3'); fill(b, 20, 8, 40, 26, 'roofG4'); fill(b, 22, 9, 36, 3, 'cream1');
+        for (let x = 26; x < 54; x += 4) fill(b, x, 10, 2, 1, 'wood4');
+        for (let r = 0; r < 5; r++) for (let c = 0; c < 2; c++) { const x = 22 + c * 19, y = 14 + r * 4; fill(b, x, y, 17, 3, hash(r, c, 3) < 0.15 ? 'stone2' : 'cream0'); for (let i = 1; i < 14; i += 2) if (hash(i, r * 3 + c, 5) < 0.7) px(b, x + i, y + 1, 'stone4'); }
+        win(b, 72, 12, 14, 18);
+      },
+      things(T) {
+        const mahogany = (b, w, h) => { fill(b, 0, 0, w, h, 'roofR4'); fill(b, 0, 0, w, 1, 'roofR3'); for (let y = 2; y < h; y += 3) for (let x = 0; x < w; x++) if (hash(x >> 3, y, 2) < 0.3) px(b, x, y, 'wood5'); };
+        // the stairwell's rail, a gap at its front east end where the steps start, roped off with the archive's sign
+        const rail = (b, w, h) => { fill(b, 0, 0, w, 2, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); for (let x = 1; x < w; x += 4) fill(b, x, 2, 2, h - 2, 'wood4'); };
+        T.box('stair_rail', 4, 30, 34, 32, 0, 12, (b, w, h, l, which) => (which === 'top' ? fill(b, 0, 0, w, h, 'wood3') : rail(b, w, h)));
+        T.box('stair_rail_side', 47, 2, 49, 32, 0, 12, (b, w, h, l, which) => (which === 'top' ? fill(b, 0, 0, w, h, 'wood3') : rail(b, w, h)));
+        T.card('stair_rope', sprite(16, 13, b => {
+          for (const x of [0, 13]) { fill(b, x, 2, 3, 11, 'brass2'); fill(b, x, 2, 1, 11, 'brass1'); fill(b, x - (x ? 0 : 0), 0, 3, 2, 'brass1'); }
+          for (let x = 3; x < 13; x++) px(b, x, 4 + Math.round(Math.sin((x - 3) / 10 * Math.PI) * 2), 'red');
+          fill(b, 4, 6, 8, 5, 'cream0'); fill(b, 4, 6, 8, 1, 'roofR2'); fill(b, 5, 8, 6, 1, 'stone4');
+        }), 41, 32);
+        // the registration counter, mahogany with raised panels; the ledger, the inkstand and the bell on it
+        T.box('counter', 84, 22, 156, 34, 0, 16, (b, w, h, l, which) => {
+          mahogany(b, w, h);
+          if (which === 'front') for (let x = 3; x < w - 8; x += 12) { fill(b, x, 4, 9, h - 6, 'roofR3'); fill(b, x + 1, 5, 7, 1, 'roofR2'); fill(b, x + 8, 5, 1, h - 7, 'wood5'); }
+          if (which === 'top') { fill(b, 0, 0, w, h, 'roofR3'); fill(b, 0, 0, w, 1, 'roofR2'); }
+        });
+        T.card('ledger_open', sprite(16, 6, b => { fill(b, 0, 1, 16, 5, 'roofG4'); fill(b, 1, 0, 14, 5, 'cream0'); fill(b, 8, 0, 1, 5, 'cream2'); for (const y of [1, 2, 3]) { fill(b, 2, y, 5, 1, 'stone3'); fill(b, 10, y, 4, 1, 'stone3'); } }), 104, 30, 16);
+        T.card('inkstand', sprite(8, 8, b => { fill(b, 0, 5, 8, 3, 'brass2'); fill(b, 0, 5, 8, 1, 'brass1'); fill(b, 1, 2, 3, 3, 'ink2'); px(b, 2, 2, 'stone2'); for (let y = 0; y < 5; y++) px(b, 6 - (y >> 1), y, 'cream0'); }), 120, 30, 16);
+        T.card('counter_bell', sprite(6, 6, b => { fill(b, 1, 1, 4, 4, 'brass1'); fill(b, 2, 0, 2, 1, 'brass2'); fill(b, 0, 5, 6, 1, 'brass3'); px(b, 2, 2, 'brass0'); }), 140, 30, 16);
+        T.card('paper_tray', sprite(12, 6, b => { fill(b, 0, 2, 12, 4, 'wood3'); fill(b, 1, 0, 10, 3, 'cream1'); fill(b, 2, 1, 8, 1, 'white'); fill(b, 0, 2, 12, 1, 'wood2'); }), 148, 28, 16);
+        // the pigeonholes of the hall's files behind it, every cell a bundle tied in tape
+        T.box('pigeonholes', 88, 0, 152, 6, 0, 24, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'front') for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
+            const x = 2 + c * 8, y = 2 + r * 7; fill(b, x, y, 6, 5, 'wood5');
+            const k = hash(c, r, 7); if (k < 0.85) { fill(b, x + 1, y + 1, 4, 4, ['cream1', 'dirt2', 'roofB2', 'cream2'][(k * 4) | 0]); fill(b, x + 1, y + 2, 4, 1, 'roofR2'); }
+          }
+        });
+        // Sam's desk: the brass typewriter, his folders stacked high, the soot-ink bottle and a lamp; his chair
+        T.box('sam_desk', 176, 12, 218, 26, 0, 14, (b, w, h, l, which) => {
+          mahogany(b, w, h);
+          if (which === 'front') { fill(b, 3, 3, 12, h - 4, 'roofR3'); fill(b, w - 15, 3, 12, h - 4, 'roofR3'); for (const x of [8, w - 10]) fill(b, x, 6, 3, 1, 'brass1'); }
+          if (which === 'top') { fill(b, 0, 0, w, h, 'roofR3'); fill(b, 6, 2, 30, h - 4, 'roofG4'); }
+        });
+        T.card('typewriter', sprite(16, 11, b => {
+          fill(b, 4, 0, 8, 4, 'white'); fill(b, 4, 0, 8, 1, 'cream1'); for (let y = 1; y < 4; y++) fill(b, 5, y, 6, 1, y % 2 ? 'stone2' : 'white');
+          fill(b, 1, 3, 14, 2, 'iron3'); fill(b, 0, 3, 2, 2, 'iron2'); fill(b, 14, 3, 2, 2, 'iron2');
+          fill(b, 1, 5, 14, 6, 'brass2'); fill(b, 1, 5, 14, 1, 'brass1'); fill(b, 2, 10, 12, 1, 'brass3');
+          for (let r = 0; r < 3; r++) for (let x = 2 + r; x < 14 - r; x += 2) px(b, x, 6 + r + r, 'ink2');
+        }), 194, 22, 14);
+        T.card('folders_0', folders(6), 182, 20, 14); T.card('folders_1', folders(4), 210, 18, 14); T.card('folders_2', folders(8), 212, 24, 14);
+        T.card('ink_bottle', sprite(4, 5, b => { fill(b, 0, 1, 4, 4, 'ink2'); fill(b, 1, 0, 2, 1, 'wood4'); px(b, 1, 2, 'stone3'); }), 203, 24, 14);
+        T.card('desk_lamp', sprite(8, 12, b => { fill(b, 3, 0, 2, 2, 'iron3'); fill(b, 1, 2, 6, 7, 'light1'); fill(b, 2, 3, 4, 5, 'light0'); fill(b, 0, 9, 8, 3, 'brass3'); }), 186, 16, 14, true);
+        T.card('desk_chair', sprite(14, 18, b => { fill(b, 1, 0, 12, 9, 'wood4'); fill(b, 1, 0, 12, 1, 'wood3'); fill(b, 3, 2, 8, 5, 'roofG3'); fill(b, 0, 9, 14, 3, 'wood3'); for (const x of [1, 11]) fill(b, x, 12, 2, 6, 'wood4'); }), 196, 32);
+        // the filing cabinets, iron, their drawers labelled
+        const cabinet = (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'iron2'); fill(b, 0, 0, w, 1, 'iron1');
+          if (which === 'front') for (let y = 2; y < h - 2; y += 7) { fill(b, 1, y, w - 2, 6, 'iron3'); fill(b, 1, y, w - 2, 1, 'iron2'); fill(b, (w >> 1) - 2, y + 2, 4, 1, 'brass1'); fill(b, (w >> 1) - 1, y + 4, 2, 1, 'cream0'); }
+        };
+        T.box('cabinet_0', 222, 0, 238, 10, 0, 32, cabinet); T.box('cabinet_1', 158, 0, 172, 8, 0, 26, cabinet);
+        // tin buckets under the leaks; while it rains a drop falls into each, rings spreading
+        const bucket = sprite(10, 9, b => { fill(b, 1, 1, 8, 8, 'iron2'); fill(b, 0, 0, 10, 2, 'iron1'); fill(b, 2, 0, 6, 1, 'water3'); fill(b, 1, 5, 8, 1, 'iron3'); fill(b, 2, 2, 1, 6, 'iron1'); });
+        const drip = k => { const frames = []; for (let f = 0; f < 8; f++) { const c = document.createElement('canvas'); c.width = 4; c.height = 40; const g = c.getContext('2d'); g.fillStyle = 'rgba(214,236,255,0.85)'; if (f < 6) { const y = Math.round(((f + k) % 6) * 6); g.fillRect(1, y, 2, 3); g.fillRect(1, y + 3, 1, 1); } else { g.fillRect(0, 37, 1, 1); g.fillRect(3, 37, 1, 1); g.fillRect(1, 36, 2, 1); } frames.push(c); } return { img: frames[0], frames, fps: 8, ax: 2, ay: 40 }; };
+        [[66, 52], [160, 44], [204, 62]].forEach(([x, y], i) => { T.card('bucket_' + i, bucket, x, y); T.card('drip_' + i, drip(i * 2), x, y, 8); });
+        // the waiting benches: one along the west wall, a low one facing the counter
+        const bench = (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'front' || which === 'right') for (let x = 2; x < w - 2; x += Math.max(6, w - 4)) fill(b, x, 3, 2, h - 3, 'wood4'); };
+        T.box('bench_w', 4, 44, 14, 84, 0, 9, bench); T.box('bench_front', 172, 70, 214, 78, 0, 8, bench);
+        T.card('hat_on_bench', sprite(10, 4, b => { fill(b, 2, 0, 6, 3, 'roofB3'); fill(b, 0, 3, 10, 1, 'roofB4'); fill(b, 3, 2, 4, 1, 'red'); }), 9, 64, 9);
+        // by the door: the umbrella stand with the morning's wet umbrellas, the ferns in their pots
+        T.card('umbrellas', sprite(10, 22, b => { fill(b, 1, 14, 8, 8, 'iron2'); fill(b, 0, 14, 10, 1, 'iron1'); for (const [x, c] of [[2, 'roofB2'], [5, 'roofR2'], [7, 'ink2']]) { fill(b, x, 0, 2, 15, c); px(b, x, 0, 'wood4'); } fill(b, 3, 21, 4, 1, 'water3'); }), 85, 90);
+        T.card('fern_0', PROPS.plant(), 100, 90); T.card('fern_1', PROPS.plant(), 156, 90);
+        T.card('water_jar', sprite(10, 13, b => { V.disc(b, 5, 8, 5, 5, 'roofR3'); fill(b, 3, 1, 4, 3, 'roofR3'); fill(b, 2, 0, 6, 1, 'roofR2'); fill(b, 2, 6, 2, 4, 'roofR2'); }), 9, 92);
+      },
+    },
+    // Under the hall, down its stair (Night 4): Sam's archive and vault No. 7 in the old rock, lit by castor-oil
+    // lanterns, the seep water ankle-deep over its flagstones till the hand pump drains it. The stone stair comes down
+    // the west wall; the copper pump stands at its foot with its pipes up the wall; the 1950 master map of Bellwood on
+    // birch bark beside it; the thick steel door of vault No. 7 in the back wall, shut, then swung open on its racks;
+    // the archive's racks along the east wall; Sam's table in the middle with its oil lamps and the files he has saved;
+    // the catalogue drawers in the west corner.
+    hall_vault: {
+      under: true, seed: 41, room: [224, 88], door: 112, bays: [], floor: flagstones, wall: masonry,
+      solid: [[4, 0, 34, 48], [50, 12, 76, 26], [140, 0, 198, 8], [190, 6, 200, 44], [206, 22, 222, 72], [104, 48, 160, 62], [4, 58, 26, 74], [194, 74, 216, 86], [40, 48, 50, 56]],
+      anchors: { stair: [44, 40], pump: [84, 24], aside: [104, 36], vault: [168, 18], table: [120, 70], sam_table: [148, 70] },
+      paint(b, R) {
+        // the damp the seep leaves in the floor's low middle, darker round the drain grate by the pump
+        R(36, 26, 204, 86, (x, y, w, h) => {
+          const dx = (x - w / 2) / (w / 2), dy = (y - h / 2) / (h / 2), fy = y + 26, row = (fy / 10) | 0, fx = x + 36 + ((hash(row, 0, 41) * 20) | 0);
+          if (fx % 18 === 0 || fy % 10 === 9 || dx * dx + dy * dy > 1 - hash((fx / 18) | 0, row, 3) * 0.3) return 0;
+          return fy % 10 === 0 ? 'stone3' : hash(x >> 1, y >> 1, 8) < 0.05 ? 'stone3' : 'stone4';
+        });
+        R(78, 30, 92, 38, (x, y, w, h) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'iron4' : x % 3 ? 'iron3' : 'ink2'));
+      },
+      back(b, w, h) {
+        // the pump's pipes up the wall and away through it, a gauge on them
+        for (const [x0, y0, x1, y1] of [[60, 20, 64, 60], [60, 18, 112, 22], [108, 2, 112, 22], [34, 30, 62, 33]]) { fill(b, x0, y0, x1 - x0, y1 - y0, 'roofR3'); fill(b, x0, y0, x1 - x0, 1, 'orange'); }
+        for (const [x, y] of [[62, 32], [84, 20], [110, 16]]) { fill(b, x - 2, y - 1, 4, 3, 'brass2'); px(b, x - 1, y, 'brass1'); }
+        V.disc(b, 74, 10, 5, 5, 'brass2'); V.disc(b, 74, 10, 4, 4, 'cream0'); fill(b, 74, 7, 1, 4, 'red'); fill(b, 73, 15, 3, 5, 'roofR3');
+        // the master map on birch bark: the rivers, the line, the town and the estuary, pinned at its corners
+        drawMap(b, 86, 6, 48, 26);
+        // the archive's rule, painted on the stone over the vault
+        fill(b, 148, 2, 42, 6, 'stone1'); fill(b, 148, 2, 42, 1, 'stone0'); for (let x = 151; x < 187; x += 3) if (hash(x, 1, 4) < 0.8) fill(b, x, 4, 2, 2, 'stone4');
+      },
+      left(b, w, h) { fill(b, 50, 24, 10, 14, 'wood4'); fill(b, 51, 25, 8, 12, 'cream1'); for (let j = 27; j < 36; j += 2) fill(b, 52, j, 6, 1, 'stone3'); },
+      right(b, w, h) { for (const x of [20, 70]) { fill(b, x - 1, 16, 6, 1, 'iron3'); fill(b, x - 1, 20, 6, 9, 'iron4'); fill(b, x, 21, 4, 7, 'light2'); fill(b, x + 1, 22, 2, 4, 'light0'); fill(b, x - 2, 29, 8, 2, 'iron3'); } },
+      things(T) {
+        // the stone stair coming down the west wall, worn in the middle of each step, a wet sheen at its foot
+        for (let k = 0; k < 6; k++) T.box('stair_' + k, 4, k * 8, 34, k * 8 + 8, 0, 48 - k * 8, (b, w, h, l, which) => {
+          for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, (x + (y >> 2) * 5) % 12 === 0 || y % 8 === 7 ? 'stone4' : hash(x >> 1, y >> 1, k) < 0.1 ? 'stone2' : 'stone3');
+          if (which === 'top') { fill(b, 0, 0, w, h, 'stone2'); fill(b, 8, 0, w - 16, h, 'stone1'); fill(b, 0, h - 1, w, 1, 'stone4'); }
+        });
+        T.box('stair_post', 32, 44, 35, 47, 0, 18, (b, w, h) => { fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3'); });
+        T.card('mop_bucket', sprite(12, 26, b => { fill(b, 2, 17, 9, 9, 'iron2'); fill(b, 1, 17, 11, 2, 'iron1'); fill(b, 3, 18, 7, 1, 'water4'); for (let y = 0; y < 18; y++) px(b, 9 - (y >> 3), y, 'wood3'); for (let x = 4; x < 11; x++) fill(b, x, 15, 1, 4, x % 2 ? 'cream2' : 'cream1'); }), 45, 56);
+        // the copper hand pump on its plinth, its spout over the drain
+        T.box('pump_plinth', 50, 12, 76, 26, 0, 8, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'stone3'); fill(b, 0, 0, w, 1, 'stone2'); if (which === 'top') fill(b, 0, 0, w, h, 'stone2'); });
+        T.card('pump', sprite(18, 30, b => {
+          fill(b, 4, 6, 9, 24, 'roofR3'); fill(b, 4, 6, 2, 24, 'orange'); fill(b, 11, 6, 2, 24, 'roofR4'); for (const y of [8, 18, 27]) fill(b, 3, y, 11, 2, 'brass2');
+          fill(b, 13, 12, 5, 3, 'roofR3'); fill(b, 16, 14, 2, 3, 'roofR4');
+          fill(b, 6, 0, 5, 6, 'iron3'); fill(b, 7, 0, 3, 1, 'iron2'); for (let i = 0; i < 6; i++) px(b, 2 - (i > 3 ? 1 : 0), 3 - (i >> 1), 'iron3'); fill(b, 0, 0, 7, 2, 'iron3');
+        }), 62, 22, 8);
+        // ankle-deep seep water over the floor, lying flat, rippling; drained after the pump
+        const pool = (w, h, seed) => {
+          const frames = [];
+          for (let f = 0; f < 4; f++) {
+            const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'), im = g.createImageData(w, h), d = new Uint32Array(im.data.buffer);
+            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+              const dx = (x - w / 2) / (w / 2), dy = (y - h / 2) / (h / 2), r = dx * dx + dy * dy + (hash(x >> 2, y >> 1, seed) - 0.5) * 0.12;
+              if (r > 1) continue;
+              const ripple = (x + y * 2 + f * 3) % 11 === 0 && hash(x >> 1, y, seed + f) < 0.5;
+              const k = r > 0.86 ? 'stone2' : ripple ? 'water3' : hash(x >> 3, y >> 2, seed + 2) < 0.3 ? 'water5' : 'water6';
+              d[y * w + x] = (KIT.u32(KIT.hex(k)) & 0x00ffffff | (r > 0.86 ? 0x90000000 : 0xb8000000)) >>> 0;   // murky, the flags showing through
+            }
+            g.putImageData(im, 0, 0); frames.push(c);
+          }
+          return { img: frames[0], frames, fps: 3, ax: w >> 1, ay: 0 };
+        };
+        T.card('flood_0', pool(150, 54, 3), 118, 31, 1); T.card('flood_1', pool(70, 24, 5), 70, 59, 1);   // a px up, or the floor hides it
+        // vault No. 7: the steel door in its frame, shut on its wheel and cylinder lock; and swung open on its racks
+        const frame = (b, w, h) => { fill(b, 0, 0, w, h, 'stone4'); for (let y = 0; y < h; y += 6) for (let x = (y / 6) % 2 * 6; x < w; x += 12) fill(b, x, y, 1, 6, 'stone5'); fill(b, 0, h - 6, w, 6, 'stone3'); };
+        T.box('vault_shut', 140, 0, 196, 6, 0, 52, (b, w, h, l, which) => {
+          if (which !== 'front') return fill(b, 0, 0, w, h, 'stone4');
+          frame(b, w, h); const cx = w >> 1, cy = 24;
+          V.disc(b, cx, cy, 22, 22, 'iron4'); V.disc(b, cx, cy, 21, 21, 'iron2'); V.disc(b, cx, cy, 17, 17, 'iron3'); V.disc(b, cx, cy, 16, 16, 'iron2');
+          for (let a = 0; a < 12; a++) { const t = a / 12 * Math.PI * 2; px(b, cx + Math.round(Math.cos(t) * 19), cy + Math.round(Math.sin(t) * 19), 'iron0'); }
+          for (let a = 0; a < 6; a++) { const t = a / 6 * Math.PI * 2; for (let r = 3; r < 11; r++) px(b, cx + Math.round(Math.cos(t) * r), cy + Math.round(Math.sin(t) * r), 'brass2'); }
+          V.disc(b, cx, cy, 10, 10, 'brass3'); V.disc(b, cx, cy, 9, 9, 'iron2'); V.disc(b, cx, cy, 3, 3, 'brass1'); fill(b, cx - 1, cy - 1, 2, 3, 'ink2');
+          stamp(b, cx + 9, cy - 20, ['111', '..1', '.1.', '.1.', '.1.'], { 1: 'brass1' });
+          fill(b, 2, cy - 4, 3, 9, 'iron3'); fill(b, w - 5, cy - 4, 3, 9, 'iron3');
+        });
+        T.box('vault_open', 140, 0, 196, 6, 0, 52, (b, w, h, l, which) => {
+          if (which !== 'front') return fill(b, 0, 0, w, h, 'stone4');
+          frame(b, w, h); const cx = w >> 1, cy = 24;
+          V.disc(b, cx, cy, 22, 22, 'iron4'); V.disc(b, cx, cy, 20, 20, 'ink2');
+          // inside: racks of archive boxes and rolled maps in the lamplight
+          for (let y = cy - 16; y < cy + 18; y += 8) for (let x = cx - 18; x < cx + 18; x++) { const dx = (x - cx) / 19, dy = (y - cy) / 19; if (dx * dx + dy * dy < 1) { px(b, x, y, 'wood4'); if (hash(x >> 2, y, 5) < 0.75) for (let j = 1; j < 7; j++) if ((((x - cx) / 19) ** 2 + ((y - j - cy) / 19) ** 2) < 1) px(b, x, y - j, ['dirt3', 'cream2', 'roofB3', 'dirt2'][((x >> 2) + y) % 4]); } }
+          V.disc(b, cx, cy + 14, 6, 3, 'light2');
+        });
+        T.box('vault_open_door', 196, 6, 202, 46, 0, 50, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'iron2'); fill(b, 0, 0, w, 1, 'iron1');
+          if (which === 'left') { for (let y = 4; y < h; y += 8) for (let x = 3; x < w - 2; x += 8) px(b, x, y, 'iron0'); fill(b, 4, 22, 10, 10, 'brass3'); V.disc(b, 9, 27, 4, 4, 'brass2'); }
+        });
+        // the archive's racks along the east wall, boxed files and rolled rail maps on their shelves
+        T.box('racks', 206, 22, 222, 72, 0, 42, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'left' || which === 'front') for (let y = 2; y < h - 2; y += 10) { fill(b, 0, y + 8, w, 2, 'wood3'); for (let x = 1; x < w - 3; x += 5) { const k = hash(x, y, 9); if (k < 0.8) { fill(b, x, y + 1, 4, 7, k < 0.3 ? 'cream1' : k < 0.55 ? 'dirt2' : 'roofB3'); fill(b, x + 1, y + 3, 2, 1, 'cream0'); } else { V.disc(b, x + 2, y + 6, 2, 2, 'cream0'); px(b, x + 2, y + 6, 'roofR2'); } } }
+        });
+        // Sam's work table: oil lamps burning on it, the files he has saved stacked to dry, his leather folder
+        T.box('work_table', 104, 50, 160, 62, 10, 14, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'top') { fill(b, 0, 0, w, h, 'wood2'); for (let x = 3; x < w; x += 11) fill(b, x, 0, 1, h, 'wood3'); } });
+        for (const [x, y] of [[105, 51], [156, 51], [105, 59], [156, 59]]) T.box(`table_leg_${x}_${y}`, x, y, x + 3, y + 3, 0, 10, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
+        const lamp = sprite(8, 13, b => { fill(b, 3, 0, 2, 2, 'iron3'); fill(b, 2, 2, 4, 1, 'brass2'); fill(b, 1, 3, 6, 6, 'light1'); fill(b, 2, 4, 4, 4, 'light0'); fill(b, 3, 5, 2, 2, 'white'); fill(b, 0, 9, 8, 4, 'brass2'); fill(b, 0, 9, 8, 1, 'brass1'); });
+        T.card('table_lamp_0', lamp, 110, 58, 14, true); T.card('table_lamp_1', lamp, 154, 56, 14, true);
+        T.card('saved_files', folders(5), 124, 56, 14); T.card('drying_sheets', sprite(18, 5, b => { for (let i = 0; i < 3; i++) { fill(b, i * 6, 1 + (i % 2), 6, 4, 'cream1'); fill(b, i * 6 + 1, 2 + (i % 2), 4, 1, 'roofB3'); } }), 138, 58, 14);
+        T.card('leather_folder', sprite(14, 5, b => { fill(b, 0, 1, 14, 4, 'wood4'); fill(b, 0, 1, 14, 1, 'wood3'); fill(b, 5, 2, 4, 3, 'roofR3'); px(b, 6, 3, 'roofR1'); }), 146, 60, 14);
+        T.card('archive_box', sprite(16, 10, b => { fill(b, 0, 2, 16, 8, 'iron3'); fill(b, 0, 2, 16, 1, 'iron2'); fill(b, 1, 0, 14, 3, 'iron2'); fill(b, 6, 4, 4, 3, 'brass2'); for (const x of [2, 13]) fill(b, x, 3, 1, 7, 'iron4'); stamp(b, 6, 7, ['1.1', '.1.'], { 1: 'cream0' }); }), 130, 54, 14);
+        T.card('table_stool', PROPS.stool(), 168, 60);
+        // the catalogue: drawers of index cards, brass pulls and label slots
+        T.box('catalogue', 4, 58, 26, 74, 0, 20, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'front' || which === 'right') for (let y = 2; y < h - 1; y += 6) for (let x = 1; x < w - 4; x += 7) { fill(b, x, y, 6, 5, 'wood4'); fill(b, x + 1, y + 1, 4, 2, 'cream1'); px(b, x + 2, y + 3, 'brass1'); px(b, x + 3, y + 3, 'brass1'); }
+        });
+        T.box('crate_0', 194, 74, 216, 86, 0, 12, PROPS.crate); T.box('crate_1', 198, 76, 212, 84, 12, 22, PROPS.crate);
+        T.card('cellar_lantern_0', lamp, 44, 4, 24, true); T.card('cellar_lantern_1', lamp, 138, 8, 24, true); T.card('cellar_lantern_2', lamp, 204, 8, 24, true);
+      },
+    },
   };
 
   /* ---------- building a room ---------- */
@@ -879,11 +1154,20 @@
   const dim = d => { const p = new Uint32Array(d.data.buffer); for (let i = 0; i < p.length; i++) p[i] = darker(p[i], SHADE); return d; };
   const dimDraw = draw => (g, t) => { g.save(); g.filter = `brightness(${SHADE})`; draw(g, t); g.restore(); };
 
+  // What stands round a room under the ground (R.under): no area, only the dark earth it is dug into, as big as the
+  // room and room to spare for the camera; its door anchor sets the room in it.
+  function cellar(id, R) {
+    const M = 56, TOP = 84, w = R.room[0] + 2 * M, h = TOP + R.room[1] + 56, b = new Buf(w, h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, hash(x >> 2, y >> 2, 5) < 0.18 ? 'wood5' : hash(x, y, 6) < 0.04 ? 'stone5' : 'ink2');
+    return { area: [0, 0, w, h], w, h, bg: '#1b1016', clips: {}, items: [], decals: { below: [] }, decks: [], flats: [], ground: b.canvas(),
+      height: () => 0, vertical: () => false, anchors: { [id + '_door']: [M + R.door, TOP + R.room[1] + 8] } };
+  }
+
   function build(id) {
     // The room stands where its house stands in its area, in the area's own coordinates: its door on the house's door,
     // its open front on the house's front. Round it is that area itself, in shade, so going through the door only
     // takes the walls and roof away (or puts them back).
-    const R = ROOMS[id], E = AREA.build(R.area), [dx, dy] = E.anchors[id + '_door'], ox = dx - R.door, oy = dy - 8 - R.room[1];
+    const R = ROOMS[id], E = R.under ? cellar(id, R) : AREA.build(R.area), [dx, dy] = E.anchors[id + '_door'], ox = dx - R.door, oy = dy - 8 - R.room[1];
     const P = x => x + ox, Q = y => y + oy, [W, H] = [E.w, E.h];
     const [x0, y0, x1, y1] = [P(0), Q(0), P(R.room[0]), Q(R.room[1])], xd = P(R.door), xc = (x0 + x1) >> 1;
     const back = Math.ceil(THICK * DEEP) + 1, fx0 = x0 - THICK, fx1 = x1 + THICK;
@@ -906,11 +1190,11 @@
     const b = new Buf(W, H); b.d.set(new Uint32Array(cg.getImageData(0, 0, W, H).data.buffer));
     // The footing: the floor stands on it, under the walls too; its stone face drops to the land, with a step at the door.
     fill(b, fx0, y0 - back, fx1 - fx0, y1 - y0 + back, 'wood5');
-    boards(b, x0, y0, x1, y1, R.seed);
+    (R.floor || boards)(b, x0, y0, x1, y1, R.seed);
     R.paint(b, (a, c, d, e, f) => { for (let y = c; y < e; y++) for (let x = a; x < d; x++) { const k = f(x - a, y - c, d - a, e - c); if (k) px(b, P(x), Q(y), k); } }, (x, y) => [P(x), Q(y)]);
     V.wallPanel(b, fx0, y1, fx1 - fx0, FLOOR, 'stone', R.seed);
     fill(b, fx0, y1, fx1 - fx0, 1, 'wood4');
-    for (let k = 0; k < 2; k++) { fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 4, 'stone1'); fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 1, 'stone0'); fill(b, xd - 14 + k * 2, y1 + 4 + k * 5, 28 - k * 4, 1, 'stone3'); }
+    if (!R.under) for (let k = 0; k < 2; k++) { fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 4, 'stone1'); fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 1, 'stone0'); fill(b, xd - 14 + k * 2, y1 + 4 + k * 5, 28 - k * 4, 1, 'stone3'); }
     // Higher land just behind the back wall (a bank, a terrace) is levelled to the floor: the wall leans back to face
     // the camera, so anything standing up there would show through it.
     const behind = (x, y) => x >= fx0 && x < fx1 && y >= y0 - back - WALL && y < y0 - back;

@@ -58,6 +58,7 @@ namespace Shop
             [1] = main => new Night1(main),
             [2] = main => new Night2(main),
             [3] = main => new Night3(main),
+            [4] = main => new Night4(main),
         };
 
         public static Main Instance { get; private set; }

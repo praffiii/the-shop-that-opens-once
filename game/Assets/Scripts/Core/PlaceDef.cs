@@ -95,6 +95,8 @@ namespace Shop
         public bool Indoors;
         /// <summary>A room cut open where its house stands in its area: the area round it is graded and sunlit as outdoors, while the room keeps its own light (Pixel.shader's _Room).</summary>
         public bool Open;
+        /// <summary>Under the ground, with no sky: its lamps burn at every hour.</summary>
+        public bool Underground;
         /// <summary>Footsteps sound on wood rather than ground.</summary>
         public bool WoodFloor;
         /// <summary>A bell rings when the courier comes in or goes out.</summary>

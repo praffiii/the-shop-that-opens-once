@@ -113,7 +113,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "bram", Label = "Captain Bram", Spot = V(-20, 4), Phases = new[] { Phase.Morning },
+                        Id = "bram", Label = "Captain Bram", Spot = V(-20, 4), Chapters = NotNightFour, Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(810, 340), Pose = "look", Facing = -1, Wait = 6f },
@@ -125,6 +125,12 @@ namespace Shop
                             "Ten past the hour, the board says. It's said that a long while now.",
                             "I drove the line forty years. Never late once. Well. Once.",
                         },
+                    },
+                    // Night 4's morning: on the platform bench in the drizzle, under his paper
+                    new Person
+                    {
+                        Id = "bram", At = V(430, 277), Seat = 9, Label = "Captain Bram", Spot = V(36, 10), Pose = "read", Facing = 1, Chapters = NightFour, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Rain on the platform roof. Sounds like a train coming, if you don't listen too hard." },
                     },
                     new Person
                     {
@@ -187,7 +193,7 @@ namespace Shop
                     // the platform's other bench.
                     new Person
                     {
-                        Id = "neighbour_a", Label = "Neighbour", Spot = V(-20, 6), Phases = new[] { Phase.Morning, Phase.Midday },
+                        Id = "neighbour_a", Label = "Neighbour", Spot = V(-20, 6), Chapters = NotNightFour, Phases = new[] { Phase.Morning, Phase.Midday },
                         Round = new[]
                         {
                             new Stop { At = V(470, 336), Pose = "talk", Facing = 1, Wait = 7f },
@@ -204,7 +210,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "neighbour_b", At = V(494, 338), Label = "Neighbour", Spot = V(20, 6), Facing = -1, Phases = new[] { Phase.Morning, Phase.Midday },
+                        Id = "neighbour_b", At = V(494, 338), Label = "Neighbour", Spot = V(20, 6), Facing = -1, Chapters = NotNightFour, Phases = new[] { Phase.Morning, Phase.Midday },
                         Lines = new[]
                         {
                             "Fine day for standing about. Trains or no trains, a station's the place for it.",
@@ -354,7 +360,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "sam", At = V(614, 404), Label = "Sam", Spot = V(-18, -4), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Morning },
+                        Id = "sam", At = V(614, 404), Label = "Sam", Spot = V(-18, -4), Pose = "sweep", Facing = 1, Chapters = NotNightFour, Phases = new[] { Phase.Morning },
                         Lines = new[]
                         {
                             "Steps first, then the ledgers. Everything in its order, or nothing can ever be found again.",
@@ -384,7 +390,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "sam", At = V(838, 572), Label = "Sam", Spot = V(-18, 4), Pose = "look", Facing = 1, Phases = new[] { Phase.Midday },
+                        Id = "sam", At = V(838, 572), Label = "Sam", Spot = V(-18, 4), Pose = "look", Facing = 1, Chapters = NotNightFour, Phases = new[] { Phase.Midday },
                         Lines = new[]
                         {
                             "Three notices pinned out of line. I've written to the hall about it. I am the hall, but procedure is procedure.",
@@ -424,7 +430,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "sam", At = V(648, 402), Label = "Sam", Spot = V(-22, 2), Away = true, Phases = new[] { Phase.Dusk },
+                        Id = "sam", At = V(648, 402), Label = "Sam", Spot = V(-22, 2), Away = true, Chapters = NotNightFour, Phases = new[] { Phase.Dusk },
                         Lines = new[]
                         {
                             "Doors locked, lamps out, ledgers shelved. A day properly closed.",
@@ -558,6 +564,7 @@ namespace Shop
                     East("to_east", 1280, 640, "To the east", "east/from_square"),
                     South("to_coast", 640, 1040, "Down to the coast", "coast/from_square"),
                     new Hotspot { Id = "bakery_door", At = V(477, 392), Label = "Bakery", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "bakery/door", Chapters = AfterDayZero },
+                    new Hotspot { Id = "hall_door", At = V(640, 392), Label = "Village hall", Area = R(-14, -32, 28, 38), Spot = V(0, 14), ExitTo = "hall/door", Chapters = FromNightFour },
                 },
             },
             ["east"] = new PlaceDef
@@ -1107,9 +1114,23 @@ namespace Shop
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
+                People = new[]
+                {
+                    // Night 4's morning: Valdo at the counter having his site plan stamped, two neighbours by the buckets
+                    new Person { Id = "valdo", At = V(640, 340), Label = "Valdo", Spot = V(24, 4), Pose = "write", Away = true, Chapters = NightFour, Phases = new[] { Phase.Morning } },
+                    new Person { Id = "neighbour_a", At = V(656, 362), Label = "Neighbour", Spot = V(-20, 6), Facing = 1, Chapters = NightFour, Phases = new[] { Phase.Morning } },
+                    new Person { Id = "neighbour_b", At = V(694, 362), Label = "Neighbour", Spot = V(6, 16), Facing = -1, Chapters = NightFour, Phases = new[] { Phase.Morning } },
+                },
                 Hotspots = new[]
                 {
                     new Hotspot { Id = "door", At = V(640, 392), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "square/hall_door" },
+                    new Hotspot { Id = "stair", At = V(561, 328), Label = "Down to the archive", Area = R(-10, -26, 20, 28), Spot = V(0, 10), ExitTo = "hall_vault/stair" },
+                    new Hotspot { Id = "counter", At = V(640, 330), Label = "Counter", Area = R(-36, -16, 72, 18), Spot = V(-24, 12), Text = "The registration counter, mahogany worn pale where elbows go. An open ledger, an inkstand, a bell to ring for the clerk." },
+                    new Hotspot { Id = "clock", At = V(640, 302), Label = "Clock", Area = R(-10, -40, 20, 30), Spot = V(-24, 40), Text = "The hall's brass pendulum clock, beating slow over the pigeonholes. Its hands say ten seventeen. They always do." },
+                    new Hotspot { Id = "desk", At = V(716, 322), Label = "Sam's desk", Area = R(-22, -20, 44, 22), Spot = V(0, 14), Text = "Sam's desk: a little brass typewriter with a sheet in it, folders stacked high, a bottle of soot ink. Everything squared to the edge." },
+                    new Hotspot { Id = "board", At = V(756, 336), Label = "Directory", Area = R(-8, -34, 10, 40), Spot = V(-16, 8), Text = "The residents' directory, a slip for every house. Under the east end, in faded ink: Daniel and Ratih, and a small Satria." },
+                    new Hotspot { Id = "buckets", At = V(680, 340), Label = "Buckets", Area = R(-8, -12, 16, 14), Spot = V(16, 4), Text = "Tin buckets under the leaks. The roof has been mended so often there's more patch than roof." },
+                    new Hotspot { Id = "cabinet", At = V(750, 306), Label = "Cabinets", Area = R(-9, -32, 18, 34), Spot = V(-8, 22), Text = "Iron filing cabinets, every drawer labelled in Sam's square hand: BIRTHS. WELLS. BRIDGES. GRIEVANCES (SETTLED)." },
                 },
             },
             // Under the hall, down its stair: Sam's archive and the steel door of vault No. 7.
@@ -1119,7 +1140,23 @@ namespace Shop
                 Variants = new[] { "day" },
                 Indoors = true,
                 Open = true,
-                Hotspots = new Hotspot[] { },
+                Underground = true,
+                People = new[]
+                {
+                    // Night 4: Sam at the jammed pump since the rain began, then at his table with what was saved
+                    new Person { Id = "sam", At = V(140, 108), Label = "Sam", Spot = V(22, 6), Pose = "pump", Facing = -1, Chapters = NightFour, Phases = new[] { Phase.Morning, Phase.Midday } },
+                    new Person { Id = "sam", At = V(204, 154), Label = "Sam", Spot = V(-28, 0), Pose = "read", Facing = -1, Chapters = NightFour, Phases = new[] { Phase.Dusk } },
+                },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "stair", At = V(86, 130), Label = "Up the stair", Area = R(-16, -30, 26, 28), Spot = V(14, -6), ExitTo = "hall/stair" },
+                    new Hotspot { Id = "pump", At = V(118, 106), Label = "Pump", Area = R(-12, -30, 24, 32), Spot = V(24, 18), Text = "A copper hand pump, its lever as long as an ant. It drains to the culvert under the square." },
+                    new Hotspot { Id = "vault", At = V(224, 90), Label = "Vault No. 7", Area = R(-28, -52, 56, 54), Spot = V(0, 12), Text = "The steel door of vault No. 7: a wheel, a cylinder lock, and a brass 7. Eight millimetres of steel between the village and its past." },
+                    new Hotspot { Id = "map", At = V(166, 88), Label = "Old map", Area = R(-24, -46, 48, 48), Spot = V(0, 16), Text = "Bellwood in 1950, drawn on a sheet of birch bark: two rivers, the line, the old bridge over the estuary, the town's blocks inked one by one." },
+                    new Hotspot { Id = "table", At = V(188, 146), Label = "Work table", Area = R(-28, -16, 56, 18), Spot = V(-12, 8), Text = "Sam's work table: two oil lamps, the files he has saved laid out to dry, a leather folder tied shut." },
+                    new Hotspot { Id = "racks", At = V(270, 156), Label = "Racks", Area = R(-8, -52, 16, 54), Spot = V(-16, -20), Text = "Racks of boxed files and rolled rail maps, each box dated. The bottom shelf is empty: what was on it is drying on the table." },
+                    new Hotspot { Id = "catalogue", At = V(71, 158), Label = "Catalogue", Area = R(-11, -20, 22, 22), Spot = V(18, 0), Text = "The catalogue: drawer on drawer of index cards. STORM, 1952 has a drawer to itself." },
+                },
             },
             // The Baker's bakery on the square, cut open: the dome oven and its flour sacks, the dough table, the bread
             // shelves and the counter. Mornings he is at work in it: kneading, a tray out of the oven, loaves onto the

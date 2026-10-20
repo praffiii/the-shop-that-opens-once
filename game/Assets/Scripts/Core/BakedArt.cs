@@ -37,8 +37,8 @@ namespace Shop
         const int MaxLamps = 32;
         static readonly int LampsId = Shader.PropertyToID("_Lamps"), LampCountId = Shader.PropertyToID("_LampCount");
 
-        /// <summary><paramref name="dir"/> is places/&lt;place&gt;/&lt;variant&gt;; the relief is the place's own.</summary>
-        public static BakedArt Build(string dir, Transform parent)
+        /// <summary><paramref name="dir"/> is places/&lt;place&gt;/&lt;variant&gt;; the relief is the place's own. Lit (underground), its lights burn at every hour.</summary>
+        public static BakedArt Build(string dir, Transform parent, bool lit = false)
         {
             var art = new GameObject("World").AddComponent<BakedArt>();
             art.transform.SetParent(parent, false);
@@ -55,7 +55,7 @@ namespace Shop
             foreach (var c in data["clips"]) clips.Add(((int)c["atlas"], Piece.Of(c, Vector2.zero)));
 
             art.Ground(dir, data["below"], atlases, clips, fps, loop);
-            var dark = Game.Phase >= Phase.Dusk;
+            var dark = lit || Game.Phase >= Phase.Dusk;
             var ties = new Dictionary<int, int>();
             foreach (JObject it in data["items"])
             {

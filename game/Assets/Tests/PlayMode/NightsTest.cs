@@ -113,6 +113,36 @@ namespace Shop.Tests
             CollectionAssert.DoesNotContain(Game.Bag, "camera_clean");
         });
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night4PlaysThrough() => Run(4, async main =>
+        {
+            Assert.IsTrue(Main.Raining, "The drizzle lasts the morning");
+            await Go(main, "hall", "door");
+            Assert.IsTrue(Game.Has("rumour"), "The lobby's rumour by the buckets");
+            await Use(main, "valdo");
+            await Go(main, "station", "from_square");
+            await Use(main, "bram");
+            Assert.AreEqual(Phase.Midday, Game.Phase, "Bram names the door");
+            Assert.IsFalse(Main.Raining, "The rain stops at midday");
+
+            await Go(main, "hall_vault", "stair");
+            Assert.IsTrue(Game.Has("plea"), "Sam's plea at the jammed pump");
+            Board.FailFirst = 1;
+            await Use(main, "pump");
+            CollectionAssert.Contains(Game.Bag, "key_turned", "The key worn bright by the tumblers");
+            CollectionAssert.DoesNotContain(Game.Bag, "key");
+            Board.FailFirst = 1;
+            await Use(main, "table");
+            Assert.AreEqual(Phase.Dusk, Game.Phase, "The sheets saved");
+            Assert.AreEqual("dusk", Game.Checkpoint);
+
+            await Use(main, "sam");
+            Assert.AreEqual(4, Game.LanternsOut, "Sam has his key");
+            Assert.AreEqual("square", main.Place.Def.Id, "Up on the hall's steps for the last light");
+            CollectionAssert.Contains(Game.Bag, "register");
+            CollectionAssert.DoesNotContain(Game.Bag, "key_turned");
+        });
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
         // story, and home to the journal, which ends the night.
         static IEnumerator Run(int night, Func<Main, Awaitable> day)
