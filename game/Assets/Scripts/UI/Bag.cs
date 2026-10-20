@@ -16,7 +16,7 @@ namespace Shop
         RectTransform panel, contents, closer, notes;
         readonly List<RectTransform> slots = new();
         readonly RectTransform[] arrows = new RectTransform[2];
-        Text itemName, sideText;
+        Text itemName, sideText, closerHint;
         Image big;
         string looking = ""; // the keepsake being looked at, or ""
         int side, pick; // the side turned up, and the slot picked in the bag
@@ -40,7 +40,7 @@ namespace Shop
             bag.sideText.alignment = TextAnchor.UpperCenter;
             for (var i = 0; i < 2; i++)
                 bag.arrows[i] = Look.Label(i == 0 ? "<" : ">", bag.closer, new Rect(110 + i * 170, 84, 12, 12)).rectTransform;
-            Look.Label("A / D to turn it over. Esc to put it back.", bag.closer, new Rect(12, 208, 300, 12), Look.Soft);
+            bag.closerHint = Look.Label("", bag.closer, new Rect(12, 208, 300, 12), Look.Soft);
             bag.gameObject.SetActive(false);
             return bag;
         }
@@ -114,7 +114,11 @@ namespace Shop
             closer.gameObject.SetActive(looking != "");
             if (looking != "")
             {
-                var s = Keepsakes.All[looking].Sides[side];
+                var sides = Keepsakes.All[looking].Sides;
+                var s = sides[side];
+                // only something with another side to it can be turned over
+                foreach (var a in arrows) a.gameObject.SetActive(sides.Length > 1);
+                Look.SetText(closerHint, sides.Length > 1 ? "A / D to turn it over. Esc to put it back." : "Esc to put it back.");
                 Look.SetSprite(big, Keepsakes.Art(looking, "lg", s.Variant), 2);
                 Look.Move(big.rectTransform, new Vector2(200, 80) - big.rectTransform.sizeDelta / 2);
                 Look.SetText(sideText, s.Seen);
