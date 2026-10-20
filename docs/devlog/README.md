@@ -42,6 +42,7 @@ kuliah Pengembangan Aplikasi Permainan (SE.3 Kelompok 1).
 | [33](33-jam-roda-dan-dialog-hidup.md) | 2026-10-20 | Jam hari berbentuk roda berjarum, dialog yang lebih hidup (jeda, penekanan, ekspresi, emote), dan semua teks dalam bahasa Inggris | |
 | [34](34-simpanan-dan-tas.md) | 2026-10-20 | Simpanan yang bertahan antarbab dan checkpoint per fase, pengaman agar kurir tak pernah membeku, dan tas yang lebih jelas | |
 | [35](35-warga-hidup-dan-padang.md) | 2026-10-20 | Warga yang hidup dalam kegiatannya (langkah sendiri, jeda, menoleh, bergantian bicara, menyapa kurir) dan halaman yang tak lagi kosong | |
+| [36](36-kalimat-warga-malam-dan-cutscene.md) | 2026-10-20 | Kalimat warga yang bergantian, warga yang terjaga di malam hari, dan setiap adegan penting sebagai cutscene | |
 
 ## Format setiap entri
 
