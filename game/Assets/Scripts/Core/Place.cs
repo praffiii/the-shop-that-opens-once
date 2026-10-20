@@ -75,7 +75,7 @@ namespace Shop
             }
             foreach (var h in def.Hotspots)
                 if (Here(h.Chapters))
-                    place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo, Step = h.Step });
+                    place.hotspots.Add(new Hotspot { Id = h.Id, Label = h.Label, At = h.At, Area = h.Area, Spot = h.Spot, ExitTo = h.ExitTo, Step = h.Step, Text = h.Text });
             return place;
         }
 

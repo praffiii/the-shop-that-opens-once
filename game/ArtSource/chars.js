@@ -558,8 +558,8 @@
   };
 
   /* ---------------- poses ---------------- */
-  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2 };
-  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3, lie: 1, wake: 1, write: 4, drink: 1, crouch: 3, strike: 2, wash: 1 };
+  const POSES = { idle: 4, walk: 6, talk: 2, give: 2, receive: 2, carry: 2, carryWalk: 6, inspect: 2, wave: 2, sit: 2, moved: 2, run: 6, brew: 4, hammer: 4, look: 4, lift: 2, polish: 4, sweep: 4, weave: 4, water: 4, tend: 4, peer: 2, photo: 2, fish: 4, rake: 4, lie: 2, wake: 2, write: 4, drink: 2, crouch: 2, strike: 2, wash: 2, knead: 4, tinker: 4 };
+  const FPS = { idle: 4, walk: 10, run: 12, carryWalk: 9, talk: 6, give: 3, receive: 3, carry: 4, inspect: 3, wave: 5, sit: 2, moved: 2, brew: 3, hammer: 6, look: 2, lift: 2, polish: 4, sweep: 4, weave: 3, water: 4, tend: 3, peer: 1, photo: 1, fish: 2, rake: 3, lie: 1, wake: 1, write: 4, drink: 1, crouch: 3, strike: 2, wash: 1, knead: 4, tinker: 3 };
   // Those in TURN also face the camera (pose_front) and turn away from it (pose_back) as they stand, walk, run and carry.
   const TURNS = ['idle', 'walk', 'run', 'carry', 'carryWalk'], VIEWS = ['front', 'back'];
   for (const p of TURNS) for (const v of VIEWS) { POSES[`${p}_${v}`] = POSES[p]; FPS[`${p}_${v}`] = FPS[p]; }
@@ -579,11 +579,12 @@
     if (id === 'helen') s.push('sit', 'moved', 'brew');
     if (id === 'marlow') s.push('wave', 'look', 'inspect', 'sweep');   // his day in the shop; polish comes with his cup
     if (id === 'leo') s.push('run');
-    if (id === 'mender') s.push('hammer');
+    if (id === 'mender') s.push('hammer', 'tinker');
     if (id === 'bram' || id === 'sam' || id === 'leo') s.push('look');
     if (CAST[id].load) s.push('carry', 'carryWalk', 'lift');
     if (CAST[id].polish) s.push('polish');
     if (id === 'sam' || id === 'baker') s.push('sweep');
+    if (id === 'baker') s.push('knead');
     if (id === 'pip') s.push('run');
     if (id === 'nora') s.push('weave');
     if (id === 'gardener') s.push('water', 'tend');
@@ -778,6 +779,15 @@
       case 'wash':   // water scooped from the jar in the dipper, then splashed over the face
         armN = f ? [[2, 0], [4, -4]] : [[3, 4], [8, 6]]; armF = f ? [[2, 1], [5, -3]] : [[2, 3], [4, 4]];
         r.dipper = f; r.eye = f ? 'closed' : 'open';
+        break;
+      case 'knead':   // leaning into the dough on the table before him, the heels of both hands pushing it out and rolling it back
+        r.hx += 1; r.hy += [1, 2, 3, 2][f]; r.dx = [0, 1, 1, 0][f];
+        armN = [[3, 3], [[7, 4], [8, 5], [9, 6], [8, 5]][f]]; armF = [[3, 3], [[9, 4], [10, 5], [11, 6], [10, 5]][f]];
+        if (f === 2) r.eye = 'squint';
+        break;
+      case 'tinker':   // bent close over the work on the bench, one hand steadying it, the other turning something small
+        r.hx += 1; r.hy += 2; r.eye = 'squint';
+        armN = [[3, 2], [[7, 3], [8, 2], [7, 3], [8, 4]][f]]; armF = [[3, 3], [7, 4]];
         break;
       case 'polish':   // rubbing what they hold (Helen's cup, Bram's whistle) with a cloth, round and round
         armF = [[3, 3], [7, 3]]; armN = [[2, 3], [[4, 2], [6, 2], [6, 4], [4, 4]][f]];

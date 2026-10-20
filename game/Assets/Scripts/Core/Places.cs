@@ -19,6 +19,9 @@ namespace Shop
 
         // The Prologue's Day 0, and every chapter after it.
         static readonly int[] DayZero = { 0 }, AfterDayZero = { 1, 2, 3, 4, 5, 6, 7, 8 }, Nights = { 1, 2, 3, 4, 5, 6, 7 };
+        // the days the story takes the Mender into his forge at midday (Night 1's watch, Night 5's shoes); the others he
+        // tinkers with the old engine on the platform
+        static readonly int[] ForgeDays = { 1, 5 }, EngineDays = { 0, 2, 3, 4, 6, 7, 8 };
 
         // Exits at an area's edges: a strip along the edge where a road leaves it, walked to just inside the edge.
         static Hotspot West(string id, float y, string label, string to) => new() { Id = id, At = V(0, y), Label = label, Area = R(0, -24, 24, 48), Spot = V(12, 0), ExitTo = to };
@@ -130,7 +133,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "mender", At = V(520, 266), Label = "Mender", Spot = V(20, 6), Pose = "hammer", Phases = new[] { Phase.Midday },
+                        Id = "mender", At = V(520, 266), Label = "Mender", Spot = V(20, 6), Pose = "hammer", Chapters = EngineDays, Phases = new[] { Phase.Midday },
                         Lines = new[]
                         {
                             "Wheels are sound. Bearings too. She could run tomorrow, if anyone let her.",
@@ -223,6 +226,7 @@ namespace Shop
                 {
                     West("to_grove", 690, "Into the trees", "grove/from_station"),
                     East("to_square", 960, 686, "To the square", "square/from_station"),
+                    new Hotspot { Id = "forge_door", At = V(504, 630), Label = "Forge", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "forge/door", Chapters = AfterDayZero },
                     new Hotspot { Id = "station_clock", At = V(810, 221), Label = "Station clock", Area = R(-16, -16, 32, 32), Spot = V(0, 120) },
                     new Hotspot { Id = "info_board", At = V(640, 306), Label = "Notice board", Area = R(-20, -46, 40, 48), Spot = V(0, 18) },
                 },
@@ -267,27 +271,12 @@ namespace Shop
                             "Here, a heel of yesterday's loaf. Night walking makes a body hungry.",
                         },
                     },
-                    // Morning: the Baker carries trays of loaves down from the bakery to the bread stall, Mia carries
-                    // crates from home to set out her vegetable stall, Pip runs letters from the shut post office's
+                    // Morning: the Baker is at work in his bakery (see "bakery"), Mia carries crates from home to set
+                    // out her vegetable stall, Pip runs letters from the shut post office's
                     // steps to the neighbours' doors, and Sam sweeps outside the hall's door.
                     // Midday: the Baker trades gossip at Mia's stall, Sam reads the notice board (Pip is at the east's
                     // playground). Dusk: the Baker sweeps before the bakery, Mia and Pip are at their door before
                     // dark, and Sam locks the hall.
-                    new Person
-                    {
-                        Id = "baker", Label = "Baker", Spot = V(0, 12), Phases = new[] { Phase.Morning },
-                        Round = new[]
-                        {
-                            new Stop { At = V(438, 404), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
-                            new Stop { At = V(800, 738), Pose = "lift", Facing = -1, Wait = 2.5f },
-                        },
-                        Lines = new[]
-                        {
-                            "Morning! First batch is out. Take a roll, they're better warm. So is the news.",
-                            "Rye on Tuesdays, seed loaf on Thursdays, and gossip every day, free.",
-                            "Out of the way, lad, hot tray! Morning!",
-                        },
-                    },
                     new Person
                     {
                         Id = "mia", Label = "Mia", Spot = V(0, 12), Phases = new[] { Phase.Morning },
@@ -488,6 +477,7 @@ namespace Shop
                     West("to_station", 640, "To the station", "station/from_square"),
                     East("to_east", 1280, 640, "To the east", "east/from_square"),
                     South("to_coast", 640, 1040, "Down to the coast", "coast/from_square"),
+                    new Hotspot { Id = "bakery_door", At = V(477, 392), Label = "Bakery", Area = R(-10, -30, 20, 36), Spot = V(0, 14), ExitTo = "bakery/door", Chapters = AfterDayZero },
                 },
             },
             ["east"] = new PlaceDef
@@ -960,6 +950,87 @@ namespace Shop
                     new Hotspot { Id = "door", At = V(300, 236), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "grove/shop_door" },
                     new Hotspot { Id = "lanterns", At = V(308, 104), Label = "Lanterns", Area = R(-42, -48, 84, 48), Spot = V(-28, 58) },
                     new Hotspot { Id = "clock", At = V(257, 106), Label = "Clock", Area = R(-8, -62, 16, 64), Spot = V(0, 10) },
+                },
+            },
+            // The Baker's bakery on the square, cut open: the dome oven and its flour sacks, the dough table, the bread
+            // shelves and the counter. Mornings he is at work in it: kneading, a tray out of the oven, loaves onto the
+            // shelves.
+            ["bakery"] = new PlaceDef
+            {
+                Id = "bakery",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                WoodFloor = true,
+                People = new[]
+                {
+                    new Person
+                    {
+                        Id = "baker", Label = "Baker", Spot = V(0, 12), Phases = new[] { Phase.Morning },
+                        Round = new[]
+                        {
+                            new Stop { At = V(431, 360), Pose = "knead", Facing = 1, Wait = 8f },
+                            new Stop { At = V(380, 346), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
+                            new Stop { At = V(483, 324), Pose = "lift", Facing = 1, Wait = 2.5f },
+                        },
+                        Lines = new[]
+                        {
+                            "Morning! First batch is out. Take a roll, they're better warm. So is the news.",
+                            "Rye on Tuesdays, seed loaf on Thursdays, and gossip every day, free.",
+                            "Mind the oven, lad, she bites. Forty years and she still bites me.",
+                        },
+                    },
+                },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(477, 392), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "square/bakery_door" },
+                    new Hotspot { Id = "oven", At = V(373, 338), Label = "Oven", Area = R(-24, -34, 48, 34), Spot = V(7, 8), Text = "The brick dome oven, black at the mouth from forty years of mornings. The heat of it reaches right across the room." },
+                    new Hotspot { Id = "flour", At = V(355, 358), Label = "Flour sacks", Area = R(-12, -18, 24, 18), Spot = V(22, -2), Text = "Sacks of wheat flour from the mill upriver, the top one already open and half scooped." },
+                    new Hotspot { Id = "dough_table", At = V(433, 354), Label = "Dough table", Area = R(-26, -16, 52, 16), Spot = V(-2, 6), Text = "A scrubbed table white with flour: the spruce basin, a sieve, and a round of dough resting under a cloth." },
+                    new Hotspot { Id = "wash_bucket", At = V(466, 360), Label = "Bucket", Area = R(-6, -12, 12, 12), Spot = V(12, 4), Text = "A bucket of clean water, for floury hands. And floury faces, by the look of the towel." },
+                    new Hotspot { Id = "bread", At = V(500, 316), Label = "Bread shelves", Area = R(-25, -40, 50, 40), Spot = V(-17, 8), Text = "Rows of round loaves and sweet buns on the shelves, still warm enough to smell from the door." },
+                    new Hotspot { Id = "recipe_book", At = V(513, 342), Label = "Recipe book", Area = R(-16, -14, 32, 14), Spot = V(0, 10), Text = "The Baker's recipe book, open on the counter. The handwriting changes three times over its pages: his grandmother's, his mother's, his." },
+                },
+            },
+            // The Mender's forge by the line, cut open: the hearth and its bellows, the quench tub, the rail anvil, the
+            // tool rack, the gear bench under the window, the shelf of old parts and the brass plates of 1952, the resin
+            // heater and the shoe press. On the days the story brings him work he is in it at midday.
+            ["forge"] = new PlaceDef
+            {
+                Id = "forge",
+                Variants = new[] { "day" },
+                Indoors = true,
+                Open = true,
+                People = new[]
+                {
+                    new Person
+                    {
+                        Id = "mender", Label = "Mender", Spot = V(16, 0), Chapters = ForgeDays, Phases = new[] { Phase.Midday },
+                        Round = new[]
+                        {
+                            new Stop { At = V(514, 580), Pose = "tinker", Facing = 1, Wait = 9f },
+                            new Stop { At = V(410, 584), Away = true, Wait = 3f },
+                            new Stop { At = V(472, 596), Pose = "hammer", Facing = -1, Wait = 5f },
+                        },
+                        Lines = new[]
+                        {
+                            "Come in, come in. Mind the sparks, they don't mind you.",
+                            "Everything in here is broken or about to be mended. Sometimes both.",
+                            "The hearth's been lit since before you were born, lad. I just keep it fed.",
+                        },
+                    },
+                },
+                Hotspots = new[]
+                {
+                    new Hotspot { Id = "door", At = V(504, 630), Label = "Back outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "station/forge_door" },
+                    new Hotspot { Id = "hearth", At = V(409, 574), Label = "Hearth", Area = R(-20, -40, 40, 40), Spot = V(1, 10), Text = "The forge hearth, banked low. The coals breathe orange under the ash whenever the door lets the wind in." },
+                    new Hotspot { Id = "bellows", At = V(436, 570), Label = "Bellows", Area = R(-7, -10, 14, 10), Spot = V(10, 8), Text = "Leather bellows, patched so often there is more patch than bellows." },
+                    new Hotspot { Id = "quench_tub", At = V(422, 606), Label = "Quench tub", Area = R(-8, -12, 16, 12), Spot = V(0, 8), Text = "A tub of black water with a skin of scale on it. It smells of hot iron and rain." },
+                    new Hotspot { Id = "anvil", At = V(454, 600), Label = "Anvil", Area = R(-9, -16, 18, 16), Spot = V(0, 6), Text = "Not an anvil at all: a length of the old line's rail, cut and stood on a stump. Polished bright on top from hammering." },
+                    new Hotspot { Id = "gear_bench", At = V(515, 572), Label = "Gear bench", Area = R(-21, -18, 42, 18), Spot = V(-1, 8), Text = "A green baize bench under the window, a lens on a jointed arm over it and brass gears laid out in rows, smallest to largest." },
+                    new Hotspot { Id = "parts_shelf", At = V(553, 558), Label = "Parts shelf", Area = R(-13, -40, 26, 40), Spot = V(-23, 20), Text = "Shelves of old parts: hinges, springs, a tin of rivets. On the top shelf, brass plates stamped BELLWOOD 1952." },
+                    new Hotspot { Id = "resin_heater", At = V(552, 584), Label = "Resin heater", Area = R(-7, -14, 14, 14), Spot = V(-22, 0), Text = "A little brazier with a pot of resin warming on it, sweet and sharp, like pine after rain." },
+                    new Hotspot { Id = "shoe_press", At = V(554, 604), Label = "Shoe press", Area = R(-7, -20, 14, 20), Spot = V(-24, 0), Text = "A wooden shoe press, its screw worn smooth. There's a shoe in it now, waiting for its new sole." },
                 },
             },
         };

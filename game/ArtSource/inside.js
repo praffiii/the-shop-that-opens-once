@@ -20,6 +20,16 @@
     .map(([f, t]) => [u32(KIT.hex(f)), u32(KIT.hex(t))]));
 
   const darker = (v, k) => (v & 0xff000000) | ((((v >>> 16) & 255) * k) << 16) | ((((v >>> 8) & 255) * k) << 8) | ((v & 255) * k);
+  // Light on a pixel: k under 1 shades it, over 1 warms it toward sunlight; stepped through a 4x4 Bayer matrix so the
+  // shading stays in crisp pixel-art bands rather than smooth gradients.
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], STEP = 0.07;
+  const lit = (v, k, x, y) => {
+    const q = Math.floor((k - 1) / STEP + BAYER[(y & 3) * 4 + (x & 3)] / 16) * STEP + 1;
+    if (q === 1) return v;
+    const c = (s, warm) => Math.max(0, Math.min(255, Math.round(q < 1 ? ((v >>> s) & 255) * q : ((v >>> s) & 255) + (255 - ((v >>> s) & 255)) * (q - 1) * warm)));
+    return (v & 0xff000000) | (c(16, 0.5) << 16) | (c(8, 0.9) << 8) | c(0, 1.1);
+  };
+  const light = (b, x0, y0, x1, y1, k) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const v = b.get(x, y); if (v >>> 24) b.set(x, y, lit(v, k(x, y), x, y)); } };
   const stamp = (b, x, y, rows, key) => rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (key[r[i]]) px(b, x + i, y + j, key[r[i]]); });
   const sprite = (w, h, paint) => ({ img: V.inked(w, h, paint).canvas(), ax: (w >> 1) + 1, ay: h + 1 });
   const bare = (w, h, paint) => { const b = new Buf(w, h); paint(b); return { img: b.canvas(), ax: w >> 1, ay: h }; }; // a sprite with no ink round it: glass
@@ -53,6 +63,38 @@
     fill(b, x + 2, y + 2, w - 4, h - 4, 'wall3');
     who.forEach(([dx, s]) => { const cx = x + dx, top = y + h - 3 - 6 * s; fill(b, cx - s, top, 2 * s + 1, 2 * s, 'wood4'); fill(b, cx - s - 1, top + 2 * s, 2 * s + 3, h - 3 - (top + 2 * s - y), 'wood4'); });
   }
+
+  // The odds and ends every lived-in room gathers, shared so each room can have its corners filled.
+  const PROPS = {
+    // a box's paint: a slatted crate, its boards and a brace
+    crate: (b, w, h) => { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, 0, w, 1, 'wood1'); fill(b, 0, 0, 2, h, 'wood4'); fill(b, w - 2, 0, 2, h, 'wood4'); fill(b, 0, h - 2, w, 2, 'wood4'); for (let k = 2; k < Math.min(w, h) - 2; k++) px(b, k, h - 1 - k, 'wood3'); },
+    barrel: () => sprite(12, 16, b => { fill(b, 1, 0, 10, 16, 'wood3'); fill(b, 0, 2, 12, 12, 'wood3'); fill(b, 2, 1, 2, 14, 'wood2'); fill(b, 9, 1, 1, 14, 'wood4'); for (const y of [3, 12]) fill(b, 0, y, 12, 1, 'iron3'); fill(b, 1, 0, 10, 1, 'wood4'); }),
+    sack: (c = 'cream1') => sprite(12, 14, b => { V.disc(b, 6, 8, 5, 6, c); fill(b, 3, 2, 6, 3, c); fill(b, 4, 0, 4, 3, c); fill(b, 3, 3, 6, 1, 'dirt2'); fill(b, 2, 9, 2, 3, 'white'); fill(b, 8, 10, 2, 3, 'dirt1'); }),
+    // a wicker basket heaped with loaves, balls of wool or vegetables
+    basket: kind => sprite(16, 11, b => {
+      const heap = { loaves: ['orange', 'roofR1', 'yellow'], yarn: ['rose', 'sky3', 'roofG1'], veg: ['roofG2', 'orange', 'roofR2'] }[kind];
+      heap.forEach((c, i) => { V.disc(b, 4 + i * 4, 4, 3, 3, c); px(b, 3 + i * 4, 3, 'white'); });
+      fill(b, 1, 5, 14, 6, 'dirt2'); for (let x = 1; x < 15; x += 2) fill(b, x, 6, 1, 4, 'dirt3'); fill(b, 0, 5, 16, 1, 'dirt1'); fill(b, 2, 10, 12, 1, 'dirt3');
+    }),
+    stool: () => sprite(10, 12, b => { fill(b, 0, 0, 10, 3, 'wood2'); fill(b, 0, 0, 10, 1, 'wood1'); for (const x of [1, 7]) fill(b, x, 3, 2, 9, 'wood4'); fill(b, 2, 7, 6, 1, 'wood3'); }),
+    // a broom leant against the wall
+    broom: () => sprite(8, 28, b => { for (let y = 0; y < 18; y++) px(b, 1 + (y >> 3), y, 'wood3'); fill(b, 2, 18, 5, 2, 'roofR3'); for (let x = 1; x < 8; x++) fill(b, x, 20, 1, 8 - (x % 2), x % 2 ? 'yellow' : 'dirt1'); }),
+    plant: () => sprite(14, 22, b => { fill(b, 3, 15, 8, 7, 'roofR2'); fill(b, 3, 15, 8, 1, 'roofR1'); fill(b, 4, 21, 6, 1, 'roofR3'); V.foliage(b, (x, y) => ((x - 7) / 7) ** 2 + ((y - 8) / 8) ** 2 <= 1 && y < 16, [0, 0, 14, 16], V.LEAF.green, 21, { cw: 5, ch: 4, dx: 3, dy: 3 }); }),
+  };
+  // Things painted on a wall: a shelf of jars, hung pans, a calendar, and a row of hooks with what hangs on them.
+  const shelf = (b, x, y, w, seed) => {
+    fill(b, x, y, w, 2, 'wood3'); fill(b, x, y, w, 1, 'wood2'); fill(b, x + 1, y + 2, 1, 3, 'wood4'); fill(b, x + w - 2, y + 2, 1, 3, 'wood4');
+    for (let i = x + 1; i < x + w - 4; i += 5) { const t = 4 + ((hash(i, y, seed) * 4) | 0), c = ['roofR2', 'cream2', 'roofB2', 'brass2', 'roofG2', 'orange'][((hash(i, y, seed + 1) * 6) | 0)]; fill(b, i, y - t, 4, t, c); fill(b, i, y - t, 4, 1, 'wood3'); px(b, i + 1, y - t + 2, 'white'); }
+  };
+  const pans = (b, x, y, n) => { fill(b, x, y, n * 9, 1, 'iron3'); for (let i = 0; i < n; i++) { const cx = x + 4 + i * 9, r = 3 + (i % 2); fill(b, cx, y + 1, 1, 4, 'iron3'); V.disc(b, cx, y + 5 + r, r, r, i % 2 ? 'orange' : 'roofR3'); V.disc(b, cx - 1, y + 4 + r, r - 2, r - 2, 'light2'); } };
+  const calendar = (b, x, y, red = 'roofR2') => { fill(b, x, y, 10, 13, 'cream0'); fill(b, x, y, 10, 3, red); px(b, x + 4, y - 1, 'iron3'); for (let j = 5; j < 12; j += 2) for (let i = 1; i < 9; i += 2) px(b, x + i, y + j, j === 7 && i === 5 ? red : 'stone2'); };
+  const hooks = (b, x, y, items) => { fill(b, x, y, items.length * 8, 2, 'wood3'); items.forEach((k, i) => { const cx = x + 3 + i * 8; px(b, cx, y + 2, 'iron2');
+    if (k === 'cap') { fill(b, cx - 3, y + 3, 7, 3, 'roofG2'); fill(b, cx - 4, y + 5, 9, 1, 'roofG3'); fill(b, cx - 2, y + 3, 3, 1, 'roofG1'); }
+    else if (k === 'coat') { fill(b, cx - 3, y + 3, 7, 14, 'dirt3'); fill(b, cx - 3, y + 3, 2, 14, 'dirt2'); fill(b, cx, y + 4, 1, 12, 'wood5'); }
+    else if (k === 'chain') { for (let j = 0; j < 12; j += 2) { px(b, cx, y + 3 + j, 'iron2'); px(b, cx + (j % 4 ? 1 : -1), y + 4 + j, 'iron3'); } }
+    else if (k === 'shoe') { fill(b, cx - 2, y + 3, 4, 3, 'iron2'); fill(b, cx - 3, y + 6, 2, 3, 'iron2'); fill(b, cx + 1, y + 6, 2, 3, 'iron2'); }
+    else if (k === 'ladle') { fill(b, cx, y + 3, 1, 8, 'brass2'); V.disc(b, cx, y + 12, 2, 2, 'brass2'); }
+    else if (k === 'apron') { fill(b, cx - 3, y + 3, 7, 13, 'white'); fill(b, cx - 3, y + 3, 7, 1, 'cream1'); fill(b, cx - 1, y + 8, 3, 3, 'cream1'); } }); };
 
   /* ---------- the rooms ---------- */
   // Marlow's shop's paint: its shopfront's bottle green, and faded plum.
@@ -142,7 +184,7 @@
       solid: [[4, 0, 36, 30], [42, 0, 72, 14], [46, 14, 58, 24], [1, 36, 17, 62], [22, 52, 50, 60], [9, 62, 19, 68],
         [79, 0, 95, 8], [98, 0, 148, 20], [100, 32, 124, 42], [132, 36, 148, 50],
         [154, 0, 222, 16], [164, 30, 200, 48], [154, 40, 166, 46], [198, 40, 210, 46], [204, 60, 224, 70],
-        [82, 80, 94, 90], [130, 80, 142, 90]],
+        [82, 80, 94, 90], [130, 80, 142, 90], [140, 54, 152, 62], [78, 52, 90, 60], [151, 64, 163, 72], [208, 50, 224, 58]],
       paint(b, R) {
         // the bedroom's braided rag rug and the family room's woven one, the doormat
         R(22, 28, 70, 50, (x, y, w, h) => { const d = Math.min(x, y, w - 1 - x, h - 1 - y); return ((x - w / 2) / (w / 2)) ** 2 + ((y - h / 2) / (h / 2)) ** 2 > 1.02 ? 0 : ['rose', 'cream1', 'sky3', 'cream1', 'roofR1'][d % 5]; });
@@ -158,12 +200,19 @@
         fill(b, 13, 25, 16, 1, 'roofB2');
         win(b, 48, 12, 18, 16);
         photo(b, 106, 10, 12, 14, [[6, 2]]); photo(b, 120, 6, 18, 14, [[5, 2], [12, 1]]); photo(b, 140, 12, 8, 10, [[4, 1]]);
+        hooks(b, 37, 10, ['cap']);
+        V.clock(b, 160, 8, 5, 17);
         fill(b, 156, 24, 40, 3, 'wood2'); fill(b, 156, 26, 40, 1, 'wood4');
         [[158, 'roofR2'], [168, 'cream1'], [178, 'sky3'], [188, 'roofR1']].forEach(([x, c], i) => { fill(b, x, 24 - 7 - (i % 2) * 2, 6, 7 + (i % 2) * 2, c); fill(b, x + 1, 24 - 6 - (i % 2) * 2, 2, 5, 'white'); });
       },
       left(b, w, h, win) { win(b, 70, 14, 16, 16); },
-      right(b, w, h, win) { win(b, 30, 14, 16, 16); },
+      right(b, w, h, win) { win(b, 30, 14, 16, 16); hooks(b, 56, 14, ['ladle', 'ladle', 'apron']); pans(b, 6, 12, 2); },
       things(T) {
+        // Ratih's basket of wool by the sofa, a palm by the partition, Satria's slippers by the bed, the rice sack and
+        // the firewood by the kitchen's door
+        T.card('wool', PROPS.basket('yarn'), 146, 60); T.card('palm', PROPS.plant(), 84, 58);
+        T.card('slippers', sprite(12, 4, b => { for (const x of [0, 7]) { fill(b, x, 0, 5, 4, 'roofB2'); fill(b, x + 1, 0, 3, 1, 'roofB1'); } }), 22, 36);
+        T.card('rice_sack', PROPS.sack(), 157, 70); T.card('firewood', sprite(16, 10, b => { for (const [y, n] of [[5, 3], [0, 2]]) for (let i = 0; i < n; i++) { const x = i * 5 + (n === 2 ? 3 : 0); V.disc(b, x + 2, y + 2, 2, 2, 'wood2'); fill(b, x + 2, y, 3, 5, 'wood3'); px(b, x + 2, y + 2, 'wood4'); } }), 216, 56);
         // the bed: a low frame, the kapok mattress, Ratih's patchwork quilt over most of it, a pillow, the headboard
         T.box('bed_frame', 4, 0, 36, 30, 0, 7, (b, w, h) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); fill(b, 0, h - 1, w, 1, 'wood4'); });
         T.box('bed_quilt', 6, 3, 34, 28, 7, 11, (b, w, h, l, which) => {
@@ -250,8 +299,157 @@
           fill(b, 3, 0, 14, 4, 'wood3'); fill(b, 3, 0, 14, 1, 'wood2'); fill(b, 9, 0, 2, 1, 'wood4');
         }), 214, 70);
         // by the door, a fern either side of the mat
-        const plant = sprite(14, 22, b => { fill(b, 3, 15, 8, 7, 'roofR2'); fill(b, 3, 15, 8, 1, 'roofR1'); fill(b, 4, 21, 6, 1, 'roofR3'); V.foliage(b, (x, y) => ((x - 7) / 7) ** 2 + ((y - 8) / 8) ** 2 <= 1 && y < 16, [0, 0, 14, 16], V.LEAF.green, 21, { cw: 5, ch: 4, dx: 3, dy: 3 }); });
+        const plant = PROPS.plant();
         T.card('door_fern_l', plant, 88, 90); T.card('door_fern_r', plant, 136, 90);
+      },
+    },
+    // The Baker's bakery on the square (Night 1's 1A, and Night 5), cut open: the brick dome oven glowing in the west
+    // corner with its flour sacks, the dough and sifting table in the middle (the spruce basin, the sieve, the wash
+    // bucket by it), and the shop's counter in the east with the bread display behind it, the recipe book on it and
+    // the copper tins along the wall.
+    bakery: {
+      area: 'square', seed: 11, room: [184, 84], door: 134, bays: [],
+      solid: [[4, 0, 54, 30], [2, 38, 22, 50], [62, 30, 116, 46], [118, 44, 128, 52], [150, 22, 182, 34], [132, 0, 182, 8],
+        [58, 0, 76, 8], [112, 0, 128, 8], [2, 60, 26, 74], [166, 70, 182, 82]],
+      anchors: { knead: [88, 52], oven: [30, 38], till: [140, 16] },
+      paint(b, R) {
+        // flour dusted round the dough table, and the woven mat before the counter
+        R(56, 26, 122, 58, (x, y, w, h) => hash(x, y, 5) < 0.1 * (1 - Math.abs(x - w / 2) / (w / 2)) ? 'cream0' : 0);
+        R(134, 40, 176, 56, (x, y, w, h) => { const e = Math.min(x, y, w - 1 - x, h - 1 - y); return e < 2 ? 'roofR3' : (x + y) % 6 < 3 ? 'yellow' : 'roofR1'; });
+        R(118, 64, 150, 74, (x, y, w, h) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wood4' : (x + y) % 4 < 2 ? 'dirt2' : 'dirt1'));
+      },
+      back(b, w, h, win) {
+        win(b, 78, 14, 18, 16);
+        // the copper tins on their shelf over the counter, and a bunch of wheat hung to dry by the window
+        fill(b, 132, 22, 48, 3, 'wood2'); fill(b, 132, 24, 48, 1, 'wood4');
+        [[134, 9], [146, 7], [156, 10], [168, 8]].forEach(([x, hh], i) => { fill(b, x, 22 - hh, 8, hh, i % 2 ? 'roofR2' : 'orange'); fill(b, x + 1, 22 - hh, 2, hh - 1, 'light2'); fill(b, x, 22 - hh, 8, 1, 'roofR3'); });
+        for (let i = 0; i < 7; i++) { fill(b, 102 + i, 12, 1, 12 + (i % 3), 'yellow'); px(b, 102 + i, 11, 'brass2'); }
+        fill(b, 101, 18, 9, 1, 'roofR3');
+        // a shelf of jars over the cooling rack, the peel hung beside it, and the day's loaves chalked on a board
+        shelf(b, 56, 12, 20, 4); fill(b, 76, 4, 2, 18, 'wood3'); fill(b, 74, 20, 6, 7, 'wood2'); fill(b, 75, 21, 4, 1, 'wood1');
+        fill(b, 112, 6, 16, 14, 'wood3'); fill(b, 113, 7, 14, 12, 'ink2'); for (const [y, n] of [[9, 9], [12, 11], [15, 7]]) { fill(b, 114, y, n, 1, 'cream1'); px(b, 125, y, 'yellow'); }
+      },
+      left(b, w, h, win) { win(b, 40, 14, 14, 14); pans(b, 8, 10, 3); hooks(b, 62, 12, ['apron']); },
+      right(b, w, h, win) { calendar(b, 30, 14); photo(b, 48, 10, 14, 12, [[7, 2]]); },
+      things(T) {
+        const brick = (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, y % 4 === 3 || (x + ((y >> 2) % 2) * 4) % 8 === 0 ? 'roofR4' : hash(x >> 2, y >> 2, 7) < 0.3 ? 'roofR3' : 'roofR2'); };
+        // the dome oven: a brick block, its arched mouth dark over the fire
+        T.box('oven', 6, 0, 52, 28, 0, 36, (b, w, h, l, which) => {
+          brick(b, w, h);
+          if (which === 'front') { V.disc(b, w >> 1, h - 4, 10, 11, 'ink2'); fill(b, (w >> 1) - 10, h - 6, 20, 6, 'ink2'); fill(b, (w >> 1) - 12, h - 18, 24, 2, 'stone2'); }
+          if (which === 'top') { fill(b, 0, 0, w, h, 'roofR3'); V.disc(b, w >> 1, h >> 1, (w >> 1) - 3, (h >> 1) - 2, 'roofR2'); }
+        });
+        T.card('oven_fire', sprite(18, 10, b => { fill(b, 0, 4, 18, 6, 'light3'); fill(b, 2, 2, 14, 7, 'light2'); fill(b, 4, 3, 10, 6, 'light1'); fill(b, 6, 5, 6, 3, 'light0'); for (const x of [3, 8, 13]) fill(b, x, 8, 3, 2, 'roofR4'); }), 29, 29, 2, true);
+        T.card('oven_embers', sprite(16, 5, b => { fill(b, 0, 2, 16, 3, 'roofR4'); for (const [x, c] of [[1, 'light3'], [4, 'orange'], [7, 'light2'], [10, 'orange'], [13, 'light3']]) fill(b, x, 1 + (x % 2), 3, 2, c); }), 29, 28, 2);
+        T.box('oven_flue', 24, 0, 34, 6, 36, WALL - 2, brick);
+        const sack = sprite(14, 16, b => { V.disc(b, 7, 9, 6, 7, 'cream1'); fill(b, 2, 3, 10, 3, 'cream2'); fill(b, 4, 0, 6, 4, 'cream1'); fill(b, 3, 3, 8, 1, 'dirt2'); for (const x of [5, 8]) fill(b, x, 8, 1, 4, 'yellow'); px(b, 6, 7, 'yellow'); });
+        T.card('flour_sack_0', sack, 9, 48); T.card('flour_sack_1', sack, 18, 46); T.card('flour_sack_2', sack, 12, 40, 6);
+        // the dough and sifting table: a scrubbed top on stout legs
+        T.box('dough_table', 64, 32, 114, 46, 12, 16, (b, w, h, l, which) => { fill(b, 0, 0, w, h, which === 'top' ? 'cream1' : 'wood3'); fill(b, 0, 0, w, 1, which === 'top' ? 'white' : 'wood2'); if (which === 'top') for (let x = 4; x < w; x += 9) fill(b, x, 2, 4, 1, 'cream2'); });
+        for (const [x, y] of [[65, 33], [110, 33], [65, 43], [110, 43]]) T.box(`dough_leg_${x}_${y}`, x, y, x + 3, y + 3, 0, 12, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
+        T.card('basin', sprite(16, 8, b => { fill(b, 0, 1, 16, 7, 'wood2'); fill(b, 1, 0, 14, 2, 'wood1'); fill(b, 2, 2, 12, 2, 'cream0'); fill(b, 0, 5, 16, 1, 'wood3'); fill(b, 1, 7, 14, 1, 'wood4'); }), 76, 40, 16);
+        T.card('sieve', sprite(12, 5, b => { fill(b, 0, 0, 12, 5, 'wood3'); fill(b, 1, 1, 10, 3, 'stone1'); for (let x = 2; x < 10; x += 2) fill(b, x, 1, 1, 3, 'stone2'); fill(b, 0, 0, 12, 1, 'wood2'); }), 96, 38, 16);
+        T.card('dough', sprite(10, 6, b => { V.disc(b, 5, 4, 4, 2, 'cream0'); fill(b, 2, 2, 6, 1, 'white'); fill(b, 1, 5, 8, 1, 'cream2'); }), 104, 44, 16);
+        T.card('wash_bucket', sprite(10, 11, b => { fill(b, 1, 2, 8, 9, 'wood3'); fill(b, 0, 2, 10, 2, 'iron3'); fill(b, 0, 8, 10, 1, 'iron3'); fill(b, 2, 2, 6, 1, 'water2'); fill(b, 1, 0, 8, 1, 'iron2'); px(b, 0, 1, 'iron2'); px(b, 9, 1, 'iron2'); }), 122, 50);
+        // the shop: the counter and its glass case of buns, the bread display on the back wall, the recipe book
+        T.box('counter', 150, 22, 182, 34, 0, 16, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 2, 'wood2');
+          if (which === 'front') for (let x = 3; x < w - 8; x += 12) { fill(b, x, 4, 9, h - 6, 'wood2'); fill(b, x + 1, 5, 7, 1, 'wood1'); }
+          if (which === 'top') { fill(b, 0, 0, w, h, 'cream1'); fill(b, 4, 2, 18, h - 4, 'sky3'); for (let x = 6; x < 20; x += 5) V.disc(b, x, h >> 1, 2, 2, 'orange'); }
+        });
+        T.box('display', 132, 0, 182, 8, 0, 42, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'front') for (const y of [4, 16, 28]) {
+            fill(b, 2, y + 8, w - 4, 2, 'wood4');
+            for (let x = 3; x < w - 8; x += 8) { V.disc(b, x + 3, y + 5, 3, 3, y === 16 ? 'roofR1' : 'orange'); fill(b, x + 1, y + 3, 4, 1, 'light2'); }
+          }
+        });
+        T.card('recipe_book', sprite(12, 5, b => { fill(b, 0, 1, 12, 4, 'roofR3'); fill(b, 1, 0, 10, 4, 'cream0'); fill(b, 6, 0, 1, 4, 'cream2'); for (const y of [1, 2, 3]) { fill(b, 2, y, 3, 1, 'stone2'); fill(b, 8, y, 2, 1, 'stone2'); } }), 170, 30, 16);
+        T.card('bell', sprite(6, 6, b => { fill(b, 1, 1, 4, 4, 'brass1'); fill(b, 2, 0, 2, 1, 'brass2'); fill(b, 0, 5, 6, 1, 'brass3'); px(b, 2, 2, 'brass0'); }), 156, 30, 16);
+        // the cooling rack of loaves, baskets of bread by the shelves, crates and the broom in the corner, a stool by
+        // the counter and a fern by the door
+        T.box('cooling_rack', 58, 0, 76, 8, 0, 36, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3');
+          if (which === 'front') for (let y = 4; y < h - 2; y += 10) { fill(b, 1, y + 6, w - 2, 1, 'iron2'); for (let x = 2; x < w - 4; x += 5) { V.disc(b, x + 2, y + 4, 2, 2, (x + y) % 3 ? 'orange' : 'roofR1'); px(b, x + 1, y + 3, 'light2'); } }
+        });
+        T.card('bread_basket_0', PROPS.basket('loaves'), 120, 8); T.card('bread_basket_1', PROPS.basket('loaves'), 120, 4, 9);
+        T.box('crate_0', 4, 60, 22, 72, 0, 14, PROPS.crate); T.box('crate_1', 6, 62, 18, 70, 14, 24, PROPS.crate);
+        T.card('broom', PROPS.broom(), 27, 64);
+        T.card('flour_barrel', PROPS.barrel(), 174, 80); T.card('stool', PROPS.stool(), 146, 42); T.card('fern', PROPS.plant(), 160, 82);
+        T.card('bakery_lamp', sprite(8, 12, b => { fill(b, 3, 0, 2, 2, 'iron3'); fill(b, 1, 2, 6, 8, 'light1'); fill(b, 2, 3, 4, 6, 'light0'); fill(b, 0, 10, 8, 2, 'iron3'); }), 92, 36, 16, true);
+      },
+    },
+    // The Mender's forge by the line (Night 1's 1B, Night 5's resoling), cut open: the stone hearth glowing in the west
+    // corner with its bellows and the quench tub, the rail anvil on its stump, the tools on the back wall, the gear
+    // table with its lens under the window, and in the east corner the resin heater and the wooden shoe press under
+    // the shelf of old parts and the brass plates of 1952.
+    forge: {
+      area: 'station', seed: 19, room: [184, 80], door: 120, bays: [],
+      solid: [[4, 0, 46, 26], [46, 6, 58, 20], [30, 44, 46, 56], [62, 40, 78, 50], [110, 6, 152, 22], [156, 0, 182, 8], [160, 26, 182, 56],
+        [60, 0, 76, 10], [80, 0, 106, 10], [4, 62, 20, 74], [160, 66, 182, 76]],
+      anchors: { anvil: [70, 56], bench: [130, 30], hearth: [26, 34] },
+      wall(b, w, h, seed) {
+        V.wallPanel(b, 0, 0, w, h, 'stone', seed);
+        // a plinth of dark stone where the floor's cinders get kicked
+        for (let y = h - 12; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, y === h - 12 ? 'stone2' : (x + ((y >> 2) % 2) * 6) % 12 === 0 || y % 4 === 3 ? 'stone4' : 'stone3');
+        fill(b, 0, 0, w, 4, 'wood4'); fill(b, 0, 3, w, 1, 'wood5'); fill(b, 0, h - 2, w, 2, 'stone4');
+      },
+      paint(b, R) {
+        // stone flags round the hearth and the anvil, where sparks fall, and cinders on them
+        R(2, 24, 84, 66, (x, y, w, h) => { const d = ((x - 4) / 80) ** 2 + ((y - 2) / 42) ** 2; if (d > 1 - hash(x >> 3, y >> 2, 4) * 0.12) return 0; const r = y % 7, c = (x + ((y / 7 | 0) % 2) * 5) % 10; return r === 6 || c === 0 ? 'stone4' : hash(x, y, 9) < 0.06 ? 'wood5' : hash(x >> 2, y / 7 | 0, 3) < 0.4 ? 'stone3' : 'stone2'; });
+        R(100, 64, 140, 74, (x, y, w, h) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wood4' : (x * 3 + y) % 5 < 2 ? 'dirt3' : 'dirt2'));
+      },
+      back(b, w, h, win) {
+        win(b, 120, 14, 18, 16);
+        // soot climbing the wall over the hearth, horseshoes nailed up for luck, a chain on its hook
+        for (let y = 0; y < h; y++) for (let x = 0; x < 50; x++) if (hash(x, y, 2) < 0.5 * (1 - Math.abs(x - 25) / 25) * (1 - y / h)) px(b, x, y, hash(x, y, 3) < 0.5 ? 'stone4' : 'stone3');
+        hooks(b, 62, 34, ['shoe', 'shoe', 'shoe', 'shoe', 'shoe']); hooks(b, 142, 10, ['chain', 'chain']);
+        // the tool rack: a board with tongs, hammers and files hung in a row
+        fill(b, 62, 14, 44, 4, 'wood3'); fill(b, 62, 14, 44, 1, 'wood2');
+        [[66, 'tongs'], [74, 'hammer'], [82, 'hammer'], [90, 'file'], [96, 'tongs'], [102, 'file']].forEach(([x, k]) => {
+          if (k === 'hammer') { fill(b, x + 1, 18, 1, 12, 'wood3'); fill(b, x - 1, 28, 5, 3, 'iron3'); }
+          else if (k === 'tongs') { fill(b, x, 18, 1, 13, 'iron3'); fill(b, x + 2, 18, 1, 13, 'iron3'); fill(b, x, 29, 3, 2, 'iron4'); }
+          else { fill(b, x, 18, 2, 12, 'iron2'); fill(b, x, 18, 2, 3, 'wood3'); }
+        });
+      },
+      right(b, w, h, win) { win(b, 36, 14, 14, 14); calendar(b, 58, 14, 'stone3'); },
+      left(b, w, h, win) { hooks(b, 60, 12, ['coat', 'chain']); },
+      things(T) {
+        const stoneBox = (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px(b, x, y, y % 6 === 5 || (x + ((y / 6 | 0) % 2) * 5) % 10 === 0 ? 'stone4' : hash(x >> 2, y >> 2, 3) < 0.3 ? 'stone3' : 'stone2'); };
+        // the hearth: a stone block, the fire in its mouth, the hood and chimney over it
+        T.box('hearth', 6, 0, 44, 24, 0, 22, (b, w, h, l, which) => { stoneBox(b, w, h); if (which === 'front') { fill(b, 6, h - 12, w - 12, 10, 'ink2'); fill(b, 4, h - 14, w - 8, 2, 'stone1'); } if (which === 'top') { fill(b, 3, 3, w - 6, h - 6, 'ink2'); for (let i = 0; i < 14; i++) px(b, 5 + ((i * 7) % (w - 10)), 5 + ((i * 5) % (h - 10)), i % 3 ? 'light2' : 'light1'); } });
+        T.card('hearth_fire', sprite(20, 10, b => { fill(b, 0, 5, 20, 5, 'light3'); fill(b, 2, 3, 16, 6, 'light2'); fill(b, 5, 2, 10, 6, 'light1'); fill(b, 8, 4, 4, 3, 'light0'); for (const x of [2, 8, 14]) fill(b, x, 8, 4, 2, 'stone4'); }), 25, 25, 2, true);
+        T.card('hearth_embers', sprite(18, 5, b => { fill(b, 0, 2, 18, 3, 'stone4'); for (const [x, c] of [[1, 'light3'], [5, 'orange'], [9, 'light2'], [12, 'orange'], [15, 'light3']]) fill(b, x, 1 + (x % 2), 3, 2, c); }), 25, 24, 2);
+        T.box('hood', 4, 0, 46, 14, 34, 48, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'iron3'); fill(b, 0, 0, w, 1, 'iron2'); fill(b, 0, h - 2, w, 2, 'iron4'); for (let x = 5; x < w; x += 8) fill(b, x, 2, 1, h - 4, 'iron4'); });
+        T.box('chimney', 18, 0, 32, 8, 48, WALL - 2, stoneBox);
+        T.card('bellows', sprite(14, 10, b => { fill(b, 0, 3, 12, 6, 'wood4'); fill(b, 1, 2, 10, 2, 'dirt3'); fill(b, 2, 4, 8, 4, 'dirt2'); for (const x of [3, 6, 9]) fill(b, x, 4, 1, 4, 'dirt3'); fill(b, 12, 5, 2, 2, 'brass2'); }), 52, 20);
+        T.card('quench_tub', sprite(16, 12, b => { fill(b, 1, 2, 14, 10, 'wood3'); fill(b, 0, 2, 16, 2, 'iron3'); fill(b, 0, 9, 16, 1, 'iron3'); fill(b, 2, 2, 12, 1, 'water3'); fill(b, 1, 0, 14, 2, 'wood2'); fill(b, 4, 0, 3, 1, 'stone0'); }), 38, 56);
+        // the rail anvil, cut from a length of the old line, on its stump
+        T.card('anvil', sprite(18, 16, b => {
+          fill(b, 4, 8, 10, 8, 'wood3'); fill(b, 4, 8, 10, 1, 'wood2'); for (const x of [6, 10]) fill(b, x, 10, 1, 5, 'wood4');
+          fill(b, 1, 2, 16, 3, 'iron2'); fill(b, 1, 2, 16, 1, 'iron1'); fill(b, 6, 5, 6, 3, 'iron3'); fill(b, 3, 7, 12, 2, 'iron3'); fill(b, 0, 3, 2, 1, 'iron2');
+        }), 70, 50);
+        // the gear table under the window: the calibration lens on its arm, gears and a loupe laid out
+        T.box('gear_table', 110, 8, 152, 22, 12, 16, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'top') { fill(b, 2, 2, w - 4, h - 4, 'roofG3'); fill(b, 2, 2, w - 4, 1, 'roofG2'); } });
+        for (const [x, y] of [[111, 9], [148, 9], [111, 19], [148, 19]]) T.box(`gear_leg_${x}_${y}`, x, y, x + 3, y + 3, 0, 12, (b, w, h) => fill(b, 0, 0, w, h, 'wood4'));
+        T.card('gears', sprite(20, 6, b => { for (const [cx, r, c] of [[4, 3, 'brass1'], [11, 2, 'brass2'], [16, 2, 'brass1']]) { V.disc(b, cx, 3, r, r, c); px(b, cx, 3, 'brass3'); } }), 124, 18, 16);
+        T.card('lens', sprite(10, 14, b => { fill(b, 1, 12, 8, 2, 'iron3'); fill(b, 4, 4, 2, 8, 'iron3'); V.disc(b, 5, 3, 4, 3, 'iron2'); V.disc(b, 5, 3, 3, 2, 'sky2'); px(b, 4, 2, 'white'); }), 142, 14, 16);
+        // the shelf of old parts and the brass plates of 1952
+        T.box('parts_shelf', 156, 0, 182, 8, 0, 40, (b, w, h, l, which) => {
+          fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2');
+          if (which === 'front') for (const y of [4, 16, 28]) { fill(b, 2, y + 8, w - 4, 2, 'wood4'); for (let x = 3; x < w - 4; x += 6) fill(b, x, y + 3, 4, 5, (x + y) % 3 ? 'brass1' : 'iron2'); }
+        });
+        // the coal bin and the workbench with its vice under the tools, the grindstone and a heap of scrap iron by the
+        // door, and lengths of old rail stacked in the east corner
+        T.box('coal_bin', 60, 0, 76, 10, 0, 12, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood4'); fill(b, 0, 0, w, 1, 'wood3'); if (which === 'top') { fill(b, 1, 1, w - 2, h - 2, 'ink2'); for (let i = 0; i < 12; i++) px(b, 2 + ((i * 5) % (w - 4)), 2 + ((i * 3) % (h - 4)), 'stone3'); } });
+        T.box('workbench', 80, 0, 106, 10, 0, 16, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 2, 'wood2'); if (which === 'front') { fill(b, 2, 4, w - 4, h - 6, 'wood4'); fill(b, 4, 6, 6, 3, 'wood2'); px(b, 7, 7, 'brass1'); } });
+        T.card('vice', sprite(10, 8, b => { fill(b, 0, 4, 10, 4, 'iron3'); fill(b, 1, 0, 3, 4, 'iron2'); fill(b, 6, 0, 3, 4, 'iron2'); fill(b, 0, 2, 10, 1, 'iron4'); }), 98, 8, 16);
+        T.card('grindstone', sprite(16, 16, b => { fill(b, 2, 9, 2, 7, 'wood4'); fill(b, 12, 9, 2, 7, 'wood4'); fill(b, 1, 9, 14, 2, 'wood3'); V.disc(b, 8, 7, 6, 6, 'stone2'); V.disc(b, 8, 7, 4, 4, 'stone1'); px(b, 8, 7, 'iron3'); fill(b, 14, 6, 2, 1, 'iron3'); }), 12, 74);
+        T.card('scrap', sprite(16, 8, b => { fill(b, 1, 5, 14, 3, 'iron3'); fill(b, 3, 2, 3, 4, 'iron2'); fill(b, 8, 1, 6, 2, 'roofR3'); fill(b, 10, 3, 2, 3, 'iron4'); V.disc(b, 6, 4, 2, 2, 'brass3'); px(b, 4, 3, 'iron1'); }), 30, 74);
+        T.box('rails', 160, 66, 182, 76, 0, 8, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'iron3'); for (let y = 0; y < h; y += 3) fill(b, 0, y, w, 1, 'iron2'); if (which === 'right' || which === 'front') fill(b, 0, h - 1, w, 1, 'iron4'); });
+        // the resin heater (a little brazier with its pot) and the wooden shoe press in the east corner
+        T.card('resin_heater', sprite(12, 14, b => { fill(b, 1, 6, 10, 8, 'iron3'); fill(b, 1, 6, 10, 1, 'iron2'); fill(b, 3, 9, 6, 3, 'light2'); fill(b, 2, 2, 8, 4, 'iron4'); fill(b, 3, 1, 6, 2, 'wood5'); fill(b, 4, 1, 4, 1, 'orange'); }), 168, 34);
+        T.card('shoe_press', sprite(14, 20, b => { fill(b, 1, 14, 12, 6, 'wood3'); fill(b, 1, 14, 12, 1, 'wood2'); fill(b, 2, 0, 2, 14, 'wood4'); fill(b, 10, 0, 2, 14, 'wood4'); fill(b, 2, 0, 10, 2, 'wood3'); fill(b, 6, 2, 2, 7, 'iron3'); fill(b, 4, 9, 6, 2, 'wood2'); fill(b, 4, 11, 6, 3, 'dirt3'); }), 170, 54);
       },
     },
     // Marlow's shop (GDD 7.6, LOC-INT-02). The Shop That Opens Once, grown into the ancient tree behind it: its roots
@@ -270,7 +468,7 @@
         [100, 0, 114, 6], [116, 0, 200, 10], [124, 46, 196, 54],
         [1, 64, 15, 80], [1, 90, 15, 106], [48, 86, 72, 96], [34, 88, 44, 96], [76, 88, 86, 96],
         [208, 0, 226, 12], [258, 18, 271, 60], [258, 72, 271, 106], [214, 52, 240, 62], [236, 74, 254, 86],
-        [220, 92, 244, 104], [208, 108, 222, 116]],
+        [220, 92, 244, 104], [208, 108, 222, 116], [176, 78, 200, 90], [98, 100, 110, 108], [113, 118, 123, 126]],
       // the customer's side of the counter, the clock, Marlow's place behind the counter, and before each box
       anchors: { counter: [160, 64], clock: [107, 16], marlow: [160, 36], ...Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map(i => ['box_' + i, [Math.min(122 + 12 * i, 190), 18]])) },
       // faded plum paper with a gold sprig, over a wainscot painted the shopfront's bottle green
@@ -424,7 +622,7 @@
         }));
         // the store: crates by the back door, shelves of jars and parcels along the east wall, a trunk, a stack of
         // crates, barrels and sacks
-        const crate = (b, w, h) => { fill(b, 0, 0, w, h, 'wood2'); fill(b, 0, 0, w, 1, 'wood1'); fill(b, 0, 0, 2, h, 'wood4'); fill(b, w - 2, 0, 2, h, 'wood4'); fill(b, 0, h - 2, w, 2, 'wood4'); for (let k = 2; k < Math.min(w, h) - 2; k++) px(b, k, h - 1 - k, 'wood3'); };
+        const crate = PROPS.crate;
         T.box('crate_0', 208, 0, 226, 12, 0, 14, crate); T.box('crate_1', 210, 1, 222, 10, 14, 25, crate);
         T.box('crate_2', 236, 74, 254, 86, 0, 16, crate); T.box('crate_3', 238, 76, 250, 84, 16, 27, crate);
         const shelves = (b, w, h, l, which) => {
@@ -440,9 +638,20 @@
         };
         T.box('shelves_0', 258, 18, 271, 60, 0, 46, shelves); T.box('shelves_1', 258, 72, 271, 106, 0, 40, shelves);
         T.box('trunk', 214, 52, 240, 62, 0, 12, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'roofB3'); fill(b, 0, 0, w, 1, 'roofB2'); for (let x = 3; x < w; x += 8) fill(b, x, 0, 2, h, 'brass3'); if (which === 'front') fill(b, (w >> 1) - 1, 3, 3, 3, 'brass1'); });
-        const barrel = sprite(12, 16, b => { fill(b, 1, 0, 10, 16, 'wood3'); fill(b, 0, 2, 12, 12, 'wood3'); fill(b, 2, 1, 2, 14, 'wood2'); for (const y of [3, 12]) fill(b, 0, y, 12, 1, 'iron3'); fill(b, 1, 0, 10, 1, 'wood4'); });
+        const barrel = PROPS.barrel();
         T.card('barrel_0', barrel, 226, 100); T.card('barrel_1', barrel, 238, 104);
         T.card('sacks', sprite(14, 12, b => { V.disc(b, 4, 7, 4, 5, 'cream2'); V.disc(b, 10, 8, 4, 4, 'cream2'); V.disc(b, 3, 6, 2, 3, 'cream1'); fill(b, 3, 1, 3, 2, 'wood4'); }), 215, 116);
+        // a table of curios by the counter (the compass, the brass lens, the black camera, a spool of patchwork
+        // thread, a pair of old boots under it), a globe on its stand, the umbrella stand by the door, books stacked
+        T.box('curio_table', 176, 78, 200, 90, 0, 12, (b, w, h, l, which) => { fill(b, 0, 0, w, h, 'wood3'); fill(b, 0, 0, w, 1, 'wood2'); if (which === 'top') { fill(b, 0, 0, w, h, PLUM[2]); fill(b, 1, 1, w - 2, 1, PLUM[1]); } if (which === 'front') fill(b, 2, 3, w - 4, h - 5, 'wood4'); });
+        T.card('compass', sprite(7, 4, b => { V.disc(b, 3, 2, 3, 2, 'brass1'); V.disc(b, 3, 2, 2, 1, 'cream0'); px(b, 3, 1, 'roofR2'); }), 180, 86, 12);
+        T.card('lens', sprite(9, 5, b => { V.disc(b, 3, 2, 3, 2, 'brass2'); V.disc(b, 3, 2, 2, 1, 'sky2'); fill(b, 6, 3, 3, 1, 'wood3'); }), 187, 84, 12);
+        T.card('camera', sprite(9, 6, b => { fill(b, 0, 1, 9, 5, 'ink2'); fill(b, 1, 0, 3, 1, 'iron3'); V.disc(b, 5, 3, 2, 2, 'iron2'); px(b, 5, 3, 'sky2'); px(b, 1, 2, 'iron1'); }), 194, 86, 12);
+        T.card('thread', sprite(6, 5, b => { fill(b, 0, 0, 6, 1, 'wood2'); fill(b, 0, 4, 6, 1, 'wood2'); fill(b, 1, 1, 4, 3, 'rose'); fill(b, 1, 2, 4, 1, 'sky3'); }), 184, 88, 12);
+        T.card('boots', sprite(12, 9, b => { for (const x of [0, 6]) { fill(b, x + 1, 0, 4, 7, 'dirt3'); fill(b, x, 6, 6, 3, 'dirt3'); fill(b, x + 1, 1, 1, 5, 'dirt2'); fill(b, x, 8, 6, 1, 'wood5'); } }), 206, 92);
+        T.card('globe', sprite(12, 20, b => { V.disc(b, 6, 6, 5, 5, 'sky3'); V.disc(b, 5, 5, 2, 2, 'roofG2'); fill(b, 7, 7, 2, 2, 'roofG2'); fill(b, 0, 5, 1, 3, 'brass2'); fill(b, 11, 5, 1, 3, 'brass2'); fill(b, 5, 12, 2, 5, 'wood3'); fill(b, 2, 17, 8, 3, 'wood4'); }), 104, 106);
+        T.card('umbrellas', sprite(10, 22, b => { fill(b, 1, 10, 8, 12, 'roofB3'); fill(b, 1, 10, 8, 1, 'roofB2'); fill(b, 2, 0, 1, 12, 'wood3'); V.disc(b, 3, 1, 1, 1, 'wood3'); fill(b, 5, 2, 2, 10, 'roofR3'); fill(b, 7, 4, 1, 8, 'ink2'); }), 118, 124);
+        T.card('books', sprite(12, 10, b => { [['roofR2', 0, 12], ['roofB2', 3, 10], ['roofG2', 6, 11], ['brass2', 8, 9]].forEach(([c, y, w]) => { fill(b, 0, y, w, 2, c); fill(b, 0, y, w, 1, 'cream0'); }); }), 106, 62);
         // by the door, ferns grown in from the grove
         T.card('fern_l', V.fern(3), 128, 132); T.card('fern_r', V.fern(6), 172, 132);
       },
@@ -486,11 +695,25 @@
     V.wallPanel(b, fx0, y1, fx1 - fx0, FLOOR, 'stone', R.seed);
     fill(b, fx0, y1, fx1 - fx0, 1, 'wood4');
     for (let k = 0; k < 2; k++) { fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 4, 'stone1'); fill(b, xd - 14 + k * 2, y1 + 1 + k * 5, 28 - k * 4, 1, 'stone0'); fill(b, xd - 14 + k * 2, y1 + 4 + k * 5, 28 - k * 4, 1, 'stone3'); }
-    S.height = (x, y) => (footed(x, y) ? top : face(x, y) ? top - (y - y1) : E.height(x, y));
-    S.vertical = (x, y) => face(x, y) || (!footed(x, y) && E.vertical(x, y));
+    // Higher land just behind the back wall (a bank, a terrace) is levelled to the floor: the wall leans back to face
+    // the camera, so anything standing up there would show through it.
+    const behind = (x, y) => x >= fx0 && x < fx1 && y >= y0 - back - WALL && y < y0 - back;
+    S.height = (x, y) => (footed(x, y) ? top : face(x, y) ? top - (y - y1) : behind(x, y) ? Math.min(E.height(x, y), top) : E.height(x, y));
+    S.vertical = (x, y) => face(x, y) || (!footed(x, y) && !behind(x, y) && E.vertical(x, y));
     // Feet stay on the floor, off the furniture and the partitions.
     const solid = [...R.solid.map(([a, c, d, e]) => [P(a), Q(c), P(d), Q(e)]), ...R.bays.map(([x, row]) => [P(x) - 3, y0, P(x) + 3, Q(row)])];
     S.blocked = (x, y) => !(x >= x0 && x < x1 && y >= y0 && y < y1) || solid.some(([a, c, d, e]) => x >= a && x < d && y >= c && y < e);
+    // The floor's light: shaded where it meets the walls (deepest in the corners) and a little toward the back, each
+    // board its own tone, and the sun falling in through the back wall's windows, slanting east as it reaches the floor.
+    const sun = [];
+    if (R.back) R.back(new Buf(x1 - x0, WALL), x1 - x0, WALL, (bb, x, y, w) => sun.push([P(x), w]));
+    light(b, x0, y0, x1, y1, (x, y) => {
+      const back = y - y0, side = Math.min(x - x0, x1 - 1 - x), near = Math.min(back * 1.4, side);
+      let k = 1 - 0.2 * (1 - (y - y0) / (y1 - y0)) - (near < 18 ? 0.34 * (1 - near / 18) ** 1.4 : 0) - (back < 20 && side < 20 ? 0.1 : 0);
+      k += (hash((y - y0) / 5 | 0, (x + (hash((y - y0) / 5 | 0, 0, R.seed) * 60 | 0)) >> 6, R.seed + 3) - 0.5) * 0.16;
+      for (const [sx, sw] of sun) { const r = back - 4, at = x - sx - r * 0.35; if (r >= 0 && r < sw * 1.6 && at >= 0 && at < sw) k += 0.3 * (1 - r / (sw * 1.6)) + 0.08; }
+      return k;
+    });
     // Soft shadows on the floor: along the walls' feet and under the furniture.
     const ground = b.canvas();
     V.shadows(ground, [['r', x0, y0, x1 - x0, 3], ['r', x0, y0, 3, y1 - y0], ['r', x1 - 3, y0, 3, y1 - y0], ...solid.map(([a, c, d, e]) => ['r', a + 2, c + 2, d - a, e - c])]);
@@ -511,6 +734,8 @@
     const wall = R.wall || plaster;
     const walls = (b2, w, h, extra, glass, panes, flip) => {
       wall(b2, w, h, R.seed);
+      // shaded under the ceiling beam, along the floor and into the corners
+      light(b2, 0, 0, w, h, (x, y) => 1 - (y < 24 ? 0.26 * (1 - y / 24) : 0) - (y > h - 10 ? 0.2 * (1 - (h - y) / 10) : 0) - (Math.min(x, w - 1 - x) < 16 ? 0.24 * (1 - Math.min(x, w - 1 - x) / 16) : 0));
       if (extra) extra(b2, w, h, (b3, x, y, ww, wh) => {
         V.win(b3, x, y, ww, wh, { frame: ['wood1', 'wood2', 'wood3'] });
         const pane = new Buf(ww, wh);

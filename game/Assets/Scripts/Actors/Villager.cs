@@ -19,7 +19,7 @@ namespace Shop
         /// <summary>Seconds before they turn to the courier again, and after the courier arrives before they first do.</summary>
         const float GreetAgain = 40f, Settling = 1.5f;
         /// <summary>Poses at work: they stop for a breath now and then.</summary>
-        static readonly HashSet<string> Work = new() { "brew", "hammer", "polish", "sweep", "weave", "tend", "water", "rake", "fish", "photo", "peer", "look" };
+        static readonly HashSet<string> Work = new() { "brew", "hammer", "polish", "sweep", "weave", "tend", "water", "rake", "fish", "photo", "peer", "look", "knead", "tinker" };
         static readonly HashSet<string> Young = new() { "pip", "kid", "grandkid", "leo" }, Old = new() { "nora", "bram", "helen", "marlow" };
 
         Person def;

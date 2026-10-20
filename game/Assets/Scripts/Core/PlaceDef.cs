@@ -25,6 +25,8 @@ namespace Shop
         public bool Step;
         /// <summary>The chapters it is there; null means every chapter.</summary>
         public int[] Chapters;
+        /// <summary>What the courier sees in it, when the chapter has nothing of its own to say about it.</summary>
+        public string Text;
         /// <summary>The person it belongs to, whose feet it follows; null for a fixed hotspot.</summary>
         public Ant Owner;
 
