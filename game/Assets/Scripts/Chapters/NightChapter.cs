@@ -33,6 +33,8 @@ namespace Shop
         protected abstract string Page { get; }
         /// <summary>The first night shows the routine at home step by step; later nights know it, and run it as one montage.</summary>
         protected virtual bool FullRoutine => Night == 1;
+        /// <summary>Night 7 plays its day first: the last box is opened at the day's end, and the night ends at the door at dawn, not in bed.</summary>
+        protected virtual bool DayFirst => false;
         /// <summary>What Satria thinks waking to the bell, and to the morning.</summary>
         protected virtual string WakeLine => "...The bell. Midnight again.";
         protected virtual string MorningLine => "Morning. Tea first. Then whoever this belongs to.";
@@ -80,7 +82,7 @@ namespace Shop
         protected virtual Awaitable ResumeDay(string checkpoint) => Start();
 
         // The village, and Marlow once he has said his name on the first night.
-        void Know()
+        protected void Know()
         {
             KnowVillage();
             if (Night > 1) Known("marlow", "Marlow");
@@ -89,7 +91,7 @@ namespace Shop
         public sealed override async Awaitable Entered(string place)
         {
             if (place == "shop" && Game.Phase == Phase.Night && !Game.Has("boxed")) await ShopVisit();
-            else if (place == "satria_home" && Game.Phase == Phase.Night && Game.Has("boxed") && !Game.Has("slept")) await HomeAgain();
+            else if (place == "satria_home" && !DayFirst && Game.Phase == Phase.Night && Game.Has("boxed") && !Game.Has("slept")) await HomeAgain();
             else if (place == "satria_home" && Game.Has("resolved")) await Evening();
             else await Arrived(place);
         }
@@ -141,7 +143,7 @@ namespace Shop
                 await Opened();
                 await Look(null);
             });
-            Hint("Home to bed. It will keep till morning.");
+            Hint(DayFirst ? "Home, to Mother's sewing machine." : "Home to bed. It will keep till morning.");
         }
 
         // Home with the box at night: the feet scrubbed on the mat, then the routine before sleep, step by step the first
@@ -168,7 +170,7 @@ namespace Shop
         // The routine's steps at home, at night and in the morning; false for anything else.
         async Awaitable<bool> Routine(string id)
         {
-            var home = Game.Phase == Phase.Night && Game.Has("boxed") && !Game.Has("slept");
+            var home = !DayFirst && Game.Phase == Phase.Night && Game.Has("boxed") && !Game.Has("slept");
             switch (id)
             {
                 case "table" when home && !Game.Has("box_home"): await Scene(SetDownBox); return true;
@@ -323,8 +325,8 @@ namespace Shop
             }
         }
 
-        // Into bed, under Mother's quilt.
-        Ant LieDown()
+        /// <summary>Into bed, under Mother's quilt.</summary>
+        protected Ant LieDown()
         {
             var courier = Actor("courier");
             courier.Feet = InBed;
@@ -334,8 +336,8 @@ namespace Shop
             return courier;
         }
 
-        // Up out of bed, standing beside it.
-        void GetUp()
+        /// <summary>Up out of bed, standing beside it.</summary>
+        protected void GetUp()
         {
             var courier = Actor("courier");
             courier.Seat = 0;

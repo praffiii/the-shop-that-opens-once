@@ -6,7 +6,7 @@ namespace Shop
     /// <summary>
     /// The page Satria writes in his journal each evening before bed: the day's title and what he made of it, written out
     /// as the pen scratches over the paper, on a page over the dimmed room. A click or a key finishes the writing, the
-    /// next closes the journal. Await <see cref="Show"/>.
+    /// next closes the journal. Await <see cref="Show"/>. Without the pen it is a page already written, read as it is: a letter.
     /// </summary>
     public sealed class Journal : MonoBehaviour
     {
@@ -35,7 +35,7 @@ namespace Shop
 
         public bool Open => gameObject.activeSelf;
 
-        public async Awaitable Show(string heading, string page)
+        public async Awaitable Show(string heading, string page, bool pen = true)
         {
             var view = Main.Size;
             Look.Place(dim.rectTransform, new Rect(Vector2.zero, view));
@@ -51,7 +51,7 @@ namespace Shop
             written = scratch = 0;
             next = false;
             gameObject.SetActive(true);
-            if (Main.Auto) written = text.Length;
+            if (Main.Auto || !pen) written = text.Length;
             while (Writing)
             {
                 written += Time.deltaTime / PerLetter;

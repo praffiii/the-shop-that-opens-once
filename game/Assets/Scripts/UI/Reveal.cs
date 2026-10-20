@@ -42,22 +42,14 @@ namespace Shop
         public async Awaitable Show(int box, string keepsake)
         {
             var view = Main.Size;
-            Look.Place(shade.rectTransform, new Rect(Vector2.zero, view));
             Look.SetSprite(back, Box(box, "closed"), Scale);
             front.enabled = item.enabled = false;
-            Look.SetText(label, "");
             var size = back.rectTransform.sizeDelta;
             var at = new Vector2(Mathf.Round((view.x - size.x) / 2), Mathf.Round((view.y - size.y) / 2 + 24));
             Look.Move(back.rectTransform, at);
             Look.Move(front.rectTransform, at);
             Look.Place(well, new Rect(0, 0, view.x, at.y + size.y - 2 * Scale));
-            gameObject.SetActive(true);
-            for (var t = 0f; t < DimSeconds; t += Time.deltaTime)
-            {
-                shade.color = new Color(Look.Ink.r, Look.Ink.g, Look.Ink.b, Dim * t / DimSeconds);
-                await Main.Frame();
-            }
-            shade.color = new Color(Look.Ink.r, Look.Ink.g, Look.Ink.b, Dim);
+            await Darken();
             await Main.Wait(0.5f);
 
             Sound.Play("latch");
@@ -67,7 +59,43 @@ namespace Shop
 
             Look.SetSprite(item, Keepsakes.Art(keepsake, "lg"), Scale);
             var high = item.rectTransform.sizeDelta.y;
-            float x = Mathf.Round((view.x - item.rectTransform.sizeDelta.x) / 2), y0 = at.y + From * Scale, y1 = at.y + SunkTo * Scale - high;
+            await Rise(at.y + From * Scale, at.y + SunkTo * Scale - high);
+            await Name(keepsake, at.y + size.y + 8);
+        }
+
+        /// <summary>A keepsake found loose up close (the photo in the sewing table's drawer): no box, it rises a little into the middle of the darkened screen.</summary>
+        public async Awaitable Show(string keepsake)
+        {
+            var view = Main.Size;
+            back.enabled = front.enabled = false;
+            Look.Place(well, new Rect(Vector2.zero, view));
+            Look.SetSprite(item, Keepsakes.Art(keepsake, "lg"), Scale);
+            item.enabled = false;
+            var y = Mathf.Round((view.y - item.rectTransform.sizeDelta.y) / 2);
+            await Darken();
+            item.enabled = true;
+            await Rise(y + 12, y);
+            await Name(keepsake, y + item.rectTransform.sizeDelta.y + 8);
+        }
+
+        // The screen darkens round the close-up.
+        async Awaitable Darken()
+        {
+            Look.Place(shade.rectTransform, new Rect(Vector2.zero, Main.Size));
+            Look.SetText(label, "");
+            gameObject.SetActive(true);
+            for (var t = 0f; t < DimSeconds; t += Time.deltaTime)
+            {
+                shade.color = new Color(Look.Ink.r, Look.Ink.g, Look.Ink.b, Dim * t / DimSeconds);
+                await Main.Frame();
+            }
+            shade.color = new Color(Look.Ink.r, Look.Ink.g, Look.Ink.b, Dim);
+        }
+
+        // The keepsake rises from row y0 to y1, centred, to its motif.
+        async Awaitable Rise(float y0, float y1)
+        {
+            var x = Mathf.Round((Main.Size.x - item.rectTransform.sizeDelta.x) / 2);
             Sound.Play("motif");
             for (var t = 0f; t < RiseSeconds; t += Time.deltaTime)
             {
@@ -75,9 +103,13 @@ namespace Shop
                 await Main.Frame();
             }
             Look.Move(item.rectTransform, new Vector2(x, y1));
-            Look.SetText(label, Keepsakes.All[keepsake].Name);
-            Look.Move(label.rectTransform, new Vector2(Mathf.Round((view.x - label.rectTransform.sizeDelta.x) / 2), at.y + size.y + 8));
+        }
 
+        // Its name under it, till a click or a key closes the close-up.
+        async Awaitable Name(string keepsake, float y)
+        {
+            Look.SetText(label, Keepsakes.All[keepsake].Name);
+            Look.Move(label.rectTransform, new Vector2(Mathf.Round((Main.Size.x - label.rectTransform.sizeDelta.x) / 2), y));
             next = false;
             if (Main.Auto) await Main.Frame();
             else

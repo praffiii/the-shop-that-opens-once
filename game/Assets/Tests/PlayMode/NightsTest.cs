@@ -190,9 +190,41 @@ namespace Shop.Tests
             CollectionAssert.Contains(Game.Bag, "savings_book");
         });
 
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Night7PlaysThrough() => Run(7, async main =>
+        {
+            Assert.AreEqual(Phase.Morning, Game.Phase, "The last day comes before its box");
+            await Use(main, "water_jar");
+            await Use(main, "stove");
+            await Use(main, "table");
+            await Go(main, "square", "from_east");
+            await Use(main, "valdo");
+            Assert.AreEqual(Phase.Midday, Game.Phase, "Valdo stood up to");
+
+            await Go(main, "station", "from_square");
+            await Use(main, "helen");
+            Assert.IsTrue(Game.Has("told_helen"), "Marcus's message given");
+            await Go(main, "satria_home", "door");
+            await Until(() => Exploring(main));
+            Assert.AreEqual(Phase.Night, Game.Phase, "Dusk at the sewing table, till the seventh bell");
+
+            await Go(main, "shop", "door");
+            await Until(() => Exploring(main));
+            CollectionAssert.IsSupersetOf(Game.Bag, new[] { "musicbox", "letter" }, "The last box: FOR THE COURIER");
+            await Go(main, "satria_home", "door");
+            await Use(main, "desk");
+            await Use(main, "stove");
+            Board.FailFirst = 1;
+            await Use(main, "sewing");
+            CollectionAssert.IsSupersetOf(Game.Bag, new[] { "musicbox_open", "photo", "letter_read" }, "The drawer opened and the letter read");
+            Assert.AreEqual(7, Game.LanternsOut, "The last lantern out");
+            await Go(main, "east", "satria_home_door");
+        }, boxFirst: false);
+
         // Plays a night: woken at home, the box from Marlow, the routine, the morning's tea, `day` for the night's own
-        // story, and home to the journal, which ends the night.
-        static IEnumerator Run(int night, Func<Main, Awaitable> day)
+        // story, and home to the journal, which ends the night. Night 7 plays its day first: `day` is all of it, to the
+        // door at dawn.
+        static IEnumerator Run(int night, Func<Main, Awaitable> day, bool boxFirst = true)
         {
             var saved = Game.Raw;
             Main main = null;
@@ -202,7 +234,7 @@ namespace Shop.Tests
                 Time.timeScale = 8f;
                 main = new GameObject("Main").AddComponent<Main>();
                 main.Talk.Picks.Enqueue("Quit"); // leaves the title, for the night to begin
-                var playing = Play(main, night, day);
+                var playing = Play(main, night, day, boxFirst);
                 var end = Time.realtimeSinceStartup + TimeLimit;
                 while (!playing.IsCompleted)
                 {
@@ -221,19 +253,22 @@ namespace Shop.Tests
             }
         }
 
-        static async Awaitable Play(Main main, int night, Func<Main, Awaitable> day)
+        static async Awaitable Play(Main main, int night, Func<Main, Awaitable> day, bool boxFirst)
         {
             await Until(() => main.Talk.Picks.Count == 0);
             Game.NewGame();
             await main.Begin(night);
-            await Go(main, "shop", "door");
-            await Go(main, "satria_home", "door");
-            foreach (var step in new[] { "table", "water_jar", "coil", "bed" }) await Use(main, step);
-            await Until(() => Exploring(main) && Game.Phase == Phase.Morning);
-            await Use(main, "stove");
-            await day(main);
+            if (boxFirst)
+            {
+                await Go(main, "shop", "door");
+                await Go(main, "satria_home", "door");
+                foreach (var step in new[] { "table", "water_jar", "coil", "bed" }) await Use(main, step);
+                await Until(() => Exploring(main) && Game.Phase == Phase.Morning);
+                await Use(main, "stove");
+            }
             var story = main.Story;
-            await Go(main, "satria_home", "door");
+            await day(main);
+            if (boxFirst) await Go(main, "satria_home", "door");
             await Until(() => Game.SavedChapter() == night + 1 && main.Story != story); // over, and the next night begun or saved for later
         }
 

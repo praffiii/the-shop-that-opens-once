@@ -61,6 +61,7 @@ namespace Shop
             [4] = main => new Night4(main),
             [5] = main => new Night5(main),
             [6] = main => new Night6(main),
+            [7] = main => new Night7(main),
         };
 
         public static Main Instance { get; private set; }
@@ -430,11 +431,11 @@ namespace Shop
             await Cards.Show(lines);
         }
 
-        /// <summary>The journal page Satria writes before bed (<see cref="Journal"/>).</summary>
-        public async Awaitable ShowJournal(string heading, string page)
+        /// <summary>The journal page Satria writes before bed (<see cref="Journal"/>); without the pen, a letter's page read as it is.</summary>
+        public async Awaitable ShowJournal(string heading, string page, bool pen = true)
         {
             Talk.Close();
-            await Journal.Show(heading, page);
+            await Journal.Show(heading, page, pen);
         }
 
         // Through a door only which place shows changes: both sides are built ahead, while a fade hides the work, and

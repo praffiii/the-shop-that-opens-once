@@ -170,6 +170,12 @@ namespace Shop
             // at home: the coil lit before sleep, and the night's box on the table once brought home
             World.ShowItemIfAny("coil_lit", Game.Has("coil_lit"));
             for (var i = 0; i < 7; i++) World.ShowItemIfAny($"box_on_table_{i}", i == Game.Chapter - 1 && Game.Has("box_home"));
+            // Night 7: home from the last box to a dark, cold house, till Satria lights the lamp and the kitchen fire
+            if (Game.Chapter == 7 && Game.Phase == Phase.Night && Game.Has("boxed"))
+            {
+                World.ShowItemIfAny("lamp_lit", Game.Has("lit_lamp"));
+                World.ShowItemIfAny("stove_fire", Game.Has("lit_fire"));
+            }
         }
 
         /// <summary>Puts the courier at a spawn point, or else at an exported anchor of that name.</summary>

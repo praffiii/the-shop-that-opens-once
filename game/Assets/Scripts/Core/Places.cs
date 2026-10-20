@@ -32,6 +32,7 @@ namespace Shop
         static readonly int[] NightFour = { 4 }, NotNightFour = { 0, 1, 2, 3, 5, 6, 7, 8 }, FromNightFour = { 4, 5, 6, 7, 8 };
         // Night 5 (the mismatched shoes): Leo limps instead of running his laps and waits for the sundown on his hill, not
         // up on the lookout; Valdo measures the main road and the Baker's lad parks his bicycle on the square.
+        static readonly int[] NightSeven = { 7 };
         static readonly int[] NightFive = { 5 }, LeoRuns = { 0, 1, 2, 4, 6, 7, 8 }, LeoWatches = { 1, 2, 3, 4, 6, 7, 8 };
 
         // The coast's fisher carries the catch landed at the jetty's foot to the fish rack; the salt worker rakes the
@@ -514,6 +515,17 @@ namespace Shop
                     {
                         Id = "valdo", At = V(760, 600), Label = "Valdo", Spot = V(28, 6), Pose = "write", Facing = -1, Chapters = NightFive, Phases = new[] { Phase.Morning },
                         Lines = new[] { "Paving, here. A proper road, for proper cars. Mind the measuring tape." },
+                    },
+                    // Day 7's morning: Valdo pacing before the hall's door, his last push ready
+                    new Person
+                    {
+                        Id = "valdo", Label = "Valdo", Spot = V(-28, -2), Chapters = NightSeven, Phases = new[] { Phase.Morning },
+                        Lines = new[] { "Tomorrow, nine sharp, Mr Satria. Not a minute later." },
+                        Round = new[]
+                        {
+                            new Stop { At = V(700, 410), Facing = -1, Wait = 2f },
+                            new Stop { At = V(672, 410), Facing = 1, Wait = 2f },
+                        },
                     },
                     new Person
                     {

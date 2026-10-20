@@ -2657,33 +2657,39 @@
     oooooo`, { o: 'dirt3', W: 'cream0', k: 'wood3', c: 'cream2' });
 
   // The photo from the sewing table's hidden drawer: Father, Mother and little Satria laughing over grilled corn in the
-  // kitchen, taken by Theo when none of them was looking; his studio's stamp and a line of his pencil on the back.
-  const SEPIA = ['wood5', 'wood4', 'wood3', 'dirt3', 'dirt2', 'dirt1', 'dirt0'];
+  // kitchen, taken by Theo when none of them was looking; his studio's stamp and a line of his pencil on the back. The
+  // print is the cast's own sprites at their own size, washed to sepia like the film is washed to grey.
+  const SEPIA = ['wood5', 'wood4', 'wood3', 'dirt3', 'dirt2', 'dirt1', 'dirt0'].map(c => PX.col(c).match(/\w\w/g).map(h => parseInt(h, 16)));
   LG.photo = (v = 'front') => {
-    const [c, x] = canvas(44, 36);
-    x.drawImage(bevel(mask(44, 36, g => rect(g, 1, 1, 42, 34, '#000')), { o: 'stone3', ol: 'stone2', h: 'white', b: 'cream0', s: 'cream1' }, 1, 1), 0, 0);
+    const W = 64, H = 54, [c, x] = canvas(W, H);
+    x.drawImage(bevel(mask(W, H, g => rect(g, 1, 1, W - 2, H - 2, '#000')), { o: 'stone3', ol: 'stone2', h: 'white', b: 'cream0', s: 'cream1' }, 1, 1), 0, 0);
     if (v === 'back') {
-      disc(x, 13, 13, 8, d => d > 7.2 || (d > 5.6 && d < 6.4) ? 'roofB3' : null); text(x, 'THEO', 6, 11, 'roofB3');
-      for (const [y, w] of [[25, 28], [29, 18]]) for (let i = 0; i < w; i++) if (i % 6 !== 5) dot(x, 7 + i, y + ((i >> 2) % 2), 'stone3');
+      disc(x, 19, 19, 12, d => d > 11.2 || (d > 9.6 && d < 10.4) ? 'roofB3' : null); text(x, 'THEO', 19 - (textWidth('THEO') >> 1), 17, 'roofB3');
+      for (const [y, w] of [[36, 40], [41, 30], [46, 18]]) for (let i = 0; i < w; i++) if (i % 7 !== 6) dot(x, 10 + i, y + ((i >> 2) % 2), 'stone3');
       return c;
     }
-    // the print: the kitchen's back wall and window, the table, the three of them with the corn, its smoke going up
-    rect(x, 4, 4, 36, 28, SEPIA[5]); rect(x, 4, 4, 36, 2, SEPIA[4]);
-    rect(x, 28, 7, 9, 8, SEPIA[2]); rect(x, 29, 8, 7, 6, SEPIA[6]); rect(x, 32, 8, 1, 6, SEPIA[3]); rect(x, 29, 11, 7, 1, SEPIA[3]);
-    rect(x, 4, 26, 36, 6, SEPIA[2]); rect(x, 4, 26, 36, 1, SEPIA[4]);
-    const ant = (cx, cy, r, flower) => {
-      ellipse(x, cx, cy + r + 3, r + 1, r + 1, SEPIA[1]);
-      disc(x, cx, cy, r, (d, lit) => d > r - 0.8 ? SEPIA[0] : lit > 0.4 ? SEPIA[3] : SEPIA[2]);
-      line(x, cx - 1, cy - r, cx - 3, cy - r - 3, SEPIA[0]); line(x, cx + 1, cy - r, cx + 3, cy - r - 3, SEPIA[0]);
-      // eyes shut with laughing, the mouth open
-      dot(x, cx - 2, cy - 1, SEPIA[6]); dot(x, cx - 1, cy - 2, SEPIA[6]); dot(x, cx + 2, cy - 1, SEPIA[6]); dot(x, cx + 1, cy - 2, SEPIA[6]);
-      rect(x, cx - 1, cy + 1, 2, 2, SEPIA[0]);
-      if (flower) { dot(x, cx + r - 1, cy - r + 1, 'cream0'); dot(x, cx + r, cy - r + 1, 'cream0'); dot(x, cx + r - 1, cy - r, 'cream0'); }
-    };
-    ant(10, 15, 4, false); ant(21, 20, 3, false); ant(32, 17, 4, true);
-    // the corn cobs in their hands, and the smoke off the grill
-    for (const [cx, cy] of [[15, 21], [24, 24], [27, 22]]) { rect(x, cx, cy, 2, 5, SEPIA[6]); dot(x, cx, cy + 1, SEPIA[4]); dot(x, cx + 1, cy + 3, SEPIA[4]); }
-    for (let j = 0; j < 8; j++) dot(x, 20 + Math.round(Math.sin(j) * 1.5), 6 + j, SEPIA[6]);
+    // the print, 56x42 under a deeper bottom margin: the kitchen wall and its window, the three of them behind the
+    // table, the corn on its clay grill and the smoke going up
+    const PW = 56, PH = 42, [pc, g] = canvas(PW, PH);
+    rect(g, 0, 0, PW, PH, 'cream1'); rect(g, 0, 0, PW, 3, 'wood1');
+    rect(g, 36, 5, 14, 13, 'wood3'); rect(g, 37, 6, 12, 11, 'white'); rect(g, 42, 6, 1, 11, 'wood3'); rect(g, 37, 11, 12, 1, 'wood3');
+    rect(g, 4, 9, 14, 1, 'wood3'); for (const i of [5, 9, 13]) rect(g, i, 6, 3, 3, i === 9 ? 'stone1' : 'roofR2');
+    CH.draw(g, 'daniel', 'laugh', 1, 17, 39, 1, { shadow: false });
+    CH.draw(g, 'mother', 'laugh', 2, 41, 39, -1, { shadow: false });
+    CH.draw(g, 'young_satria', 'laugh', 0, 30, 45, 1, { shadow: false });
+    rect(g, 0, 37, PW, 5, 'wood4'); rect(g, 0, 37, PW, 1, 'wood2'); rect(g, 0, 38, PW, 1, 'wood3');
+    rect(g, 43, 34, 11, 4, 'roofR4'); rect(g, 43, 34, 11, 1, 'roofR2'); rect(g, 44, 35, 9, 1, 'roofR0');
+    for (const i of [44, 48]) { rect(g, i, 32, 4, 2, 'light1'); dot(g, i + 1, 32, 'brass3'); dot(g, i + 3, 33, 'brass3'); }
+    for (let j = 0; j < 14; j++) dot(g, 49 + Math.round(Math.sin(j * 0.7) * 1.6), 30 - j, j % 3 ? 'white' : 'cream0');
+    // washed to sepia by its light
+    const im = g.getImageData(0, 0, PW, PH), d = im.data;
+    for (let j = 0; j < PH; j++) for (let i = 0; i < PW; i++) {
+      const o = (j * PW + i) * 4, l = (0.299 * d[o] + 0.587 * d[o + 1] + 0.114 * d[o + 2]) / 255;
+      const [r, gg, b] = SEPIA[Math.min(6, Math.round(6 * l ** 1.6))];
+      d[o] = r; d[o + 1] = gg; d[o + 2] = b; d[o + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+    x.drawImage(pc, 4, 4);
     return c;
   };
   SM.photo = () => S(`

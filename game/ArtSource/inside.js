@@ -169,7 +169,10 @@
         // the lid stands up behind, its inside lined in plum velvet; inside the box, dark velvet
         fill(b, 1, 0, W - 2, 16, c); fill(b, 4, 2, W - 8, 13, PLUM[3]); fill(b, 4, 2, W - 8, 1, PLUM[2]); fill(b, 0, 14, W, 2, 'brass3');
         fill(b, 0, 16, W, 6, l); fill(b, 3, 17, W - 6, 6, PLUM[5]);
-      } else body(b, 20);
+      } else {
+        body(b, 20);
+        if (i === 6) { fill(b, 4, 25, W - 8, 13, c); carve(b, 'FOR THE', 28, 26, d, l); carve(b, 'COURIER', 28, 32, d, l); }
+      }
     }).canvas();
   }
   // What each box's lid has carved on it, seen only up close (the cabinet's cubbies show them plain, so the nights
