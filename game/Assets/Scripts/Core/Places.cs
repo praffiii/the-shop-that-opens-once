@@ -34,7 +34,7 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
-                    // Morning: Helen brews at her stall, Kapten Bram paces between the frozen clock and the timetable,
+                    // Morning: Helen brews at her stall, Captain Bram paces between the frozen clock and the timetable,
                     // a porter carries sacks up from the yard to Helen's stall, and the Mender is at the anvil.
                     // Midday: Helen wipes cups, Bram polishes the whistle by his carriage, the Mender taps the old
                     // engine's wheels. Dusk: Helen waits on the bench facing the tunnel, Bram stands by the engine,
@@ -46,7 +46,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "bram", Label = "Kapten Bram", Spot = V(-20, 4), Phases = new[] { Phase.Morning },
+                        Id = "bram", Label = "Captain Bram", Spot = V(-20, 4), Phases = new[] { Phase.Morning },
                         Round = new[]
                         {
                             new Stop { At = V(810, 340), Pose = "look", Facing = -1, Wait = 6f },
@@ -77,7 +77,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "bram", At = V(232, 632), Label = "Kapten Bram", Spot = V(18, 4), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
+                        Id = "bram", At = V(232, 632), Label = "Captain Bram", Spot = V(18, 4), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
                         Line = "Brass goes green if you let it. I give the whistle a rub every day, in case she needs it.",
                     },
                     new Person
@@ -122,7 +122,7 @@ namespace Shop
                     },
                     new Person
                     {
-                        Id = "bram", At = V(612, 268), Label = "Kapten Bram", Spot = V(20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Dusk },
+                        Id = "bram", At = V(612, 268), Label = "Captain Bram", Spot = V(20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Dusk },
                         Line = "The old girl's still got steam in her somewhere. You can hear it, if the evening's quiet.",
                     },
                     new Person
@@ -291,23 +291,23 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
-                    // Morning: Nenek Nora weaves at the loom out on her deck, the Gardener waters the chamomile rows, and Leo
+                    // Morning: Grandma Nora weaves at the loom out on her deck, the Gardener waters the chamomile rows, and Leo
                     // runs laps of the lane. Midday: Nora still weaves, the Gardener tends the rows behind his glasshouse,
                     // Leo looks out from his lookout. Dusk: Nora sits on her steps, the Gardener rests on the orchard bench,
                     // Leo watches the far road through the telescope.
                     new Person
                     {
-                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Nenek Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Morning },
+                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Grandma Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Morning },
                         Line = "Sit a while if you like, child. The loom goes at its own pace, and so do I.",
                     },
                     new Person
                     {
-                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Nenek Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Midday },
+                        Id = "nora", At = V(260, 401), Floor = 16, Label = "Grandma Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Midday },
                         Line = "My mother taught me this pattern, and her mother before her. The thread remembers what we forget.",
                     },
                     new Person
                     {
-                        Id = "nora", At = V(323, 422), Seat = 8, Label = "Nenek Nora", Spot = V(-23, 24), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
+                        Id = "nora", At = V(323, 422), Seat = 8, Label = "Grandma Nora", Spot = V(-23, 24), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
                         Line = "Evenings are the best part. The river talks, and I listen. Sit, if your legs are tired.",
                     },
                     new Person
@@ -374,7 +374,7 @@ namespace Shop
                             new Stop { At = V(548, 714), Pose = "tend", Facing = -1, Wait = 5f, Carry = true },
                             new Stop { At = V(330, 478), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "Fresh honeydew for Nenek Nora. She says it keeps her fingers quick at the loom.",
+                        Line = "Fresh honeydew for Grandma Nora. She says it keeps her fingers quick at the loom.",
                     },
                     new Person
                     {
@@ -402,7 +402,7 @@ namespace Shop
                     new Person
                     {
                         Id = "valdo", At = V(72, 452), Label = "Valdo", Spot = V(18, 6), Facing = -1, After = "welcomed", Chapters = DayZero, Phases = new[] { Phase.Dusk },
-                        Line = "The morning of Day Eight, Saudara Satria. The investors don't like waiting. Nor do I.",
+                        Line = "The morning of Day Eight, Mr Satria. The investors don't like waiting. Nor do I.",
                     },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
@@ -542,7 +542,7 @@ namespace Shop
                 Hotspots = new[]
                 {
                     new Hotspot { Id = "door", At = V(877, 440), Label = "Outside", Area = R(-16, -10, 32, 12), Spot = V(0, -6), ExitTo = "east/satria_home_door" },
-                    // what Satria finds of his family on Day 0: their photo over the sofa, Ayah's radio, Ibu's sewing
+                    // what Satria finds of his family on Day 0: their photo over the sofa, Father's radio, Mother's sewing
                     // machine, the kitchen's water jar, and the bed he sleeps in
                     new Hotspot { Id = "photo", At = V(892, 349), Label = "Family photo", Area = R(-24, -86, 48, 32), Spot = V(0, 26), Chapters = DayZero },
                     new Hotspot { Id = "radio", At = V(905, 393), Label = "Radio", Area = R(-9, -31, 18, 18), Spot = V(0, 11), Chapters = DayZero },

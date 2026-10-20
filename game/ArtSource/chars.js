@@ -1019,12 +1019,21 @@
     smile:      ['.......', '.......', '.kkkkk.', 'k.....k', '.......', '.......', '.......', '.......'],
     moved:      ['.......', '.......', '.kkkkk.', 'kvvvvvk', 'wwhhppp', 'wwwpphw', '.wwwww.', '...t...'],
     movedBlink: ['.......', '.......', '.......', 'k.....k', '.kkkkk.', '..t....', '..s....', '.......'],
+    // eyes gone wide: the lid lifted clear of the eye and the pupil small in the middle
+    wide:       ['.kkkkk.', 'k.....k', 'wwwwwww', 'wwwhpww', 'wwwppww', 'wwwwwww', 'wwwwwww', '.wwwww.'],
+    // the lid low and the brow tipped up at the inner end
+    sad:        ['kk.....', '..kk...', '.kkkkk.', 'kvvvvvk', 'wwwhppp', 'wwwpppp', '.wwwww.', '.......'],
+    // the brow drawn down hard over a narrowed eye
+    cross:      ['.....kk', '...kk..', '.kkkkk.', 'kvvvvvk', 'wwwhhpp', 'wwwpppp', '.wwwww.', '.......'],
   };
   const PMOUTH = {
     neutral: ['k...k', '.kkk.'],
     talk:    ['.kkk.', 'krrrk', 'krRrk', '.kkk.'],
     smile:   ['k....k', '.kkkk.'],
     wobble:  ['.k.k.', 'k.k.k'],
+    o:       ['.kk.', 'krrk', '.kk.'],
+    frown:   ['.kkk.', 'k...k'],
+    flat:    ['kkkkk'],
   };
   const PMK = { k: 'ink', r: 'roofR4', R: 'rose' };
 
@@ -1248,6 +1257,7 @@
     const st = d.stoop || 0, kd = d.kid ? 2 : 0, cx = 24 + st, cy = 21 + st + kd, hr = [13 - kd / 2, 11 - kd / 2];
     const P = { cx, cy, ex: cx + 3 - kd / 2, ey: cy - 4 + kd / 2, mx: cx + 9 - kd / 2, my: cy + 6 - kd / 2 };
     const moved = mood === 'moved', smile = mood === 'smile';
+    const own = { surprised: ['wide', 'o'], sad: ['sad', 'frown'], cross: ['cross', 'flat'] }[mood];   // the other moods' eyes and mouth
     if (d.back) d.back(x, P);                                     // bag, bun, hood
     plate(x, g => { region(g, inBust, bustShade(d.cloth)); if (d.bust) d.bust(g, P); });
     // antennae: stalks rise from the head top and bend forward to a club (behind hats, over the head)
@@ -1268,13 +1278,13 @@
       rect(g, cx - 9, cy - 7, 3, 2, 'ant0'); rect(g, cx - 10, cy - 5, 2, 2, 'ant0'); dot(g, cx - 6, cy - 8, 'ant0');
     });
     // face
-    const eyeKey = frame === 2 ? (moved ? 'movedBlink' : 'blink') : moved ? 'moved' : (smile && frame !== 1) ? 'smile' : 'open';
+    const eyeKey = frame === 2 ? (moved ? 'movedBlink' : 'blink') : moved ? 'moved' : (smile && frame !== 1) ? 'smile' : own ? own[0] : 'open';
     G2(x, PEYE[eyeKey], PEK, P.ex, P.ey);
     if (d.lash && eyeKey === 'open') { dot(x, P.ex - 1, P.ey, 'ink'); dot(x, P.ex - 2, P.ey - 1, 'ink'); }
     if (frame !== 2 && !moved) { rect(x, P.ex + 9, P.ey + 2, 2, 5, 'cream0'); rect(x, P.ex + 10, P.ey + 3, 1, 3, 'pupil'); dot(x, P.ex + 9, P.ey + 1, 'ink'); }  // far eye, foreshortened
     else line(x, P.ex + 9, P.ey + 4, P.ex + 10, P.ey + 4, 'ink');
     rect(x, P.ex - 3, P.ey + 9, 3, 1, smile || moved ? 'rose' : 'roofR1');                          // blush
-    G2(x, PMOUTH[frame === 1 ? 'talk' : moved ? 'wobble' : smile ? 'smile' : 'neutral'], PMK, P.mx - 2, P.my);
+    G2(x, PMOUTH[frame === 1 ? 'talk' : moved ? 'wobble' : smile ? 'smile' : own ? own[1] : 'neutral'], PMK, P.mx - 2, P.my);
     if (d.face) d.face(x, P);
     if (moved && frame !== 2) { dot(x, P.ex - 1, P.ey + 9, 'water1'); dot(x, P.ex - 1, P.ey + 10, 'water1'); dot(x, P.ex - 1, P.ey + 11, 'white'); }
     if (moved) { dot(x, P.ex + 8, P.ey - 3, 'white'); dot(x, P.ex + 9, P.ey - 4, 'light1'); dot(x, P.ex + 7, P.ey - 4, 'light1'); }
@@ -1288,7 +1298,8 @@
     const p = resolve(id, pose), f = wrap(p, frame);
     return memo(`s|${id}|${p}|${f}`, () => { const t = turned(p); return t ? renderTurned(id, t[0], f, t[1]) : render(id, p, f); });
   }
-  const MOODS = { courier: ['smile'], marlow: ['smile'], mother: ['smile'], helen: ['moved'], nora: ['smile', 'moved'], mia: ['smile', 'moved'], grandkid: ['smile', 'moved'] };
+  // Every face can show every mood (the talk box asks for one per line).
+  const MOODS = ['smile', 'moved', 'surprised', 'sad', 'cross'];
 
   window.CH = {
     ids: IDS,
@@ -1312,7 +1323,7 @@
       if (dir < 0) ctx.drawImage(flip(s), x - 19, y - 37); else ctx.drawImage(s, x - 20, y - 37);
     },
     portrait(id, frame = 0, mood = 'neutral') {
-      if (!(MOODS[id] || []).includes(mood)) mood = 'neutral';
+      if (!MOODS.includes(mood)) mood = 'neutral';
       frame = ((frame | 0) % 3 + 3) % 3;
       return memo(`p|${id}|${frame}|${mood}`, () => renderPortrait(id, frame, mood));
     },

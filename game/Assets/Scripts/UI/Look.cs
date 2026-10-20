@@ -136,6 +136,9 @@ namespace Shop
         /// <summary>How wide a label's text is, in canvas px.</summary>
         public static float Width(Text t) => Mathf.Ceil(t.preferredWidth);
 
+        /// <summary>True when the mouse is over a rect of the screen canvas (top-left origin, y down).</summary>
+        public static bool Hit(Rect r) => r.Contains(Controls.MouseCanvas);
+
         /// <summary>True when the mouse is over this UI node and it is showing.</summary>
         public static bool Hit(RectTransform rt) =>
             rt.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(rt, Main.UiPoint, Main.Instance.Camera);

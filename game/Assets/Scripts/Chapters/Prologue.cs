@@ -17,7 +17,7 @@ namespace Shop
         public override async Awaitable Start()
         {
             // Satria knows everyone here: he grew up with them
-            foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Nenek Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
+            foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Grandma Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
                          ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder"), ("valdo", "Valdo") })
                 Known(id, name);
             Game.Bag.AddRange(new[] { "shirt", "purse", "contract" });
@@ -65,7 +65,7 @@ namespace Shop
         {
             "to_road" => "The last bus has gone.",
             "home_door" when !Game.Has("welcomed") => "Not yet.",
-            "home_door" when !Game.Bag.Contains("homekey") => "Locked. Bu Helen said the key is under Mother's old geranium pot.",
+            "home_door" when !Game.Bag.Contains("homekey") => "Locked. Aunt Helen said the key is under Mother's old geranium pot.",
             "to_station" or "to_coast" => "It's getting dark. I should get home first.",
             _ => base.Closed(id),
         };
@@ -79,7 +79,7 @@ namespace Shop
                     Actor("courier").FaceTo(Anchor("home").x);
                     await Look(Anchor("home"));
                     await Wait(1.2f);
-                    await Say("courier", "...Not yet.");
+                    await Say("courier", "...Not yet.", "sad");
                     await Look(null);
                     break;
                 // the yard gate shrieks open on its rusty hinges, into a yard gone wild
@@ -96,7 +96,7 @@ namespace Shop
                 // onto the bridge, Theo at its rail waving him in
                 case "bridge":
                     await ShowText("Bellwood. It still smells of bread and river water.");
-                    await Say("theo", "Welcome back to Bellwood, Satria. The sea wind here never changes.");
+                    await Say("theo", "Welcome back to Bellwood, Satria. The sea wind here never changes.", "smile");
                     break;
             }
         }
@@ -147,38 +147,113 @@ namespace Shop
                 case "bus_bin":
                     await ShowText("A wooden bin, clean but for a few pine cuttings. The ants out here still sort their dry leaves with care.");
                     break;
-                // the villagers Satria passes on Day 0 have a word for him, not their everyday talk
+                // the villagers Satria passes on Day 0 have a word for him, not their everyday talk: a short exchange
+                // the first time, and something else if he comes back to them
+                case "nora" when Again("nora"):
+                    await Say("nora", "Go on home, child. The house has waited long enough. So have its ghosts, I'd say... the kind ones.", "smile");
+                    break;
                 case "nora":
-                    await Say("nora", "Is that... Ratih's boy? Goodness. You went away a sapling and came back a tree.", "moved");
+                    await Say("nora", "Is that... Ratih's boy? Goodness *gracious*. You went away a sapling and came back a tree.", "surprised");
+                    await Say("courier", "Evening, Grandma Nora. You're still weaving, I see.");
+                    await Say("nora", "Every day the light lets me. Your mother sat on this very deck and threaded my shuttles when her eyes were better than mine.", "moved");
+                    if (await Choose("I remember. She'd come home with wool in her hair.", "I can't stay long, I'm afraid.") == 0)
+                    {
+                        await Say("courier", "I remember. She'd come home with wool in her hair.", "smile");
+                        await Say("nora", "Ha! She would. Plum wool, mostly. She said it suited the dusk.", "smile");
+                    }
+                    else
+                    {
+                        await Say("courier", "I can't stay long, I'm afraid.");
+                        await Say("nora", "Nobody ever means to. Then the river gets into their bones.", "sad");
+                    }
+                    break;
+                case "gardener" when Again("gardener"):
+                    await Say("gardener", "Chamomile wants a light hand and a lot of patience. Like most things worth keeping.");
                     break;
                 case "gardener":
-                    await Say("gardener", "Satria? Your mother's beds are all weeds now. I couldn't bring myself to touch them.");
+                    await Say("gardener", "Satria? Well, I'll be. Your mother's beds are all weeds now. I couldn't bring myself to touch them.", "sad");
+                    await Say("courier", "You looked after the field, though. It smells like it used to.");
+                    await Say("gardener", "The chamomile was her idea, you know. *Plant something that calms people*, she said. So I did, and I kept on.", "smile");
+                    break;
+                case "farmhand" when Again("farmhand"):
+                    await Say("farmhand", "If you're after work while you're here, the aphids always need herding. Ha! Only joking. Mostly.", "smile");
                     break;
                 case "farmhand":
-                    await Say("farmhand", "Evening, stranger. Oh! Not a stranger at all, are you.");
+                    await Say("farmhand", "Evening, stranger. Oh! Not a stranger at all, are you. Ratih's lad, from the end of the road!", "surprised");
+                    await Say("courier", "Guilty. Long day on the bus.");
+                    await Say("farmhand", "Then sit a minute before that hill road. My legs always thank me for it.", "smile");
+                    break;
+                case "herder" when Again("herder"):
+                    await Say("herder", "There, they've settled. Aphids are easy, really. They only want to know where home is.");
                     break;
                 case "herder":
-                    await Say("herder", "Mind the little ones on the lane. They wander out at dusk.");
+                    await Say("herder", "Mind the little ones on the lane! They wander out at dusk and sit right where you'd tread.", "surprised");
+                    await Say("courier", "I'll watch my feet.");
+                    await Say("herder", "Good lad. Half the village has stepped in honeydew this week. The other half lies about it.", "smile");
+                    break;
+                case "mia" when Again("mia"):
+                    await Say("mia", "Pip's been at the window all week, watching for the bus. He'll have a hundred questions for you.", "smile");
                     break;
                 case "mia":
                     await Say("mia", "Welcome home, Satria. Don't mind the talk. It's only talk.");
+                    if (await Choose("What are they saying?", "Thank you, Mia.") == 0)
+                    {
+                        await Say("courier", "What are they saying?", "puzzled");
+                        await Say("mia", "That a man in a grey suit keeps measuring your mother's fence with a tape. That you've come to sell. That you'll be gone by the festival.", "sad");
+                        await Say("mia", "I told them a boy who grew up on Ratih's ginger tea knows what he's doing. Don't make me a liar.", "smile");
+                    }
+                    else await Say("mia", "Mm. Get some rest. You look like a parcel left out in the rain.", "smile");
+                    break;
+                case "pip" when Again("pip"):
+                    await Say("pip", "When you go back to the city can I have your cap? Not now. Later. When you're old.", "smile");
                     break;
                 case "pip":
-                    await Say("pip", "Are you the city courier? A real one? With a real bag?");
+                    await Say("pip", "Are you the city courier? A *real* one? With a real bag?!", "surprised");
+                    await Say("courier", "A real one. The bag's real too. Mostly it's full of shirts.");
+                    await Say("pip", "Shirts?! Couriers carry *treasure*. Or secret letters. Or at least sweets.", "cross");
+                    if (await Choose("Secret letters. Don't tell anyone.", "Just shirts, sorry.") == 0)
+                    {
+                        await Say("courier", "Secret letters. Don't tell anyone.");
+                        await Say("pip", "...I won't. I'm very good at secrets. I've only told Mochi two.", "smile");
+                    }
+                    else await Say("pip", "Boring. You need a better job.", "sad");
+                    break;
+                case "sam" when Again("sam"):
+                    await Say("sam", "The archive keeps the village's paper. Somebody has to remember what everyone else would rather forget.");
                     break;
                 case "sam":
-                    await Say("sam", "Doors locked, lamps out. Welcome back, Satria.");
+                    await Say("sam", "Satria. Doors locked, lamps out, ledgers shut. And now the courier comes home. Welcome back.");
+                    await Say("courier", "You haven't changed, Sam. Still closing up the hall at dusk.");
+                    await Say("sam", "Someone has to. The hall remembers everything, and it does not like to be left open after dark.");
+                    break;
+                case "florist" when Again("florist"):
+                    await Say("florist", "Take a sprig of chamomile for the house. Your mother always kept a cup of it on the sill.", "smile");
                     break;
                 case "florist":
-                    await Say("florist", "Ratih's boy! She'd have been glad to see you home.");
+                    await Say("florist", "Ratih's boy! Oh, she'd have been *so* glad to see you home.", "moved");
+                    await Say("courier", "I wish I'd come sooner.");
+                    await Say("florist", "Well. You've come now. That's the part the flowers care about.", "smile");
+                    break;
+                case "shopper" when Again("shopper"):
+                    await Say("shopper", "I'd best get these loaves home before they go cold. Mind the agent, Satria. He smiles with his teeth.");
                     break;
                 case "shopper":
                     await Say("shopper", "So you're back. That house will be glad of someone in it.");
+                    await Say("courier", "For a little while, at least.");
+                    await Say("shopper", "Little whiles have a way of stretching, here.", "smile");
                     break;
                 default:
                     await Chat(id);
                     break;
             }
+        }
+
+        // True when Satria has already talked with someone today; marks that he has.
+        static bool Again(string id)
+        {
+            if (Game.Has("talked_" + id)) return true;
+            Game.Mark("talked_" + id);
+            return false;
         }
 
         // 17:15, at the road's turn into the East: Valdo has waited by the waymark since the bus, and steps into
@@ -191,19 +266,19 @@ namespace Shop
             var valdo = Actor("valdo");
             var walking = Walk("courier", new Vector2(110, 470));
             await Wait(0.8f);
-            await Say("valdo", "Ah, Saudara Satria! Right on time. I've been waiting for your bus since three o'clock.", "smile");
+            await Say("valdo", "Ah, Mr Satria! Right on time. I've been waiting for your bus since three o'clock.", "smile");
             await walking;
             var stepping = Walk("valdo", new Vector2(80, 468));
             await Look(new Vector2(95, 466));
             await stepping;
             valdo.FaceTo(courier.Feet.x);
             courier.FaceTo(valdo.Feet.x);
-            await Say("courier", "Pak Valdo... I've barely set foot in the village.");
-            await Say("valdo", "I understand, I understand. Homesick, of course. But business can't wait for nostalgia, Saudara Satria.");
+            await Say("courier", "Mr Valdo... I've barely set foot in the village.", "surprised");
+            await Say("valdo", "I understand, I understand. Homesick, of course. But business can't wait for *nostalgia*, Mr Satria.", "smile");
             await Say("valdo", "The sugar mill's investors in the capital have the money ready. They need your late parents' land settled before the week is out: by the morning of Day Eight, to be exact.");
-            await Say("valdo", "The draft agreement is already in your bag. Sign the stamped page, and the transfer clears every instalment on your courier's motorbike in the city. Clear out the house, pack what matters, and we sign the day after tomorrow. Agreed?");
-            await Say("courier", "Give me a few days to put my mother's things in order, Pak Valdo.");
-            await Say("valdo", "Of course. But remember the deadline: the morning of Day Eight. Don't let a golden chance slip away because the country air has lulled you.");
+            await Say("valdo", "The draft agreement is already in your bag. Sign the stamped page, and the transfer clears every instalment on your courier's motorbike in the city. Clear out the house, pack what matters, and we sign the day after tomorrow. Agreed?", "smile");
+            await Say("courier", "Give me a few days to put my mother's things in order, Mr Valdo.");
+            await Say("valdo", "Of course. But remember the deadline: the morning of Day Eight. Don't let a *golden chance* slip away because the country air has lulled you.", "cross");
             Note("Valdo wants the sale contract signed by the morning of Day Eight.");
             await Cinema(false);
             await Look(null);
@@ -218,8 +293,8 @@ namespace Shop
             await Say("courier", "Everything is just as it was eleven years ago, when I walked out with my worn canvas rucksack for the city bus.");
             await Say("courier", "The dust comes away thick on my fingers when I touch the glass. Father... Mother... I'm sorry.", "moved");
             await Say("courier", "I didn't come back to Bellwood for old times' sake. I came back to settle the deed with that land agent, clear what's left of my debts in the city, and go again, as far away as I can.");
-            await Say("courier", "This village is too quiet, and thinking of the two of you in this empty house only makes my chest tighter.");
-            await Say("courier", "Three days. Just three days, and it's all over.");
+            await Say("courier", "This village is too quiet, and thinking of the two of you in this empty house only makes my chest tighter.", "sad");
+            await Say("courier", "Three days. Just *three days*, and it's all over.", "sad");
             await Cinema(false);
             Hint("Rest when you're ready: the bed is in the bedroom, by the west wall.");
         }
@@ -258,8 +333,8 @@ namespace Shop
             var baker = Actor("baker");
             helen.Held = Keepsakes.Art("basket", "xs", "");
             var walking = Walk("courier", new Vector2(1080, 650));
-            await Say("mia", "They say that land agent from the city's been out to Bu Ratih's house again and again. They'll pour concrete over that yard for a sugar mill, you'll see.");
-            await Say("shopper", "Such a shame if it's sold. Bu Ratih planted the chamomile there with her own hands...");
+            await Say("mia", "They say that land agent from the city's been out to Ratih's house again and again. They'll pour concrete over that yard for a sugar mill, you'll see.");
+            await Say("shopper", "Such a shame if it's sold. Ratih planted the chamomile there with her own hands...");
             await walking;
             // they gather by the bread stall as people do to talk, all turned to Satria in the middle: Helen on his
             // left, the Baker and Leo on his right, a step apart and clear of the lamp, and the shot takes in the four of them
@@ -272,7 +347,7 @@ namespace Shop
             var basket = await helen.Drop();
             Sfx("drop");
             await Say("helen", "Satria?! Oh, good heavens... Satria! Have you really come home?!", "moved");
-            await Say("courier", "Evening, Bu Helen. Yes... just for a little while.");
+            await Say("courier", "Evening, Aunt Helen. Yes... just for a little while.");
             // the Baker comes down from his door with a tray from the oven, and Leo gets up from the bench under the
             // oak to see what the fuss is, while Helen hurries over
             baker.Carrying = true;
@@ -281,19 +356,19 @@ namespace Shop
             var framing = Look(middle + new Vector2(12, 0));
             await Walk("helen", middle + new Vector2(-28, 0));
             helen.FaceTo(middle.x);
-            await Say("helen", "A little while? Eleven years you've been off in the city! Eleven years! The last letter you sent was for your mother's funeral, two years ago... ah, never mind that.", "moved");
-            await Say("helen", "Look at you, thin as a twig in the wind. Racing parcels about from dawn to midnight and forgetting to eat, I'll bet.");
+            await Say("helen", "A little while? *Eleven years* you've been off in the city! Eleven years! The last letter you sent was for your mother's funeral, two years ago... ah, never mind that.", "moved");
+            await Say("helen", "Look at you, thin as a twig in the wind. Racing parcels about from dawn to midnight and forgetting to eat, I'll bet.", "cross");
             await framing;
             await bakerComing;
             baker.FaceTo(middle.x);
-            await Say("baker", "Who's making all the fuss this late, Helen? Well, look! Satria?! The village's little runner, all grown into a city ant!");
+            await Say("baker", "Who's making all the fuss this late, Helen? Well, look! Satria?! The village's little runner, all grown into a city ant!", "surprised");
             await leoComing;
             Actor("leo").FaceTo(middle.x);
-            await Say("leo", "Heard you're the fastest express courier in the city, Satria? Careful, or an old crock like me will outrun you yet!");
-            if (await Choose("The city's too noisy, Pak Baker. Bellwood's air is far cleaner.", "None of you have changed. Still turning out for whoever steps off the bus.") == 0)
+            await Say("leo", "Heard you're the fastest express courier in the city, Satria? Careful, or an old crock like me will outrun you yet!", "smile");
+            if (await Choose("The city's too noisy, Mr Baker. Bellwood's air is far cleaner.", "None of you have changed. Still turning out for whoever steps off the bus.") == 0)
             {
-                await Say("courier", "The city's too noisy, Pak Baker. Bellwood's air is far cleaner.");
-                await Say("baker", "Ha! That's my boy. Here, still warm. Ginger and palm sugar, same as ever.");
+                await Say("courier", "The city's too noisy, Mr Baker. Bellwood's air is far cleaner.");
+                await Say("baker", "Ha! That's my boy. Here, still warm. Ginger and palm sugar, same as ever.", "smile");
                 courier.FaceTo(baker.Feet.x);
                 courier.Held = Keepsakes.Art("biscuit", "xs");
                 courier.Pose = "receive";
@@ -306,7 +381,7 @@ namespace Shop
             else await Say("courier", "None of you have changed. Still turning out for whoever steps off the bus.");
             await Say("helen", "Your family's house at the end of the east road still stands, Satria. Though the grass in the front yard is up to your waist by now.");
             await Say("helen", "The key's where it always was, under your mother's old geranium pot. Go and rest, dust yourself off. If you need hot water or some supper tonight, come by my stall on the platform.");
-            await Say("courier", "Thank you so much, Bu Helen. I'll get along home, then.");
+            await Say("courier", "Thank you so much, Aunt Helen. I'll get along home, then.", "smile");
             Note("The key to Mother's house is under her old geranium pot.");
             // Helen goes back for her basket
             await Walk("helen", stood);

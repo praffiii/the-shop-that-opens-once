@@ -7,6 +7,10 @@ namespace Shop
     /// <summary>
     /// The talk box: a portrait, the speaker's name, words typed out, and choices.
     /// Await <see cref="Say"/> and <see cref="Choose"/>. Click, Space or Enter shows the whole line, then moves on.
+    /// Lines are alive: they type at the speaker's pace and catch their breath at commas and full stops, words written
+    /// *like this* stand out in colour, and the line's mood shows on the portrait and in a bubble over the speaker's
+    /// head (surprised !, puzzled ?, smile a note, moved a heart, cross a vein, sad a drop), a surprised or cross line
+    /// jolting the box.
     /// </summary>
     public sealed class Talk : MonoBehaviour
     {
@@ -21,6 +25,14 @@ namespace Shop
             ["bram"] = .052f, ["mia"] = .033f, ["valdo"] = .034f, ["kid"] = .020f, ["grandkid"] = .020f,
         };
         const float VillagerPace = .036f;
+        /// <summary>How long the typing waits after a comma and after the end of a sentence, in seconds.</summary>
+        const float CommaPause = .12f, StopPause = .32f;
+        /// <summary>The emote bubbles' frames in Art/ui/emote, by mood.</summary>
+        static readonly Dictionary<string, int> Emotes = new() { ["surprised"] = 0, ["puzzled"] = 1, ["smile"] = 2, ["moved"] = 3, ["cross"] = 4, ["sad"] = 5 };
+        const float EmoteSeconds = 2f, ShakeSeconds = .3f;
+        /// <summary>How far over the feet a head is, in art px, for the emote bubble.</summary>
+        const float HeadHeight = 42f;
+        const string Emphasis = "#c4472b"; // roofR2's deep red, readable on the paper
         const float Height = 62f;
         /// <summary>The box spans the screen up to this width.</summary>
         const float MaxWidth = 560f;
@@ -33,14 +45,16 @@ namespace Shop
         public readonly Queue<string> Picks = new();
 
         RectTransform root, list;
-        Image box, nameTag, frame, face, arrow, mark;
+        Image box, nameTag, frame, face, arrow, mark, emote;
         Text nameText, text;
         readonly List<Text> choices = new();
-        float width = MaxWidth, typed, clock, speed = Speed, pitch = 1f;
+        float width = MaxWidth, typed, clock, speed = Speed, pitch = 1f, hold, emoteLeft, shake;
         string full = "", who = "", mood = "", voice = "";
+        bool[] marked = System.Array.Empty<bool>(); // which letters of the line stand out
         int shown, sel, picked = -1;
         bool next;
-        Ant speaker;
+        Ant speaker, talker; // speaker: who is posed talking; talker: whoever says the line, for the emote
+        Vector2 at;
         Vector2 lastMouse;
 
         public static Talk Create(Transform parent)
@@ -58,6 +72,7 @@ namespace Shop
             talk.arrow = Look.Picture("next", talk.root);
             talk.list = (RectTransform)Look.Panel("panel", t).transform;
             talk.mark = Look.Panel("choice", talk.list);
+            talk.emote = Look.Picture("emote", t);
             talk.Close();
             return talk;
         }
@@ -66,6 +81,7 @@ namespace Shop
         {
             root.gameObject.SetActive(false);
             list.gameObject.SetActive(false);
+            emote.gameObject.SetActive(false);
             StopSpeaker();
             Sound.Speaking = false;
         }
@@ -85,7 +101,8 @@ namespace Shop
             Look.Move(arrow.rectTransform, new Vector2(width - 16, Height - 13));
             var bottom = view.y - Height - Margin;
             var top = Hides(actor, bottom) || Hides(Courier, bottom);
-            Look.Move(root, new Vector2((view.x - width) / 2, top ? Margin + 10 : bottom));
+            at = new Vector2((view.x - width) / 2, top ? Margin + 10 : bottom);
+            Look.Move(root, at);
             root.gameObject.SetActive(true);
             this.who = who;
             this.mood = mood;
@@ -94,8 +111,13 @@ namespace Shop
             if (who != "") Look.SetSprite(face, Ant.Portrait(who, mood));
             var left = who != "" ? 62f : 10f;
             Look.Place(text.rectTransform, new Rect(left, 6, width - left - 10, 50));
-            full = line;
-            typed = 0f;
+            Mark(line);
+            typed = hold = 0f;
+            talker = actor;
+            emoteLeft = Emotes.ContainsKey(mood) && actor ? EmoteSeconds : 0f;
+            if (emoteLeft > 0) Look.SetSprite(emote, Look.Frame("emote", Emotes[mood]), Main.Zoom);
+            emote.gameObject.SetActive(false);
+            shake = mood is "surprised" or "cross" ? ShakeSeconds : 0f;
             Type(0);
             Voice(who);
             nameTag.gameObject.SetActive(speakerName != "");
@@ -190,7 +212,7 @@ namespace Shop
                     if (Look.Hit(choices[i].rectTransform)) Select(i);
             lastMouse = Controls.MouseCanvas;
             if (!root.gameObject.activeSelf) return;
-            if (Typing)
+            if (Typing && (hold -= Time.deltaTime) <= 0)
             {
                 typed += speed * Time.deltaTime;
                 var was = shown;
@@ -198,8 +220,17 @@ namespace Shop
                 // One blip per frame at most, on the newest letter shown: spaces and punctuation are silent.
                 if (voice != "" && shown > was && char.IsLetterOrDigit(full[shown - 1]))
                     Sound.Blip(voice, pitch * (1f + (char.ToLowerInvariant(full[shown - 1]) * 7 % 9 - 4) * .025f));
+                // a breath after a comma, a longer one at the end of a sentence (not inside "..." or "?!")
+                if (shown > was && shown < full.Length && full[shown] == ' ')
+                {
+                    var c = full[shown - 1];
+                    if (c is ',' or ';' or ':' or '-') hold = CommaPause;
+                    else if (c is '.' or '!' or '?') hold = StopPause;
+                    if (hold > 0) typed = shown;
+                }
             }
-            else StopSpeaker();
+            if (!Typing) StopSpeaker();
+            Animate();
             Sound.Speaking = voice != "" && Typing;
             arrow.gameObject.SetActive(!list.gameObject.activeSelf && !Typing);
             // Portrait frames: 0 rests, 1 has the mouth open, 2 blinks.
@@ -213,6 +244,45 @@ namespace Shop
         }
 
         bool Typing => shown < full.Length;
+
+        // The box's jolt, and the emote bubble popping up over the speaker's head and bobbing there a moment.
+        void Animate()
+        {
+            if (shake > 0)
+            {
+                shake -= Time.deltaTime;
+                var d = shake > 0 ? Mathf.Round(Mathf.Sin(shake * 70f) * 3f * shake / ShakeSeconds) : 0f;
+                Look.Move(root, at + new Vector2(d, 0));
+            }
+            var showing = emoteLeft > 0 && talker && talker.isActiveAndEnabled && Main.Instance.Place;
+            emote.gameObject.SetActive(showing);
+            if (!showing) return;
+            emoteLeft -= Time.deltaTime;
+            var age = EmoteSeconds - emoteLeft;
+            var rise = age < .12f ? (1 - age / .12f) * 6 : Mathf.Round(Mathf.Sin(age * 6f));
+            var size = emote.rectTransform.sizeDelta;
+            var head = Main.ToCanvas(talker.Feet + new Vector2(0, -HeadHeight));
+            Look.Move(emote.rectTransform, head - new Vector2(size.x / 2, size.y - rise));
+        }
+
+        // The line without its *marks*, and which of its letters they made stand out.
+        void Mark(string line)
+        {
+            var plain = new System.Text.StringBuilder();
+            var marks = new List<bool>();
+            var on = false;
+            foreach (var c in line)
+            {
+                if (c == '*') on = !on;
+                else
+                {
+                    plain.Append(c);
+                    marks.Add(on);
+                }
+            }
+            full = plain.ToString();
+            marked = marks.ToArray();
+        }
 
         // Picks the voice and pace of who speaks: "" for narration, which is silent and quicker.
         void Voice(string id)
@@ -233,7 +303,15 @@ namespace Shop
         void Type(int n)
         {
             shown = n;
-            text.text = n >= full.Length ? full : full[..n] + "<color=#00000000>" + full[n..] + "</color>";
+            var s = new System.Text.StringBuilder();
+            for (var i = 0; i < n; i++)
+            {
+                if (marked[i] && (i == 0 || !marked[i - 1])) s.Append("<color=").Append(Emphasis).Append('>');
+                s.Append(full[i]);
+                if (marked[i] && (i == n - 1 || !marked[i + 1])) s.Append("</color>");
+            }
+            if (n < full.Length) s.Append("<color=#00000000>").Append(full[n..]).Append("</color>");
+            text.text = s.ToString();
         }
 
         // True when a box at box y would cover a good part of someone on screen (more than their feet).

@@ -36,7 +36,7 @@ namespace Shop
                     new Side("side", "The crown is pulled out, as if someone stopped it on purpose."),
                 },
             },
-            // what Satria comes home with, and Pak Baker's welcome
+            // what Satria comes home with, and Mr Baker's welcome
             ["shirt"] = new Keepsake { Name = "Spare shirt", Sides = new[] { new Side("", "A clean city shirt, pressed and folded. It looks out of place here already.") } },
             ["purse"] = new Keepsake { Name = "Coin purse", Sides = new[] { new Side("", "What is left of the fare: a few coins rattling at the bottom.") } },
             ["contract"] = new Keepsake
@@ -45,7 +45,7 @@ namespace Shop
                 Sides = new[] { new Side("", "Valdo's draft for the sale of Mother's house, from Bram Capital. The line to sign on is still empty.", "Valdo's draft contract: the sale of Mother's house, not signed yet.") },
             },
             ["homekey"] = new Keepsake { Name = "House key", Sides = new[] { new Side("", "Mother's old brass key, green with moss from its years under the geranium pot.") } },
-            ["biscuit"] = new Keepsake { Name = "Ginger biscuit", Sides = new[] { new Side("", "Still warm from Pak Baker's oven. Ginger and palm sugar, the way it always was.") } },
+            ["biscuit"] = new Keepsake { Name = "Ginger biscuit", Sides = new[] { new Side("", "Still warm from Mr Baker's oven. Ginger and palm sugar, the way it always was.") } },
         };
 
         /// <summary>A keepsake's art at a size (xs in a hand, sm in the bag, lg up close), centred on its middle pixel.</summary>
