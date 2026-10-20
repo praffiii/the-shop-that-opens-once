@@ -7,7 +7,8 @@ Renders export.html?only=<part> in headless Google Chrome and writes the files i
 are, and WAV audio encoded to OGG Vorbis with oggenc. Chrome is driven over the DevTools pipe, so a part may be
 asynchronous: the page's `done` promise settles once the part has finished.
 Walk masks (walk.png) are only seeds: they are written when missing, or with --force,
-because they are meant to be repainted by hand.
+because they are meant to be repainted by hand. A kept mask that differs from its seed is named, so one left
+behind by new solids is not missed.
 """
 import base64
 import json
@@ -93,6 +94,9 @@ def export(part: str, force: bool) -> None:
     for rel, data in files.items():
         path = ART / rel
         if path.name == "walk.png" and path.exists() and not force:
+            # a kept mask that no longer matches its seed: repainted by hand, or left behind by new solids
+            if path.read_bytes() != base64.b64decode(data.split(",", 1)[1]):
+                print(f"{part}: {rel} differs from its seed; delete it to re-seed, unless it was repainted by hand")
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
         if data.startswith("data:image/png;base64,"):
