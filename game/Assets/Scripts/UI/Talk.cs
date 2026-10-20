@@ -37,6 +37,7 @@ namespace Shop
         /// <summary>How far over the feet a head is, in art px, for the emote bubble.</summary>
         const float HeadHeight = 42f;
         const string Emphasis = "#c4472b"; // roofR2's deep red, readable on the paper
+        /// <summary>The box's height for up to three lines; a longer line grows it.</summary>
         const float Height = 62f;
         /// <summary>The box spans the screen up to this width.</summary>
         const float MaxWidth = 560f;
@@ -52,7 +53,7 @@ namespace Shop
         Image box, nameTag, frame, face, arrow, mark, emote;
         Text nameText, text;
         readonly List<Text> choices = new();
-        float width = MaxWidth, typed, clock, speed = Speed, pitch = 1f, hold, emoteLeft, shake;
+        float width = MaxWidth, height = Height, typed, clock, speed = Speed, pitch = 1f, hold, emoteLeft, shake;
         string full = "", who = "", mood = "", voice = "";
         bool[] marked = System.Array.Empty<bool>(); // which letters of the line stand out
         int shown, sel, picked = -1;
@@ -101,28 +102,31 @@ namespace Shop
             list.gameObject.SetActive(false);
             var view = Main.Size;
             width = Mathf.Min(view.x - 2 * Margin, MaxWidth);
-            Look.Resize(box.rectTransform, new Vector2(width, Height));
-            Look.Move(arrow.rectTransform, new Vector2(width - 16, Height - 13));
-            var bottom = view.y - Height - Margin;
-            var top = Hides(actor, bottom) || Hides(Courier, bottom);
-            at = new Vector2((view.x - width) / 2, top ? Margin + 10 : bottom);
-            Look.Move(root, at);
-            root.gameObject.SetActive(true);
             this.who = who;
             this.mood = mood;
             face.gameObject.SetActive(who != "");
             frame.gameObject.SetActive(who != "");
             if (who != "") Look.SetSprite(face, Ant.Portrait(who, mood));
             var left = who != "" ? 62f : 10f;
-            Look.Place(text.rectTransform, new Rect(left, 6, width - left - 10, 50));
             Mark(line);
+            root.gameObject.SetActive(true);
+            // the whole line is laid out from the start (the untyped rest invisible), so the box fits it before it types
+            Look.Place(text.rectTransform, new Rect(left, 6, width - left - 10, Height - 12));
+            Type(0);
+            height = Mathf.Max(Height, Mathf.Ceil(text.preferredHeight) + 12);
+            Look.Place(text.rectTransform, new Rect(left, 6, width - left - 10, height - 12));
+            Look.Resize(box.rectTransform, new Vector2(width, height));
+            Look.Move(arrow.rectTransform, new Vector2(width - 16, height - 13));
+            var bottom = view.y - height - Margin;
+            var top = Hides(actor, bottom) || Hides(Courier, bottom);
+            at = new Vector2((view.x - width) / 2, top ? Margin + 10 : bottom);
+            Look.Move(root, at);
             typed = hold = 0f;
             talker = actor;
             emoteLeft = Emotes.ContainsKey(mood) && actor ? EmoteSeconds : 0f;
             if (emoteLeft > 0) Look.SetSprite(emote, Look.Frame("emote", Emotes[mood]), Main.Zoom);
             emote.gameObject.SetActive(false);
             shake = mood is "surprised" or "cross" ? ShakeSeconds : 0f;
-            Type(0);
             Voice(who);
             nameTag.gameObject.SetActive(speakerName != "");
             Look.SetText(nameText, speakerName);
@@ -141,7 +145,7 @@ namespace Shop
         }
 
         /// <summary>Where the box is on screen, or an empty rect while it is closed.</summary>
-        public Rect BoxRect => root.gameObject.activeSelf ? new Rect(Look.Pos(root), new Vector2(width, Height)) : default;
+        public Rect BoxRect => root.gameObject.activeSelf ? new Rect(Look.Pos(root), new Vector2(width, height)) : default;
 
         /// <summary>
         /// Lists <paramref name="options"/> and returns the index picked. The list sits by the talk box's right end,
@@ -166,7 +170,7 @@ namespace Shop
             {
                 var at = Look.Pos(root);
                 var below = at.y < Main.Size.y / 2;
-                Look.Move(list, new Vector2(at.x + width - size.x, below ? at.y + Height + 3 : at.y - size.y - 3));
+                Look.Move(list, new Vector2(at.x + width - size.x, below ? at.y + height + 3 : at.y - size.y - 3));
             }
             for (var i = 0; i < choices.Count; i++) Look.Move(choices[i].rectTransform, new Vector2(12, 4 + i * Look.Line));
             arrow.gameObject.SetActive(false);
