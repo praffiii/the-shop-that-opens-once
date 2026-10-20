@@ -188,6 +188,12 @@ namespace Shop
 
         public bool Walking => path.Count > 0;
 
+        /// <summary>How brisk its walk is against <see cref="Speed"/>: a child's quick, an old knee's slow.</summary>
+        public float Pace { get; set; } = 1f;
+
+        /// <summary>Its sheet has this pose.</summary>
+        public bool Has(string pose) => info["poses"][pose] != null;
+
         /// <summary>Walks at <see cref="RunSpeed"/> with the run pose, by keys or along a path.</summary>
         public bool Running { get; set; }
 
@@ -268,7 +274,7 @@ namespace Shop
             if (path.Count > 0)
             {
                 var to = path[0];
-                MoveBy(Vector2.ClampMagnitude(to - Here(), (Running ? RunSpeed : Speed) * Time.deltaTime));
+                MoveBy(Vector2.ClampMagnitude(to - Here(), (Running ? RunSpeed : Speed) * Pace * Time.deltaTime));
                 if (Vector2.Distance(exact, to) < 0.001f)
                 {
                     path.RemoveAt(0);

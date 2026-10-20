@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,7 +6,7 @@ namespace Shop
 {
     /// <summary>
     /// What sits over the world while exploring: the day-and-phase dial at the top left, the bag button, the name of
-    /// whatever is under the mouse, a bubble over whatever is close enough to use, short hints, and the pixel mouse cursor.
+    /// whatever is under the mouse, a bubble over whatever is close enough to use, short hints, the bubbles of villagers going about their day, and the pixel mouse cursor.
     /// </summary>
     public sealed class Hud : MonoBehaviour
     {
@@ -22,6 +23,8 @@ namespace Shop
         Text hover, toast;
         Dial dial;
         float toastLeft, clock;
+        // a villager's bubble and how long it has shown (Villager: a note as they hum, a "!" as the courier comes by)
+        readonly Dictionary<Ant, (Image image, float age)> bubbles = new();
 
         public static Hud Create(Transform parent)
         {
@@ -55,6 +58,32 @@ namespace Shop
             toastLeft = ToastSeconds;
         }
 
+        /// <summary>A mood's bubble over someone's head for a moment, as over a speaker's (Talk.Emotes).</summary>
+        public void Emote(Ant ant, string mood)
+        {
+            var image = bubbles.TryGetValue(ant, out var b) ? b.image : Look.Picture("emote", transform);
+            Look.SetSprite(image, Look.Frame("emote", Talk.Emotes[mood]), Main.Zoom);
+            bubbles[ant] = (image, 0f);
+        }
+
+        void Bubbles(bool exploring)
+        {
+            foreach (var ant in new List<Ant>(bubbles.Keys))
+            {
+                var (image, age) = bubbles[ant];
+                age += Time.deltaTime;
+                if (!ant || age > Talk.EmoteSeconds)
+                {
+                    Destroy(image.gameObject);
+                    bubbles.Remove(ant);
+                    continue;
+                }
+                bubbles[ant] = (image, age);
+                image.gameObject.SetActive(exploring && ant.isActiveAndEnabled);
+                Talk.Over(image, ant, age);
+            }
+        }
+
         /// <summary>A click on the bag button while exploring.</summary>
         public bool Handle() => Exploring && Controls.Click && Look.Hit(bag.rectTransform);
 
@@ -73,6 +102,7 @@ namespace Shop
 
             bag.gameObject.SetActive(exploring);
             dial.Tick(exploring);
+            Bubbles(exploring);
             var tip = exploring ? Place.Hover?.Label ?? (Look.Hit(dial.Area) ? dial.Tip : null) : null;
             Look.Move(bag.rectTransform, new Vector2(view.x - 24, 8));
             hoverTag.gameObject.SetActive(tip != null);

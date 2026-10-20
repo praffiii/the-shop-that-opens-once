@@ -7,9 +7,21 @@ namespace Shop
     /// Keeps someone at their activity: they hold its pose where they stand, or walk their round from stop to stop,
     /// keeping each stop's pose for a while (at some, turned to the courier). Talked to, they stop and turn to the
     /// courier; taken into a scene, the story moves them. Either way they go back to it after, from the nearest stop.
+    /// While they keep a pose they live in it: they stop work for a breath, glance about, hum, take turns talking with
+    /// whoever stands by them, and turn to the courier coming past, so no two of them keep time like clockwork.
     /// </summary>
     public sealed class Villager : MonoBehaviour
     {
+        /// <summary>Seconds between the small things they do while keeping a pose.</summary>
+        const float BeatMin = 3f, BeatMax = 8f;
+        /// <summary>How near (art px) someone stands to be company, and the courier comes to be noticed.</summary>
+        const float CompanyNear = 44f, NoticeNear = 40f;
+        /// <summary>Seconds before they turn to the courier again, and after the courier arrives before they first do.</summary>
+        const float GreetAgain = 40f, Settling = 1.5f;
+        /// <summary>Poses at work: they stop for a breath now and then.</summary>
+        static readonly HashSet<string> Work = new() { "brew", "hammer", "polish", "sweep", "weave", "tend", "water", "rake", "fish", "photo", "peer", "look" };
+        static readonly HashSet<string> Young = new() { "pip", "kid", "grandkid", "leo" }, Old = new() { "nora", "bram", "helen", "marlow" };
+
         Person def;
         Ant ant;
         Place place;
@@ -17,11 +29,18 @@ namespace Shop
         float wait;
         bool walking, talking;
         string listening; // the pose they stopped in to listen
+        // the pose they keep, the way they face in it (0: no side of their own), whether turned away, and to the courier
+        string rest = "idle";
+        int restFacing;
+        bool restAway, restWatch;
+        float beat, aside, greeted = -GreetAgain, since;
+        Ant company;
 
         public static void Add(Ant ant, Person def, Place place)
         {
             var v = ant.gameObject.AddComponent<Villager>();
             (v.def, v.ant, v.place) = (def, ant, place);
+            ant.Pace = Young.Contains(def.Id) ? 1.2f : Old.Contains(def.Id) ? .8f : Random.Range(.9f, 1.05f);
             if (def.Round == null)
             {
                 ant.Feet = def.At;
@@ -39,6 +58,7 @@ namespace Shop
         public void Talk(float courierX)
         {
             talking = true;
+            aside = 0;
             ant.Stop();
             ant.Pose = listening = ant.Carrying ? "carry" : ant.Pose == "sit" ? "sit" : "idle";
             ant.FaceTo(courierX);
@@ -50,6 +70,7 @@ namespace Shop
             if (talking) return;
             talking = true;
             walking = false;
+            aside = 0;
             ant.Stop();
             ant.Running = false;
             ant.Pose = listening = ant.Carrying ? "carry" : "idle";
@@ -69,24 +90,29 @@ namespace Shop
         // Keeps their activity where they stand.
         void Hold()
         {
-            ant.Pose = def.Pose;
-            ant.Facing = def.Facing;
-            if (def.Away) ant.FaceAway();
+            Settle(def.Pose, def.Facing, def.Away, false);
         }
 
         void Update()
         {
             if (talking) return;
+            if (since == 0 && !walking)
+            {
+                // everyone is in the place now: who keeps them company
+                company = Company();
+                Resume();
+            }
+            since += Time.deltaTime;
             if (walking)
             {
                 if (ant.Walking) return;
                 walking = false;
                 Keep();
             }
-            else if (def.Round != null && def.Round[at].Watch && place.Player is { } courier)
-                Watch(courier.Feet.x);
+            else Live();
             if (!walking && def.Round != null && (wait -= Time.deltaTime) <= 0)
             {
+                aside = 0;
                 ant.Carrying = def.Round[at].Carry;
                 ant.Running = def.Round[at].Run;
                 at = (at + 1) % def.Round.Length;
@@ -117,11 +143,104 @@ namespace Shop
             }
             var stop = def.Round[at];
             ant.Carrying = ant.Running = false;
-            ant.Pose = stop.Pose;
-            if (stop.Away) ant.FaceAway();
-            else if (stop.Watch && place.Player) ant.FaceTo(place.Player.Feet.x);
-            else if (stop.Facing != 0) ant.FaceTo(ant.Feet.x + stop.Facing * 8);
-            wait = stop.Wait;
+            Settle(stop.Pose, stop.Facing, stop.Away, stop.Watch);
+            wait = stop.Wait * Random.Range(.75f, 1.35f);
+        }
+
+        // Takes up a pose to keep, turned to whoever keeps them company there.
+        void Settle(string pose, int facing, bool away, bool watch)
+        {
+            (rest, restFacing, restAway, restWatch) = (pose, facing != 0 ? facing : ant.Facing, away, watch);
+            company = Company();
+            aside = 0;
+            beat = Random.Range(BeatMin, BeatMax);
+            Resume();
+        }
+
+        // Back to the pose they keep, after a beat.
+        void Resume()
+        {
+            ant.Pose = rest;
+            if (restAway) ant.FaceAway();
+            else if (restWatch && place.Player) ant.FaceTo(place.Player.Feet.x);
+            else if (company && (rest is "talk" or "idle" or "sit")) ant.FaceTo(company.Feet.x);
+            else ant.FaceTo(ant.Feet.x + restFacing * 8);
+        }
+
+        // Someone standing still near enough to keep them company, the nearest.
+        Ant Company()
+        {
+            Ant best = null;
+            var near = CompanyNear;
+            foreach (var other in place.People)
+            {
+                var d = Vector2.Distance(other.Feet, ant.Feet);
+                if (other == ant || other.Walking || !other.isActiveAndEnabled || d >= near) continue;
+                (best, near) = (other, d);
+            }
+            return best;
+        }
+
+        // Their pose in between the stops: turning to the courier coming by, and a beat now and then.
+        void Live()
+        {
+            if (aside > 0 && (aside -= Time.deltaTime) <= 0) Resume();
+            if (place.Player is { } courier && Notice(courier)) return;
+            if (aside > 0) return;
+            if (restWatch && place.Player) Watch(place.Player.Feet.x);
+            if ((beat -= Time.deltaTime) > 0) return;
+            beat = Random.Range(BeatMin, BeatMax);
+            Beat();
+        }
+
+        // The courier comes close: they look up from what they are doing and turn to them, now and then with a note
+        // of hello.
+        bool Notice(Ant courier)
+        {
+            if (since < Settling || Time.time - greeted < GreetAgain || Vector2.Distance(courier.Feet, ant.Feet) > NoticeNear) return false;
+            greeted = Time.time;
+            Aside(rest == "sit" || !Work.Contains(rest) ? rest : "idle", courier.Feet.x, 1.6f);
+            if (Random.value < .5f) Bubble("smile");
+            return true;
+        }
+
+        // One small thing, as their pose and company allow.
+        void Beat()
+        {
+            var r = Random.value;
+            company = Company();
+            if (company && rest == "talk")
+            {
+                // a pause in the talk: they listen while the other answers, and now and then they laugh
+                Aside("idle", company.Feet.x, Random.Range(1.5f, 3f));
+                if (company.TryGetComponent<Villager>(out var other)) other.Answer(ant);
+                if (r < .3f) Bubble("smile");
+            }
+            else if (company && rest is "idle" or "look" && r < .5f && ant.Has("talk")) Aside("talk", company.Feet.x, Random.Range(2f, 3.5f));
+            else if (company && rest == "sit" && r < .3f) Bubble("smile"); // a word on the bench
+            else if (Work.Contains(rest) && r < .45f) Aside("idle", ant.Feet.x - ant.Facing * 8, Random.Range(1.5f, 2.5f)); // a breath, looking about
+            else if (Work.Contains(rest) && r < .6f) Bubble("smile"); // humming at it
+            else if (!restWatch) Aside(rest, ant.Feet.x - ant.Facing * 8, Random.Range(.8f, 1.6f)); // a glance over the shoulder
+        }
+
+        // Their company has paused to listen: they answer, if they are free to.
+        void Answer(Ant to)
+        {
+            if (talking || walking || aside > 0 || rest == "talk" || !ant.Has("talk")) return;
+            Aside("talk", to.Feet.x, Random.Range(1.5f, 2.5f));
+        }
+
+        // A pose for a moment, turned toward x, then back to the pose they keep.
+        void Aside(string pose, float x, float seconds)
+        {
+            if (ant.Has(pose)) ant.Pose = pose;
+            ant.FaceTo(x);
+            aside = seconds;
+        }
+
+        void Bubble(string mood)
+        {
+            if (Main.Instance && Main.Instance.Hud) Main.Instance.Hud.Emote(ant, mood);
         }
 
         // Turns to the courier when they pass to the other side, not at every step in front.

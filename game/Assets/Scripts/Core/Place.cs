@@ -150,6 +150,9 @@ namespace Shop
         /// <summary>Someone in this place by id ("courier" is the player), or null.</summary>
         public Ant Actor(string id) => id == "courier" ? Player : people.TryGetValue(id, out var ant) ? ant : null;
 
+        /// <summary>Everyone in this place but the courier.</summary>
+        public IEnumerable<Ant> People => people.Values;
+
         /// <summary>Who someone in this place is now (their activity and line), or null.</summary>
         public Person Who(string id) => here.GetValueOrDefault(id);
 

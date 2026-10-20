@@ -28,8 +28,9 @@ namespace Shop
         /// <summary>How long the typing waits after a comma and after the end of a sentence, in seconds.</summary>
         const float CommaPause = .12f, StopPause = .32f;
         /// <summary>The emote bubbles' frames in Art/ui/emote, by mood.</summary>
-        static readonly Dictionary<string, int> Emotes = new() { ["surprised"] = 0, ["puzzled"] = 1, ["smile"] = 2, ["moved"] = 3, ["cross"] = 4, ["sad"] = 5 };
-        const float EmoteSeconds = 2f, ShakeSeconds = .3f;
+        public static readonly Dictionary<string, int> Emotes = new() { ["surprised"] = 0, ["puzzled"] = 1, ["smile"] = 2, ["moved"] = 3, ["cross"] = 4, ["sad"] = 5 };
+        public const float EmoteSeconds = 2f;
+        const float ShakeSeconds = .3f;
         /// <summary>How far over the feet a head is, in art px, for the emote bubble.</summary>
         const float HeadHeight = 42f;
         const string Emphasis = "#c4472b"; // roofR2's deep red, readable on the paper
@@ -258,10 +259,15 @@ namespace Shop
             emote.gameObject.SetActive(showing);
             if (!showing) return;
             emoteLeft -= Time.deltaTime;
-            var age = EmoteSeconds - emoteLeft;
+            Over(emote, talker, EmoteSeconds - emoteLeft);
+        }
+
+        /// <summary>Puts an emote bubble over someone's head, popping up as it appears and bobbing after (<paramref name="age"/> in seconds).</summary>
+        public static void Over(Image emote, Ant who, float age)
+        {
             var rise = age < .12f ? (1 - age / .12f) * 6 : Mathf.Round(Mathf.Sin(age * 6f));
             var size = emote.rectTransform.sizeDelta;
-            var head = Main.ToCanvas(talker.Feet + new Vector2(0, -HeadHeight));
+            var head = Main.ToCanvas(who.Feet + new Vector2(0, -HeadHeight));
             Look.Move(emote.rectTransform, head - new Vector2(size.x / 2, size.y - rise));
         }
 

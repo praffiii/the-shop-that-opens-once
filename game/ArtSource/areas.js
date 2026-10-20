@@ -120,6 +120,23 @@
     });
   }
 
+  /* ---------- the meadow: what grows on the lawns ---------- */
+  // Long grass, wild flowers and the odd toadstool on the open lawns between things, never on a path, a slope or
+  // against a thing, and walked through, so no lawn lies bare.
+  const MEADOW = ['yellow', 'white', 'lilac', 'rose', 'blue', 'pink'];
+  function meadow(S, G, things) {
+    const open = (x, y) => G.mat(x, y) === 'g' && !S.blocked(x, y) && !G.vertical(x, y);
+    const room = (x, y) => [[0, 0], [-16, 0], [16, 0], [0, -24], [0, 12], [-12, -12], [12, -12]].every(([i, j]) => open(x + i, y + j));
+    const clear = (x, y) => things.every(({ s, x: tx, y: ty }) => {
+      const w = (s.img ? s.img.width : s.w || 40) / 2 + 14, h = s.ay || s.h || 30;
+      return Math.abs(tx - x) > w || y < ty - h - 6 || y > ty + 18;
+    });
+    KIT.scatter(S.w * 7 + 5, 36, [0, 0, S.w, S.h], (x, y) => room(x, y) && clear(x, y), 3).forEach(([x, y, r, q], k) => {
+      const s = r < 0.5 ? V.reeds(k % 9 + 1) : r < 0.92 ? V.flowerClump(k + 200, MEADOW[(q * 6) | 0]) : V.mushrooms(k % 3 + 1);
+      things.push({ name: 'meadow_' + k, s, x, y, o: { walk: true, ...(r < 0.5 ? { sway: 2 } : {}) } });
+    });
+  }
+
   /* ---------- bugs: butterflies by day, fireflies at night ---------- */
   // Each flies a small loop that repeats every 6 s, its position stepped at 7.5 fps so the loop bakes to few frames.
   function bugs(S, G, glow, dragonflies = []) {
@@ -132,8 +149,21 @@
         g.drawImage(s.frames[Math.floor(q * s.fps) % s.frames.length], fx - s.ax, fy - s.ay);
       } });
     };
-    const B = [1, 2, 3, 4, 5].map(k => V.butterfly(k)), D = V.dragonfly(), F = V.firefly();
-    KIT.scatter(31, 160, [0, 0, S.w, S.h], (x, y) => open(x, y) && open(x, y + 30), 1).slice(0, 6).forEach(([x, y, r], i) => fly('butterfly_' + i, B[i % 5], x, y, 18, 8, r * 6, { day: true }));
+    // Each crawls along the ground there and back over the 6 s loop, turning at either end, pausing at the far one.
+    const crawl = (name, s, x, y, len, ph) => {
+      const w = s.img.width;
+      S.items.push({ name, y, box: [x - s.ax - 1, y - s.ay - 1, len + w + 2, s.img.height + 2], animated: true, walk: true, day: true, foot: 1, draw: (g, t) => {
+        const q = ((Math.floor(t * 7.5) / 7.5 + ph) % 6) / 6, there = q < 0.45, d = there ? q / 0.45 : q < 0.55 ? 1 : 1 - (q - 0.55) / 0.45;
+        const fx = Math.round(x + d * len);
+        if (there || q < 0.55) g.drawImage(s.img, fx - s.ax, y - s.ay);
+        else { g.save(); g.translate(fx - s.ax + w, y - s.ay); g.scale(-1, 1); g.drawImage(s.img, 0, 0); g.restore(); }
+      } });
+    };
+    const B = [1, 2, 3, 4, 5].map(k => V.butterfly(k)), D = V.dragonfly(), F = V.firefly(), C = [V.ladybug(), V.snail(), V.beetle(1), V.beetle(2), V.ladybug()];
+    const flight = KIT.scatter(31, 120, [0, 0, S.w, S.h], (x, y) => open(x, y) && open(x, y + 30), 1);
+    flight.slice(0, Math.round(S.w * S.h / 90000)).forEach(([x, y, r], i) => fly('butterfly_' + i, B[i % 5], x, y, 18, 8, r * 6, { day: true }));
+    KIT.scatter(33, 140, [0, 0, S.w, S.h], (x, y) => [0, 12, 24, 36].every(d => open(x + d, y) && open(x + d, y - 8)), 1).slice(0, 6)
+      .forEach(([x, y, r], i) => crawl('crawler_' + i, C[i % C.length], x, y, i % 5 === 1 ? 14 : 30, r * 6));
     dragonflies.forEach(([x, y], i) => fly('dragonfly_' + i, D, x, y, 26, 10, i, { day: true }));
     glow.forEach(([cx, cy, rx, ry], k) => KIT.scatter(40 + k, 30, [cx - rx, cy - ry, 2 * rx, 2 * ry], (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 < 1, 1).slice(0, 14)
       .forEach(([x, y, r], i) => fly(`firefly_${k}_${i}`, F, x, y - 14, 10, 6, r * 6, { light: true })));
@@ -332,6 +362,7 @@
     waterLife(S, G);
     if (def.jetty) jetty(S, def.jetty);
     if (def.fields) fields(S, def.fields);
+    meadow(S, G, P);
     P.forEach(t => (t.s.model ? placeModel : place)(S, t));
     bugs(S, G, def.glow || [], def.dragonflies);
     forest(S, G, def.species, def.under);
@@ -520,6 +551,15 @@
         at('home_sam', V.townHome('sam'), 830, 900, { lane: [[830, 924]] });
         [[200, 860], [380, 860], [930, 700], [1240, 860]].forEach(([x, y], i) => at('blossom_' + i, V.blossom(i + 1), x, y, { sway: 2 }));
         at('oak_w', V.oak(3), 70, 800);
+        // the weaver's cloth drying on the west lawn, a bucket by the well; an apple tree and a swing for the children
+        // on the east lawn; down the lane, Sam's and the weaver's vegetable plots and a chopping block
+        at('weaver_line', V.clothesline(), 196, 712); at('weaver_basket', V.sacks(3), 238, 716); at('well_bucket', V.bucket(), 356, 770);
+        at('beetle_cart', V.beetleCart(), 58, 700);
+        at('apple_e', V.fruitTree(5, 'apple'), 1210, 700, { sway: 1 }); at('swing_e', V.swing(), 1190, 846);
+        [['cabbage', 958], ['carrot', 976]].forEach(([k, y], i) => at('lane_veg_w' + i, V.vegRow(k, 64), 330, y, { walk: true }));
+        [['carrot', 958], ['cabbage', 976]].forEach(([k, y], i) => at('lane_veg_e' + i, V.vegRow(k, 56), 690, y, { walk: true }));
+        at('lane_stump', V.stumpBig(2), 930, 964); at('lane_logs', V.logPile(), 976, 960);
+        [[340, 612], [960, 612]].forEach(([x, y], i) => at('door_pot_' + i, V.flowerPot(i + 5, i ? 'pink' : 'red'), x, y));
         [[150, 690, 'yellow'], [420, 690, 'white'], [220, 760, 'rose'], [60, 880, 'lilac'], [880, 760, 'yellow'], [1000, 690, 'white'], [1220, 760, 'pink'], [540, 880, 'rose'], [740, 880, 'blue']]
           .forEach(([x, y, c], i) => at('flowers_' + i, V.flowerClump(i + 10, c), x, y, { walk: true }));
       },
@@ -614,6 +654,11 @@
         at('crates_salt', V.crateStack(6), 354, 440); at('barrel_salt', V.barrel(), 380, 446);
         at('fish_rack_0', B.fishRack(), 580, 444); at('nets_0', B.nets(), 620, 448, { walk: true });
         at('lighthouse', { ...V.lighthouse(), door: undefined }, 900, 650);   // seen, not entered
+        // the lawns on the way down: nets and the catch drying in the sun, a boat turned over for mending, pots of
+        // flowers by a bench where the fishers rest
+        at('lawn_rack_0', B.fishRack(), 300, 320); at('lawn_nets_0', B.nets(), 352, 344, { walk: true }); at('lawn_crates', B.catchCrates(), 396, 316);
+        at('lawn_boat', V.rowboat(true), 640, 352, { walk: true }); at('lawn_barrel', V.barrel(), 600, 326); at('lawn_sacks', V.sacks(4), 700, 322);
+        at('lawn_bench', V.bench2(6), 800, 340); at('lawn_pot', V.flowerPot(7, 'yellow'), 830, 336); at('lawn_fruit', V.fruitTree(6, 'orange'), 120, 330, { sway: 1 });
         at('fish_rack', B.fishRack(), 820, 520);
         // the sand: a rowboat pulled up just out of the water, the catch landed at the jetty's foot, salt raked up in the pans, nets,
         // crates, driftwood, rocks
