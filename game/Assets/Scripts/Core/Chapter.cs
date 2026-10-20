@@ -41,8 +41,13 @@ namespace Shop
         /// <summary>Runs when the courier steps onto an unseen spot (<see cref="Hotspot.Step"/>) for the first time in the chapter.</summary>
         public virtual Awaitable Stepped(string id) => Done();
 
-        /// <summary>Why a way out is shut for now, which the courier says before stepping back from it; null while it is open. <paramref name="id"/> is the exit's hotspot id.</summary>
-        public virtual string Closed(string id) => null;
+        /// <summary>
+        /// Why a way out is shut for now, which the courier says before stepping back from it; null while it is open.
+        /// <paramref name="id"/> is the exit's hotspot id. Marlow's door opens only at midnight, until the night's
+        /// keepsake is home.
+        /// </summary>
+        public virtual string Closed(string id) =>
+            id == "shop_door" && (Game.Phase != Phase.Night || Game.Has("handed_over")) ? "Just roots and shadow. The fog only comes at midnight." : null;
 
         /// <summary>Learns someone's name: the talk box and their hotspot use it from now on.</summary>
         protected void Known(string id, string displayName)
@@ -120,6 +125,9 @@ namespace Shop
 
         protected Awaitable Wait(float seconds) => Main.Wait(seconds);
 
+        /// <summary>The story moves the time of day on (<see cref="Main.MovePhase"/>); watched, the light turns round everyone as they are.</summary>
+        protected Awaitable MovePhase(Phase to, bool watched = false) => Main.MovePhase(to, watched);
+
         protected Awaitable Card(params string[] lines) => Main.ShowCard(lines);
 
         /// <summary>Into a cinematic scene (bars over the top and bottom, the camera closer) or back out of it.</summary>
@@ -187,6 +195,7 @@ namespace Shop
             owner.Held = art;
             owner.Pose = "receive";
             Game.Bag.Remove(keepsake);
+            Game.Mark("handed_over");
             Sfx("right");
         }
 

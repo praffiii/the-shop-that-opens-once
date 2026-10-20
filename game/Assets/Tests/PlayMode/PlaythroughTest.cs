@@ -96,6 +96,7 @@ namespace Shop.Tests
             Assert.IsTrue(await main.Place.WalkAndUse("helen"), "The courier can walk up to Helen");
             await Until(() => Game.SavedChapter() == 1 && main.Story == null);
             Assert.AreEqual(1, Game.LanternsOut, "A lantern goes out");
+            Assert.AreEqual(Phase.Night, Game.Phase, "The handover turns dusk to night");
             CollectionAssert.DoesNotContain(Game.Bag, "watch", "Helen keeps the watch");
         }
 

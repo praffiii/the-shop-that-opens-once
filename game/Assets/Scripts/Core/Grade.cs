@@ -27,22 +27,26 @@ namespace Shop
             Shader.SetGlobalFloat(CloudsId, 0);
         }
 
-        public static void Apply(Phase phase, bool indoors)
+        public static void Apply(Phase phase, bool indoors) => Blend(phase, phase, indoors, 1f);
+
+        /// <summary>The grade <paramref name="t"/> of the way from one time of day to the next, as the light turns while the courier watches.</summary>
+        public static void Blend(Phase from, Phase to, bool indoors, float t)
         {
-            var g = indoors ? null : Art.Json("grades")[phase.ToString().ToLowerInvariant()];
-            if (g == null) Set(Vector3.one, Vector3.zero, Vector3.zero);
-            else Set(V(g["mul"]), V(g["add"]), V(g["shade"]));
-            Shader.SetGlobalFloat(CloudsId, indoors ? 0 : phase switch { Phase.Morning => 0.8f, Phase.Midday => 1f, Phase.Dusk => 0.4f, _ => 0f });
-            Shader.SetGlobalColor(LampTintId, new Color(1f, 0.72f, 0.38f, phase switch { Phase.Dusk => 0.6f, Phase.Night => 1f, _ => 0f }));
-            Shader.SetGlobalColor(RimId, indoors ? Color.clear : phase switch
-            {
-                Phase.Dusk => new Color(1f, 0.82f, 0.66f, 0.45f),
-                Phase.Night => new Color(0.7f, 0.8f, 1f, 0.35f),
-                _ => Color.clear,
-            });
+            var (a, b) = (Of(from, indoors), Of(to, indoors));
+            Set(Vector3.Lerp(a.mul, b.mul, t), Vector3.Lerp(a.add, b.add, t), Vector3.Lerp(a.shade, b.shade, t));
+            Shader.SetGlobalFloat(CloudsId, Mathf.Lerp(a.clouds, b.clouds, t));
+            Shader.SetGlobalColor(LampTintId, Color.Lerp(a.lamp, b.lamp, t));
+            Shader.SetGlobalColor(RimId, Color.Lerp(a.rim, b.rim, t));
             var sun = RenderSettings.sun;
             if (!sun) return;
             sun.enabled = !indoors;
+            sun.transform.rotation = Quaternion.Slerp(a.sun, b.sun, t);
+            Shader.SetGlobalColor(ShadowTintId, Color.Lerp(a.shadow, b.shadow, t));
+        }
+
+        static (Vector3 mul, Vector3 add, Vector3 shade, float clouds, Color lamp, Color rim, Quaternion sun, Color shadow) Of(Phase phase, bool indoors)
+        {
+            var g = indoors ? null : Art.Json("grades")[phase.ToString().ToLowerInvariant()];
             // (height above the horizon, turn from north, shadow colour): shadows fall away from the camera, west in
             // the morning, east at dusk; the moon's are faint.
             var (height, turn, tint) = phase switch
@@ -52,8 +56,20 @@ namespace Shop
                 Phase.Dusk => (24f, 58f, new Color(0.62f, 0.54f, 0.72f)),
                 _ => (50f, -36f, new Color(0.78f, 0.78f, 0.88f)),
             };
-            sun.transform.rotation = Quaternion.Euler(height, turn, 0);
-            Shader.SetGlobalColor(ShadowTintId, tint);
+            return (
+                g == null ? Vector3.one : V(g["mul"]),
+                g == null ? Vector3.zero : V(g["add"]),
+                g == null ? Vector3.zero : V(g["shade"]),
+                indoors ? 0 : phase switch { Phase.Morning => 0.8f, Phase.Midday => 1f, Phase.Dusk => 0.4f, _ => 0f },
+                new Color(1f, 0.72f, 0.38f, phase switch { Phase.Dusk => 0.6f, Phase.Night => 1f, _ => 0f }),
+                indoors ? Color.clear : phase switch
+                {
+                    Phase.Dusk => new Color(1f, 0.82f, 0.66f, 0.45f),
+                    Phase.Night => new Color(0.7f, 0.8f, 1f, 0.35f),
+                    _ => Color.clear,
+                },
+                Quaternion.Euler(height, turn, 0),
+                tint);
         }
 
         /// <summary><paramref name="c"/> graded as the shader grades art, for colours that are not art (the backdrop).</summary>

@@ -62,6 +62,15 @@
     return loop;
   }
 
+  // One loop of a phase's ambience, seamless the way the music is: what still rings past its end folds back onto its start.
+  async function ambience(name) {
+    const L = Sound.ambienceLength, n = L * RATE;
+    const d = await render(L + 3, s => s._ambience(name, 0, 1952));
+    const loop = d.slice(0, n);
+    for (let i = n; i < d.length; i++) loop[i - n] += d[i];
+    return loop;
+  }
+
   // One effect, trimmed to its sound and its decay. k picks the variation: footsteps cycle through four.
   async function effect(name, opts = {}, k = 0) {
     const d = await render(6, s => { s._n = k; s.sfx(name, opts); });   // 6 s is more than any effect needs, as checked below
@@ -90,6 +99,7 @@
     const put = async (name, samples) => { BAKE.out[`sound/${name}.ogg`] = await wav(samples); };
     for (const mood of MOODS) await put(`music_${mood}`, await music(mood));
     await put('wind', await wind());
+    for (const name of Sound.ambiences) await put(`amb_${name}`, await ambience(name));
     for (const name of EFFECTS) await put(name, await effect(name));
     for (const id of Sound.voices) await put(`voice_${id}`, await effect(`voice_${id}`));
     for (let k = 0; k < 4; k++) {

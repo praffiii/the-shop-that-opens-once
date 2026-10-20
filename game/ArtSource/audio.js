@@ -158,6 +158,52 @@
   };
   for (const [id, blip] of Object.entries(VOICES)) FX['voice_' + id] = blip;
 
+  /* Each phase's ambience under the music (GDD 9): a loop of AMB seconds, its events placed by a seeded hash so every
+     export is the same. Bugs only, as on the ant planet: the GDD's morning sparrows are tree crickets and bees here. */
+  const AMB = 16;
+  const AMBIENCE = {
+    // dew and bugs waking: tree crickets trilling now and then, a bee droning past, drops falling off the leaves
+    morning: (s, r) => {
+      for (let k = 0; k < 9; k++) {
+        const t = r() * AMB, f = 3400 + r() * 900;
+        for (let p = 0; p < 7; p++) s._note(t + p * 0.032, f, { vol: 0.012, dec: 0.022, atk: 0.003 });
+      }
+      for (let k = 0; k < 2; k++) {
+        const t = 1 + k * 8 + r() * 4;
+        s._note(t, 205 + r() * 30, { type: 'sawtooth', lp: 700, vol: 0.016, atk: 1.2, dec: 1.6, glide: 1.03 });
+      }
+      for (let k = 0; k < 6; k++) s._note(r() * AMB, 1500 + r() * 700, { vol: 0.02, dec: 0.12, atk: 0.002, glide: 0.7 });
+    },
+    // the market: voices murmuring too far off to make out, a cart's wheels knocking, a basket set down
+    midday: (s, r) => {
+      for (let t = 0; t < AMB; t += 0.07 + r() * 0.16) {
+        const f = 420 + r() * 700;
+        s._noise(t, { f, f2: f * (0.8 + r() * 0.4), q: 5, vol: 0.05 + r() * 0.05, atk: 0.02, dur: 0.08 + r() * 0.12 });
+      }
+      for (let k = 0; k < 3; k++) {
+        const t = r() * (AMB - 2);
+        for (let p = 0; p < 5; p++) s._noise(t + p * 0.21, { type: 'lowpass', f: 300, vol: 0.12, dur: 0.05, atk: 0.003 });
+      }
+      for (let k = 0; k < 4; k++) s._noise(r() * AMB, { f: 900, q: 1.5, vol: 0.06, dur: 0.06, atk: 0.003 });
+    },
+    // waves breaking on the far shore: a slow swell and its hiss drawing back, four to the loop
+    dusk: (s, r) => {
+      for (let k = 0; k < 4; k++) {
+        const t = k * 4 + r() * 0.6;
+        s._noise(t, { type: 'lowpass', f: 300, f2: 900, vol: 0.14, atk: 1.4, dur: 2.6 });
+        s._noise(t + 1.5, { f: 2400, f2: 1200, q: 0.6, vol: 0.05, atk: 0.4, dur: 2.2 });
+      }
+    },
+    // crickets all round in the dark, three near and a chorus farther off, and now and then dew dripping
+    night: (s, r) => {
+      for (const [f, v, gap] of [[4300, 0.02, 0.62], [4700, 0.012, 0.81], [3900, 0.009, 0.53]])
+        for (let t = r() * gap; t < AMB; t += gap * (0.9 + r() * 0.2))
+          for (let p = 0; p < 3; p++) s._note(t + p * 0.045, f, { vol: v, dec: 0.03, atk: 0.004 });
+      for (let t = 0; t < AMB; t += 0.05) s._note(t, 5200 + r() * 400, { vol: 0.0025, dec: 0.03, atk: 0.01 });
+      for (let k = 0; k < 4; k++) s._note(r() * AMB, 1700 + r() * 500, { vol: 0.015, dec: 0.1, atk: 0.002, glide: 0.7 });
+    },
+  };
+
   // A hinge or a bed's creak: the wood or iron sticks and slips, pulse after pulse every gap seconds for dur, its pitch
   // sliding from f0 to f1.
   function creak(s, t, dur, f0, f1, gap) {
@@ -185,6 +231,14 @@
     }
     static caption(name) { return CAPTIONS[name] || ''; }
     static get voices() { return Object.keys(VOICES); }
+    static get ambiences() { return Object.keys(AMBIENCE); }
+    static get ambienceLength() { return AMB; }
+    // Queues one loop of a phase's ambience from t, its events placed by a hash seeded with `seed`.
+    _ambience(name, t, seed) {
+      let a = seed;
+      const r = () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; };
+      AMBIENCE[name]({ _note: (at, f, o) => this._note(t + at, f, o), _noise: (at, o) => this._noise(t + at, o) }, r);
+    }
     get on() { return this._on; }
 
     _init() {

@@ -4,12 +4,14 @@ using UnityEngine.UI;
 namespace Shop
 {
     /// <summary>
-    /// What sits over the world while exploring: the bag button, the name of whatever is under the mouse, a bubble
-    /// over whatever is close enough to use, short hints, and the pixel mouse cursor.
+    /// What sits over the world while exploring: the day-and-phase dial at the top left, the bag button, the name of
+    /// whatever is under the mouse, a bubble over whatever is close enough to use, short hints, and the pixel mouse cursor.
     /// </summary>
     public sealed class Hud : MonoBehaviour
     {
         const float ToastSeconds = 4f;
+        /// <summary>How long the dial hops when the time of day moves on, in seconds.</summary>
+        const float HopSeconds = 0.6f;
 
         /// <summary>Set by Main whenever the place changes.</summary>
         public Place Place;
@@ -18,14 +20,18 @@ namespace Shop
         /// <summary>Hints and the cursor, above every panel. Main keeps it last on the screen.</summary>
         public RectTransform Top { get; private set; }
 
-        Image bag, hoverTag, prompt, toastBox, cursor;
-        Text hover, toast;
-        float toastLeft, clock;
+        Image bag, hoverTag, prompt, toastBox, cursor, dial, dialIcon;
+        Text hover, toast, dialText;
+        float toastLeft, clock, hop;
+        (int, Phase) shown = (-1, Phase.Dusk); // the day and phase on the dial
 
         public static Hud Create(Transform parent)
         {
             var hud = Look.Node("Hud", parent).gameObject.AddComponent<Hud>();
             var t = hud.transform;
+            hud.dial = Look.Panel("panel", t);
+            hud.dialIcon = Look.Picture("phase", hud.dial.transform);
+            hud.dialText = Look.Label("", hud.dial.transform);
             hud.bag = Look.Picture("bag", t, Art.Sprite(Art.Texture("icons/bag")));
             hud.hoverTag = Look.Panel("name", t);
             hud.hover = Look.Label("", hud.hoverTag.transform, default, Art.Color((string)Look.Ui["name"]["text"]));
@@ -56,6 +62,27 @@ namespace Shop
         /// <summary>A click on the bag button while exploring.</summary>
         public bool Handle() => Exploring && Controls.Click && Look.Hit(bag.rectTransform);
 
+        // The day and the time of day, top left: a little window on the sky and "Day 1 · Morning". It hops when the
+        // story moves the time on.
+        void Dial(bool exploring)
+        {
+            dial.gameObject.SetActive(exploring);
+            if (!exploring) return;
+            var now = (Game.Chapter, Game.Phase);
+            if (now != shown)
+            {
+                if (shown.Item1 >= 0) hop = HopSeconds;
+                shown = now;
+                Look.SetSprite(dialIcon, Art.Sprite(Art.Texture("icons/" + Game.Phase.ToString().ToLowerInvariant())));
+                Look.SetText(dialText, $"Day {Game.Chapter} · {Game.Phase}");
+                Look.Move(dialIcon.rectTransform, new Vector2(4, 3));
+                Look.Move(dialText.rectTransform, new Vector2(24, 5));
+                Look.Resize(dial.rectTransform, new Vector2(Look.Width(dialText) + 30, 22));
+            }
+            hop = Mathf.Max(0, hop - Time.deltaTime);
+            Look.Move(dial.rectTransform, new Vector2(8, 8 - Mathf.Round(Mathf.Sin(hop / HopSeconds * Mathf.PI) * 4)));
+        }
+
         public void Tick()
         {
             clock += Time.deltaTime;
@@ -70,6 +97,7 @@ namespace Shop
             cursor.gameObject.SetActive(Application.isFocused);
 
             bag.gameObject.SetActive(exploring);
+            Dial(exploring);
             Look.Move(bag.rectTransform, new Vector2(view.x - 24, 8));
             hoverTag.gameObject.SetActive(exploring && Place.Hover != null);
             if (hoverTag.gameObject.activeSelf)
@@ -98,6 +126,9 @@ namespace Shop
                 toastBox.gameObject.SetActive(toastLeft > 0);
                 var box = Talk ? Talk.BoxRect : default;
                 var y = box.height > 0 && box.y < 40 ? box.yMax + 4 : 6f;
+                // below the dial when a long hint would run into it
+                var dialEdge = Look.Pos(dial.rectTransform).x + dial.rectTransform.sizeDelta.x + 4;
+                if (dial.gameObject.activeSelf && Look.Pos(toastBox.rectTransform).x < dialEdge) y = Mathf.Max(y, 8 + dial.rectTransform.sizeDelta.y + 4);
                 Look.Move(toastBox.rectTransform, new Vector2(Look.Pos(toastBox.rectTransform).x, y));
             }
         }

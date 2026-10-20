@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Shop
 {
-    /// <summary>The time of day. It moves with the story, never with a clock.</summary>
+    /// <summary>The time of day. It moves with the story, never with a clock (Main.MovePhase).</summary>
     public enum Phase { Morning, Midday, Dusk, Night }
 
     /// <summary>
@@ -39,7 +39,7 @@ namespace Shop
         {
             Chapter = n;
             LanternsOut = Mathf.Clamp(n - 1, 0, 7);
-            Phase = Phase.Dusk;
+            Phase = n == 0 ? Phase.Dusk : Phase.Night; // the prologue arrives at dusk; a night begins at the midnight bell
             flags.Clear();
             Bag.Clear();
             Notes.Clear();

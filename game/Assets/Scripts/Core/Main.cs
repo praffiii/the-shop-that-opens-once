@@ -49,6 +49,8 @@ namespace Shop
         const string TitlePlace = "grove";
         static readonly Vector2 TitleView = new(300, 236);
         const float FadeSeconds = 0.4f;
+        /// <summary>How long the light takes to turn when the courier watches the time of day move on.</summary>
+        const float TurnSeconds = 3f;
 
         static readonly Dictionary<int, Func<Main, Chapter>> Chapters = new()
         {
@@ -427,20 +429,48 @@ namespace Shop
             if (villager) villager.Done();
         }
 
-        // Developer builds only: the time of day moves on where the courier stands, so morning and midday can be seen
-        // before the story moves them.
+        /// <summary>
+        /// The story moves the time of day on, where the courier stands (Game.Phase is never moved any other way).
+        /// Unwatched, the place is rebuilt under the new light behind a fade, with who is out at that time. Watched,
+        /// the light turns slowly round everyone as they are, as at a handover at dusk; the place takes in who is out
+        /// once the courier leaves it.
+        /// </summary>
+        public async Awaitable MovePhase(Phase to, bool watched = false)
+        {
+            var from = Game.Phase;
+            if (from == to || !Place) return;
+            Game.Phase = to;
+            if (watched)
+            {
+                for (var t = 0f; t < TurnSeconds; t += Time.deltaTime)
+                {
+                    Grade.Blend(from, to, Place.Def.Indoors && !Place.Def.Open, Mathf.SmoothStep(0f, 1f, t / TurnSeconds));
+                    await Frame();
+                }
+                Place.Show();
+                View.backgroundColor = Grade.Of(Place.World.Bg);
+                Sound.Mood(Place.Def.Mood, Place.Def.Indoors);
+                return;
+            }
+            var player = courier.gameObject.activeSelf;
+            var (at, facing) = (courier.Feet, courier.Facing);
+            await Fade(true);
+            Swap(Place.Def.Id, "");
+            if (player)
+            {
+                courier.gameObject.SetActive(true);
+                Place.Enter(courier, at);
+                courier.Facing = facing;
+            }
+            FrameCamera(0f);
+            await Fade(false);
+        }
+
+        // Developer builds only: the time of day moves on where the courier stands, so every phase can be seen.
         async Awaitable NextPhase()
         {
             Hold();
-            Game.Phase = (Phase)(((int)Game.Phase + 1) % 4);
-            var at = courier.Feet;
-            await Fade(true);
-            Swap(Place.Def.Id, "");
-            courier.gameObject.SetActive(true);
-            Place.Enter(courier, at);
-            FrameCamera(0f);
-            await Fade(false);
-            Hud.Toast(Game.Phase.ToString());
+            await MovePhase((Phase)(((int)Game.Phase + 1) % 4));
             Release();
         }
 

@@ -16,7 +16,6 @@ namespace Shop
 
         public override async Awaitable Start()
         {
-            Game.Phase = Phase.Dusk;
             // Satria knows everyone here: he grew up with them
             foreach (var (id, name) in new[] { ("helen", "Helen"), ("baker", "Baker"), ("leo", "Leo"), ("theo", "Theo"), ("nora", "Nenek Nora"), ("gardener", "Gardener"), ("mia", "Mia"), ("pip", "Pip"), ("sam", "Sam"),
                          ("shopper", "Shopper"), ("florist", "Flower seller"), ("farmhand", "Farmhand"), ("herder", "Aphid herder"), ("valdo", "Valdo") })
@@ -68,7 +67,7 @@ namespace Shop
             "home_door" when !Game.Has("welcomed") => "Not yet.",
             "home_door" when !Game.Bag.Contains("homekey") => "Locked. Bu Helen said the key is under Mother's old geranium pot.",
             "to_station" or "to_coast" => "It's getting dark. I should get home first.",
-            _ => null,
+            _ => base.Closed(id),
         };
 
         public override async Awaitable Stepped(string id)

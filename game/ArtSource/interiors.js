@@ -1992,6 +1992,32 @@
     for (let k = 0; k < 5; k++) { rect(x, 10 + k, 5 + k, 2, 1, 'roofR2'); rect(x, 14 - k, 5 + k, 2, 1, 'roofR2'); }
     return c; };
 
+  // The HUD's day-and-phase dial (GDD 10.2), one per phase: a round window on the sky over a hill, the sun rising,
+  // high, setting, or the moon and two stars. Inside the ink ring, sky above the hill's line and hill below it.
+  function phaseDial(sky, hill, draw) {
+    const [c, x] = canvas(16, 16);
+    for (let py = 0; py < 16; py++) for (let px = 0; px < 16; px++) {
+      const d = Math.hypot(px - 7.5, py - 7.5);
+      if (d > 8) continue;
+      const ground = py > 10 + Math.round(Math.sin(px * 0.5) * 0.8);
+      rect(x, px, py, 1, 1, d > 7 ? 'ink' : ground ? hill : sky[Math.min(sky.length - 1, Math.floor(py / 4))]);
+    }
+    draw(x);
+    return c;
+  }
+  const sun = (x, cy, r, col) => { for (let py = -r; py <= r; py++) for (let px = -r; px <= r; px++) if (px * px + py * py <= r * r + 1 && cy + py <= 10) rect(x, 7 + px, cy + py, 1, 1, col); };
+  ICONS.morning = () => phaseDial(['sky2', 'sky1', 'dusk0'], 'roofG2', x => { sun(x, 10, 3, 'light2'); rect(x, 6, 8, 2, 1, 'light0'); });
+  ICONS.midday = () => phaseDial(['sky3', 'sky2', 'sky1'], 'roofG2', x => {
+    sun(x, 5, 2, 'light2'); rect(x, 6, 4, 1, 1, 'light0');
+    for (const [px, py] of [[7, 1], [3, 5], [11, 5], [4, 2], [10, 2]]) rect(x, px, py, 1, 1, 'light1');
+  });
+  ICONS.dusk = () => phaseDial(['dusk4', 'dusk3', 'dusk2'], 'roofG3', x => { sun(x, 11, 3, 'light3'); rect(x, 5, 9, 4, 1, 'light2'); });
+  ICONS.night = () => phaseDial(['iron4', 'dusk5', 'dusk4'], 'roofG4', x => {
+    sun(x, 5, 3, 'light0');
+    for (let py = -3; py <= 3; py++) for (let px = -3; px <= 3; px++) if ((px - 2) * (px - 2) + (py + 1) * (py + 1) <= 8) rect(x, 7 + px, 5 + py, 1, 1, ['iron4', 'dusk5', 'dusk4'][Math.floor((5 + py) / 4)]);
+    rect(x, 3, 6, 1, 1, 'light1'); rect(x, 11, 3, 1, 1, 'white'); rect(x, 12, 8, 1, 1, 'light1');
+  });
+
   /* ================================================================ FOLIAGE (shared by the station) */
   // Canopy from clumps [cx, cy, r]; each clump lit from the top-left with a scalloped rim and leaf clusters.
   function canopy(w, h, clumps, seed, pal = ['leaf0', 'leaf1', 'leaf2', 'leaf3', 'leaf4', 'leaf5']) {

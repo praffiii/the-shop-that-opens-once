@@ -4,7 +4,7 @@ namespace Shop
 {
     /// <summary>
     /// Not part of the story: a short run through every system (walking, places, talking, choices, the bag, handing
-    /// over a keepsake, a lantern going out, saving), from the title's editor-only option. Night 1 replaces it.
+    /// over a keepsake as the light turns to night, a lantern going out, saving), from the title's editor-only option. Night 1 replaces it.
     /// </summary>
     public sealed class DevChapter : Chapter
     {
@@ -42,6 +42,9 @@ namespace Shop
             Hint("Press E to look in your bag.");
         }
 
+        // Marlow's door is open whenever the run comes by.
+        public override string Closed(string id) => null;
+
         public override async Awaitable Interact(string id)
         {
             switch (id)
@@ -51,6 +54,7 @@ namespace Shop
                     if (await Choose("Show the watch", "Goodbye") != 0) return;
                     await GiveKeepsake("helen", "watch");
                     await Say("helen", "Oh. Where did you find this?", "moved");
+                    await MovePhase(Phase.Night, watched: true);
                     await LanternGoesOut();
                     await Main.EndChapter();
                     break;

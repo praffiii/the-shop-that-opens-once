@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Shop
 {
     /// <summary>
-    /// Music, the evening wind and small sound effects. Every sound is synthesized in ArtSource/audio.js and
-    /// exported to Art/sound. Music cross-fades between moods.
+    /// Music, the evening wind, the time of day's ambience and small sound effects. Every sound is synthesized in
+    /// ArtSource/audio.js and exported to Art/sound. Music cross-fades between moods, and ambience between phases.
     /// </summary>
     public sealed class Sound : MonoBehaviour
     {
@@ -13,18 +13,21 @@ namespace Shop
         const float Fade = 1.2f;
         /// <summary>The wind's volume indoors, as a fraction of outdoors.</summary>
         const float IndoorWind = 0.2f;
+        /// <summary>The ambience's volume indoors, heard through the walls.</summary>
+        const float IndoorAmbience = 0.35f;
         /// <summary>The music and wind while someone speaks: 3.5 dB down, under their voice.</summary>
         const float Duck = 0.67f;
 
         public static Sound Instance { get; private set; }
 
         readonly Dictionary<string, AudioClip> clips = new();
-        readonly AudioSource[] music = new AudioSource[2];
-        readonly float[] target = new float[3]; // the two music players, then the wind
+        readonly AudioSource[] music = new AudioSource[2], ambience = new AudioSource[2];
+        readonly float[] target = new float[5]; // the two music players, the wind, then the two ambience players
+        AudioSource[] beds; // the same, in the same order
         readonly List<AudioSource> effects = new();
         AudioSource wind, voice;
-        int front, steps;
-        string mood = "";
+        int front, ambFront, steps;
+        string mood = "", amb = "";
         bool muted;
 
         /// <summary>Set by Talk while a voice is speaking: the music and wind duck under it.</summary>
@@ -55,6 +58,8 @@ namespace Shop
             for (var i = 0; i < 2; i++) music[i] = Source(true);
             wind = Source(true);
             wind.clip = Clip("wind");
+            for (var i = 0; i < 2; i++) ambience[i] = Source(true);
+            beds = new[] { music[0], music[1], wind, ambience[0], ambience[1] };
             voice = Source(false);
             voice.volume = 1f;
             for (var i = 0; i < 6; i++) effects.Add(Source(false));
@@ -82,7 +87,7 @@ namespace Shop
             return clip;
         }
 
-        /// <summary>Cross-fades to a mood's music: dusk, shop, memory or resolved. Indoors, the wind drops.</summary>
+        /// <summary>Cross-fades to a mood's music (dusk, shop, memory or resolved) and to the time of day's ambience. Indoors, the wind and the ambience drop.</summary>
         public static void Mood(string newMood, bool indoors)
         {
             if (Instance) Instance.SetMood(newMood, indoors);
@@ -92,6 +97,18 @@ namespace Shop
         {
             if (!wind.isPlaying) wind.Play();
             target[2] = indoors ? IndoorWind : 1f;
+            var phase = "amb_" + Game.Phase.ToString().ToLowerInvariant();
+            if (phase != amb)
+            {
+                amb = phase;
+                target[3 + ambFront] = 0f;
+                ambFront = 1 - ambFront;
+                var bed = ambience[ambFront];
+                bed.clip = Clip(phase);
+                bed.volume = 0f;
+                bed.Play();
+            }
+            target[3 + ambFront] = indoors ? IndoorAmbience : 1f;
             if (newMood == mood) return;
             mood = newMood;
             target[front] = 0f;
@@ -136,13 +153,12 @@ namespace Shop
 
         void Update()
         {
-            var sources = new[] { music[0], music[1], wind };
             var duck = Speaking ? Duck : 1f;
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < beds.Length; i++)
             {
-                var s = sources[i];
+                var s = beds[i];
                 s.volume = Mathf.MoveTowards(s.volume, target[i] * duck, Time.unscaledDeltaTime / Fade);
-                if (i < 2 && target[i] == 0f && s.volume == 0f && s.isPlaying) s.Stop();
+                if (i != 2 && target[i] == 0f && s.volume == 0f && s.isPlaying) s.Stop();
             }
         }
     }
