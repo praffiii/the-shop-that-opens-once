@@ -11,8 +11,9 @@ namespace Shop
     /// Runs the game: the title, the current chapter's story, moving between places, and the screen UI.
     /// While any story step runs, the courier can't move; the controls come back when all are done.
     ///
-    /// The world is drawn in 3D at the window's full resolution, through a camera tilted down (<see cref="Art.Pitch"/>)
-    /// in a gentle perspective, with depth of field, bloom and a vignette: the HD-2D look. The UI is drawn into
+    /// The world is drawn in 3D through a camera tilted down (<see cref="Art.Pitch"/>) in a gentle perspective, with
+    /// depth of field, bloom and a vignette: the HD-2D look. It is drawn at the window's resolution up to the detail it
+    /// has at 1080p (<see cref="DetailFactor"/>), and scaled up by a whole number past that. The UI is drawn into
     /// a small screen canvas, at least <see cref="Base"/>, then scaled up over the world by the largest whole number
     /// that fits the window, so its pixels stay square and crisp.
     /// </summary>
@@ -35,6 +36,9 @@ namespace Shop
         const int UiLayer = 5;
         /// <summary>The least canvas the screen shows (the world is Base / WorldZoom).</summary>
         static readonly Vector2 Base = new(640, 360);
+        /// <summary>The canvas scale at 1080p. A bigger window draws the world at that detail (each art pixel some 6 px
+        /// across) and scales it up by a whole number, crisp, so 4K costs what 1080p does; the canvas stays full size.</summary>
+        const int DetailFactor = 3;
         /// <summary>A cinematic scene's black bars over the top and bottom of the screen: how tall (canvas px) and how fast they slide in.</summary>
         const float BarHeight = 30f, BarSeconds = 0.4f;
         /// <summary>In a room cut open the camera looks this far (art px) past the courier toward the back wall, where the room's things stand.</summary>
@@ -673,6 +677,7 @@ namespace Shop
         {
             window = new Vector2Int(Screen.width, Screen.height);
             factor = Mathf.Max(1, Mathf.FloorToInt(Mathf.Min(window.x / Base.x, window.y / Base.y)));
+            ((UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline).renderScale = 1f / Mathf.Max(1, factor / DetailFactor);
             int w = window.x / factor & ~1, h = window.y / factor & ~1;
             Size = new Vector2(w, h);
             Camera.targetTexture = null;

@@ -2,7 +2,7 @@
 
 The single source of truth for what this game is, what has been decided, and what is still open. Read it before any full-game design, story or development task.
 
-Last updated: 2026-10-20.
+Last updated: 2026-10-21.
 
 **Status:** building the full game in Unity, on the new design in the UTS GDD. The following exist:
 - the UTS GDD, which redesigns the story and gameplay (`docs/game-design-document.pdf`)
@@ -48,6 +48,7 @@ Every fact carries a source tag:
 - `[Decision]` The engine is Unity 6.6 (6000.6.6f1) with C#. It replaces Godot 4. The editor is VS Code. (2026-10-18)
 - `[Decision]` The game ships as desktop builds for Windows and macOS, into `game/Builds/Windows` and `game/Builds/macOS` (ignored by git). The web build is cancelled: with the full HD-2D look (Bokeh depth of field, bloom, HDR, shadows over a full-window view) it ran at about 6 fps in Chrome on an Apple M4, while the same scene costs about 2.4 ms a frame natively, and reaching 60 on the web would have meant rendering less. The user chose the full look over the web. (2026-10-20)
 - `[Decision]` Builds keep every post-processing effect: URP's stripping of unused post-processing variants is off, because the game builds its depth of field, bloom and vignette in code (`Main.Effects`), so no volume asset in the project shows them to the stripper and a build would drop them. (2026-10-20)
+- `[Decision]` Past 1080p the world is drawn at 1080p's detail and scaled up by a whole number with no smoothing (URP's render scale at 1 / (factor / 3), point upscaling), so a 4K screen draws the same pixels as 1080p, four times over; the UI stays at the window's full resolution. On an Apple M4 the macOS build fell to about 20 fps at 4K fullscreen, the shadows and depth of field costing four times as much for no detail the art has (it is drawn at 3 screen pixels to an art pixel at 1080p). The user chose this over a smaller shadow map, which would have changed the picture. (2026-10-21)
 - `[Decision]` Build targets: Web first, then Windows. Those two build modules are installed. (2026-10-18, superseded 2026-10-20)
 - `[Decision]` The Godot MVP is an archive and stays untouched. It lives in `archive/godot-mvp/`, and the git tag `godot-mvp` marks its last commit. Its web build stays live at https://the-shop-that-opens-once-game.vercel.app as a record. (2026-10-18)
 - `[Decision]` The Unity project lives in `game/`. It started from the Universal 2D template (URP with the 2D renderer), trimmed to sprites, the Input System, uGUI and the Test Framework. (2026-10-18)
