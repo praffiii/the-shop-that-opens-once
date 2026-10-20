@@ -58,8 +58,8 @@ namespace Shop
         public string After;
         /// <summary>Stops they walk round in turn, starting at the first, instead of staying at <see cref="At"/>.</summary>
         public Stop[] Round;
-        /// <summary>What they say when the chapter has nothing for them.</summary>
-        public string Line;
+        /// <summary>What they say when the chapter has nothing for them: the first line, then the next each time they are talked to again, round.</summary>
+        public string[] Lines;
     }
 
     /// <summary>A stop on someone's round: they walk there and keep a pose for a while.</summary>

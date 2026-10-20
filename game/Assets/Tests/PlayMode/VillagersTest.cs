@@ -6,7 +6,8 @@ namespace Shop.Tests
 {
     /// <summary>
     /// Everyone can be found: each stop on someone's round, and where the courier stands to talk to them there, can be
-    /// walked to from where the courier arrives in the place, or from its way out.
+    /// walked to from where the courier arrives in the place, or from its way out; and everyone out of doors has
+    /// something of their own to say.
     /// </summary>
     public sealed class VillagersTest
     {
@@ -25,6 +26,14 @@ namespace Shop.Tests
                         Assert.IsTrue(Reaches(walk, from, at + p.Spot), $"{def.Id}: the courier cannot walk up to {p.Id} at {at}");
                     }
             }
+        }
+
+        [Test]
+        public void EveryoneOutdoorsHasSomethingToSay()
+        {
+            foreach (var def in Places.Every.Where(d => !d.Indoors))
+                foreach (var p in def.People)
+                    Assert.IsTrue(p.Lines is { Length: > 0 } && p.Lines.All(l => !string.IsNullOrWhiteSpace(l)), $"{def.Id}: {p.Id} has nothing to say");
         }
 
         static bool Reaches(WalkMap walk, Vector2 from, Vector2 to)

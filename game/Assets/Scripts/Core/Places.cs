@@ -34,6 +34,24 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
+                    // Night: Captain Bram cannot sleep and walks the platform between the frozen clock and the board, as
+                    // he has every night since the trains stopped.
+                    new Person
+                    {
+                        Id = "bram", Label = "Captain Bram", Spot = V(-20, 4), Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Round = new[]
+                        {
+                            new Stop { At = V(810, 340), Pose = "look", Facing = -1, Wait = 7f },
+                            new Stop { At = V(664, 318), Facing = -1, Wait = 5f },
+                            new Stop { At = V(470, 330), Pose = "look", Facing = -1, Wait = 6f },
+                        },
+                        Lines = new[]
+                        {
+                            "Can't sleep. Never could, on a still night. The rails used to sing me off.",
+                            "Midnight, near enough. The 23:40 would have been in by now, in my day.",
+                            "Go on, courier. An old man walking a platform is no business of yours. Mind the edge.",
+                        },
+                    },
                     // Morning: Helen brews at her stall, Captain Bram paces between the frozen clock and the timetable,
                     // a porter carries sacks up from the yard to Helen's stall, and the Mender is at the anvil.
                     // Midday: Helen wipes cups, Bram polishes the whistle by his carriage, the Mender taps the old
@@ -42,7 +60,12 @@ namespace Shop
                     new Person
                     {
                         Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Pose = "brew", Facing = -1, Phases = new[] { Phase.Morning },
-                        Line = "Morning, love. The first cup always goes on the end of the counter, in case the train comes in.",
+                        Lines = new[]
+                        {
+                            "Morning, love. The first cup always goes on the end of the counter, in case the train comes in.",
+                            "Sugar? No? You look like a two-sugar sort to me. I'll put one in anyway.",
+                            "The kettle's older than you are. It whistles flat, but it's never once let me down.",
+                        },
                     },
                     new Person
                     {
@@ -52,7 +75,12 @@ namespace Shop
                             new Stop { At = V(810, 340), Pose = "look", Facing = -1, Wait = 6f },
                             new Stop { At = V(664, 318), Facing = -1, Wait = 4f },
                         },
-                        Line = "The board still says the morning train is due. I check it anyway. Forty years on the footplate does that.",
+                        Lines = new[]
+                        {
+                            "The board still says the morning train is due. I check it anyway. Forty years on the footplate does that.",
+                            "Ten past the hour, the board says. It's said that a long while now.",
+                            "I drove the line forty years. Never late once. Well. Once.",
+                        },
                     },
                     new Person
                     {
@@ -63,27 +91,52 @@ namespace Shop
                             new Stop { At = V(432, 432), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
                             new Stop { At = V(252, 326), Pose = "lift", Facing = -1, Wait = 2.5f },
                         },
-                        Line = "Sugar and tea for Helen's stall. She goes through a sack a week, pouring for a train that never comes.",
+                        Lines = new[]
+                        {
+                            "Sugar and tea for Helen's stall. She goes through a sack a week, pouring for a train that never comes.",
+                            "Mind your feet, these sacks don't stop for anyone.",
+                            "Heavy today. Helen says it's the damp. I say it's my age.",
+                        },
                     },
                     new Person
                     {
                         Id = "mender", At = V(566, 626), Label = "Mender", Spot = V(0, 14), Pose = "hammer", Phases = new[] { Phase.Morning },
-                        Line = "Morning. Mind the sparks.",
+                        Lines = new[]
+                        {
+                            "Morning. Mind the sparks.",
+                            "Hinges for the hall, a hoop for the Gardener's barrel. Small work keeps the fire honest.",
+                            "You've your mother's way of standing in a doorway. Come in or go out, lad.",
+                        },
                     },
                     new Person
                     {
                         Id = "helen", At = V(352, 316), Label = "Helen", Spot = V(18, 2), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Every cup gets a wipe, used or not. You never know who'll step off that train.",
+                        Lines = new[]
+                        {
+                            "Every cup gets a wipe, used or not. You never know who'll step off that train.",
+                            "Twelve cups, twelve saucers. I count them every noon, though no one's ever taken one.",
+                            "Midday's slow. I like it. The steam has the platform to itself.",
+                        },
                     },
                     new Person
                     {
                         Id = "bram", At = V(232, 632), Label = "Captain Bram", Spot = V(18, 4), Pose = "polish", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Brass goes green if you let it. I give the whistle a rub every day, in case she needs it.",
+                        Lines = new[]
+                        {
+                            "Brass goes green if you let it. I give the whistle a rub every day, in case she needs it.",
+                            "She'll want coal and a crew, if she ever runs again. I'd still know every lever blind.",
+                            "Hand me that rag? No, the other one. The clean one is for the whistle only.",
+                        },
                     },
                     new Person
                     {
                         Id = "mender", At = V(520, 266), Label = "Mender", Spot = V(20, 6), Pose = "hammer", Phases = new[] { Phase.Midday },
-                        Line = "Wheels are sound. Bearings too. She could run tomorrow, if anyone let her.",
+                        Lines = new[]
+                        {
+                            "Wheels are sound. Bearings too. She could run tomorrow, if anyone let her.",
+                            "I oil her once a month. Nobody asked me to. Nobody asked me not to, either.",
+                            "An engine left standing rusts from the inside first. Same as people.",
+                        },
                     },
                     // Two neighbours who come by to chat on the platform: he stands and listens, she talks, wanders off to read
                     // the notices or look in at Helen's stall, and comes back with more to say. At dusk they sit together on
@@ -98,37 +151,72 @@ namespace Shop
                             new Stop { At = V(470, 336), Pose = "talk", Facing = 1, Wait = 7f },
                             new Stop { At = V(380, 334), Facing = -1, Wait = 4f },
                         },
-                        Line = "Have you heard? The Baker's trying a new rye. Again. We'll all be very polite about it.",
+                        Lines = new[]
+                        {
+                            "Have you heard? The Baker's trying a new rye. Again. We'll all be very polite about it.",
+                            "They say the hall's roof leaks again. Sam's written to himself about it twice.",
+                            "Mia's boy ran past with a letter for me. Two years since I had one. It was a bill.",
+                        },
                     },
                     new Person
                     {
                         Id = "neighbour_b", At = V(494, 338), Label = "Neighbour", Spot = V(20, 6), Facing = -1, Phases = new[] { Phase.Morning, Phase.Midday },
-                        Line = "Fine day for standing about. Trains or no trains, a station's the place for it.",
+                        Lines = new[]
+                        {
+                            "Fine day for standing about. Trains or no trains, a station's the place for it.",
+                            "She does the talking. I do the nodding. Forty years married, it works.",
+                            "Don't let her start on the rye. We'll be here till dusk.",
+                        },
                     },
                     new Person
                     {
                         Id = "neighbour_a", At = V(572, 277), Seat = 9, Label = "Neighbour", Spot = V(-22, 8), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "We sit here every evening. A habit, that's all. You never know who might step off.",
+                        Lines = new[]
+                        {
+                            "We sit here every evening. A habit, that's all. You never know who might step off.",
+                            "The lamps come on one by one along the platform. Like someone's walking down it.",
+                            "Sit, if you like. There's room. There's always room on this bench.",
+                        },
                     },
                     new Person
                     {
                         Id = "neighbour_b", At = V(590, 277), Seat = 9, Label = "Neighbour", Spot = V(22, 8), Pose = "sit", Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "Evening already. My knees say bench, and my knees are usually right.",
+                        Lines = new[]
+                        {
+                            "Evening already. My knees say bench, and my knees are usually right.",
+                            "She says I snore on this bench. I say I'm listening to the rails with my eyes shut.",
+                            "Another day the train didn't come. Still. A good day.",
+                        },
                     },
                     new Person
                     {
                         Id = "helen", At = V(430, 277), Label = "Helen", Spot = V(26, 6), Pose = "sit", Seat = 9, Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "I sit here every evening. The tunnel's dark, but I like to be the first face they see.",
+                        Lines = new[]
+                        {
+                            "I sit here every evening. The tunnel's dark, but I like to be the first face they see.",
+                            "You'll catch a chill, love. Go on home. I'll be here a while yet.",
+                            "Some evenings I think I hear it. Then it's only the wind in the cutting.",
+                        },
                     },
                     new Person
                     {
                         Id = "bram", At = V(612, 268), Label = "Captain Bram", Spot = V(20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "The old girl's still got steam in her somewhere. You can hear it, if the evening's quiet.",
+                        Lines = new[]
+                        {
+                            "The old girl's still got steam in her somewhere. You can hear it, if the evening's quiet.",
+                            "Dusk's when she looks her best. All that green paint goes gold.",
+                            "My father drove her before me. I'd like to see her move once more, that's all.",
+                        },
                     },
                     new Person
                     {
                         Id = "mender", At = V(566, 626), Label = "Mender", Spot = V(0, 14), Pose = "hammer", Phases = new[] { Phase.Dusk },
-                        Line = "One more piece before dark. The forge doesn't like to go cold.",
+                        Lines = new[]
+                        {
+                            "One more piece before dark. The forge doesn't like to go cold.",
+                            "Bank the coals right and they'll wake warm. It's all in the banking.",
+                            "Off with you before the light goes. The road's darker than it looks.",
+                        },
                     },
                 },
                 Hotspots = new[]
@@ -145,6 +233,40 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
+                    // Night: Sam walks the square's lamps, checking each is lit, and the Baker hauls the morning's flour in
+                    // from the cart, since the oven is lit before the birds are up.
+                    new Person
+                    {
+                        Id = "sam", Label = "Sam", Spot = V(-18, 4), Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Round = new[]
+                        {
+                            new Stop { At = V(482, 534), Pose = "look", Facing = -1, Wait = 4f },
+                            new Stop { At = V(798, 534), Pose = "look", Facing = 1, Wait = 4f },
+                            new Stop { At = V(798, 778), Pose = "look", Facing = 1, Wait = 4f },
+                            new Stop { At = V(482, 778), Pose = "look", Facing = -1, Wait = 4f },
+                        },
+                        Lines = new[]
+                        {
+                            "Lamp four flickers. I've noted it. I note everything after dark; the dark forgets.",
+                            "The hall rule says the square stays lit till dawn. I wrote the rule. I keep it.",
+                            "Out late, courier? Mind the fountain's rim. It has claimed better ankles than yours.",
+                        },
+                    },
+                    new Person
+                    {
+                        Id = "baker", Label = "Baker", Spot = V(0, 12), Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Round = new[]
+                        {
+                            new Stop { At = V(262, 654), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
+                            new Stop { At = V(438, 404), Pose = "lift", Facing = -1, Wait = 3f },
+                        },
+                        Lines = new[]
+                        {
+                            "Flour for the morning. The oven's lit at four, and four comes sooner than you'd think.",
+                            "Shh. The square's asleep. Well, except Sam. Sam is never asleep.",
+                            "Here, a heel of yesterday's loaf. Night walking makes a body hungry.",
+                        },
+                    },
                     // Morning: the Baker carries trays of loaves down from the bakery to the bread stall, Mia carries
                     // crates from home to set out her vegetable stall, Pip runs letters from the shut post office's
                     // steps to the neighbours' doors, and Sam sweeps outside the hall's door.
@@ -159,7 +281,12 @@ namespace Shop
                             new Stop { At = V(438, 404), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
                             new Stop { At = V(800, 738), Pose = "lift", Facing = -1, Wait = 2.5f },
                         },
-                        Line = "Morning! First batch is out. Take a roll, they're better warm. So is the news.",
+                        Lines = new[]
+                        {
+                            "Morning! First batch is out. Take a roll, they're better warm. So is the news.",
+                            "Rye on Tuesdays, seed loaf on Thursdays, and gossip every day, free.",
+                            "Out of the way, lad, hot tray! Morning!",
+                        },
                     },
                     new Person
                     {
@@ -169,7 +296,12 @@ namespace Shop
                             new Stop { At = V(950, 628), Pose = "lift", Facing = -1, Wait = 2.5f, Carry = true },
                             new Stop { At = V(562, 568), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "Cabbages up front, carrots behind. If Pip runs past you, tell him to stop for breakfast.",
+                        Lines = new[]
+                        {
+                            "Cabbages up front, carrots behind. If Pip runs past you, tell him to stop for breakfast.",
+                            "Heavy crate, light heart. That's what my mother said. She never lifted a crate.",
+                            "You're the courier? Pip's not stopped talking about you since you came.",
+                        },
                     },
                     new Person
                     {
@@ -181,47 +313,92 @@ namespace Shop
                             new Stop { At = V(310, 628), Pose = "lift", Facing = 1, Wait = 2f, Carry = true },
                             new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 2f },
                         },
-                        Line = "Letters! The post office is shut, so I carry them myself. One day I'll be a real courier, like you!",
+                        Lines = new[]
+                        {
+                            "Letters! The post office is shut, so I carry them myself. One day I'll be a real courier, like you!",
+                            "This one's for the hall. Sam always says thank you very properly. I like that.",
+                            "Can't stop! Mail waits for no one! That's what couriers say, right?",
+                        },
                     },
                     new Person
                     {
                         Id = "sam", At = V(614, 404), Label = "Sam", Spot = V(-18, -4), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Morning },
-                        Line = "Steps first, then the ledgers. Everything in its order, or nothing can ever be found again.",
+                        Lines = new[]
+                        {
+                            "Steps first, then the ledgers. Everything in its order, or nothing can ever be found again.",
+                            "Mind the wet step. I've only swept it once, and once is not finished.",
+                            "The hall opens at nine. It has opened at nine since 1931. I see no reason to change it.",
+                        },
                     },
                     new Person
                     {
                         Id = "baker", At = V(588, 570), Label = "Baker", Spot = V(10, 14), Pose = "talk", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Mia's carrots, my rolls, and a bit of news for both. That's a fair trade in Bellwood.",
+                        Lines = new[]
+                        {
+                            "Mia's carrots, my rolls, and a bit of news for both. That's a fair trade in Bellwood.",
+                            "You heard about the city man with the papers? Valdo. Smiles like a shut door.",
+                            "Have a roll. No, take it. Ratih's boy doesn't pay in my square.",
+                        },
                     },
                     new Person
                     {
                         Id = "mia", At = V(562, 568), Label = "Mia", Spot = V(-6, 16), Pose = "talk", Facing = 1, Phases = new[] { Phase.Midday },
-                        Line = "Two cabbages for one of his rolls. He thinks he's winning. He isn't.",
+                        Lines = new[]
+                        {
+                            "Two cabbages for one of his rolls. He thinks he's winning. He isn't.",
+                            "Pip's at the playground. If you see him, he's to eat his lunch, not trade it.",
+                            "The Baker hears everything first. I hear it second, but I hear it right.",
+                        },
                     },
                     new Person
                     {
                         Id = "sam", At = V(838, 572), Label = "Sam", Spot = V(-18, 4), Pose = "look", Facing = 1, Phases = new[] { Phase.Midday },
-                        Line = "Three notices pinned out of line. I've written to the hall about it. I am the hall, but procedure is procedure.",
+                        Lines = new[]
+                        {
+                            "Three notices pinned out of line. I've written to the hall about it. I am the hall, but procedure is procedure.",
+                            "The notice board is the village's memory. Somebody has to keep it tidy.",
+                            "A lost glove, a found glove. Different gloves. I've pinned them side by side, in hope.",
+                        },
                     },
                     new Person
                     {
                         Id = "baker", At = V(470, 404), Label = "Baker", Spot = V(18, -4), Pose = "sweep", Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "Last crumbs swept, last loaf sold. Tomorrow the oven's lit before the birds are up.",
+                        Lines = new[]
+                        {
+                            "Last crumbs swept, last loaf sold. Tomorrow the oven's lit before the birds are up.",
+                            "The oven's still warm. I sit by it some nights, like my father did.",
+                            "Don't tell Mia, but I keep her carrot loaf for myself on Fridays.",
+                        },
                     },
                     new Person
                     {
                         Id = "mia", At = V(1000, 630), Label = "Mia", Spot = V(-18, 8), Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "Home before dark, that's our rule. Pip knows why.",
+                        Lines = new[]
+                        {
+                            "Home before dark, that's our rule. Pip knows why.",
+                            "The sky goes heavy some evenings. Pip holds my hand tighter then.",
+                            "Ratih used to sew for half the square. Your mother had the kindest hands in Bellwood.",
+                        },
                     },
                     new Person
                     {
                         Id = "pip", At = V(1018, 632), Label = "Pip", Spot = V(18, 8), Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "Mum says we go in before the sky goes grey. I don't mind. Much.",
+                        Lines = new[]
+                        {
+                            "Mum says we go in before the sky goes grey. I don't mind. Much.",
+                            "Do couriers ever get scared of thunder? Not that I am. I'm just asking.",
+                            "Tomorrow I'll carry twice as many letters. You'll see.",
+                        },
                     },
                     new Person
                     {
                         Id = "sam", At = V(648, 402), Label = "Sam", Spot = V(-22, 2), Away = true, Phases = new[] { Phase.Dusk },
-                        Line = "Doors locked, lamps out, ledgers shelved. A day properly closed.",
+                        Lines = new[]
+                        {
+                            "Doors locked, lamps out, ledgers shelved. A day properly closed.",
+                            "Good night, Satria. Mind the third step down, it wobbles. I've written to myself about it.",
+                            "The archive keeps. Paper is patient, if you let it be.",
+                        },
                     },
                     // The flower seller waters the white and the yellow flowers out on the west lawn, then sets her pots
                     // straight at her stall, while a shopper goes round the stalls with her basket: home, the bread
@@ -236,7 +413,12 @@ namespace Shop
                             new Stop { At = V(136, 692), Pose = "water", Facing = 1, Wait = 5f },
                             new Stop { At = V(520, 748), Pose = "lift", Facing = 1, Wait = 4f },
                         },
-                        Line = "Little and often, that's the trick with pots. Too much water and they sulk.",
+                        Lines = new[]
+                        {
+                            "Little and often, that's the trick with pots. Too much water and they sulk.",
+                            "Geraniums like the sun, ferns like the shade, and I like a bit of both.",
+                            "Your mother bought red geraniums every spring. Never once let one die.",
+                        },
                     },
                     new Person
                     {
@@ -248,7 +430,12 @@ namespace Shop
                             new Stop { At = V(594, 750), Pose = "lift", Facing = -1, Wait = 4f, Carry = true },
                             new Stop { At = V(500, 576), Pose = "lift", Facing = 1, Wait = 4f, Carry = true },
                         },
-                        Line = "Bread, carrots, and something pretty for the table. A basket's not full till it has flowers in it.",
+                        Lines = new[]
+                        {
+                            "Bread, carrots, and something pretty for the table. A basket's not full till it has flowers in it.",
+                            "The Baker's given me two rolls again. I think he fancies my basket.",
+                            "Market days are better than the city. In the city, nobody asks how your knee is.",
+                        },
                     },
                     new Person
                     {
@@ -258,24 +445,42 @@ namespace Shop
                             new Stop { At = V(520, 750), Pose = "lift", Facing = 1, Wait = 3f, Carry = true },
                             new Stop { At = V(140, 628), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "Pots in for the night. They'd keep out here, but I sleep better with them indoors.",
+                        Lines = new[]
+                        {
+                            "Pots in for the night. They'd keep out here, but I sleep better with them indoors.",
+                            "Smell that? Night-scented stock. It saves itself for the evening.",
+                            "One more trip and I'm done. My back says two is too many.",
+                        },
                     },
                     // Day 0's dusk: Helen buying the last loaves at the bread stall and Leo chatting by the bench under the
                     // oak, there when Satria comes home.
                     new Person
                     {
                         Id = "helen", At = V(760, 752), Label = "Helen", Spot = V(18, 4), Away = true, Chapters = DayZero, Phases = new[] { Phase.Dusk },
-                        Line = "Go on home and rest, Satria. The key's under the geranium pot, same as ever.",
+                        Lines = new[]
+                        {
+                            "Go on home and rest, Satria. The key's under the geranium pot, same as ever.",
+                            "The lane's darker than the city, love. Walk the middle and you'll be fine.",
+                        },
                     },
                     new Person
                     {
                         Id = "leo", At = V(1088, 764), Label = "Leo", Spot = V(18, 4), Pose = "talk", Facing = -1, Chapters = DayZero, Phases = new[] { Phase.Dusk },
-                        Line = "Go on, city legs. Your house won't walk to you.",
+                        Lines = new[]
+                        {
+                            "Go on, city legs. Your house won't walk to you.",
+                            "What, still here? The house is east, past the bridge. You used to know that.",
+                        },
                     },
                     new Person
                     {
                         Id = "shopper", At = V(1040, 755), Seat = 8, Label = "Shopper", Spot = V(0, 20), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "Basket full, feet tired. I'll sit under the oak a while before I go in.",
+                        Lines = new[]
+                        {
+                            "Basket full, feet tired. I'll sit under the oak a while before I go in.",
+                            "The oak's been here longer than the square. It's heard every secret in Bellwood.",
+                            "Evening, courier. Sit. Feet first, news after.",
+                        },
                     },
                 },
                 Hotspots = new[]
@@ -291,6 +496,27 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
+                    // Night: Grandma Nora sits up on her porch, too old to sleep early; Leo watches the far road from the
+                    // lookout till the last lamp on the bend goes out.
+                    new Person
+                    {
+                        Id = "nora", At = V(323, 422), Seat = 8, Label = "Grandma Nora", Spot = V(-23, 24), Pose = "sit", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Lines = new[]
+                        {
+                            "Still up, child? So am I. The river talks louder at night, and I like to keep it company.",
+                            "Your mother used to slip out on nights like this. She'd sit right where you're standing.",
+                            "Go on with your errand. Old women and owls keep the night well enough.",
+                        },
+                    },
+                    new Person
+                    {
+                        Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Lines = new[]
+                        {
+                            "The lamp on the far bend's still lit. When it goes out, I go in. That's the deal.",
+                            "Don't you sleep, courier? No. Me neither.",
+                        },
+                    },
                     // Morning: Grandma Nora weaves at the loom out on her deck, the Gardener waters the chamomile rows, and Leo
                     // runs laps of the lane. Midday: Nora still weaves, the Gardener tends the rows behind his glasshouse,
                     // Leo looks out from his lookout. Dusk: Nora sits on her steps, the Gardener rests on the orchard bench,
@@ -298,17 +524,32 @@ namespace Shop
                     new Person
                     {
                         Id = "nora", At = V(260, 401), Floor = 16, Label = "Grandma Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Morning },
-                        Line = "Sit a while if you like, child. The loom goes at its own pace, and so do I.",
+                        Lines = new[]
+                        {
+                            "Sit a while if you like, child. The loom goes at its own pace, and so do I.",
+                            "Hand me the blue thread. No, that's green. My eyes are older than my hands.",
+                            "Your mother sat right there, on that step, when she was small. Swinging her legs.",
+                        },
                     },
                     new Person
                     {
                         Id = "nora", At = V(260, 401), Floor = 16, Label = "Grandma Nora", Spot = V(0, 45), Pose = "weave", Facing = 1, Phases = new[] { Phase.Midday },
-                        Line = "My mother taught me this pattern, and her mother before her. The thread remembers what we forget.",
+                        Lines = new[]
+                        {
+                            "My mother taught me this pattern, and her mother before her. The thread remembers what we forget.",
+                            "Every knot is someone. That one's the Baker. That loose one is Leo, always running off.",
+                            "Midday light is good for blues. Evening light lies about blues.",
+                        },
                     },
                     new Person
                     {
                         Id = "nora", At = V(323, 422), Seat = 8, Label = "Grandma Nora", Spot = V(-23, 24), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "Evenings are the best part. The river talks, and I listen. Sit, if your legs are tired.",
+                        Lines = new[]
+                        {
+                            "Evenings are the best part. The river talks, and I listen. Sit, if your legs are tired.",
+                            "Listen. Hear how the river slows at dusk? It's thinking about the day.",
+                            "I'm too old to sleep early. Sleep's for people with less to remember.",
+                        },
                     },
                     new Person
                     {
@@ -319,17 +560,32 @@ namespace Shop
                             new Stop { At = V(378, 211), Pose = "water", Facing = 1, Wait = 5f },
                             new Stop { At = V(378, 268), Pose = "water", Facing = -1, Wait = 5f },
                         },
-                        Line = "Chamomile won't be hurried. Water, wait, and one morning it simply opens.",
+                        Lines = new[]
+                        {
+                            "Chamomile won't be hurried. Water, wait, and one morning it simply opens.",
+                            "Morning's the time for watering. The sun drinks it all by noon.",
+                            "Mind the third row, those are new. Babies, all of them.",
+                        },
                     },
                     new Person
                     {
                         Id = "gardener", At = V(790, 604), Label = "Gardener", Spot = V(18, 0), Pose = "tend", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Tomatoes under glass, cabbages out here. Everything mends at its own pace. People too.",
+                        Lines = new[]
+                        {
+                            "Tomatoes under glass, cabbages out here. Everything mends at its own pace. People too.",
+                            "Pull a weed and two come to its funeral. Gardening is patience, mostly.",
+                            "The glasshouse panes came from the old station. Your father brought them, you know.",
+                        },
                     },
                     new Person
                     {
                         Id = "gardener", At = V(513, 447), Seat = 8, Label = "Gardener", Spot = V(36, 8), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "The watering's done. Now I sit, and the orchard grows without my help.",
+                        Lines = new[]
+                        {
+                            "The watering's done. Now I sit, and the orchard grows without my help.",
+                            "The farmhand says twelve crates. I counted eleven and a half. We'll see.",
+                            "Listen to the orchard settle. Trees sigh at dusk, if you're quiet.",
+                        },
                     },
                     new Person
                     {
@@ -339,17 +595,32 @@ namespace Shop
                             new Stop { At = V(120, 472), Facing = 1, Wait = 2f, Run = true },
                             new Stop { At = V(880, 482), Facing = -1, Wait = 2f, Run = true },
                         },
-                        Line = "Lap nine! Still the fastest legs in Bellwood. Ask anyone. Well, anyone old enough to remember.",
+                        Lines = new[]
+                        {
+                            "Lap nine! Still the fastest legs in Bellwood. Ask anyone. Well, anyone old enough to remember.",
+                            "Lap ten! You could try keeping up, courier. No? Thought not.",
+                            "Don't time me. I stopped letting people time me a long while back.",
+                        },
                     },
                     new Person
                     {
                         Id = "leo", At = V(856, 236), Label = "Leo", Spot = V(-20, 4), Pose = "look", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Up here I can see every road in the valley. Every road a runner could take.",
+                        Lines = new[]
+                        {
+                            "Up here I can see every road in the valley. Every road a runner could take.",
+                            "Bus comes twice a week. I see it coming before anyone. Habit.",
+                            "Go on, ask me something. I'll pretend not to hear and you can pretend I'm busy.",
+                        },
                     },
                     new Person
                     {
                         Id = "leo", At = V(882, 157), Floor = 30, Label = "Leo", Spot = V(-4, 55), Pose = "peer", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Dusk },
-                        Line = "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
+                        Lines = new[]
+                        {
+                            "Sun's going. I watch the far road till the lamps come on. Old habit. Don't ask.",
+                            "The lamps take a while to reach the far bend. I wait for that one.",
+                            "Don't stand behind me. I don't like people behind me when I'm watching the road.",
+                        },
                     },
                     // A farmhand gathers the windfall apples under the orchard's trees and empties the basket into the crates;
                     // the aphid herder tends the pen and carries a pail of honeydew up the lane to Nora's steps. At dusk the
@@ -363,7 +634,12 @@ namespace Shop
                             new Stop { At = V(534, 414), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
                             new Stop { At = V(484, 452), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "The wind does half my picking. I just come along after and say thank you.",
+                        Lines = new[]
+                        {
+                            "The wind does half my picking. I just come along after and say thank you.",
+                            "Fill a crate, carry a crate, empty a crate. Like counting sheep, but with apples.",
+                            "The Gardener counts wrong. Don't tell him I said that. Do tell him, actually.",
+                        },
                     },
                     new Person
                     {
@@ -374,12 +650,22 @@ namespace Shop
                             new Stop { At = V(548, 714), Pose = "tend", Facing = -1, Wait = 5f, Carry = true },
                             new Stop { At = V(330, 478), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "Fresh honeydew for Grandma Nora. She says it keeps her fingers quick at the loom.",
+                        Lines = new[]
+                        {
+                            "Fresh honeydew for Grandma Nora. She says it keeps her fingers quick at the loom.",
+                            "They're gentle things, aphids. You just have to be gentler.",
+                            "Shh, they're napping. They nap a lot. I'm jealous.",
+                        },
                     },
                     new Person
                     {
                         Id = "farmhand", At = V(541, 447), Seat = 8, Label = "Farmhand", Spot = V(20, 8), Pose = "sit", Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "Twelve crates today. The Gardener says eleven. We'll argue it out till dark.",
+                        Lines = new[]
+                        {
+                            "Twelve crates today. The Gardener says eleven. We'll argue it out till dark.",
+                            "Eleven and a half? Who leaves half a crate? He's counting the apple I ate.",
+                            "Evening, courier. Sit. Argue with us. We've run out of new things to argue about.",
+                        },
                     },
                     new Person
                     {
@@ -389,20 +675,34 @@ namespace Shop
                             new Stop { At = V(500, 714), Pose = "tend", Facing = 1, Wait = 5f },
                             new Stop { At = V(548, 714), Pose = "tend", Facing = -1, Wait = 5f },
                         },
-                        Line = "Counting them in for the night. They wander, the little ones, same as children.",
+                        Lines = new[]
+                        {
+                            "Counting them in for the night. They wander, the little ones, same as children.",
+                            "Forty-one, forty-two... You made me lose count. Forty... one?",
+                            "Night comes, the little ones huddle. They know something we've forgotten.",
+                        },
                     },
                     // Day 0's dusk: Theo at the bridge's rail, there to wave Satria in.
                     new Person
                     {
                         Id = "theo", At = V(186, 456), Label = "Theo", Spot = V(-18, 6), Pose = "look", Facing = 1, Chapters = DayZero, Phases = new[] { Phase.Dusk },
-                        Line = "The sea wind never changes here, Satria. Nor do we, much.",
+                        Lines = new[]
+                        {
+                            "The sea wind never changes here, Satria. Nor do we, much.",
+                            "Your father would have liked to see you here. That's all I'll say.",
+                        },
                     },
                     // Day 0, once the square has welcomed Satria: Valdo, the city's land agent, waiting by the waymark at
                     // the road's turn into the East to catch him on his way home.
                     new Person
                     {
                         Id = "valdo", At = V(72, 452), Label = "Valdo", Spot = V(18, 6), Facing = -1, After = "welcomed", Chapters = DayZero, Phases = new[] { Phase.Dusk },
-                        Line = "The morning of Day Eight, Mr Satria. The investors don't like waiting. Nor do I.",
+                        Lines = new[]
+                        {
+                            "The morning of Day Eight, Mr Satria. The investors don't like waiting. Nor do I.",
+                            "A sensible man signs early, Mr Satria. Sentiment is expensive.",
+                            "Good evening. I trust the house is as dreary as the photographs.",
+                        },
                     },
                     // Midday: Pip on his break at the playground, dashing between the slide and the swing.
                     new Person
@@ -413,7 +713,12 @@ namespace Shop
                             new Stop { At = V(360, 628), Facing = 1, Wait = 3f, Run = true },
                             new Stop { At = V(474, 622), Facing = -1, Wait = 4f, Run = true },
                         },
-                        Line = "I'm not playing, I'm on my break! Couriers get breaks, don't they?",
+                        Lines = new[]
+                        {
+                            "I'm not playing, I'm on my break! Couriers get breaks, don't they?",
+                            "Push me on the swing? Just once. Couriers are strong.",
+                            "When I'm big I'll run the post office. Mum says somebody has to open it.",
+                        },
                     },
                 },
                 Hotspots = new[]
@@ -451,38 +756,79 @@ namespace Shop
                 Variants = new[] { "day" },
                 People = new[]
                 {
+                    // Night: Arlo fishes off the jetty's end by lantern; the fish bite best when the village is asleep.
+                    new Person
+                    {
+                        Id = "arlo", At = V(514, 754), Label = "Arlo", Spot = V(-16, -6), Pose = "fish", Facing = 1, Chapters = AfterDayZero, Phases = new[] { Phase.Night },
+                        Lines = new[]
+                        {
+                            "Night fishing. The big ones only come up when they think we're all asleep.",
+                            "Quiet now. Hear that? The sea breathing. In, and out.",
+                            "The lighthouse used to sweep right across here. I still wait for it to come round.",
+                        },
+                    },
                     // Theo photographs the sea from the bluff in the morning, waits out the flat noon light at his studio door,
                     // and shoots the sunset by the rope bridge's remains. Arlo fishes off the jetty, mends his net on the
                     // street at midday, and sits at the jetty's end at dusk.
                     new Person
                     {
                         Id = "theo", At = V(400, 228), Label = "Theo", Spot = V(-18, 4), Pose = "photo", Facing = 1, Phases = new[] { Phase.Morning },
-                        Line = "The light off the sea is honest at this hour. It doesn't flatter anyone.",
+                        Lines = new[]
+                        {
+                            "The light off the sea is honest at this hour. It doesn't flatter anyone.",
+                            "Don't stand in my frame. Or do. People make better pictures than sea, mostly.",
+                            "I've photographed this coast ten thousand times. It's never the same twice.",
+                        },
                     },
                     new Person
                     {
                         Id = "theo", At = V(278, 216), Label = "Theo", Spot = V(-16, 2), Pose = "look", Facing = -1, Phases = new[] { Phase.Midday },
-                        Line = "Too bright. Everything goes flat at noon. I'll wait for the light to come back.",
+                        Lines = new[]
+                        {
+                            "Too bright. Everything goes flat at noon. I'll wait for the light to come back.",
+                            "Noon's for mending things. Lenses, nets, grudges.",
+                            "You've a face for the camera, Satria. Your father had it too. Stubborn, in the jaw.",
+                        },
                     },
                     new Person
                     {
                         Id = "theo", At = V(124, 226), Label = "Theo", Spot = V(-22, 4), Pose = "photo", Facing = -1, Phases = new[] { Phase.Dusk },
-                        Line = "Sunsets are easy to photograph. That's why I keep trying to get one right.",
+                        Lines = new[]
+                        {
+                            "Sunsets are easy to photograph. That's why I keep trying to get one right.",
+                            "Hold still. No, the sun, not you.",
+                            "The darkroom's locked. It stays locked. Don't ask about the darkroom.",
+                        },
                     },
                     new Person
                     {
                         Id = "arlo", At = V(514, 754), Label = "Arlo", Spot = V(-16, -6), Pose = "fish", Facing = 1, Phases = new[] { Phase.Morning },
-                        Line = "Tide's turning. Fish bite when the water changes its mind. Sit quiet and you'll see.",
+                        Lines = new[]
+                        {
+                            "Tide's turning. Fish bite when the water changes its mind. Sit quiet and you'll see.",
+                            "Never shout on a jetty. The fish hear it, and worse, the sea does.",
+                            "Sit quiet with me a minute. A minute is all the sea ever asks for.",
+                        },
                     },
                     new Person
                     {
                         Id = "arlo", At = V(606, 452), Label = "Arlo", Spot = V(-18, 6), Pose = "tend", Facing = 1, Phases = new[] { Phase.Midday },
-                        Line = "Every knot's a promise to the next storm. I keep my promises.",
+                        Lines = new[]
+                        {
+                            "Every knot's a promise to the next storm. I keep my promises.",
+                            "Pull that end. Firmer. There. Now the storm has to argue with both of us.",
+                            "My father knotted nets on this very spot. Same knots. Better hands.",
+                        },
                     },
                     new Person
                     {
                         Id = "arlo", At = V(506, 759), Label = "Arlo", Spot = V(-8, -10), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "End of the day, the sea goes quiet. Best time to think, if you've got thinking to do.",
+                        Lines = new[]
+                        {
+                            "End of the day, the sea goes quiet. Best time to think, if you've got thinking to do.",
+                            "See that light on the point? Lighthouse hasn't been lit in years. I still look for it.",
+                            "Go on home, lad. The tide doesn't need watching. I just like to.",
+                        },
                     },
                     // A fisher carries the catch landed at the jetty's foot, crate by crate, to the fish rack; the salt worker
                     // rakes the salt pans on the sand and carries the sacks to the salt store. At dusk the fisher sits on the rowboat pulled up on the
@@ -495,7 +841,12 @@ namespace Shop
                             new Stop { At = V(486, 606), Pose = "lift", Facing = -1, Wait = 3f, Carry = true },
                             new Stop { At = V(820, 536), Pose = "lift", Facing = -1, Wait = 3f },
                         },
-                        Line = "Arlo catches them, I carry them. He says that makes him the brains. I say it makes me the back.",
+                        Lines = new[]
+                        {
+                            "Arlo catches them, I carry them. He says that makes him the brains. I say it makes me the back.",
+                            "Mind the wet planks, they're slicker than they look.",
+                            "Good haul today. Arlo says it's skill. It's mostly tide.",
+                        },
                     },
                     new Person
                     {
@@ -506,17 +857,32 @@ namespace Shop
                             new Stop { At = V(242, 530), Pose = "rake", Facing = 1, Wait = 5f, Carry = true },
                             new Stop { At = V(236, 470), Pose = "lift", Facing = 1, Wait = 3f },
                         },
-                        Line = "The sea leaves the salt and I fetch it in. A fair arrangement. The sea's never once complained.",
+                        Lines = new[]
+                        {
+                            "The sea leaves the salt and I fetch it in. A fair arrangement. The sea's never once complained.",
+                            "Rake slow, rake even. Salt's like people, it doesn't like being rushed.",
+                            "My hands taste of the sea all year. My wife says it's romantic. My wife is lying.",
+                        },
                     },
                     new Person
                     {
                         Id = "fisher", At = V(230, 592), Seat = 6, Label = "Fisher", Spot = V(0, -14), Pose = "sit", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "Crates washed, rack full. Now I sit and watch the water do nothing for a while.",
+                        Lines = new[]
+                        {
+                            "Crates washed, rack full. Now I sit and watch the water do nothing for a while.",
+                            "Evening's when the gulls give up arguing. Peaceful.",
+                            "Sit, if you want. The sand's still warm.",
+                        },
                     },
                     new Person
                     {
                         Id = "salter", At = V(236, 470), Label = "Salt worker", Spot = V(0, 14), Pose = "sweep", Facing = 1, Phases = new[] { Phase.Dusk },
-                        Line = "Salt gets everywhere. Into the step, into the door, into my dreams.",
+                        Lines = new[]
+                        {
+                            "Salt gets everywhere. Into the step, into the door, into my dreams.",
+                            "Sweep it out, it blows back in. That's the coast for you.",
+                            "Off home soon. The salt will still be here in the morning. It always is.",
+                        },
                     },
                 },
                 Hotspots = new[] { North("to_square", 480, "Up to the square", "square/from_coast") },

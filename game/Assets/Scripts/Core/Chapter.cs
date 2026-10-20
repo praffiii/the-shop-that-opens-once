@@ -18,6 +18,8 @@ namespace Shop
         readonly Dictionary<string, string> names = new();
         /// <summary>The villagers taken into the scene, back to their activity once it ends.</summary>
         readonly HashSet<Villager> cued = new();
+        // how often each villager's lines have been heard this chapter, so the next talk says the next one
+        readonly Dictionary<string[], int> chats = new();
 
         protected Chapter(Main main) => Main = main;
 
@@ -84,9 +86,11 @@ namespace Shop
         /// <summary>Someone's own line when the chapter has nothing for them, under the name on their hotspot.</summary>
         protected Awaitable Chat(string id)
         {
-            var line = Main.Place.Who(id)?.Line;
-            if (line == null && !Debug.isDebugBuild) return Done(); // a player never meets a placeholder
-            return line == null ? ShowText($"Nothing written here yet ({id}).") : Main.Talk.Say(Main.Place.Find(id).Label, id, line, "neutral", Actor(id));
+            var lines = Main.Place.Who(id)?.Lines;
+            if (lines == null) return Debug.isDebugBuild ? ShowText($"Nothing written here yet ({id}).") : Done(); // a player never meets a placeholder
+            var n = chats.GetValueOrDefault(lines);
+            chats[lines] = n + 1;
+            return Main.Talk.Say(Main.Place.Find(id).Label, id, lines[n % lines.Length], "neutral", Actor(id));
         }
 
         /// <summary>Words with no speaker: what the courier sees or reads.</summary>
@@ -142,6 +146,14 @@ namespace Shop
 
         /// <summary>Into a cinematic scene (bars over the top and bottom, the camera closer) or back out of it.</summary>
         protected Awaitable Cinema(bool on) => Main.Cinema(on);
+
+        /// <summary>An important moment played as a cutscene: into the cinematic view, the scene, and back out, even if the scene fails.</summary>
+        protected async Awaitable Scene(System.Func<Awaitable> scene)
+        {
+            await Cinema(true);
+            try { await scene(); }
+            finally { await Cinema(false); }
+        }
 
         /// <summary>Marlow fetches the night's box from the cabinet: he goes to it and takes it out of its cubby.</summary>
         protected async Awaitable FetchBox(int box)

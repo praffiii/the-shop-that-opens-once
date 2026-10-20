@@ -78,27 +78,36 @@ namespace Shop
             {
                 // halfway across the East: Satria looks back at the house at the road's end, and is not ready for it
                 case "glimpse":
-                    Actor("courier").FaceTo(Anchor("home").x);
-                    await Look(Anchor("home"));
-                    await Wait(1.2f);
-                    await Say("courier", "...Not yet.", "sad");
-                    await Look(null);
+                    await Scene(async () =>
+                    {
+                        Actor("courier").FaceTo(Anchor("home").x);
+                        await Look(Anchor("home"));
+                        await Wait(1.2f);
+                        await Say("courier", "...Not yet.", "sad");
+                        await Look(null);
+                    });
                     break;
                 // the yard gate shrieks open on its rusty hinges, into a yard gone wild
                 case "gate":
-                    Actor("courier").FaceAway();
-                    Sfx("gate");
-                    await Wait(0.5f);
-                    Main.Place.World.ShowItemIfAny("satria_gate", false);
-                    Main.Place.World.ShowItemIfAny("satria_gate_open", true);
-                    await Wait(0.6f);
-                    await ShowText("The rusty iron gate shrieks as he pushes it: creak, clack. Wild grass has crept right up to the porch's wooden steps.");
-                    await ShowText("The dusk wind blows cold, carrying the smell of wet earth and a childhood that aches to remember.");
+                    await Scene(async () =>
+                    {
+                        Actor("courier").FaceAway();
+                        Sfx("gate");
+                        await Wait(0.5f);
+                        Main.Place.World.ShowItemIfAny("satria_gate", false);
+                        Main.Place.World.ShowItemIfAny("satria_gate_open", true);
+                        await Wait(0.6f);
+                        await ShowText("The rusty iron gate shrieks as he pushes it: creak, clack. Wild grass has crept right up to the porch's wooden steps.");
+                        await ShowText("The dusk wind blows cold, carrying the smell of wet earth and a childhood that aches to remember.");
+                    });
                     break;
                 // onto the bridge, Theo at its rail waving him in
                 case "bridge":
-                    await ShowText("Bellwood. It still smells of bread and river water.");
-                    await Say("theo", "Welcome back to Bellwood, Satria. The sea wind here never changes.", "smile");
+                    await Scene(async () =>
+                    {
+                        await ShowText("Bellwood. It still smells of bread and river water.");
+                        await Say("theo", "Welcome back to Bellwood, Satria. The sea wind here never changes.", "smile");
+                    });
                     break;
             }
         }
