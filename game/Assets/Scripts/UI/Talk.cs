@@ -34,6 +34,8 @@ namespace Shop
         public static readonly Dictionary<string, int> Emotes = new() { ["surprised"] = 0, ["puzzled"] = 1, ["smile"] = 2, ["moved"] = 3, ["cross"] = 4, ["sad"] = 5 };
         public const float EmoteSeconds = 2f;
         const float ShakeSeconds = .3f;
+        /// <summary>How far the title's sign drops as it opens, in canvas px, and in how many seconds.</summary>
+        const float SignFall = 14f, SignDrop = .35f;
         /// <summary>How far over the feet a head is, in art px, for the emote bubble.</summary>
         const float HeadHeight = 42f;
         const string Emphasis = "#c4472b"; // roofR2's deep red, readable on the paper
@@ -49,8 +51,12 @@ namespace Shop
         /// <summary>For tests in <see cref="Main.Auto"/> mode: the options to pick next, in order; otherwise the first one.</summary>
         public readonly Queue<string> Picks = new();
 
-        RectTransform root, list;
-        Image box, nameTag, frame, face, arrow, mark, emote;
+        RectTransform root, list, paper, board; // list: the open one of the paper list and the title's sign
+        Image box, nameTag, frame, face, arrow, mark, emote, lantern;
+        readonly Image[] ropes = new Image[2];
+        Image branch;
+        Vector2 boardAt;
+        float boardAge;
         Text nameText, text;
         readonly List<Text> choices = new();
         float width = MaxWidth, height = Height, typed, clock, speed = Speed, pitch = 1f, hold, emoteLeft, shake;
@@ -75,8 +81,13 @@ namespace Shop
             talk.face = Look.Picture("face", talk.root);
             Look.Move(talk.face.rectTransform, new Vector2(7, 7));
             talk.arrow = Look.Picture("next", talk.root);
-            talk.list = (RectTransform)Look.Panel("panel", t).transform;
-            talk.mark = Look.Panel("choice", talk.list);
+            talk.list = talk.paper = (RectTransform)Look.Panel("panel", t).transform;
+            talk.mark = Look.Panel("choice", talk.paper);
+            // the title's list: a wooden sign hung by two ropes from a banyan branch, Marlow's lantern by the line picked
+            talk.board = (RectTransform)Look.Panel("sign", t).transform;
+            talk.branch = Look.Picture("branch", talk.board, Look.Piece("branch"));
+            for (var i = 0; i < 2; i++) talk.ropes[i] = Look.Picture("rope", talk.board, Look.Piece("sign_rope"));
+            talk.lantern = Look.Picture("lantern", talk.board, Look.Frame("hud_lantern", 0));
             talk.emote = Look.Picture("emote", t);
             talk.Close();
             return talk;
@@ -85,7 +96,8 @@ namespace Shop
         public void Close()
         {
             root.gameObject.SetActive(false);
-            list.gameObject.SetActive(false);
+            paper.gameObject.SetActive(false);
+            board.gameObject.SetActive(false);
             emote.gameObject.SetActive(false);
             StopSpeaker();
             Sound.Speaking = false;
@@ -154,20 +166,24 @@ namespace Shop
 
         /// <summary>
         /// Lists <paramref name="options"/> and returns the index picked. The list sits by the talk box's right end,
-        /// or centred under <paramref name="topCenter"/> when given.
+        /// or centred under <paramref name="topCenter"/> when given; on a <paramref name="sign"/> (the title's) it hangs
+        /// there on its ropes, dropping in as it opens.
         /// </summary>
-        public async Awaitable<int> Choose(string[] options, Vector2? topCenter = null)
+        public async Awaitable<int> Choose(string[] options, Vector2? topCenter = null, bool sign = false)
         {
             foreach (var c in choices) Destroy(c.gameObject);
             choices.Clear();
+            list.gameObject.SetActive(false);
+            list = sign ? board : paper;
             var w = 0f;
             foreach (var o in options)
             {
-                var l = Look.Label(o, list);
+                var l = Look.Label(o, list, default, sign ? Art.Color((string)Look.Ui["sign"]["text"]) : Look.Ink);
                 choices.Add(l);
                 w = Mathf.Max(w, Look.Width(l));
             }
-            var size = new Vector2(w + 22, options.Length * Look.Line + 10);
+            var left = sign ? 19f : 12f; // a sign's lines leave room for the lantern
+            var size = new Vector2(Mathf.Max(w + left + 10, sign ? 76 : 0), options.Length * Look.Line + 10);
             Look.Resize(list, size);
             if (topCenter is { } tc)
                 Look.Move(list, new Vector2(tc.x - size.x / 2, tc.y));
@@ -177,7 +193,18 @@ namespace Shop
                 var below = at.y < Main.Size.y / 2;
                 Look.Move(list, new Vector2(at.x + width - size.x, below ? at.y + height + 3 : at.y - size.y - 3));
             }
-            for (var i = 0; i < choices.Count; i++) Look.Move(choices[i].rectTransform, new Vector2(12, 4 + i * Look.Line));
+            for (var i = 0; i < choices.Count; i++) Look.Move(choices[i].rectTransform, new Vector2(left, 4 + i * Look.Line));
+            if (sign)
+            {
+                // the branch over the sign, its ropes down from the branch to the sign's two top nails
+                var mid = Mathf.Round(size.x / 2);
+                Look.Move(branch.rectTransform, new Vector2(mid - 36, -20));
+                Look.Move(ropes[0].rectTransform, new Vector2(mid - 30, -12));
+                Look.Move(ropes[1].rectTransform, new Vector2(mid + 27, -12));
+                boardAt = Look.Pos(list);
+                boardAge = 0;
+                Look.Move(list, boardAt - new Vector2(0, SignFall));
+            }
             arrow.gameObject.SetActive(false);
             Select(0);
             list.gameObject.SetActive(true);
@@ -224,6 +251,14 @@ namespace Shop
                 for (var i = 0; i < choices.Count; i++)
                     if (Look.Hit(choices[i].rectTransform)) Select(i);
             lastMouse = Controls.MouseCanvas;
+            if (board.gameObject.activeSelf)
+            {
+                // the sign drops the last bit onto its ropes, and the lantern flickers
+                boardAge += Time.deltaTime;
+                var k = Mathf.Clamp01(boardAge / SignDrop);
+                Look.Move(board, boardAt - new Vector2(0, Mathf.Round(SignFall * Mathf.Pow(1 - k, 3))));
+                Look.SetSprite(lantern, Look.Frame("hud_lantern", (int)(clock * 5) % 7 == 0 ? 1 : 0));
+            }
             if (!root.gameObject.activeSelf) return;
             if (Typing && (hold -= Time.deltaTime * Settings.Pace) <= 0)
             {
@@ -343,7 +378,18 @@ namespace Shop
         void Select(int i)
         {
             sel = i;
-            Look.Place(mark.rectTransform, new Rect(5, 3 + i * Look.Line, list.sizeDelta.x - 10, Look.Line + 2));
+            if (list == board)
+            {
+                Look.Move(lantern.rectTransform, new Vector2(7, 6 + i * Look.Line));
+                // the line picked in full paint, the rest worn
+                for (var c = 0; c < choices.Count; c++)
+                {
+                    var paint = choices[c].color;
+                    paint.a = c == i ? 1f : .6f;
+                    choices[c].color = paint;
+                }
+            }
+            else Look.Place(mark.rectTransform, new Rect(5, 3 + i * Look.Line, list.sizeDelta.x - 10, Look.Line + 2));
         }
 
         void StopSpeaker()

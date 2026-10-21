@@ -250,6 +250,8 @@ namespace Shop
             Music("letter");
             await Wait(1.5f);
             await Main.ShowCredits();
+            PlayerPrefs.SetInt(Main.EndedKey, 1);
+            PlayerPrefs.Save();
             Main.Finish();
         }
     }

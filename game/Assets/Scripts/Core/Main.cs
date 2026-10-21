@@ -302,20 +302,24 @@ namespace Shop
             Talk.Close();
             if (Place) await Fade(true);
             Swap(TitlePlace, "");
+            var saved = Game.SavedChapter();
+            var cast = TitleCast(saved);
+            foreach (var p in cast) Villager.Add(Place.Bring(p.Id, p.At), p, Place);
             await Fade(false);
             Look.SetSprite(logo, Art.Sprite(Art.Texture("ui/title")), Zoom); // the title is world art: world-sized pixels
             Look.Move(logo.rectTransform, new Vector2((Size.x - logo.rectTransform.sizeDelta.x) / 2, 24));
             logo.gameObject.SetActive(true);
             var options = new List<string> { "Begin" };
-            var saved = Game.SavedChapter();
             if (saved > 0 && Chapters.ContainsKey(saved)) options.Add("Continue");
             options.Add("Settings");
             if (Application.platform != RuntimePlatform.WebGLPlayer) options.Add("Quit");
             if (Application.isEditor) options.Add(SystemsTest); // the run through every system, for the tests
             if (Application.isEditor && Chapters.Count > 1) options.Add(ChapterSelect); // any chapter made so far, to try it out
             string pick;
-            while ((pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))]) == "Settings") await Settings.Show();
+            var menu = new Vector2(Size.x / 2, Size.y - 10 - (options.Count * Look.Line + 10)); // the sign hangs just above the bottom
+            while ((pick = options[await Talk.Choose(options.ToArray(), menu, sign: true)]) == "Settings") await Settings.Show();
             logo.gameObject.SetActive(false);
+            foreach (var p in cast) Place.Leave(p.Id);
             switch (pick)
             {
                 case "Begin":
@@ -339,6 +343,36 @@ namespace Shop
                     await Begin(n);
                     break;
             }
+        }
+
+        /// <summary>Set once the epilogue's credits have rolled: the title shows the whole village.</summary>
+        public const string EndedKey = "ended";
+
+        // Who stands before Marlow's door on the title, by the save: Satria, and each one whose keepsake he has brought
+        // home so far (a night joins once it is resolved, so the next chapter is saved), Marlow in his doorway after his
+        // own night, and once the ending is seen, the village around them. A new game shows Satria alone.
+        static List<Person> TitleCast(int saved)
+        {
+            var done = saved == Game.Epilogue && PlayerPrefs.GetInt(EndedKey) == 1 ? Game.Epilogue : Mathf.Clamp(saved - 1, 0, 7);
+            var cast = new List<Person>();
+            void Stand(int night, string id, float x, float y, int facing, string pose = "idle", string holds = null)
+            {
+                if (night <= done) cast.Add(new Person { Id = id, At = new Vector2(x, y), Facing = facing, Pose = pose, Holds = holds });
+            }
+            // those he has helped close round him, the village a ring further out
+            Stand(0, "courier", 302, 266, 1);
+            Stand(1, "helen", 270, 254, 1);
+            Stand(2, "mia", 334, 256, -1);
+            Stand(2, "pip", 354, 270, -1, holds: "rabbit_mended");
+            Stand(3, "theo", 242, 268, 1, "photo");
+            Stand(4, "sam", 366, 246, -1);
+            Stand(5, "leo", 276, 282, 1);
+            Stand(6, "marlow", 318, 244, -1);
+            Stand(Game.Epilogue, "mender", 212, 252, 1);
+            Stand(Game.Epilogue, "baker", 394, 258, -1);
+            Stand(Game.Epilogue, "nora", 212, 278, 1);
+            Stand(Game.Epilogue, "bram", 388, 280, -1);
+            return cast;
         }
 
         public const string SystemsTest = "Systems test";
