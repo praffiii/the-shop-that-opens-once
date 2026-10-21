@@ -29,7 +29,7 @@ namespace Shop
         Text day, phase;
         int shownOut = -1; // lanterns shown out; one fewer than Game.LanternsOut while the last one smokes
         float smokeLeft;
-        int handAt = -1, chapter = -1; // the hand's step (0 is straight up, clockwise), and the day shown
+        int handAt = -1, chapter = -1, lang = -1; // the hand's step (0 is straight up, clockwise), and the day shown and in which language
         Phase lit;
         float stepLeft, flip, hop;
         bool named;
@@ -65,8 +65,8 @@ namespace Shop
 
         /// <summary>What the dial shows, for the name nameTag by the cursor when it is hovered.</summary>
         public string Tip => branch.isActiveAndEnabled && Look.Hit(LanternArea)
-            ? $"Marlow's lanterns: {Lanterns - Game.LanternsOut} still burning."
-            : $"{Game.Phase}, Day {Game.Chapter}. Time moves on with the story.";
+            ? Lang.F("Marlow's lanterns: {0} still burning.", Lanterns - Game.LanternsOut)
+            : Lang.F("{0}, Day {1}. Time moves on with the story.", Lang.T(Game.Phase.ToString()), Game.Chapter);
 
         static int StepOf(Phase p) => (12 + 4 * (int)p) % 16; // morning to the left, midday at the top, clockwise
 
@@ -76,11 +76,11 @@ namespace Shop
             if (!shown) return;
             if (handAt < 0) Set(StepOf(Game.Phase));
             if (!named) Light(Game.Phase);
-            if (chapter != Game.Chapter)
+            if (chapter != Game.Chapter || lang != Lang.Current)
             {
-                if (chapter >= 0) hop = HopSeconds;
-                chapter = Game.Chapter;
-                Look.SetText(day, $"Day {Game.Chapter}");
+                if (chapter >= 0 && chapter != Game.Chapter) hop = HopSeconds;
+                (chapter, lang) = (Game.Chapter, Lang.Current);
+                Look.SetText(day, Lang.F("Day {0}", Game.Chapter));
                 Look.Move(day.rectTransform, new Vector2(5, 1));
                 Layout();
             }

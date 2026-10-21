@@ -9,8 +9,8 @@ namespace Shop.Tests
 {
     /// <summary>
     /// Plays chapters from the title to their end with no one at the keyboard, on the real walk masks and places: the
-    /// Prologue's Day 0 as Begin starts it, and the systems test (the talk box, the bag, handing a keepsake over and
-    /// back, a lantern going out and the save).
+    /// Prologue's Day 0 as Begin starts it (in English, and in Indonesian with every line it shows translated), and the
+    /// systems test (the talk box, the bag, handing a keepsake over and back, a lantern going out and the save).
     /// </summary>
     public sealed class PlaythroughTest
     {
@@ -19,6 +19,23 @@ namespace Shop.Tests
 
         [UnityTest]
         public IEnumerator ProloguePlaysThrough() => Run(Prologue);
+
+        [UnityTest]
+        public IEnumerator ProloguePlaysInIndonesian()
+        {
+            var was = Lang.Current;
+            Lang.Current = 1;
+            Lang.Missing.Clear();
+            try
+            {
+                yield return Run(Prologue);
+                CollectionAssert.IsEmpty(Lang.Missing, "Every line the Prologue shows has its Indonesian");
+            }
+            finally
+            {
+                Lang.Current = was;
+            }
+        }
 
         [UnityTest]
         public IEnumerator SystemsTestPlaysThrough() => Run(SystemsTest, Main.SystemsTest);

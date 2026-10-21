@@ -142,14 +142,14 @@ namespace Shop
             else
             {
                 var k = Keepsakes.All[Game.Bag[pick]];
-                Look.SetText(itemName, $"{k.Name}\n<color=#7a452e>{k.Sides[0].Seen}</color>");
+                Look.SetText(itemName, Lang.F("{0}\n<color=#7a452e>{1}</color>", Lang.T(k.Name), Lang.T(k.Sides[0].Seen)));
             }
             for (var i = notes.childCount - 1; i >= 0; i--) Destroy(notes.GetChild(i).gameObject);
             // what the courier means to do next, over the notes
             var top = 0f;
             if (Game.Errand != "")
             {
-                var errand = Look.Label($"<color=#7a452e>Now:</color> {Game.Errand}", notes, new Rect(0, 0, NotesWidth, 0));
+                var errand = Look.Label(Lang.F("<color=#7a452e>Now:</color> {0}", Lang.T(Game.Errand)), notes, new Rect(0, 0, NotesWidth, 0));
                 var h = Mathf.Max(Look.Line, Mathf.Ceil(errand.preferredHeight));
                 Look.Resize(errand.rectTransform, new Vector2(NotesWidth, h));
                 Look.Block("rule", notes, new Rect(0, h + 4, 40, 1), Look.Soft);

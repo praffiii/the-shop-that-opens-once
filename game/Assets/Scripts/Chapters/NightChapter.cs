@@ -72,7 +72,7 @@ namespace Shop
         public override async Awaitable Start()
         {
             Know();
-            await Card($"Night {Night}: {Title}", $"Day {Night}, midnight.");
+            await Card($"{Lang.F("Night {0}", Night)}: {Title}", Lang.F("Day {0}, midnight.", Night)); // the postcard translates the title itself
             await Go("satria_home", "bed");
             await Scene(async () =>
             {
@@ -331,7 +331,7 @@ namespace Shop
                 courier.Pose = "write";
                 Sfx("pen");
                 await Wait(1f);
-                await Main.ShowJournal($"Day {Numbers[Night]}: {Word}", Page);
+                await Main.ShowJournal(Lang.F("Day {0}: {1}", Lang.T(Numbers[Night]), Lang.T(Word)), Page);
                 courier.Pose = "idle";
                 await Walk("courier", Main.Place.Find("bed").GlobalSpot);
                 LieDown();
@@ -472,7 +472,7 @@ namespace Shop
             Sfx("crickets");
             await Wait(1.5f);
             Game.Mark("slept");
-            await Card("The night passes.", $"Day {Night}, morning.");
+            await Card("The night passes.", Lang.F("Day {0}, morning.", Night));
             await MovePhase(Phase.Morning);
             Checkpoint("morning");
             var courier = LieDown();

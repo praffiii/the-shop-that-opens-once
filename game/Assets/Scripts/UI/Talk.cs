@@ -111,6 +111,7 @@ namespace Shop
         /// </summary>
         public async Awaitable Say(string speakerName, string who, string line, string mood = "neutral", Ant actor = null)
         {
+            line = Lang.T(line);
             list.gameObject.SetActive(false);
             var view = Main.Size;
             width = Mathf.Min(view.x - 2 * Margin, MaxWidth);

@@ -49,7 +49,7 @@ namespace Shop
         public override async Awaitable Start()
         {
             Know();
-            await Card($"Night {Night}: {Title}", "Day 7, morning.");
+            await Card($"{Lang.F("Night {0}", Night)}: {Title}", Lang.F("Day {0}, morning.", Night));
             await Go("satria_home", "bed");
             await Scene(async () =>
             {
@@ -378,7 +378,7 @@ namespace Shop
                 courier.Pose = "write";
                 Sfx("pen");
                 await Wait(1f);
-                await Main.ShowJournal($"Day Seven: {Word}", Page);
+                await Main.ShowJournal(Lang.F("Day Seven: {0}", Lang.T(Word)), Page);
                 courier.Pose = "idle";
                 await ShowText("He folds Mother's letter into the bag's inmost pocket, near his heart.");
                 await LanternGoesOut();

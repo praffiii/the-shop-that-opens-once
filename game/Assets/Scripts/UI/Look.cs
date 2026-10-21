@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,7 +23,11 @@ namespace Shop
         static Font font;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Reset() => font = null;
+        static void Reset()
+        {
+            font = null;
+            english.Clear();
+        }
 
         /// <summary>ui.json: sizes, 9-slice margins, frame counts and cursor hotspots of the UI pieces.</summary>
         public static JObject Ui => Art.Json("ui/ui");
@@ -136,12 +141,44 @@ namespace Shop
             return t;
         }
 
-        /// <summary>Changes a label's text; a label with no wrapping width is resized to fit it.</summary>
+        /// <summary>
+        /// Changes a label's text, in the player's language (<see cref="Lang"/>); a label with no wrapping width is resized
+        /// to fit it. The label keeps its English, so a change of language shows it again in the new one.
+        /// </summary>
         public static void SetText(Text t, string text)
         {
-            t.text = text;
+            if (english.Count > pruneAt)
+            {
+                Prune();
+                pruneAt = english.Count * 2 + 256;
+            }
+            english[t] = text;
+            Show(t);
+        }
+
+        static readonly Dictionary<Text, string> english = new(); // each label's text as written
+        static int pruneAt = 256;
+
+        static void Show(Text t)
+        {
+            t.text = Lang.T(english[t]);
             if (t.horizontalOverflow == HorizontalWrapMode.Overflow)
                 t.rectTransform.sizeDelta = new Vector2(Width(t), Mathf.Max(Line, Mathf.Ceil(t.preferredHeight)));
+        }
+
+        // Forgets the labels gone with their screens.
+        static void Prune()
+        {
+            foreach (var t in new List<Text>(english.Keys))
+                if (!t) english.Remove(t);
+        }
+
+        /// <summary>Shows every label again in the language now set.</summary>
+        public static void Retranslate()
+        {
+            Prune();
+            foreach (var (t, text) in english)
+                if (text != "") Show(t); // a label that is typed out letter by letter (the talk box, the journal) is left as it is
         }
 
         /// <summary>How wide a label's text is, in canvas px.</summary>

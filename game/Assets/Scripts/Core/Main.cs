@@ -338,7 +338,7 @@ namespace Shop
                 case ChapterSelect:
                     var made = new List<int>(Chapters.Keys);
                     made.Sort();
-                    var n = made[await Talk.Choose(made.ConvertAll(c => c == 0 ? "Prologue" : c == Game.Epilogue ? "Epilogue" : $"Night {c}").ToArray(), new Vector2(Size.x / 2, Size.y - 140))];
+                    var n = made[await Talk.Choose(made.ConvertAll(c => c == 0 ? "Prologue" : c == Game.Epilogue ? "Epilogue" : Lang.F("Night {0}", c)).ToArray(), new Vector2(Size.x / 2, Size.y - 140))];
                     Game.NewGame();
                     await Begin(n);
                     break;
@@ -413,7 +413,7 @@ namespace Shop
             {
                 Game.StartChapter(next, Phase.Night);
                 Game.Save();
-                await ShowCard("Thank you for playing.", $"{(next == Game.Epilogue ? "The epilogue" : $"Night {next}")} is still being made.");
+                await ShowCard("Thank you for playing.", next == Game.Epilogue ? "The epilogue is still being made." : Lang.F("Night {0} is still being made.", next));
                 Finish();
             }
         }

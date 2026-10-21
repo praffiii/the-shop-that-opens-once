@@ -125,7 +125,7 @@ namespace Shop
         {
             var mark = Add(Look.Picture("postmark", parent, Look.Piece("postmark")));
             Look.Move(mark.rectTransform, at);
-            var day = Write($"Day {Game.Chapter}", mark.transform, default, Art.Color((string)Look.Ui["postmark"]["text"]));
+            var day = Write(Lang.F("Day {0}", Game.Chapter), mark.transform, default, Art.Color((string)Look.Ui["postmark"]["text"]));
             Look.Move(day.rectTransform, new Vector2(Ring - day.rectTransform.sizeDelta.x / 2, 18));
             return mark;
         }

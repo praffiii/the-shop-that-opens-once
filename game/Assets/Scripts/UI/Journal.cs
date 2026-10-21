@@ -41,7 +41,7 @@ namespace Shop
             Look.Place(dim.rectTransform, new Rect(Vector2.zero, view));
             Look.SetText(title, heading);
             // the page sized to the whole text, then written out letter by letter
-            body.text = text = page;
+            body.text = text = Lang.T(page);
             var height = Mathf.Ceil(body.preferredHeight);
             body.text = "";
             var h = Pad + title.rectTransform.sizeDelta.y + Gap + height + Pad;
