@@ -7,13 +7,14 @@ using UnityEngine.TestTools;
 
 namespace Shop.Tests
 {
-    /// <summary>Holding Shift with a direction key runs: the run pose, at the run speed.</summary>
+    /// <summary>A tap of Shift while walking with a direction key runs: the run pose, at the run speed.</summary>
     public sealed class RunTest
     {
         [UnityTest]
         public IEnumerator ShiftRuns()
         {
-            var saved = Game.Raw;
+            var (saved, running) = (Game.Raw, Controls.Running);
+            Controls.Running = false; // the pace is kept between runs, and Shift switches it
             // The editor may be unfocused while tests run; let the virtual keyboard reach the game anyway.
             var settings = InputSystem.settings;
             var (editor, background) = (settings.editorInputBehaviorInPlayMode, settings.backgroundBehavior);
@@ -50,6 +51,7 @@ namespace Shop.Tests
                 settings.backgroundBehavior = background;
                 Main.Auto = false;
                 Game.Raw = saved;
+                Controls.Running = running;
             }
         }
     }
