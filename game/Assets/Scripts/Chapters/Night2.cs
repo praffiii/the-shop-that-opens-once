@@ -143,7 +143,7 @@ namespace Shop
                 case "valdo" when Game.Phase == Phase.Morning && !Game.Has("asked_valdo"):
                     Game.Mark("asked_valdo");
                     await Say("courier", "Mr Valdo, a moment. Do you know of a child's doll that matters to someone in this village?");
-                    await Say("valdo", "Mr Satria, are you quite well? Yesterday a rusty watch, today children's dolls?! The sugar-mill investors come from the city the day after tomorrow to check your boundaries!", "cross");
+                    await Say("valdo", "Mr Satria, are you quite well? Yesterday a rusty watch, today children's dolls?! The sugar-mill investors come from the city at the week's end to check your boundaries!", "cross");
                     await Say("valdo", "If they see you wandering the village with rag scraps, they'll think you've cracked. Focus on the deed, Mr Satria. Don't make a fool of yourself.", "cross");
                     break;
                 case "gigi" or "kiko" or "lulu" when Game.Phase == Phase.Morning && !Game.Has("asked_kids"):
