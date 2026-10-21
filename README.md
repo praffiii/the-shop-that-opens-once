@@ -11,7 +11,7 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 | Key | Action |
 | --- | --- |
 | WASD or the arrow keys | Walk |
-| Shift | Run |
+| Shift | Switch between running and walking (indoors the courier always walks) |
 | Space or Enter | Talk, look and use; hold it in some minigames |
 | E | Open the bag |
 | I | Inspect a keepsake in the bag |

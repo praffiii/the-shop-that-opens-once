@@ -38,7 +38,7 @@ namespace Shop
             await Wait(0.6f);
             await Look(null);
             await Cinema(false);
-            Tip("Click to walk, or use WASD (hold Shift to run). Space uses what is close. E opens your bag.");
+            Tip("Click to walk, or use WASD (Shift to run or walk). Space uses what is close. E opens your bag.");
         }
 
         public override async Awaitable Entered(string place)

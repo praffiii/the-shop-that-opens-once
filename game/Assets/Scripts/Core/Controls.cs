@@ -40,8 +40,19 @@ namespace Shop
         public static bool Down => Pressed(Key.S, Key.DownArrow);
         public static bool Left => Pressed(Key.A, Key.LeftArrow);
         public static bool Right => Pressed(Key.D, Key.RightArrow);
-        /// <summary>Shift held: the courier runs.</summary>
-        public static bool Run => Held(Key.LeftShift, Key.RightShift);
+        /// <summary>Shift: the courier switches between walking and running.</summary>
+        public static bool Pace => Pressed(Key.LeftShift, Key.RightShift);
+
+        /// <summary>Whether the courier runs (outdoors only), kept for the next time the game starts.</summary>
+        public static bool Running
+        {
+            get => PlayerPrefs.GetInt("run") == 1;
+            set
+            {
+                PlayerPrefs.SetInt("run", value ? 1 : 0);
+                PlayerPrefs.Save();
+            }
+        }
 
         /// <summary>The walking direction from WASD or the arrow keys, y down, at most length 1.</summary>
         public static Vector2 Move

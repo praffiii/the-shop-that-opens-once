@@ -16,7 +16,7 @@ namespace Shop
         {
             await Card("Systems test", "Not part of the story.");
             await Go("station", "start");
-            Tip("Click to walk, or use WASD (hold Shift to run). Space uses what is close.");
+            Tip("Click to walk, or use WASD (Shift to run or walk). Space uses what is close.");
         }
 
         public override async Awaitable Entered(string place)

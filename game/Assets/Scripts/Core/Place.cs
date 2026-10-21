@@ -236,7 +236,13 @@ namespace Shop
             World.SeeThrough(Player.Feet);
             Hover = controls ? HotspotAt(Shop.Controls.MouseWorld) : null;
             Near = controls ? Nearest() : null;
-            Player.Running = controls && input && Shop.Controls.Run;
+            if (controls && input && Shop.Controls.Pace)
+            {
+                Shop.Controls.Running = !Shop.Controls.Running;
+                Main.Instance.Hud.Toast(!Shop.Controls.Running ? "Walking." : Def.Indoors ? "Running, once outdoors." : "Running.");
+            }
+            // indoors the courier walks: a room is a few steps across, seen close
+            Player.Running = controls && input && Shop.Controls.Running && !Def.Indoors;
             if (!controls || !input) return;
             if (Shop.Controls.Click || (Shop.Controls.Interact && Near != null))
             {
