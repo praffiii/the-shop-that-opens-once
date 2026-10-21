@@ -16,7 +16,7 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 | E | Open the bag |
 | I | Inspect a keepsake in the bag |
 | R | Retry a minigame |
-| Esc | Pause |
+| Esc | Pause, and the settings (volumes, text speed, the screen) |
 
 There are no markers. Follow what the villagers say, and read the Notes in the bag. The game saves at every checkpoint, and Continue on the title picks up from there.
 
