@@ -117,6 +117,11 @@ namespace Shop
                 {
                     await Main.Frame();
                     outcome = game.Tick();
+                    if (Controls.Win)
+                    {
+                        game.Solve(); // developer builds only
+                        outcome = Minigame.Outcome.Won;
+                    }
                 }
             Sound.Play(outcome == Minigame.Outcome.Won ? "chime" : "wrong");
             if (outcome == Minigame.Outcome.Won) await Main.Wait(WonSeconds);

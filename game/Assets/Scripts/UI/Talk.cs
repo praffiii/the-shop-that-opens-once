@@ -141,7 +141,12 @@ namespace Shop
             next = false;
             if (Main.Auto) await Main.Frame();
             else
-                while (!next) await Main.Frame();
+                while (!next)
+                {
+                    if (Controls.Skim) Type(full.Length); // developer builds only: the line is shown and moves on
+                    await Main.Frame();
+                    if (Controls.Skim && !Typing) next = true;
+                }
         }
 
         /// <summary>Where the box is on screen, or an empty rect while it is closed.</summary>

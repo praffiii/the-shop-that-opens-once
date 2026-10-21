@@ -20,6 +20,15 @@ A game project by SE.3 · Kelompok 1: Andika Rafa Akbar, Dara Dwi Hidayat, Khair
 
 There are no markers. Follow what the villagers say, and read the Notes in the bag. The game saves at every checkpoint, and Continue on the title picks up from there.
 
+Developer keys, in the Unity editor and development builds only (not in a normal build), for trying the story out:
+
+| Key | Cheat |
+| --- | --- |
+| F5 | The time of day moves on |
+| F6 | Win the minigame on screen |
+| F7 (hold) | Talk types out and moves on by itself |
+| F8 | Start the next chapter |
+
 ## What's in this repo
 
 | Path | What it is |

@@ -34,8 +34,15 @@ namespace Shop
         public static bool Inspect => Pressed(Key.I);
         public static bool Cancel => Pressed(Key.Escape);
         public static bool Retry => Pressed(Key.R);
-        /// <summary>F5: the time of day moves on (developer builds only).</summary>
-        public static bool NextPhase => Pressed(Key.F5);
+        // Developer builds only (the editor and development builds), to try the story out.
+        /// <summary>F5: the time of day moves on.</summary>
+        public static bool NextPhase => Debug.isDebugBuild && Pressed(Key.F5);
+        /// <summary>F6: the minigame on screen is won.</summary>
+        public static bool Win => Debug.isDebugBuild && Pressed(Key.F6);
+        /// <summary>F7 held: talk types out and moves on by itself.</summary>
+        public static bool Skim => Debug.isDebugBuild && Keys != null && Keys[Key.F7].isPressed;
+        /// <summary>F8: the next chapter starts.</summary>
+        public static bool NextChapter => Debug.isDebugBuild && Pressed(Key.F8);
         public static bool Up => Pressed(Key.W, Key.UpArrow);
         public static bool Down => Pressed(Key.S, Key.DownArrow);
         public static bool Left => Pressed(Key.A, Key.LeftArrow);

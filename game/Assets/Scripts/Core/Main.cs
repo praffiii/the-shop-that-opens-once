@@ -654,9 +654,14 @@ namespace Shop
                     Run(Pause());
                     input = false;
                 }
-                else if (Debug.isDebugBuild && Controls.NextPhase)
+                else if (Controls.NextPhase)
                 {
                     Run(NextPhase());
+                    input = false;
+                }
+                else if (Controls.NextChapter && Story != null)
+                {
+                    Run(EndChapter()); // developer builds only: on to the next chapter, as its end would
                     input = false;
                 }
             }
