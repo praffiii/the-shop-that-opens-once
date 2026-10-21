@@ -154,8 +154,8 @@ namespace Shop
             await who.Walk(Main.Place.Walk.Path(who.Feet, to));
         }
 
-        /// <summary>Glides the camera to show a point (such as an anchor), or back to the courier with null.</summary>
-        protected Awaitable Look(Vector2? at) => Main.LookAt(at);
+        /// <summary>Glides the camera to show a point (such as an anchor), or back to the courier with null; <paramref name="wide"/>, without the cinematic step closer.</summary>
+        protected Awaitable Look(Vector2? at, bool wide = false) => Main.LookAt(at, wide);
 
         protected Awaitable Go(string place, string spawn, Vector2? at = null) => Main.Go(place, spawn, at);
 
@@ -344,7 +344,8 @@ namespace Shop
             var (place, feet) = (Main.Place.Def.Id, Actor("courier").Feet);
             await Go("shop", "counter");
             Music("resolved");
-            await Look(Anchor("clock"));
+            // the whole back wall: the clock's face, the seven lanterns on the cabinet and their boxes
+            await Look(Anchor("clock") + new Vector2(33, 0), true);
             var world = Main.Place.World;
             var lit = Game.LanternsOut;
             await Wait(0.8f);

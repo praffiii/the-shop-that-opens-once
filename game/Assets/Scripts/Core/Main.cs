@@ -26,7 +26,7 @@ namespace Shop
         /// Octopath's does, so the courier is small in a wide view of the place, and comes in close in a room cut open,
         /// whose walls run past the screen's edges.
         /// </summary>
-        int WorldZoom => (Place && Place.Def.Open ? 2 : 1) + (cinema ? 1 : 0);
+        int WorldZoom => (Place && Place.Def.Open ? 2 : 1) + (cinema && !wide ? 1 : 0);
         /// <summary>How far past a place's edge (art px) the camera may look, so the courier is never pinned to the screen's edge; there the forest goes on.</summary>
         const float Overscan = 96f;
         /// <summary>The view camera's vertical field of view, in degrees; it looks down at <see cref="Art.Pitch"/>.</summary>
@@ -106,7 +106,7 @@ namespace Shop
         Vector2? look; // a world point the camera shows instead of the courier
         readonly Dictionary<string, Place> kept = new(); // the places built, by id: the one on screen and those through its doors
         (int chapter, Phase phase) keptFor;
-        bool gliding, cinema; // cinema: in a cinematic scene, the camera a step closer
+        bool gliding, cinema, wide; // cinema: in a cinematic scene, the camera a step closer; wide: but not for this look
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Reset()
@@ -423,10 +423,11 @@ namespace Shop
             if (held == 0) Story?.Wrap(); // a scene the courier did not walk into (Release wraps those)
         }
 
-        /// <summary>Glides the camera to show a world point, or back to the courier with null. Returns once it is there.</summary>
-        public async Awaitable LookAt(Vector2? at)
+        /// <summary>Glides the camera to show a world point, or back to the courier with null; <paramref name="wide"/>, without a cinematic scene's step closer. Returns once it is there.</summary>
+        public async Awaitable LookAt(Vector2? at, bool wide = false)
         {
             look = at;
+            this.wide = wide && at != null;
             Talk.Courier = at == null ? courier : null;
             gliding = true;
             while (gliding && Place) await Frame();
@@ -485,7 +486,7 @@ namespace Shop
             Sound.Mood(Place.Def.Music, Place.Def.Indoors);
             View.backgroundColor = Grade.Of(Place.World.Bg);
             look = null;
-            gliding = false;
+            gliding = wide = false;
             FrameCamera(0f);
         }
 
