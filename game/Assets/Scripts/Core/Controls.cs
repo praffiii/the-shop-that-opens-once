@@ -39,7 +39,7 @@ namespace Shop
         public static bool NextPhase => Debug.isDebugBuild && Pressed(Key.F5);
         /// <summary>F6: the minigame on screen is won.</summary>
         public static bool Win => Debug.isDebugBuild && Pressed(Key.F6);
-        /// <summary>F7 held: talk types out and moves on by itself.</summary>
+        /// <summary>F7 held: talk types out and moves on by itself, and cards and pages move on.</summary>
         public static bool Skim => Debug.isDebugBuild && Keys != null && Keys[Key.F7].isPressed;
         /// <summary>F8: the next chapter starts.</summary>
         public static bool NextChapter => Debug.isDebugBuild && Pressed(Key.F8);

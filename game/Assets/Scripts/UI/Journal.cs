@@ -76,7 +76,7 @@ namespace Shop
         public bool Handle()
         {
             if (!Open) return false;
-            if (!Controls.Interact && !Controls.Click) return true;
+            if (!Controls.Interact && !Controls.Click && !Controls.Skim) return true;
             if (Writing) written = text.Length;
             else next = true;
             return true;

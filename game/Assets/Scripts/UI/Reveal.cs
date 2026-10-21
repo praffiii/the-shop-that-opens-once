@@ -120,7 +120,7 @@ namespace Shop
         public bool Handle()
         {
             if (!Open) return false;
-            if (Controls.Interact || Controls.Click) next = true;
+            if (Controls.Interact || Controls.Click || Controls.Skim) next = true;
             return true;
         }
 
