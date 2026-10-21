@@ -47,8 +47,8 @@ namespace Shop
             area = Look.Node("game", sheet.transform);
             game.Build(area);
             game.Reset();
-            notes = Rows(game.Instructions);
-            again = Rows(new[] { ("R", "Try again") });
+            notes = Keys(sheet.transform, game.Instructions);
+            again = Keys(sheet.transform, new[] { ("R", "Try again") });
 
             var view = Main.Size;
             Look.SetText(title, game.Title);
@@ -68,10 +68,10 @@ namespace Shop
             Sound.Play("page");
         }
 
-        // Instruction lines, each with its key as a key cap before the words.
-        RectTransform Rows(IReadOnlyList<(string Key, string Text)> lines)
+        /// <summary>Instruction lines, each with its key as a key cap before the words (also the settings page's).</summary>
+        public static RectTransform Keys(Transform parent, IReadOnlyList<(string Key, string Text)> lines)
         {
-            var rows = Look.Node("rows", sheet.transform);
+            var rows = Look.Node("rows", parent);
             var (width, indent) = (0f, 0f); // the words line up after the widest key cap
             for (var i = 0; i < lines.Count; i++)
             {

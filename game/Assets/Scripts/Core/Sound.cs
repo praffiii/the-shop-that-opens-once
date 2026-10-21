@@ -28,22 +28,9 @@ namespace Shop
         AudioSource wind, voice;
         int front, ambFront, steps;
         string mood = "", amb = "";
-        bool muted;
 
         /// <summary>Set by Talk while a voice is speaking: the music and wind duck under it.</summary>
         public static bool Speaking;
-
-        /// <summary>Silences everything (the pause menu's sound switch).</summary>
-        public static bool Muted
-        {
-            get => Instance && Instance.muted;
-            set
-            {
-                if (!Instance) return;
-                Instance.muted = value;
-                AudioListener.volume = value ? 0f : 1f;
-            }
-        }
 
         public static Sound Create(Transform parent)
         {
@@ -70,7 +57,6 @@ namespace Shop
         {
             AudioSettings.OnAudioConfigurationChanged -= Restart;
             if (Instance == this) Instance = null;
-            AudioListener.volume = 1f;
         }
 
         // A change of audio device (headphones in or out, the output switched) resets Unity's audio and stops every
@@ -140,7 +126,7 @@ namespace Shop
                     player = p;
                     break;
                 }
-            player.volume = 1f;
+            player.volume = Settings.Volume(Settings.Sounds);
             player.clip = Instance.Clip(name);
             player.Play();
         }
@@ -149,6 +135,7 @@ namespace Shop
         public static void Blip(string id, float pitch)
         {
             if (!Instance) return;
+            Instance.voice.volume = Settings.Volume(Settings.Voices);
             Instance.voice.pitch = pitch;
             Instance.voice.PlayOneShot(Instance.Clip("voice_" + id));
         }
@@ -164,10 +151,11 @@ namespace Shop
         void Update()
         {
             var duck = Speaking ? Duck : 1f;
+            float music = Settings.Volume(Settings.Music), sounds = Settings.Volume(Settings.Sounds);
             for (var i = 0; i < beds.Length; i++)
             {
                 var s = beds[i];
-                s.volume = Mathf.MoveTowards(s.volume, target[i] * duck, Time.unscaledDeltaTime / Fade);
+                s.volume = Mathf.MoveTowards(s.volume, target[i] * duck * (i < 2 ? music : sounds), Time.unscaledDeltaTime / Fade);
                 if (i != 2 && target[i] == 0f && s.volume == 0f && s.isPlaying) s.Stop();
             }
         }

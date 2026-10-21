@@ -225,9 +225,9 @@ namespace Shop
                     if (Look.Hit(choices[i].rectTransform)) Select(i);
             lastMouse = Controls.MouseCanvas;
             if (!root.gameObject.activeSelf) return;
-            if (Typing && (hold -= Time.deltaTime) <= 0)
+            if (Typing && (hold -= Time.deltaTime * Settings.Pace) <= 0)
             {
-                typed += speed * Time.deltaTime;
+                typed += speed * Settings.Pace * Time.deltaTime;
                 var was = shown;
                 Type(Mathf.Min((int)typed, full.Length));
                 // One blip per frame at most, on the newest letter shown: spaces and punctuation are silent.

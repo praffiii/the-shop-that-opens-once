@@ -89,6 +89,7 @@ namespace Shop
         public Card Cards { get; private set; }
         public Credits Credits { get; private set; }
         public Journal Journal { get; private set; }
+        public Settings Settings { get; private set; }
         /// <summary>The screen minigames are played on (<see cref="Shop.Board"/>).</summary>
         public Board Board { get; private set; }
         public Reveal Reveal { get; private set; }
@@ -220,6 +221,7 @@ namespace Shop
             Credits = Credits.Create(t);
             Journal = Journal.Create(t);
             Reveal = Reveal.Create(t);
+            Settings = Settings.Create(t);
             curtain = Look.Picture("Curtain", t);
             curtain.enabled = true;
             curtain.color = Look.Cream;
@@ -306,10 +308,12 @@ namespace Shop
             var options = new List<string> { "Begin" };
             var saved = Game.SavedChapter();
             if (saved > 0 && Chapters.ContainsKey(saved)) options.Add("Continue");
+            options.Add("Settings");
             if (Application.platform != RuntimePlatform.WebGLPlayer) options.Add("Quit");
             if (Application.isEditor) options.Add(SystemsTest); // the run through every system, for the tests
             if (Application.isEditor && Chapters.Count > 1) options.Add(ChapterSelect); // any chapter made so far, to try it out
-            var pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))];
+            string pick;
+            while ((pick = options[await Talk.Choose(options.ToArray(), new Vector2(Size.x / 2, Size.y - 74))]) == "Settings") await Settings.Show();
             logo.gameObject.SetActive(false);
             switch (pick)
             {
@@ -597,10 +601,10 @@ namespace Shop
         async Awaitable Pause()
         {
             Hold();
-            var options = new[] { "Keep playing", Sound.Muted ? "Sound on" : "Sound off", "Back to the title" };
+            var options = new[] { "Keep playing", "Settings", "Back to the title" };
             switch (await Talk.Choose(options, Size / 2 - new Vector2(0, 32)))
             {
-                case 1: Sound.Muted = !Sound.Muted; break;
+                case 1: await Settings.Show(); break;
                 case 2: Finish(); break;
             }
             Release();
@@ -636,7 +640,7 @@ namespace Shop
             Controls.MouseCanvas = new Vector2(Mathf.Floor(p.x), Mathf.Floor(Size.y - p.y));
             if (Place) Controls.MouseWorld = Pick(Controls.PointerScreen);
 
-            var input = !(Cards.Handle() || Credits.Handle() || Journal.Handle() || Reveal.Handle() || Bag.Handle() || Talk.Handle() || Board.Handle());
+            var input = !(Cards.Handle() || Credits.Handle() || Journal.Handle() || Reveal.Handle() || Settings.Handle() || Bag.Handle() || Talk.Handle() || Board.Handle());
             if (input && Hud.Handle())
             {
                 Run(OpenBag());
