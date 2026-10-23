@@ -1,7 +1,8 @@
 # The marketing site: what the game is, shown working
 
 Date: 2026-10-23, revised 2026-10-24. Status: approved by the user, 2026-10-23; the page's structure revised and
-approved 2026-10-24. The user skipped a written build plan.
+approved 2026-10-24, and its layout revised again the same day (the game in framed windows). The user skipped a
+written build plan.
 
 ## Why
 
@@ -48,33 +49,39 @@ In conversation, 2026-10-23:
 In conversation, 2026-10-24:
 - The page explains the game, boat.dev's way: a hero that says what it is, then one claim per section shown live.
 - The sections are the hero and the six below. No "how it was made" section.
+- The game does not fill the screen behind the page: with the world behind everything, the hero was "noisy", and the
+  copy panels "spamming the whole screen". The page is calm, and each section has its own framed live scene beside
+  its words, as boat.dev gives each feature its own animation. The hero's scene opens full screen to play and
+  shrinks back ("shrink and unshrink").
+- The hero does not explain the whole game; each section explains one thing.
 
 ## The page, top to bottom
 
-The world is one canvas fixed behind the whole page. Each section is a short block of copy on the left, on the
-game's paper panel; the world on the right shows what the copy claims, with the camera framing its subject to the
-right of the copy (on a phone the copy sits under the scene). Scrolling moves the camera and the time of day.
-Satria's controls work only while the hero is on screen.
+The page is calm: no game behind it. Its background is the sky, and it moves from morning to midnight as the
+visitor scrolls, so the day still runs down the page. Each section is its words on the left and its own framed scene
+on the right (stacked on a phone): a window into Bellwood in a wooden frame, live, showing only what that section
+claims. One WebGL canvas serves the windows: it moves into whichever window is on screen, and a window it leaves
+keeps a still of its last frame.
 
-### The hero: what the game is
+### The hero: what it is, in one look
 
 - The game's title lettering (`ui/title.png`).
 - **Headline:** "One shop. Seven nights. Seven keepsakes to return."
-- **One sentence:** "Satria comes home to Bellwood to sell the family house. At midnight, a shop in the roots of the
-  old banyan opens for thirty minutes, and its keeper has one last job. A cozy pixel-art mystery for macOS and
-  Windows."
+- **One line:** "A cozy pixel-art mystery for macOS and Windows."
 - **Download** for the visitor's computer, with macOS and Windows tabs (as boat.dev shows its install command per
   OS), and the GitHub link.
-- **Facts:** free, 1 to 3 hours, English and Bahasa Indonesia.
-- **The live square**, framed right of the copy and labelled "Try it: walk around Bellwood": walking by keys or
-  taps, talking by Space or a tap, with the game's dialogue box, real lines from the Prologue and Night 1 days, and
-  no spoilers. Walking is optional; someone who only scrolls sees the square living on its own.
+- **The window:** the live square, villagers about their morning, Satria among them, with a Play button: "Walk
+  around Bellwood". Play opens the window full screen, where the visitor walks Satria by keys or taps and talks to
+  villagers (the game's dialogue box, real lines from the Prologue and Night 1 days, no spoilers). Esc or the close
+  button shrinks it back into its frame.
+- No premise, facts or features here: the sections below carry them.
 
 ### 1. "A village that lives its own day."
 
 The villagers keep their own routines: Mia carries crates to her stall, Pip runs letters, Sam sweeps the hall's
-steps. Scrolling through the section runs the day from morning to dusk over the square (the game's grades,
-lamps and windows lighting up), and the camera drifts past the villagers at work.
+steps. The section holds still while the scroll runs the day from morning to dusk in its window (the game's
+grades, lamps and windows lighting up) and the page's sky with it, the camera with Mia, then Pip, then Sam, the
+game's day dial turning beside the words.
 
 ### 2. "The shop opens at midnight."
 
@@ -134,6 +141,8 @@ A quiet footer under it: the repo, the team's credit line and the licence. No ma
 
 These are the builder's calls (the agent's), stated here so the user can change them.
 
+- **The premise and the facts** (free, 1 to 3 hours, English and Bahasa Indonesia) move out of the hero: the premise
+  into section 2, the facts beside the final Download.
 - **Where:** a new `site/` folder in this repo. `presentation/` is frozen and stays untouched.
 - **Stack** (the user's picks, 2026-10-23): Bun (the latest, 1.4.4) to install, run scripts and test (`bun test`);
   Vite as the dev server and bundler, run through Bun; TypeScript, strict; three.js, the one runtime library, for
