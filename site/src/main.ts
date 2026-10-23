@@ -4,6 +4,7 @@ import { Land } from './land';
 import { Bag } from './ui/bag';
 import { DOING, Hud } from './ui/hud';
 import { lang } from './ui/lang';
+import { Mend } from './ui/mend';
 import { sound } from './ui/sound';
 import { Talk } from './ui/talk';
 
@@ -74,7 +75,8 @@ async function start() {
   heroWin.screen.append(canvas);
   const hero = new Hero(canvas, matchMedia('(max-width: 720px)').matches);
   const land = new Land(document.body);
-  await Promise.all([hero.load(), land.load(), lang.load()]);
+  const mend = new Mend(wins.find(w => w.name === 'mend')!.el);
+  await Promise.all([hero.load(), land.load(), lang.load(), mend.load()]);
   const [day, night] = [$('.day'), $('.night')];
   let scale = 2;
   const talk = new Talk(document.body, () => scale, () => ({ left: 0, width: innerWidth }));
@@ -136,6 +138,12 @@ async function start() {
   window.addEventListener('keydown', e => {
     // The bag in view takes the keys that turn its keepsake over.
     if (!hud.playing && current?.name === 'bag' && TURN_KEYS[e.code] && !e.repeat) return bag.take(TURN_KEYS[e.code]!);
+    // The bench in view takes its keys, but a focused key cap's Space or Enter is its own click.
+    const onButton = e.target instanceof Element && !!e.target.closest('a, button');
+    if (!hud.playing && current?.name === 'mend' && !e.repeat && !(onButton && (e.code === 'Space' || e.code === 'Enter'))) {
+      if (mend.key(e.code)) e.preventDefault();
+      return;
+    }
     if (!hud.playing) return;
     if (e.code === 'Escape') return open(false);
     if (!TALK_KEYS.has(e.code) || e.repeat || (e.target instanceof Element && e.target.closest('a, button'))) return;
@@ -196,7 +204,7 @@ async function start() {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
-    const where = current?.name === 'night' || current?.name === 'bag' ? 'grove' : 'square';
+    const where = current && ['night', 'bag', 'mend'].includes(current.name) ? 'grove' : 'square';
     if (where !== hero.where) hero.snap();
     hero.where = where;
     hero.day = current?.name === 'hero' ? 0 : time;
@@ -219,7 +227,7 @@ async function start() {
       hero.stage(lit, open);
     }
     // After midnight the shop stays open behind what follows.
-    if (current?.name === 'bag') hero.stage(7, true);
+    if (current?.name === 'bag' || current?.name === 'mend') hero.stage(7, true);
     land.at(n.top < innerHeight / 2 ? 'grove' : 'square');
     const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(time + 0.5))}`;
     if (want !== bed) {
@@ -242,6 +250,7 @@ async function start() {
     talk.tick(dt);
     hud.tick(dt);
     bag.tick(dt, current?.name === 'bag');
+    mend.tick(dt, current?.name === 'mend');
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);

@@ -853,7 +853,128 @@ main {
 }
 
 /* The talk box (Talk.cs): --w and --h its size, --left where its words start, in canvas px. */
+/* The Mender's bench over the dimmed world, as the game's Board: at its own scale --k, in whole device pixels. */
+.mend {
+  --u: calc(var(--k, 2) * 1px);
+  position: absolute;
+  inset: calc(5px * var(--s));
+  display: grid;
+  place-items: center;
+  background: rgb(42 27 34 / 0.82);
+  color: var(--ink);
+  font: 400 calc(11 * var(--u)) / calc(14 * var(--u)) 'Pixelify Sans', sans-serif;
+  text-shadow: none;
+}
+
+.mend-bench,
+.mend-plate {
+  isolation: isolate;
+}
+
+.mend-bench::before,
+.mend-plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-style: solid;
+  border-color: transparent;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.mend-bench {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: calc(10 * var(--u));
+  min-width: calc(232 * var(--u));
+  padding: calc(16 * var(--u));
+}
+
+.mend-bench::before {
+  border-width: calc(7 * var(--u));
+  border-image: url('/art/ui/bench.png') 7 fill / calc(7 * var(--u)) stretch;
+}
+
+.mend-plate {
+  position: absolute;
+  top: calc(-9 * var(--u));
+  left: 50%;
+  translate: -50% 0;
+  height: calc(17 * var(--u));
+  padding: var(--u) calc(12 * var(--u)) 0;
+  color: var(--paper);
+  white-space: nowrap;
+}
+
+.mend-plate::before {
+  border-width: calc(4 * var(--u)) calc(5 * var(--u));
+  border-image: url('/art/ui/plate.png') 4 5 fill / calc(4 * var(--u)) calc(5 * var(--u)) stretch;
+}
+
+.mend-area {
+  position: relative;
+  width: calc(200 * var(--u));
+  height: calc(92 * var(--u));
+}
+
+.mend-play {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.mend-rate {
+  position: absolute;
+  left: calc(146 * var(--u));
+  top: calc(53 * var(--u));
+  color: #fff1d2;
+}
+
+/* Every set of rows in the one place, so the bench keeps its size; only the set for now shows. */
+.mend-rows {
+  display: grid;
+  place-items: center;
+}
+
+/* The words line up after the widest key caps, as the Board's rows. */
+.mend-set {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: var(--u) calc(5 * var(--u));
+}
+
+.mend-set[inert] {
+  visibility: hidden;
+}
+
+.mend-keys {
+  display: flex;
+  gap: var(--u);
+}
+
+.mend-say {
+  color: #7a452e;
+}
+
+.mend .cap:active {
+  translate: 0 var(--u);
+}
+
+/* The fail lines, said inside the window rather than along the foot of the screen. */
+.window > .talk {
+  --s: var(--k, 2);
+  --u: calc(var(--k, 2) * 1px);
+  position: absolute;
+}
+
 .talk {
+  /* Its own type at its own scale: inherited, the size would be the page's. */
+  font: calc(11 * var(--u)) / calc(14 * var(--u)) 'Pixelify Sans', system-ui, sans-serif;
   position: fixed;
   left: calc(var(--x) * 1px);
   bottom: calc(6 * var(--u));
@@ -973,8 +1094,24 @@ main {
   }
 
   /* The bag stands taller on a phone: the watch over its Notes. */
-  .feature .window {
+  [data-window='bag'] {
     aspect-ratio: 9 / 14;
+  }
+
+  [data-window='mend'] {
+    aspect-ratio: 1 / 1;
+  }
+
+  /* A narrower bench, its words wrapping under the play area, so it can stand at more than one device pixel. */
+  .mend-bench {
+    min-width: 0;
+    gap: calc(6 * var(--u));
+    padding: calc(12 * var(--u)) calc(8 * var(--u)) calc(8 * var(--u));
+  }
+
+  .mend-set {
+    grid-template-columns: auto minmax(0, 1fr);
+    max-width: calc(200 * var(--u));
   }
 
   .bag {
