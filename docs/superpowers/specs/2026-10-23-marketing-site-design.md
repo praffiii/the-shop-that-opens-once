@@ -1,6 +1,7 @@
-# The marketing site: Bellwood you can play in a browser
+# The marketing site: what the game is, shown working
 
-Date: 2026-10-23. Status: approved by the user, 2026-10-23. The user skipped a written build plan.
+Date: 2026-10-23, revised 2026-10-24. Status: approved by the user, 2026-10-23; the page's structure revised and
+approved 2026-10-24. The user skipped a written build plan.
 
 ## Why
 
@@ -8,17 +9,20 @@ Version 1.0.0 is out on GitHub (macOS and Windows zips), but the only page the g
 which still tells the retired story. The game needs a public page that people can find, share and download from.
 
 The user wants a stranger who opens the link to think "oh my God, what page is this? This is so cool" within the
-first few seconds, because the page plays like the game instead of describing it. Their references are
-https://x.ai/bot and https://boat.dev/. What those two do, which this page borrows:
-- the product runs on the page: a live app window (x.ai), a pixel sea where a "Run" button launches a boat (boat.dev);
-- each section is a tiny working scene with one short line under it, not a feature list;
-- calm framing (big type, lots of space, one colour world), with the motion carrying the excitement.
+first few seconds. Their references are https://x.ai/bot and https://boat.dev/.
+
+The first build (2026-10-23) made the hero the playable square and nothing else, and the user found it "more like
+demo web version not marketing itself, it's not explaining the game". What boat.dev does, which this page now does:
+- the hero says in one line what the product is, in one sentence why, and offers the download straight away;
+- each section after it is one short, plain claim with a few lines of copy and a live visual proving it (boat's
+  terminal mockups, here the game running);
+- the live parts are the proof under the words, not a substitute for them.
 
 **Who it is for.** The public: anyone who might play the game. The lecturer and classmates see it first, but it is
 not built only for them.
 
-**Success:** a first-time visitor plays with the hero before reading anything, scrolls to the end, and downloads the
-game or stars the repo.
+**Success:** a first-time visitor knows within a few seconds what the game is (a cozy pixel-art mystery: seven
+nights, seven keepsakes to return), plays with it, scrolls to the end, and downloads the game or stars the repo.
 
 **What would make it a failure even if it works** (the user's words: "if it looks plain or generic, like a
 template"):
@@ -27,81 +31,87 @@ template"):
 - flat panels with no crafted pieces or motion (the same complaint the user made about the game's first UI);
 - art that is not the game's: redrawn, AI-made or placeholder pictures;
 - a page that stutters, or a hero that sits blank while it loads;
+- a page that only demos the game and never says what it is (the 2026-10-24 review);
 - spoilers of Nights 6 and 7 or the ending.
 
-## What the user decided (in conversation, 2026-10-23)
+## What the user decided
 
+In conversation, 2026-10-23:
 - The audience is the public, not only the lecturer and classmates.
-- The hero is option 1: walk Satria through the real Bellwood and talk to villagers.
-- Option 2 runs down the page: scrolling moves the day from morning to midnight, ending at Marlow's shop.
-- Options 3 (mend the Night 1 watch) and 4 (open the bag and turn a keepsake) are sections along the way.
+- The playable square (walk Satria, talk to villagers) is on the page.
+- Scrolling moves the time of day, ending at Marlow's shop at midnight.
+- Mending the Night 1 watch and the bag are sections along the way.
 - At the end a visitor can download the game and go to the GitHub repo.
 - It must look rich, with beautiful animation and motion; never plain or generic.
 - No mockups first: the user declined the visual companion.
 
+In conversation, 2026-10-24:
+- The page explains the game, boat.dev's way: a hero that says what it is, then one claim per section shown live.
+- The sections are the hero and the six below. No "how it was made" section.
+
 ## The page, top to bottom
 
-The world is one canvas fixed behind the whole page. The sections float over it, and the scroll position drives the
-time of day and where the camera looks. Satria's controls work only while the hero is on screen.
+The world is one canvas fixed behind the whole page. Each section is a short block of copy on the left, on the
+game's paper panel; the world on the right shows what the copy claims, with the camera framing its subject to the
+right of the copy (on a phone the copy sits under the scene). Scrolling moves the camera and the time of day.
+Satria's controls work only while the hero is on screen.
 
-### 1. Morning: the square (the hero)
+### The hero: what the game is
 
-The real Market Square in the morning, in the game's HD-2D view: houses in 3D, swaying grass and trees, chimney
-smoke, bugs, cloud shadows, tilt-shift blur at the top and bottom. A few villagers go about their day (Mia at her
-stall, the Baker, Pip, Helen passing through on the way to the station).
+- The game's title lettering (`ui/title.png`).
+- **Headline:** "One shop. Seven nights. Seven keepsakes to return."
+- **One sentence:** "Satria comes home to Bellwood to sell the family house. At midnight, a shop in the roots of the
+  old banyan opens for thirty minutes, and its keeper has one last job. A cozy pixel-art mystery for macOS and
+  Windows."
+- **Download** for the visitor's computer, with macOS and Windows tabs (as boat.dev shows its install command per
+  OS), and the GitHub link.
+- **Facts:** free, 1 to 3 hours, English and Bahasa Indonesia.
+- **The live square**, framed right of the copy and labelled "Try it: walk around Bellwood": walking by keys or
+  taps, talking by Space or a tap, with the game's dialogue box, real lines from the Prologue and Night 1 days, and
+  no spoilers. Walking is optional; someone who only scrolls sees the square living on its own.
 
-- Over the scene: the game's title lettering (`ui/title.png`) and a Download button. Nothing else.
-- A key cap hint, drawn as a pixel-art key: "WASD to walk". On a phone: "Tap to walk".
-- Pressing a key, or tapping, hands Satria to the visitor: walking and running with his real sheets (turning in four
-  directions), footsteps by surface.
-- Walking up to a villager and pressing Space (or tapping them) opens the game's dialogue box: portrait with mood,
-  name tag, text typed at the game's speed, the speaker's voice blips, a "next" arrow. The lines are real lines
-  from the game's Prologue and Night 1 days. No spoilers.
-- Satria stays inside the square (its walk mask); its exits are closed.
-- Walking is optional. Someone who only scrolls sees the square living on its own.
+### 1. "A village that lives its own day."
 
-### 2. Midday: the premise
+The villagers keep their own routines: Mia carries crates to her stall, Pip runs letters, Sam sweeps the hall's
+steps. Scrolling through the section runs the day from morning to dusk over the square (the game's grades,
+lamps and windows lighting up), and the camera drifts past the villagers at work.
 
-The story's hook, in a few short lines over the scene: Satria comes home to sell his parents' house; a shop that
-opens only at midnight gives him one last job. It arrives as a courier's postcard sliding up, like the game's chapter
-cards (airmail border, stamp with Marlow's lantern, a BELLWOOD postmark thumping down).
+### 2. "The shop opens at midnight."
 
-### 3. The bag: no markers
+The camera cuts to the Banyan Grove at night. The bell tolls midnight, the door in the banyan's roots glows and
+opens (the grove's exported `shop_closed` gives way to `shop`, and its seven `shop_lantern_*` light one by one).
+The copy says how a night works: Marlow opens a relic box, Satria finds whose keepsake it is by day, and returns
+it before the shop closes. The world stays at the grove at night for the sections that follow.
 
-The pillar "no quest markers", shown by doing it. The courier bag opens on screen; the visitor picks the brass
-pocket watch and turns it (front, back, sides). Each new side drops a clue into the Notes page with the game's chime
-("Stopped at 10:17", "Initials on the back"). One line under it: no arrows, no checklist; you match what you see with
-what villagers say.
+### 3. "No quest markers, just people."
 
-### 4. Dusk: mend the watch
+The courier bag opens over the scene; the visitor picks the brass pocket watch and turns it (front, back, sides).
+Each new side drops a clue into the Notes page with the game's chime ("Stopped at 10:17", "Initials on the back").
+The copy: no arrows, no checklist; you find who owns it by matching what you see with what villagers say.
+
+### 4. "Mend it with your own hands."
 
 The Night 1 minigame, playable, ported from `Minigames/ClockworkAlign.cs`: pick a wheel, turn it till its red mark
 points up, set it going. Keyboard as in the game (W/S, A/D, Space), plus drag and tap for mouse and touch. Failing
-gets the game's own friendly lines (the Mender, Satria) and an instant retry. Winning starts the watch ticking. The
-light outside has turned to dusk, and lamps and windows light up.
+gets the game's own friendly lines and an instant retry. Winning starts the watch ticking.
 
-### 5. Seven nights, seven keepsakes
+### 5. "Seven nights, seven lanterns."
 
 Marlow's seven lanterns hang from a banyan branch, as on the game's HUD. Nights 1 to 5 each show their keepsake
 and a one-line hook, as postcards (the watch, Mochi, Daniel's camera, the plain key, the running shoes). Nights 6
 and 7 are sealed: a postcard face down, its lantern burning, no keepsake and no hint of what it is. Hovering or
 tapping a lantern makes it flicker.
 
-### 6. Midnight: the shop opens
+### 6. Midnight at the shop: download
 
-The camera cuts to the Banyan Grove at night. The bell tolls midnight, the door in the banyan's roots glows and
-opens, Marlow's lantern light spills out (the grove's exported `shop_closed` gives way to `shop`, and its seven
-`shop_lantern_*` light one by one). The Download button stands in that light:
+The shop's door, open, its lantern light spilling out, and the Download standing in that light:
 - it detects the visitor's computer and offers that zip straight from the latest GitHub release ("Download for
   macOS", with Windows one tap away, and the reverse);
 - under it, the short "first time you open it" note from the README (neither build is signed);
 - beside it, "Star on GitHub", linking to the repo;
 - on a phone: "Play it on your Mac or PC" instead of a download that would not run, with the repo link.
 
-### 7. Credits
-
-The team's five names, as the game's credits roll would have them, and "Every pixel drawn in code, every sound
-synthesized in code."
+A quiet footer under it: the repo, the team's credit line and the licence. No making-of section.
 
 ## Throughout
 
@@ -138,8 +148,8 @@ These are the builder's calls (the agent's), stated here so the user can change 
   about 6 fps (Bokeh depth of field, bloom and HDR over a full window), so the site does not copy that post-processing:
   its tilt-shift is a cheap blur in a single pass, weighted by screen height, and its glow is drawn into the light
   sprites. The target is 60 fps on an Apple M-series laptop and a smooth 30 on an ordinary laptop and a recent phone.
-- **One screen first** (the user's rule for any new look): the hero is built and shown to the user as a single
-  screen before the rest of the page is built.
+- **One screen first** (the user's rule for any new look): the hero and section 1, which set the copy-and-proof look
+  every section follows, are built and shown to the user before the rest of the page is built.
 - **Assets come from the game.** A sync script copies what the page uses from `game/Assets/Resources/Art/` into
   `site/public/` (the square, the grove, the cast in the hero, the watch's minigame pieces, the keepsakes of Nights
   1 to 5, the UI pieces, the fonts) and turns the OGG sounds it uses into MP3, which every browser plays. Nothing is
@@ -157,6 +167,7 @@ These are the builder's calls (the agent's), stated here so the user can change 
 ## Not in this work
 
 - No web build of the game itself, no saves, no story past the square's morning talk.
+- No section on how the game was made (the user, 2026-10-24).
 - No other areas to walk in (the station, the east, the coast); the grove is seen, not walked.
 - No accounts, newsletter, analytics or comments.
 - No changes to the game, `presentation/` or `archive/`.
