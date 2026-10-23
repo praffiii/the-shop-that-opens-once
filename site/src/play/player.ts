@@ -14,14 +14,16 @@ export class Player {
   private readonly held = new Set<string>();
   /** Taken by the visitor: their first key or tap hands Satria over. */
   active = false;
-  /** Keys and taps are ignored (talk on screen, or the hero scrolled away). */
+  /** Keys and taps are ignored while someone talks. */
   paused = false;
+  /** The hero is scrolled away: the keys go back to the page. */
+  away = false;
   onTake: (() => void) | null = null;
   onRun: ((running: boolean) => void) | null = null;
 
   constructor(readonly ant: Ant, private readonly walk: WalkMap) {
     window.addEventListener('keydown', e => {
-      if (this.paused || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (this.paused || this.away || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.code in KEYS) {
         e.preventDefault();
         this.held.add(e.code);
@@ -45,14 +47,14 @@ export class Player {
 
   /** Walks to an art point the visitor tapped; resolves true on arrival. */
   goTo(p: V) {
-    if (this.paused) return Promise.resolve(false);
+    if (this.paused || this.away) return Promise.resolve(false);
     this.take();
     return this.ant.walk(this.walk.path(this.ant.feet, p));
   }
 
   update(dt: number) {
     let x = 0, y = 0;
-    if (!this.paused) for (const k of this.held) (x += KEYS[k]![0]), (y += KEYS[k]![1]);
+    if (!this.paused && !this.away) for (const k of this.held) (x += KEYS[k]![0]), (y += KEYS[k]![1]);
     if (x || y) {
       const len = Math.hypot(x, y), speed = (this.ant.running ? RUN_SPEED : SPEED) * dt;
       const from = this.ant.feet, to = this.walk.slide(from, { x: (x / len) * speed, y: (y / len) * speed });

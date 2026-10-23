@@ -32,12 +32,17 @@ export class Hero {
   private grades!: ReturnType<typeof looks>;
   player!: Player;
   villagers: Villager[] = [];
-  /** The time of day, 0 morning .. 3 night. */
+  /** The time of day, 0 morning .. 3 night, easing toward day. */
   time = 0;
+  day = 0;
+  /** Whom the camera follows, and where on the screen (CSS px) it frames them: the middle of the space beside the copy. */
+  subject: Ant | null = null;
+  aim = { x: 0, y: 0 };
   private cam = { x: 640, y: 640 };
   private vel = { x: 0, y: 0 };
   private lead = { x: 0, y: 0 };
   private last = { x: 0, y: 0 };
+  private followed: Ant | null = null;
   private bg = new THREE.Color();
   running = true;
 
@@ -147,8 +152,11 @@ export class Hero {
     return { x: p.x, y: z - y };
   }
 
+  // The camera eases after its subject, a little ahead of where they walk, holding them at the aim on screen.
   private follow(dt: number) {
-    const f = this.player.ant.feet;
+    const who = this.subject ?? this.player.ant;
+    const f = who.feet;
+    if (who !== this.followed) (this.followed = who), (this.last = { ...f });
     const step = { x: f.x - this.last.x, y: f.y - this.last.y };
     this.last = { ...f };
     const moving = Math.hypot(step.x, step.y) > 0.01;
@@ -158,10 +166,13 @@ export class Hero {
     this.lead.x += (goal.x - this.lead.x) * k;
     this.lead.y += (goal.y - this.lead.y) * k;
     const [w, h] = this.place.data.size;
-    const vw = this.view.canvas.clientWidth / this.view.zoom, vh = this.view.canvas.clientHeight / this.view.zoom;
+    const cw = this.view.canvas.clientWidth, ch = this.view.canvas.clientHeight, z = this.view.zoom;
+    const vw = cw / z, vh = ch / z;
+    // Seen at the aim rather than the middle: the camera looks that far the other way.
+    const ax = (this.aim.x - cw / 2) / z, ay = (this.aim.y - ch / 2) / z;
     const clamp = (v: number, size: number, view: number) =>
       size <= view ? size / 2 : Math.min(Math.max(v, view / 2 - OVERSCAN), size - view / 2 + OVERSCAN);
-    const tx = clamp(f.x + this.lead.x, w, vw), ty = clamp(f.y + this.lead.y - 16, h, vh);
+    const tx = clamp(f.x + this.lead.x - ax, w, vw), ty = clamp(f.y + this.lead.y - 16 - ay, h, vh);
     // A critically damped spring, as Unity's SmoothDamp follows.
     const omega = 2 / FOLLOW, x = omega * dt, e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
     for (const a of ['x', 'y'] as const) {
@@ -180,6 +191,7 @@ export class Hero {
     for (const v of this.villagers) v.update(dt);
     this.feet();
     this.follow(dt);
+    this.time += (this.day - this.time) * Math.min(1, dt * 3);
     const dir = apply(this.grades, this.time);
     const dark = this.time > 1.6;
     this.place.lights.visible = dark;

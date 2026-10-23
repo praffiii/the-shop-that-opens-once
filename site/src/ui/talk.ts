@@ -32,7 +32,12 @@ export class Talk {
   private row = 0;
   private done: (() => void) | null = null;
 
-  constructor(parent: HTMLElement, private readonly scale: () => number) {
+  constructor(
+    parent: HTMLElement,
+    private readonly scale: () => number,
+    /** The part of the screen the world shows in (CSS px), beside the page's copy: the box sits in it. */
+    private readonly stage: () => { left: number; width: number },
+  ) {
     this.root.className = 'talk panel';
     this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-live', 'polite');
@@ -66,9 +71,10 @@ export class Talk {
     this.name.hidden = !speaker;
     this.slot.hidden = this.face.hidden = !who;
     if (who) this.face.style.backgroundImage = `url(/art/chars/portraits/${who}.png)`;
-    const s = this.scale();
-    const width = Math.min(innerWidth / s - 2 * MARGIN, MAX_WIDTH);
+    const s = this.scale(), stage = this.stage();
+    const width = Math.floor(Math.min(stage.width / s - 2 * MARGIN, MAX_WIDTH));
     this.root.style.setProperty('--w', `${width}`);
+    this.root.style.setProperty('--x', `${Math.round(stage.left + (stage.width - width * s) / 2)}`);
     this.root.style.setProperty('--left', `${who ? FACE_LEFT : 10}`);
     this.root.hidden = false;
     this.shown = -1;
@@ -95,6 +101,13 @@ export class Talk {
     if (!this.open) return;
     if (this.typing) return this.type(this.full.length);
     sound.play('click', 0.5);
+    const done = this.done;
+    this.done = null;
+    done?.();
+  }
+
+  /** Ends the line at once (the visitor scrolled away from the talk). */
+  end() {
     const done = this.done;
     this.done = null;
     done?.();

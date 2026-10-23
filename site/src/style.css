@@ -8,6 +8,20 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dmsans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dmsans-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
 :root {
   --s: 2;
   --t: 3;
@@ -17,6 +31,8 @@
   --paper: #fffaf0;
   --red: #c4472b;
   --grass: #2f7a3a;
+  --soft: #7a6a6e;
+  --read: 'DM Sans', system-ui, sans-serif;
   color-scheme: light;
 }
 
@@ -24,15 +40,15 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  background: var(--grass);
+}
+
 body {
   margin: 0;
-  height: 100%;
-  background: var(--grass);
   color: var(--paper);
   font: calc(11 * var(--u)) / calc(14 * var(--u)) 'Pixelify Sans', system-ui, sans-serif;
   -webkit-font-smoothing: none;
-  overflow: hidden;
 }
 
 img,
@@ -43,7 +59,7 @@ img,
 #world {
   position: fixed;
   inset: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   display: block;
   opacity: 0;
@@ -112,19 +128,26 @@ button {
   --m: 5;
 }
 
-/* The hero: the title lettering, and the Download sign hung under it on two ropes from a branch, as the game's
-   title screen hangs its menu. */
-.hero {
-  position: fixed;
-  left: max(calc(24 * var(--u)), 6vw);
-  top: max(calc(18 * var(--u)), 7vh);
-  display: grid;
-  justify-items: start;
+/* The copy beside the world: each section's words on the game's paper, on the left, with the world on the right
+   showing what they claim (main.ts frames the camera's subject in the space beside it). */
+main {
+  position: relative;
   pointer-events: none;
 }
 
+.copy {
+  width: min(38rem, 46vw);
+  margin-left: max(1.5rem, 5vw);
+  pointer-events: auto;
+}
+
+.hero {
+  min-height: 100vh;
+  padding: max(1.25rem, 5vh) 0 6rem;
+}
+
 .title {
-  margin: 0;
+  margin: 0 0 calc(6 * var(--u)) calc(-3px * var(--t));
   line-height: 0;
 }
 
@@ -141,50 +164,145 @@ button {
   }
 }
 
-.hang {
+.card,
+.note {
   position: relative;
-  margin: calc(24 * var(--u)) 0 0 calc(40px * var(--t));
-  pointer-events: auto;
+  padding: 1.75rem 2rem 1.5rem;
+  color: var(--ink);
+  filter: drop-shadow(0 calc(3 * var(--u)) 0 rgb(42 27 34 / 0.35));
+}
+
+.ready .card {
+  animation: card-up 0.45s cubic-bezier(0.33, 1, 0.68, 1) 0.15s both;
+}
+
+/* Slides up and eases to rest, as the game's chapter postcards (Card.cs SlideSeconds). */
+@keyframes card-up {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+.headline,
+.claim {
+  margin: 0 0 1rem;
+  font: 400 calc(22px * var(--k)) / calc(26px * var(--k)) 'Pixelify Sans', sans-serif;
+  --k: 2;
+}
+
+.headline span {
+  display: block;
+  text-wrap: balance;
+}
+
+.headline span:last-child {
+  color: var(--red);
+}
+
+.card p,
+.note p {
+  margin: 0 0 1.25rem;
+  max-width: 34em;
+  font: 400 1.125rem / 1.6 var(--read);
+  -webkit-font-smoothing: antialiased;
+  color: #4a3a40;
+}
+
+/* The stamp with Marlow's lantern, and the postmark that thumps down on it once the card rests. */
+.stamp {
+  position: absolute;
+  top: calc(-10px * var(--t));
+  right: calc(8px * var(--t));
+  width: calc(41px * var(--t));
+  height: calc(49px * var(--t));
+  background: url('/art/icons/lantern.png') 50% 40% / calc(16px * var(--t)) no-repeat, url('/art/ui/stamp.png') 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+
+.postmark {
+  position: absolute;
+  top: calc(16px * var(--t));
+  right: calc(18px * var(--t));
+  width: calc(75px * var(--t));
+  height: calc(43px * var(--t));
+  background: url('/art/ui/postmark.png') 0 0 / 100% 100%;
+  image-rendering: pixelated;
   opacity: 0;
 }
 
-.ready .hang {
-  animation: sign-drop 0.35s cubic-bezier(0.33, 1, 0.68, 1) 0.5s both;
+.postmark span {
+  position: absolute;
+  left: 0;
+  width: calc(42px * var(--t));
+  top: calc(19px * var(--t));
+  text-align: center;
+  color: #5060b0;
+  font-size: calc(11px * var(--t) / 2);
+  line-height: 1;
 }
 
-/* Drops the last bit onto its ropes (Talk.cs SignFall, SignDrop), then a short swing settles. */
-@keyframes sign-drop {
+.thumped .postmark {
+  opacity: 1;
+}
+
+.thumped .card {
+  animation: jolt 0.08s steps(1) both;
+}
+
+@keyframes jolt {
   from {
-    opacity: 1;
-    transform: translateY(calc(-14 * var(--u)));
-  }
-  to {
-    opacity: 1;
+    transform: translateY(2px);
   }
 }
 
-.branch {
+/* Download: the visitor's computer as two tabs (boat.dev's install tabs), and the wooden sign. */
+.get-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: var(--u) 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.os {
+  display: flex;
+  gap: var(--u);
+}
+
+.get-row .get {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.get-row .source {
+  justify-self: end;
+}
+
+.tab {
+  position: relative;
+  isolation: isolate;
+  height: calc(14 * var(--u));
+  padding: 0 calc(6 * var(--u)) var(--u);
+  color: var(--ink);
+}
+
+.tab::before {
+  content: '';
   position: absolute;
-  left: calc(50% - 36 * var(--u));
-  top: calc(-20 * var(--u));
-  width: calc(72 * var(--u));
-  height: calc(10 * var(--u));
-  background: url('/art/ui/branch.png') 0 0 / 100% 100%;
+  inset: 0;
+  z-index: -1;
+  border: calc(2 * var(--u)) solid transparent;
+  border-image: url('/art/ui/choice.png') 2 fill / calc(2 * var(--u)) stretch;
   image-rendering: pixelated;
 }
 
-.rope {
-  position: absolute;
-  top: calc(-12 * var(--u));
-  left: calc(50% - 30 * var(--u));
-  width: calc(3 * var(--u));
-  height: calc(12 * var(--u));
-  background: url('/art/ui/sign_rope.png') 0 0 / 100% 100%;
-  image-rendering: pixelated;
+.tab[aria-selected='true'] {
+  color: var(--paper);
 }
 
-.rope + .rope {
-  left: calc(50% + 27 * var(--u));
+.tab[aria-selected='true']::before {
+  border-image-source: url('/art/ui/name.png');
 }
 
 .get {
@@ -221,15 +339,101 @@ button {
   background-position-x: calc(-7 * var(--u));
 }
 
+.source {
+  padding-bottom: var(--u);
+  white-space: nowrap;
+  color: var(--ink);
+  font: 500 1rem var(--read);
+  -webkit-font-smoothing: antialiased;
+  text-underline-offset: 0.2em;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding: 1rem 0 0;
+  list-style: none;
+  border-top: 2px dotted #e3cfa6;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.facts li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  background: var(--icon) 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+
+/* A section's claim stays beside the world while the scroll runs through it. */
+.day {
+  height: 320vh;
+}
+
+.sticky {
+  position: sticky;
+  top: max(1.5rem, 12vh);
+}
+
+.claim {
+  --k: 1.5;
+}
+
+.dial {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding-top: 1rem;
+  border-top: 2px dotted #e3cfa6;
+}
+
+.clock {
+  position: relative;
+  flex: none;
+  width: 81px;
+  height: 81px;
+  background: url('/art/ui/clock_face.png') calc(var(--phase, 0) * -81px) 0 / 324px 81px;
+  image-rendering: pixelated;
+}
+
+.hand {
+  position: absolute;
+  inset: 0;
+  background: url('/art/ui/clock_hand.png') calc(var(--step, 0) * -81px) 0 / 1296px 81px;
+  image-rendering: pixelated;
+}
+
+.phase {
+  display: block;
+  font-size: 22px;
+  line-height: 28px;
+}
+
+.who {
+  display: block;
+  font: 400 1rem / 1.5 var(--read);
+  -webkit-font-smoothing: antialiased;
+  color: #4a3a40;
+}
+
 /* The key caps under the hero: W A S D in a cross, or Space when someone is near enough to talk to. */
 .hint {
   position: fixed;
-  left: 50%;
+  left: var(--stage-mid, 50%);
   bottom: calc(14 * var(--u));
   display: flex;
   align-items: flex-end;
   gap: calc(5 * var(--u));
   translate: -50% 0;
+  white-space: nowrap;
   text-shadow: 0 var(--u) 0 var(--ink), var(--u) 0 0 var(--ink), calc(-1 * var(--u)) 0 0 var(--ink), 0 calc(-1 * var(--u)) 0 var(--ink);
   transition: opacity 0.4s, translate 0.4s;
 }
@@ -289,7 +493,8 @@ button {
   display: grid;
 }
 
-.hint-say {
+.hint-say,
+.hint-try {
   padding-bottom: var(--u);
 }
 
@@ -356,7 +561,7 @@ button {
 /* The talk box (Talk.cs): --w and --h its size, --left where its words start, in canvas px. */
 .talk {
   position: fixed;
-  left: calc(50% - var(--w) * var(--u) / 2);
+  left: calc(var(--x) * 1px);
   bottom: calc(6 * var(--u));
   width: calc(var(--w) * var(--u));
   height: calc(var(--h) * var(--u));
@@ -440,15 +645,48 @@ button {
   display: none !important;
 }
 
-@media (max-width: 720px) {
-  .hero {
-    left: 50%;
-    translate: -50% 0;
-    justify-items: center;
+@media (max-width: 900px) {
+  .copy {
+    width: auto;
+    margin: 0 1rem;
   }
 
-  .hang {
-    margin-left: 0;
+  .hero {
+    padding-bottom: 55vh;
+  }
+
+  .headline {
+    --k: 1.5;
+  }
+
+  /* The stamp and postmark at the card's own size, clear of the headline. */
+  .card {
+    --t: 1;
+  }
+
+  .claim {
+    --k: 1;
+  }
+
+  .get-row {
+    grid-template-columns: auto;
+  }
+
+  .get-row .source {
+    order: 1;
+    justify-self: start;
+    margin-top: 0.5rem;
+  }
+
+  .sticky {
+    top: auto;
+    bottom: 1rem;
+  }
+
+  .day {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
   }
 }
 
