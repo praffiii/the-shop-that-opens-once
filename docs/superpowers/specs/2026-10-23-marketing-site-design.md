@@ -68,8 +68,10 @@ keeps a still of its last frame.
 - The game's title lettering (`ui/title.png`).
 - **Headline:** "One shop. Seven nights. Seven keepsakes to return."
 - **One line:** "A cozy pixel-art mystery for macOS and Windows."
-- **Download** for the visitor's computer, with macOS and Windows tabs (as boat.dev shows its install command per
-  OS), and the GitHub link.
+- **Download free:** one sign that glides the page down to the shop's door (section 6), the whole day running by
+  on the way to midnight, where the visitor picks macOS or Windows. The user, 2026-10-24: the hero and the last
+  section both carrying the tabs and GitHub looked redundant, and a hero sign reading "Download for macOS" made the
+  game look Mac-only.
 - **The window:** the live square, villagers about their morning, Satria among them, with a Play button: "Walk
   around Bellwood". Play opens the window full screen, where the visitor walks Satria by keys or taps and talks to
   villagers (the game's dialogue box, real lines from the Prologue and Night 1 days, no spoilers). Esc or the close
@@ -118,7 +120,8 @@ The shop's door, open, its lantern light spilling out, and the Download standing
 - beside it, "Star on GitHub", linking to the repo;
 - on a phone: "Play it on your Mac or PC" instead of a download that would not run, with the repo link.
 
-A quiet footer under it: the repo, the team's credit line and the licence. No making-of section.
+No footer: the user had the team's credit line removed (2026-10-24), and the repo has no licence, which keeps it
+all rights reserved (the builder's call, which the user accepted). No making-of section.
 
 ## Throughout
 
