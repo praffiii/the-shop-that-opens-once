@@ -202,7 +202,8 @@ main {
 }
 
 .hero,
-.pin {
+.pin,
+.feature {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: center;
@@ -555,6 +556,164 @@ main {
   height: calc(16 * var(--u));
 }
 
+/* The courier's bag over the grove (ui/bag.ts): the keepsake turned over on the left, the Notes on the right, the
+   game's paper panel round them, and its toast on the panel's foot when something is noted. */
+.bag {
+  position: absolute;
+  z-index: 2;
+  inset: calc(16 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: calc(12 * var(--u));
+  padding: calc(9 * var(--u)) calc(11 * var(--u));
+  color: var(--ink);
+}
+
+.bag-look,
+.bag-notes {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  min-height: 0;
+}
+
+.bag-look {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  column-gap: calc(5 * var(--u));
+  align-items: center;
+}
+
+.bag-head {
+  grid-column: 1 / -1;
+}
+
+.bag-slot {
+  display: grid;
+  place-items: center;
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+}
+
+.bag-slot img {
+  width: calc(13 * var(--u));
+}
+
+.bag-name {
+  line-height: 1.1;
+}
+
+/* The keepsake turned up, three or four screen px to its pixel, between the game's < and > */
+.bag-turn {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6 * var(--u));
+  min-height: 0;
+}
+
+.bag-big {
+  --k: calc(var(--s) + 1);
+  height: calc(48px * var(--k));
+  width: auto;
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+
+.bag-arrow {
+  padding: calc(4 * var(--u)) calc(3 * var(--u));
+  color: var(--ink);
+}
+
+.bag-arrow:hover {
+  color: var(--red);
+}
+
+.bag-arrow:active {
+  translate: 0 var(--u);
+}
+
+.bag-seen,
+.bag-list {
+  margin: 0;
+  font: 400 0.9375rem / 1.45 var(--read);
+  -webkit-font-smoothing: antialiased;
+}
+
+.bag-seen {
+  grid-column: 1 / -1;
+  align-self: start;
+  min-height: 4.35em;
+}
+
+.bag-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bag-list li {
+  padding-bottom: 0.5rem;
+  border-bottom: var(--u) solid rgb(122 69 46 / 0.25);
+}
+
+.bag-list .soft {
+  color: #7a452e;
+}
+
+.bag-list .soft {
+  border: 0;
+}
+
+.bag-list .new {
+  animation: noted 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes noted {
+  from {
+    opacity: 0;
+    translate: 0 calc(-4 * var(--u));
+  }
+}
+
+.bag-toast {
+  position: absolute;
+  z-index: 3;
+  right: calc(24 * var(--u));
+  bottom: calc(5 * var(--u));
+  padding: calc(4 * var(--u)) calc(8 * var(--u)) calc(5 * var(--u));
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 calc(6 * var(--u));
+  transition: opacity 0.2s, translate 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+  pointer-events: none;
+}
+
+.bag-toast.on {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Try it: the game's key caps beside the words, pressed as the visitor presses them. */
+.try {
+  display: flex;
+  align-items: center;
+  gap: var(--u);
+}
+
+.try .cap {
+  font: 400 calc(11 * var(--u)) / 1 'Pixelify Sans', sans-serif;
+  -webkit-font-smoothing: none;
+}
+
+.try span {
+  margin-left: 0.75rem;
+}
+
 /* The key caps under the hero: W A S D in a cross, or Space when someone is near enough to talk to. */
 .hint {
   position: fixed;
@@ -783,7 +942,8 @@ main {
 
 @media (max-width: 900px) {
   .hero,
-  .pin {
+  .pin,
+  .feature {
     grid-template-columns: minmax(0, 1fr);
     align-content: center;
     gap: 1.5rem;
@@ -810,6 +970,36 @@ main {
     aspect-ratio: 1 / 1;
     width: min(100%, 48vh);
     justify-self: center;
+  }
+
+  /* The bag stands taller on a phone: the watch over its Notes. */
+  .feature .window {
+    aspect-ratio: 9 / 14;
+  }
+
+  .bag {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    inset: calc(14 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u));
+    gap: calc(6 * var(--u));
+    padding: calc(7 * var(--u)) calc(8 * var(--u));
+  }
+
+  .bag-big {
+    --k: var(--s);
+  }
+
+  .bag-seen {
+    min-height: 0;
+  }
+
+  .bag-toast {
+    right: 50%;
+    translate: 50% calc(6 * var(--u));
+  }
+
+  .bag-toast.on {
+    translate: 50% 0;
   }
 
   /* Clear of the corner's switches, as the hero is. */

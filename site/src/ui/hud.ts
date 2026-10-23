@@ -84,8 +84,7 @@ export class Hud {
     lang.listeners.add(() => this.words());
     for (const type of ['keydown', 'keyup'] as const)
       window.addEventListener(type, e => {
-        const cap = document.querySelector(`.cap[data-key="${e.code}"]`);
-        cap?.classList.toggle('down', type === 'keydown');
+        for (const cap of document.querySelectorAll(`.cap[data-key="${e.code}"]`)) cap.classList.toggle('down', type === 'keydown');
       });
     this.pick(this.os);
   }

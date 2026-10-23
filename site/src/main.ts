@@ -1,12 +1,15 @@
 import './style.css';
 import { Hero } from './hero';
 import { Land } from './land';
+import { Bag } from './ui/bag';
 import { DOING, Hud } from './ui/hud';
 import { lang } from './ui/lang';
 import { sound } from './ui/sound';
 import { Talk } from './ui/talk';
 
 const TALK_KEYS = new Set(['Space', 'Enter', 'KeyE']);
+/** The keys that turn the bag's keepsake over, as the game's A / D. */
+const TURN_KEYS: Record<string, number> = { KeyA: -1, ArrowLeft: -1, KeyD: 1, ArrowRight: 1 };
 /** Whom the day's section follows, in turn as it scrolls by. */
 const DAY_CAST = Object.keys(DOING);
 /** The time the day's section runs to: dusk, its lamps and windows lit. */
@@ -76,6 +79,7 @@ async function start() {
   let scale = 2;
   const talk = new Talk(document.body, () => scale, () => ({ left: 0, width: innerWidth }));
   const hud = new Hud(hero, talk);
+  const bag = new Bag(wins.find(w => w.name === 'bag')!.el);
   hero.player.away = true;
   let current: Win | null = heroWin;
   const resize = () => {
@@ -130,6 +134,8 @@ async function start() {
   });
 
   window.addEventListener('keydown', e => {
+    // The bag in view takes the keys that turn its keepsake over.
+    if (!hud.playing && current?.name === 'bag' && TURN_KEYS[e.code] && !e.repeat) return bag.take(TURN_KEYS[e.code]!);
     if (!hud.playing) return;
     if (e.code === 'Escape') return open(false);
     if (!TALK_KEYS.has(e.code) || e.repeat || (e.target instanceof Element && e.target.closest('a, button'))) return;
@@ -190,7 +196,7 @@ async function start() {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
-    const where = current?.name === 'night' ? 'grove' : 'square';
+    const where = current?.name === 'night' || current?.name === 'bag' ? 'grove' : 'square';
     if (where !== hero.where) hero.snap();
     hero.where = where;
     hero.day = current?.name === 'hero' ? 0 : time;
@@ -212,6 +218,8 @@ async function start() {
       Object.assign(shop, { open, lit });
       hero.stage(lit, open);
     }
+    // After midnight the shop stays open behind what follows.
+    if (current?.name === 'bag') hero.stage(7, true);
     land.at(n.top < innerHeight / 2 ? 'grove' : 'square');
     const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(time + 0.5))}`;
     if (want !== bed) {
@@ -233,6 +241,7 @@ async function start() {
     if (current) hero.frame(dt, t);
     talk.tick(dt);
     hud.tick(dt);
+    bag.tick(dt, current?.name === 'bag');
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
