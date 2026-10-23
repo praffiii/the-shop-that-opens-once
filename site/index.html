@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Shop That Opens Once</title>
+    <meta name="description" content="A courier comes home to Bellwood to sell his parents' house, and a shop that opens only at midnight gives him one last job. A pixel-art game for macOS and Windows." />
+    <link rel="preload" href="/fonts/pixelify-latin.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <canvas id="world" role="img" aria-label="Bellwood's market square on a morning: villagers set out their stalls, and Satria the courier stands among them."></canvas>
+
+    <main>
+      <section class="hero">
+        <h1 class="title"><img src="/art/ui/title.png" width="188" height="62" alt="The Shop That Opens Once" /></h1>
+        <div class="hang">
+          <span class="branch" aria-hidden="true"></span>
+          <span class="rope" aria-hidden="true"></span>
+          <span class="rope" aria-hidden="true"></span>
+          <a class="get sign" href="https://github.com/praffiii/the-shop-that-opens-once/releases/latest">
+            <span class="lantern" aria-hidden="true"></span>
+            <span class="get-label" data-id="Unduh">Download</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <div class="hint" aria-hidden="true">
+      <div class="keys">
+        <kbd class="cap" data-key="KeyW">W</kbd>
+        <kbd class="cap" data-key="KeyA">A</kbd>
+        <kbd class="cap" data-key="KeyS">S</kbd>
+        <kbd class="cap" data-key="KeyD">D</kbd>
+      </div>
+      <kbd class="cap wide" data-key="Space" data-id="Spasi">Space</kbd>
+      <span class="hint-say">to walk</span>
+    </div>
+
+    <span class="prompt" aria-hidden="true"></span>
+
+    <nav class="corner">
+      <button class="lang tag" type="button" aria-label="Baca dalam Bahasa Indonesia" data-id-label="Read in English">
+        <span data-id="EN">ID</span>
+      </button>
+      <button class="mute slot" type="button" aria-pressed="false" aria-label="Turn sound on">
+        <span class="speaker" aria-hidden="true"></span>
+      </button>
+    </nav>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
