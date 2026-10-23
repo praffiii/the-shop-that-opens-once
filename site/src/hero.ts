@@ -35,14 +35,14 @@ export class Hero {
   /** The time of day, 0 morning .. 3 night, easing toward day. */
   time = 0;
   day = 0;
-  /** Whom the camera follows, and where on the screen (CSS px) it frames them: the middle of the space beside the copy. */
+  /** Whom the camera follows: Satria unless a section says otherwise. */
   subject: Ant | null = null;
-  aim = { x: 0, y: 0 };
   private cam = { x: 640, y: 640 };
   private vel = { x: 0, y: 0 };
   private lead = { x: 0, y: 0 };
   private last = { x: 0, y: 0 };
   private followed: Ant | null = null;
+  private snapping = false;
   private bg = new THREE.Color();
   running = true;
 
@@ -79,7 +79,7 @@ export class Hero {
   }
 
   resize() {
-    this.view.zoom = Math.min(Math.max(innerHeight / 330, 2), 4);
+    this.view.zoom = Math.min(Math.max(this.view.canvas.clientHeight / 330, 2), 4);
     this.view.resize();
     this.post.resize(this.view.renderer);
   }
@@ -152,7 +152,12 @@ export class Hero {
     return { x: p.x, y: z - y };
   }
 
-  // The camera eases after its subject, a little ahead of where they walk, holding them at the aim on screen.
+  /** Cuts straight to the subject on the next frame, as a film cuts (a new window, a new subject). */
+  snap() {
+    this.snapping = true;
+  }
+
+  // The camera eases after its subject, a little ahead of where they walk.
   private follow(dt: number) {
     const who = this.subject ?? this.player.ant;
     const f = who.feet;
@@ -166,13 +171,16 @@ export class Hero {
     this.lead.x += (goal.x - this.lead.x) * k;
     this.lead.y += (goal.y - this.lead.y) * k;
     const [w, h] = this.place.data.size;
-    const cw = this.view.canvas.clientWidth, ch = this.view.canvas.clientHeight, z = this.view.zoom;
-    const vw = cw / z, vh = ch / z;
-    // Seen at the aim rather than the middle: the camera looks that far the other way.
-    const ax = (this.aim.x - cw / 2) / z, ay = (this.aim.y - ch / 2) / z;
+    const vw = this.view.canvas.clientWidth / this.view.zoom, vh = this.view.canvas.clientHeight / this.view.zoom;
     const clamp = (v: number, size: number, view: number) =>
       size <= view ? size / 2 : Math.min(Math.max(v, view / 2 - OVERSCAN), size - view / 2 + OVERSCAN);
-    const tx = clamp(f.x + this.lead.x - ax, w, vw), ty = clamp(f.y + this.lead.y - 16 - ay, h, vh);
+    const tx = clamp(f.x + this.lead.x, w, vw), ty = clamp(f.y + this.lead.y - 16, h, vh);
+    if (this.snapping) {
+      this.snapping = false;
+      this.cam = { x: tx, y: ty };
+      this.vel = { x: 0, y: 0 };
+      return;
+    }
     // A critically damped spring, as Unity's SmoothDamp follows.
     const omega = 2 / FOLLOW, x = omega * dt, e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
     for (const a of ['x', 'y'] as const) {

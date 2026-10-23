@@ -1,7 +1,6 @@
-// What sits over the world: the Download with its macOS and Windows tabs, the postmark that thumps onto the hero's
-// card, the key caps that teach walking and talking, the bubble over whoever Satria can talk to, the day's dial, and
-// the sound and language switches. It also works out the stage: the part of the screen beside the copy, where the
-// camera frames its subject and the talk box sits.
+// The page's pieces round the world: the Download with its macOS and Windows tabs, the key caps that teach walking
+// and talking while the square is open to play, the bubble over whoever Satria can talk to, the day's dial, and the
+// sound and language switches.
 import type { Hero } from '../hero';
 import type { Villager } from '../play/villagers';
 import { lang } from './lang';
@@ -15,10 +14,10 @@ type Words = Record<'en' | 'id', string>;
 
 /** The page's own words that change as the visitor plays, in both languages. */
 const SAY = {
-  walk: { en: 'walk around Bellwood', id: 'jelajahi Bellwood' },
+  walk: { en: 'to walk', id: 'untuk berjalan' },
   talk: { en: 'to talk to {0}', id: 'untuk bicara dengan {0}' },
-  tap: { en: 'tap to walk around Bellwood', id: 'ketuk untuk menjelajahi Bellwood' },
-  tapTalk: { en: 'tap {0} to talk', id: 'ketuk {0} untuk bicara' },
+  tap: { en: 'Tap the ground to walk', id: 'Ketuk tanah untuk berjalan' },
+  tapTalk: { en: 'Tap {0} to talk', id: 'Ketuk {0} untuk bicara' },
   soundOn: { en: 'Turn sound on', id: 'Nyalakan suara' },
   soundOff: { en: 'Turn sound off', id: 'Matikan suara' },
   mac: { en: 'Download for macOS', id: 'Unduh untuk macOS' },
@@ -51,15 +50,6 @@ function guess(): Os | null {
   return null;
 }
 
-export interface Stage {
-  left: number;
-  width: number;
-  /** How much of the world shows, in CSS px of height: too little and the key caps would sit on the copy. */
-  room: number;
-  /** Where the camera holds its subject, in CSS px. */
-  aim: { x: number; y: number };
-}
-
 export class Hud {
   private readonly hint = $('.hint');
   private readonly say = $('.hint-say');
@@ -71,14 +61,15 @@ export class Hud {
   private readonly clock = $('.clock');
   private readonly phase = $('.phase');
   private readonly who = $('.who');
+  private readonly plaque = $('.day-plaque');
   private readonly touch = matchMedia('(pointer: coarse)').matches;
   private os = guess();
   private age = 0;
   private walked = 0;
   private near: Villager | null = null;
   private doing = '';
-  /** The hero is on screen: Satria is the visitor's. */
-  playing = true;
+  /** The square is open full screen: Satria is the visitor's. */
+  playing = false;
 
   constructor(private readonly hero: Hero, private readonly talk: Talk) {
     this.hint.classList.toggle('touch', this.touch);
@@ -95,12 +86,6 @@ export class Hud {
     this.pick(this.os);
   }
 
-  /** The hero's card has come to rest: the postmark thumps down on its stamp. */
-  thump() {
-    document.body.classList.add('thumped');
-    sound.play('stamp', 0.6);
-  }
-
   private pick(os: Os | null) {
     this.os = os;
     for (const tab of this.tabs) tab.setAttribute('aria-selected', `${tab.dataset.os === os}`);
@@ -112,23 +97,14 @@ export class Hud {
   scale() {
     const s = Math.min(Math.max(Math.floor(innerHeight / 300), 2), 3);
     const w = document.documentElement.clientWidth;
-    const t = w <= 900 ? Math.max(1, Math.floor((w - 8) / 188)) : innerHeight >= 1100 ? 3 : 2;
+    const t = w <= 900 ? Math.max(1, Math.min(2, Math.floor((w - 48) / 188))) : innerHeight >= 1100 ? 3 : 2;
     const root = document.documentElement.style;
-    root.setProperty('--s', `${s}`);
+    // The page's own pieces stay at 2x beside its type; the game, open full screen, draws its UI at s, as the game does.
+    root.setProperty('--s', `${innerHeight >= 1200 ? 3 : 2}`);
+    root.setProperty('--play-s', `${s}`);
     root.setProperty('--t', `${t}`);
     root.setProperty('--z', `${Math.round(this.hero.view.zoom)}`);
     return s;
-  }
-
-  /** The screen beside a section's copy, or under it on a narrow screen. */
-  stage(copy: HTMLElement): Stage {
-    const r = copy.getBoundingClientRect(), w = innerWidth, h = innerHeight;
-    if (w <= 900) {
-      const top = Math.min(Math.max(r.bottom, 0), h * 0.6);
-      return { left: 0, width: w, room: h - Math.max(r.bottom, 0), aim: { x: w / 2, y: (top + h) / 2 + 24 } };
-    }
-    const left = r.right + 16;
-    return { left, width: w - left, room: h, aim: { x: (left + w) / 2, y: h * 0.56 } };
   }
 
   /** The day's dial: the clock's quarter for the phase, its hand round the day, and who the camera is with. */
@@ -143,9 +119,8 @@ export class Hud {
     }
   }
 
-  tick(dt: number, stage: Stage) {
+  tick(dt: number) {
     this.age += dt;
-    document.documentElement.style.setProperty('--stage-mid', `${stage.left + stage.width / 2}px`);
     const near = this.talk.open || !this.playing ? null : this.hero.near();
     // The bubble over the one to talk to, popping up and bobbing (Talk.Over).
     this.prompt.classList.toggle('on', !!near);
@@ -158,7 +133,7 @@ export class Hud {
     // The key caps: walking until the visitor has walked a while, then talking whenever someone is near.
     const pose = this.hero.player.ant.currentPose;
     if (pose === 'walk' || pose === 'run') this.walked += dt;
-    this.hint.classList.toggle('gone', !this.playing || this.talk.open || stage.room < 200 || (this.walked > 4 && !near));
+    this.hint.classList.toggle('gone', !this.playing || this.talk.open || (this.walked > 4 && !near));
     if (this.near !== near) {
       this.near = near;
       this.hint.classList.toggle('near', !!near);
@@ -176,7 +151,9 @@ export class Hud {
     this.mute.setAttribute('aria-pressed', `${sound.on}`);
     this.mute.setAttribute('aria-label', (sound.on ? SAY.soundOff : SAY.soundOn)[l]);
     $('.get-label').textContent = (this.os ? SAY[this.os] : SAY.any)[l];
-    this.phase.textContent = PHASES[Number(this.phase.dataset.phase ?? 0)]![l];
+    const phase = PHASES[Number(this.phase.dataset.phase ?? 0)]!;
+    this.phase.textContent = phase[l];
+    this.plaque.textContent = l === 'id' ? `Alun-alun, ${phase.id.toLowerCase()}` : `The Market Square, ${phase.en.toLowerCase()}`;
     this.who.textContent = DOING[this.doing]?.[l] ?? '';
   }
 }

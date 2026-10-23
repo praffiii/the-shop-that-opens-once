@@ -9,44 +9,45 @@
     <link rel="preload" href="/fonts/dmsans-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <canvas id="world" role="img" aria-label="Bellwood's market square, alive: villagers go about their day and Satria the courier stands among them."></canvas>
-
     <main>
       <section class="hero">
         <div class="copy">
           <h1 class="title"><img src="/art/ui/title.png" width="188" height="62" alt="The Shop That Opens Once" /></h1>
-          <div class="card panel">
-            <span class="stamp" aria-hidden="true"></span>
-            <span class="postmark" aria-hidden="true"><span data-id="00.00">00:00</span></span>
-            <h2 class="headline">
-              <span data-id="Satu toko.">One shop.</span>
-              <span data-id="Tujuh malam.">Seven nights.</span>
-              <span data-id="Tujuh kenangan untuk dikembalikan.">Seven keepsakes to return.</span>
-            </h2>
-            <p class="pitch" data-id="Satria pulang ke Bellwood untuk menjual rumah keluarga. Tengah malam, sebuah toko di akar beringin tua buka selama tiga puluh menit, dan pemiliknya punya satu pekerjaan terakhir. Misteri pixel art yang hangat untuk macOS dan Windows.">Satria comes home to Bellwood to sell the family house. At midnight, a shop in the roots of the old banyan opens for thirty minutes, and its keeper has one last job. A cozy pixel-art mystery for macOS and Windows.</p>
-            <div class="get-row">
-              <div class="os" role="tablist" aria-label="Your computer" data-id-label="Komputermu">
-                <button class="tab" type="button" role="tab" data-os="mac" aria-selected="true">macOS</button>
-                <button class="tab" type="button" role="tab" data-os="win" aria-selected="false">Windows</button>
-              </div>
-              <a class="source" href="https://github.com/praffiii/the-shop-that-opens-once" data-id="Kode sumber di GitHub">Source on GitHub</a>
-              <a class="get sign" href="https://github.com/praffiii/the-shop-that-opens-once/releases/latest">
-                <span class="lantern" aria-hidden="true"></span>
-                <span class="get-label">Download for macOS</span>
-              </a>
+          <p class="headline">
+            <span data-id="Satu toko.">One shop.</span>
+            <span data-id="Tujuh malam.">Seven nights.</span>
+            <span data-id="Tujuh kenangan untuk dikembalikan.">Seven keepsakes to return.</span>
+          </p>
+          <p class="line" data-id="Misteri pixel art yang hangat untuk macOS dan Windows.">A cozy pixel-art mystery for macOS and Windows.</p>
+          <div class="get-row">
+            <div class="os" role="tablist" aria-label="Your computer" data-id-label="Komputermu">
+              <button class="tab" type="button" role="tab" data-os="mac" aria-selected="true">macOS</button>
+              <button class="tab" type="button" role="tab" data-os="win" aria-selected="false">Windows</button>
             </div>
-            <ul class="facts">
-              <li><i class="icon" style="--icon: url(/art/icons/heart.png)"></i><span data-id="Gratis">Free</span></li>
-              <li><i class="icon" style="--icon: url(/art/icons/clock.png)"></i><span data-id="1 sampai 3 jam">1 to 3 hours</span></li>
-              <li><i class="icon" style="--icon: url(/art/icons/talk.png)"></i><span data-id="Inggris dan Bahasa Indonesia">English and Bahasa Indonesia</span></li>
-            </ul>
+            <a class="source" href="https://github.com/praffiii/the-shop-that-opens-once" data-id="Kode sumber di GitHub">Source on GitHub</a>
+            <a class="get sign" href="https://github.com/praffiii/the-shop-that-opens-once/releases/latest">
+              <span class="lantern" aria-hidden="true"></span>
+              <span class="get-label">Download for macOS</span>
+            </a>
           </div>
         </div>
+        <figure class="window" data-window="hero">
+          <div class="screen" role="img" aria-label="Bellwood's market square, live: villagers go about their morning, and Satria the courier stands among them." data-id-label="Alun-alun Bellwood, langsung: warga menjalani pagi mereka, dan Satria si kurir berdiri di antara mereka."></div>
+          <canvas class="still" aria-hidden="true"></canvas>
+          <figcaption class="plaque tag" data-id="Alun-alun, pagi">The Market Square, morning</figcaption>
+          <button class="play sign" type="button">
+            <span class="lantern" aria-hidden="true"></span>
+            <span data-id="Jelajahi Bellwood">Walk around Bellwood</span>
+          </button>
+          <button class="close tag" type="button" aria-label="Back to the page" data-id-label="Kembali ke halaman">
+            <kbd>Esc</kbd><span data-id="Tutup">Close</span>
+          </button>
+        </figure>
       </section>
 
       <section class="day">
-        <div class="copy sticky">
-          <div class="panel note">
+        <div class="pin">
+          <div class="copy">
             <h2 class="claim" data-id="Desa yang menjalani harinya sendiri.">A village that lives its own day.</h2>
             <p data-id="Setiap warga Bellwood punya tujuan. Ajak mereka bicara, dan mereka berhenti, menoleh, dan menjawab dengan suaranya sendiri, lalu kembali ke kesibukannya. Dari pagi sampai senja desa ini punya jamnya sendiri, dan ia ingat apa yang kau lakukan untuknya.">Everyone in Bellwood has somewhere to be. Talk to them and they stop, turn, and answer in their own voice, then go back to what they were doing. From morning to dusk the village keeps its own clock, and it remembers what you do for it.</p>
             <div class="dial">
@@ -57,12 +58,16 @@
               </div>
             </div>
           </div>
+          <figure class="window" data-window="day">
+            <div class="screen" role="img" aria-label="The square through the day: Mia at her stall, Pip with the letters, Sam at the hall." data-id-label="Alun-alun sepanjang hari: Mia di kiosnya, Pip dengan surat-suratnya, Sam di balai."></div>
+            <canvas class="still" aria-hidden="true"></canvas>
+            <figcaption class="plaque tag day-plaque">The Market Square, morning</figcaption>
+          </figure>
         </div>
       </section>
     </main>
 
-    <div class="hint" aria-hidden="true">
-      <span class="hint-try" data-id="Coba:">Try it:</span>
+    <div class="hint gone" aria-hidden="true">
       <div class="keys">
         <kbd class="cap" data-key="KeyW">W</kbd>
         <kbd class="cap" data-key="KeyA">A</kbd>
@@ -70,7 +75,7 @@
         <kbd class="cap" data-key="KeyD">D</kbd>
       </div>
       <kbd class="cap wide" data-key="Space" data-id="Spasi">Space</kbd>
-      <span class="hint-say">walk around Bellwood</span>
+      <span class="hint-say">to walk</span>
     </div>
 
     <span class="prompt" aria-hidden="true"></span>
