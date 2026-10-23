@@ -236,12 +236,14 @@ async function start() {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
-    // The door's window is the square at midnight with everyone gathered in it; the night's three, the grove.
+    // The door's window is the square the morning after, everyone gathered in it; the night's three, the grove.
     const where = current && ['night', 'bag', 'mend'].includes(current.name) ? 'grove' : 'square';
-    const gathered = current?.name === 'door';
-    if (where !== hero.where || gathered !== hero.gathered) hero.snap();
+    const gathered = current?.name === 'door', cut = gathered !== hero.gathered;
+    if (where !== hero.where || cut) hero.snap();
     Object.assign(hero, { where, gathered });
-    hero.day = current?.name === 'hero' ? 0 : time;
+    hero.day = current?.name === 'hero' || gathered ? 0 : time;
+    // Into the morning after and out of it the light cuts, as the camera does, not running the day backwards.
+    if (cut) hero.time = hero.day;
     let subject = null;
     if (current?.name === 'day') {
       const id = DAY_CAST[Math.min(DAY_CAST.length - 1, Math.floor(d.p * DAY_CAST.length))]!;
@@ -267,7 +269,7 @@ async function start() {
     const v = through(nights);
     post.show(v.top < innerHeight * 0.3 ? Math.min(6, Math.floor(v.p * 7)) : -1);
     land.at(n.top < innerHeight / 2 ? 'grove' : 'square');
-    const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(time + 0.5))}`;
+    const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(hero.day + 0.5))}`;
     if (want !== bed) {
       bed = want;
       beds();
