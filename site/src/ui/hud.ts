@@ -7,6 +7,9 @@ import { lang } from './lang';
 import { sound } from './sound';
 import type { Talk } from './talk';
 
+/** With reduced motion, what moves only to be alive holds still; what answers the visitor still moves. */
+const STILL = matchMedia('(prefers-reduced-motion: reduce)');
+
 const RELEASES = 'https://github.com/praffiii/the-shop-that-opens-once/releases/latest';
 const ZIPS = { mac: 'TheShopThatOpensOnce-macOS.zip', win: 'TheShopThatOpensOnce-Windows.zip' };
 type Os = keyof typeof ZIPS;
@@ -148,7 +151,7 @@ export class Hud {
     this.prompt.classList.toggle('on', !!near);
     if (near) {
       const z = Math.round(this.hero.view.zoom), head = this.hero.head(near);
-      const bob = Math.round(Math.sin(this.age * 6)) * z;
+      const bob = STILL.matches ? 0 : Math.round(Math.sin(this.age * 6)) * z;
       this.prompt.style.transform = `translate(${Math.round(head.x - 5 * z)}px, ${Math.round(head.y - 9 * z + bob)}px)`;
       this.prompt.classList.toggle('blink', Math.floor(this.age * 2) % 2 === 1);
     }
@@ -162,7 +165,7 @@ export class Hud {
       this.words();
     }
     // Marlow's lantern on each sign flickers now and then.
-    this.lanterns.forEach((l, i) => l.classList.toggle('flicker', Math.floor(this.age * 5 + i * 2.3) % 7 === 0));
+    this.lanterns.forEach((l, i) => l.classList.toggle('flicker', !STILL.matches && Math.floor(this.age * 5 + i * 2.3) % 7 === 0));
   }
 
   private words() {

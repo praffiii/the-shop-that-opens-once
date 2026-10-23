@@ -6,6 +6,9 @@
 import { lang } from './lang';
 import { sound } from './sound';
 
+/** With reduced motion, what moves only to be alive holds still; what answers the visitor still moves. */
+const STILL = matchMedia('(prefers-reduced-motion: reduce)');
+
 type Words = Record<'en' | 'id', string>;
 
 /** Nights 1 to 5: the title the game writes on the card, the keepsake in its stamp, and the page's one-line hook. */
@@ -252,7 +255,7 @@ export class Post {
     this.lanterns.forEach((b, i) => {
       this.flicker[i] = Math.max(0, this.flicker[i]! - dt);
       const dark = i < this.out || (i === this.out && this.smoking > 0);
-      const flick = this.flicker[i]! > 0 ? Math.floor(this.clock * 12) % 2 === 0 : Math.floor(this.clock * 5 + i * 2.3) % 7 === 0;
+      const flick = this.flicker[i]! > 0 ? Math.floor(this.clock * 12) % 2 === 0 : !STILL.matches && Math.floor(this.clock * 5 + i * 2.3) % 7 === 0;
       b.style.setProperty('--f', `${dark ? 2 : flick ? 1 : 0}`);
     });
   }

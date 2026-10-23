@@ -8,6 +8,9 @@ import { lang } from './lang';
 import { sound } from './sound';
 import { Talk } from './talk';
 
+/** With reduced motion a fail leaves the board still; the line still says it. */
+const STILL = matchMedia('(prefers-reduced-motion: reduce)');
+
 const STEPS = 12;
 /** Each wheel's piece, its middle on the bench and how far its teeth reach (art px). */
 const WHEELS = [
@@ -302,7 +305,7 @@ export class Mend {
     if (this.mode === 'won') this.t += dt;
     this.rate.textContent = hz ? `${hz.toFixed(1)} Hz` : '-.- Hz';
     if (this.shake > 0) this.shake = Math.max(0, this.shake - dt);
-    const jolt = this.shake ? Math.round(Math.sin((SHAKE - this.shake) * 60) * 4 * (this.shake / SHAKE)) : 0;
+    const jolt = this.shake && !STILL.matches ? Math.round(Math.sin((SHAKE - this.shake) * 60) * 4 * (this.shake / SHAKE)) : 0;
     this.bench.style.translate = `${jolt * this.unit}px 0`;
     if (this.spark >= 0) this.spark = this.spark + dt > SPARK ? -1 : this.spark + dt;
     this.draw(hz);

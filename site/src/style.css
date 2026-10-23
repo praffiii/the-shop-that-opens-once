@@ -1487,7 +1487,8 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   *,
-  *::before {
+  *::before,
+  *::after {
     animation-duration: 0.01s !important;
     animation-delay: 0s !important;
     transition-duration: 0.01s !important;
