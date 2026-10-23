@@ -1,6 +1,6 @@
 // The page's pieces round the world: the Download with its macOS and Windows tabs, the key caps that teach walking
-// and talking while the square is open to play, the bubble over whoever Satria can talk to, the day's dial, and the
-// sound and language switches.
+// and talking while the square is open to play, the bubble over whoever Satria can talk to, the day's dial, the
+// sound and language switches, and the plaques that name what each window shows.
 import type { Hero } from '../hero';
 import type { Villager } from '../play/villagers';
 import { lang } from './lang';
@@ -23,6 +23,8 @@ const SAY = {
   mac: { en: 'Download for macOS', id: 'Unduh untuk macOS' },
   win: { en: 'Download for Windows', id: 'Unduh untuk Windows' },
   any: { en: 'Download', id: 'Unduh' },
+  grove: { en: 'The Banyan Grove, night', id: 'Hutan Beringin, malam' },
+  midnight: { en: 'The Banyan Grove, midnight', id: 'Hutan Beringin, tengah malam' },
 } satisfies Record<string, Words>;
 
 const PHASES: Words[] = [
@@ -62,12 +64,14 @@ export class Hud {
   private readonly phase = $('.phase');
   private readonly who = $('.who');
   private readonly plaque = $('.day-plaque');
+  private readonly nightPlaque = $('.night-plaque');
   private readonly touch = matchMedia('(pointer: coarse)').matches;
   private os = guess();
   private age = 0;
   private walked = 0;
   private near: Villager | null = null;
   private doing = '';
+  private open = false;
   /** The square is open full screen: Satria is the visitor's. */
   playing = false;
 
@@ -119,6 +123,12 @@ export class Hud {
     }
   }
 
+  /** The grove's plaque: night, then midnight once the shop is open. */
+  night(open: boolean) {
+    this.open = open;
+    this.words();
+  }
+
   tick(dt: number) {
     this.age += dt;
     const near = this.talk.open || !this.playing ? null : this.hero.near();
@@ -155,5 +165,6 @@ export class Hud {
     this.phase.textContent = phase[l];
     this.plaque.textContent = l === 'id' ? `Alun-alun, ${phase.id.toLowerCase()}` : `The Market Square, ${phase.en.toLowerCase()}`;
     this.who.textContent = DOING[this.doing]?.[l] ?? '';
+    this.nightPlaque.textContent = (this.open ? SAY.midnight : SAY.grove)[l];
   }
 }

@@ -174,6 +174,12 @@ button {
 .land-ground,
 .land-lights {
   bottom: 0;
+  transition: opacity 0.3s;
+}
+
+.land.turning .land-ground,
+.land.turning .land-lights {
+  opacity: 0;
 }
 
 .land-ground {
@@ -464,7 +470,8 @@ main {
 }
 
 /* A section's words and window hold still while the scroll runs through it. */
-.day {
+.day,
+.night {
   height: 300vh;
 }
 
@@ -509,6 +516,43 @@ main {
   min-height: 3em;
   font: 400 1rem / 1.5 var(--read);
   -webkit-font-smoothing: antialiased;
+}
+
+/* A night, step by step: each phase's icon from the game's HUD in a slot, then what Satria does in it. */
+.steps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 1rem / 1.4 var(--read);
+  -webkit-font-smoothing: antialiased;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.steps b {
+  display: block;
+  font: 400 22px / 26px 'Pixelify Sans', sans-serif;
+  -webkit-font-smoothing: none;
+}
+
+.step-icon {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+}
+
+.step-icon img {
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
 }
 
 /* The key caps under the hero: W A S D in a cross, or Space when someone is near enough to talk to. */
@@ -766,6 +810,28 @@ main {
     aspect-ratio: 1 / 1;
     width: min(100%, 48vh);
     justify-self: center;
+  }
+
+  /* Clear of the corner's switches, as the hero is. */
+  .pin {
+    padding-top: 4.5rem;
+  }
+
+  /* A night's four steps two by two, so the words and the window still fit one screen. */
+  .steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .steps li {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .steps b {
+    font-size: 11px;
+    line-height: 14px;
   }
 
   /* The source link under the sign, and the plaque centred so its name fits the narrow frame. */

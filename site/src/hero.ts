@@ -1,4 +1,5 @@
-// The hero: the Market Square in the morning, alive, with Satria for the visitor to walk and villagers to talk to.
+// The page's world: the Market Square, alive, with Satria for the visitor to walk and villagers to talk to; and the
+// Banyan Grove at night, where Marlow's shop opens at midnight, its door lit and its seven lanterns lighting one by one.
 import * as THREE from 'three';
 import { Ant } from './world/ant';
 import { build, type Built } from './world/bake';
@@ -18,6 +19,10 @@ export const ART = '/art';
 /** How far past the place's edge the camera may look (art px); the forest goes on there. */
 const OVERSCAN = 96;
 const LEAD = 26, FOLLOW = 0.35;
+/** Where the grove's camera looks: the banyan's door with its arc of lanterns over it (art px). */
+const SHOP = { x: 300, y: 212 };
+/** Where Marlow stands in his door, and where Satria waits before it. */
+const MARLOW = { x: 300, y: 258 }, VISITOR = { x: 300, y: 276 };
 /** How near (art px) Satria must stand to talk to someone. */
 export const REACH = 30;
 /** How far over the feet a head is, in art px, for the bubble over it. */
@@ -27,7 +32,13 @@ export class Hero {
   readonly view: View;
   private readonly post = new Post();
   private readonly sun: Sun;
-  private place!: Built;
+  private square!: Built;
+  private grove!: Built;
+  /** Which place the world shows. */
+  where: 'square' | 'grove' = 'square';
+  /** Marlow in his door, and Satria waiting before it, in the grove. */
+  private marlow!: Ant;
+  private visitor!: Ant;
   private walk!: WalkMap;
   private grades!: ReturnType<typeof looks>;
   player!: Player;
@@ -46,23 +57,42 @@ export class Hero {
   private bg = new THREE.Color();
   running = true;
 
+  private get place() {
+    return this.where === 'grove' ? this.grove : this.square;
+  }
+
   constructor(canvas: HTMLCanvasElement, small: boolean) {
     this.view = new View(canvas);
     this.sun = new Sun(small ? 2048 : 4096);
   }
 
   async load() {
-    const [place, grades, cast, mask] = await Promise.all([
+    const [place, grove, grades, cast, mask] = await Promise.all([
       build(ART, 'square'),
+      build(ART, 'grove'),
       json<Grades>(`${ART}/grades.json`),
       json<Cast>(`${ART}/chars/chars.json`),
       pixels(`${ART}/places/square/walk.png`),
     ]);
-    this.place = place;
+    [this.square, this.grove] = [place, grove];
     this.grades = looks(grades);
     this.walk = WalkMap.fromImage(mask);
-    this.view.scene.add(place.group);
-    this.sun.add(place.casters, [place.lights]);
+    for (const p of [place, grove]) {
+      this.view.scene.add(p.group);
+      this.sun.add(p.casters, [p.lights]);
+    }
+    // The epilogue's empty roots never show here, nor the grove's daytime beetle.
+    for (const name of ['shop_gone', 'crawler_0']) grove.items.get(name)!.visible = false;
+    [this.marlow, this.visitor] = await Promise.all([Ant.make('marlow', cast, ART, grove.relief), Ant.make('courier', cast, ART, grove.relief)]);
+    for (const a of [this.marlow, this.visitor]) {
+      grove.group.add(a.mesh);
+      this.sun.add([[a.mesh, a.caster]]);
+    }
+    this.marlow.place(MARLOW.x, MARLOW.y);
+    this.marlow.turn('front');
+    this.visitor.place(VISITOR.x, VISITOR.y);
+    this.visitor.turn('back');
+    this.stage(0, false);
     const ants = await Promise.all(['courier', ...SQUARE_MORNING.map(p => p.id)].map(id => Ant.make(id, cast, ART, place.relief)));
     for (const a of ants) {
       place.group.add(a.mesh);
@@ -152,6 +182,26 @@ export class Hero {
     return { x: p.x, y: z - y };
   }
 
+  /**
+   * The shop at midnight: `lit` of its seven lanterns burning, and whether its door is open, the closed sign gone, the
+   * door lit and Marlow in it (waving his visitor in once the lanterns are all lit).
+   */
+  stage(lit: number, open: boolean) {
+    const items = this.grove.items, show = (name: string, on: boolean) => (items.get(name)!.visible = on);
+    for (let i = 0; i < 7; i++) {
+      show(`shop_lantern_${i}`, i < lit);
+      show(`shop_lantern_${i}_day`, i >= lit);
+    }
+    show('shop_closed', !open);
+    show('shop_lit', open);
+    this.marlow.mesh.visible = open;
+    const wave = lit >= 7;
+    if (wave !== (this.marlow.currentPose === 'wave')) {
+      this.marlow.setPose(wave ? 'wave' : 'idle');
+      if (!wave) this.marlow.turn('front');
+    }
+  }
+
   /** Cuts straight to the subject on the next frame, as a film cuts (a new window, a new subject). */
   snap() {
     this.snapping = true;
@@ -160,7 +210,9 @@ export class Hero {
   // The camera eases after its subject, a little ahead of where they walk.
   private follow(dt: number) {
     const who = this.subject ?? this.player.ant;
-    const f = who.feet;
+    // In the grove the camera holds on the shop, low enough in a short window to keep Satria in it.
+    const below = VISITOR.y + 30 - this.view.canvas.clientHeight / this.view.zoom / 2;
+    const f = this.where === 'grove' ? { x: SHOP.x, y: Math.max(SHOP.y, below) + 16 } : who.feet;
     if (who !== this.followed) (this.followed = who), (this.last = { ...f });
     const step = { x: f.x - this.last.x, y: f.y - this.last.y };
     this.last = { ...f };
@@ -194,16 +246,21 @@ export class Hero {
   frame(dt: number, t: number) {
     if (!this.running) return;
     shared.uTime.value = t;
+    this.square.group.visible = this.where === 'square';
+    this.grove.group.visible = this.where === 'grove';
     this.place.update(t);
     this.player.update(dt);
     for (const v of this.villagers) v.update(dt);
+    this.marlow.update(dt);
+    this.visitor.update(dt);
     this.feet();
     this.follow(dt);
     this.time += (this.day - this.time) * Math.min(1, dt * 3);
     const dir = apply(this.grades, this.time);
     const dark = this.time > 1.6;
     this.place.lights.visible = dark;
-    this.place.day.visible = this.time < 2;
+    // The grove's day pieces are its shop's shut sign and unlit lanterns, which the shop's stage shows.
+    this.place.day.visible = this.where === 'grove' || this.time < 2;
     this.lamps();
     this.view.scene.background = gradeColor(this.place.data.bg, this.bg);
     this.view.look(this.cam.x, this.cam.y, this.place.relief.under(this.cam.x, this.cam.y));
@@ -215,7 +272,7 @@ export class Hero {
 
   // Each ant casts a small dark spot on what it stands on.
   private feet() {
-    const all = [this.player.ant, ...this.villagers.map(v => v.ant)];
+    const all = this.where === 'grove' ? [this.marlow, this.visitor].filter(a => a.mesh.visible) : [this.player.ant, ...this.villagers.map(v => v.ant)];
     shared.uFeetCount.value = all.length;
     all.forEach((a, i) => {
       const h = this.place.relief.under(a.feet.x, a.feet.y);

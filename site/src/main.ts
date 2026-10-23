@@ -11,6 +11,19 @@ const TALK_KEYS = new Set(['Space', 'Enter', 'KeyE']);
 const DAY_CAST = Object.keys(DOING);
 /** The time the day's section runs to: dusk, its lamps and windows lit. */
 const DUSK = 2;
+/**
+ * The night's section, as far through it as each beat: night has fallen, the bell tolls midnight and the door opens,
+ * then the lanterns light one at each step after it.
+ */
+const NIGHTFALL = 0.3, MIDNIGHT = 0.38, LANTERN_STEP = 0.05;
+/** The music and ambience for each time of day (as the game's), and for the shop in the grove. */
+const BEDS: Record<string, Record<string, number>> = {
+  0: { music_dawn: 0.35, amb_morning: 0.5 },
+  1: { music_market: 0.35, amb_midday: 0.5 },
+  2: { music_dusk: 0.35, amb_dusk: 0.5 },
+  3: { music_night: 0.35, amb_night: 0.5 },
+  shop: { music_shop: 0.35, amb_night: 0.5, crickets: 0.3 },
+};
 /** The page's sky at each time of day (0 morning .. 3 night), top and bottom, from the game's own sky colours. */
 const SKY: [string, string][] = [
   ['#c2e6ff', '#f2faff'],
@@ -59,7 +72,7 @@ async function start() {
   const hero = new Hero(canvas, matchMedia('(max-width: 720px)').matches);
   const land = new Land(document.body);
   await Promise.all([hero.load(), land.load(), lang.load()]);
-  const day = $('.day');
+  const [day, night] = [$('.day'), $('.night')];
   let scale = 2;
   const talk = new Talk(document.body, () => scale, () => ({ left: 0, width: innerWidth }));
   const hud = new Hud(hero, talk);
@@ -76,7 +89,8 @@ async function start() {
   for (const w of wins) watch.observe(w.screen);
 
   hero.player.ant.onStep = () => sound.step();
-  const beds = () => sound.beds({ music_dawn: 0.35, amb_morning: 0.5 });
+  let bed = '0';
+  const beds = () => sound.beds(BEDS[bed]!);
   sound.listeners.add(beds);
   beds();
 
@@ -165,22 +179,44 @@ async function start() {
   };
 
   // The scroll directs the world: the hero's window is the square's morning with Satria, the day's runs morning to
-  // dusk with the villagers at work, and the page's sky moves with it.
+  // dusk with the villagers at work, the night's falls on the grove till the bell tolls and the shop opens; and the
+  // page's sky moves with it.
+  const through = (el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top, p: clamp01(-r.top / Math.max(1, r.height - innerHeight)) };
+  };
+  const shop = { open: false, lit: 0 };
   const direct = () => {
-    const r = day.getBoundingClientRect();
-    const p = clamp01(-r.top / Math.max(1, r.height - innerHeight));
-    const time = r.top > 0 ? 0 : p * DUSK;
+    const d = through(day), n = through(night);
+    const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
+    const where = current?.name === 'night' ? 'grove' : 'square';
+    if (where !== hero.where) hero.snap();
+    hero.where = where;
+    hero.day = current?.name === 'hero' ? 0 : time;
+    let subject = null;
     if (current?.name === 'day') {
-      const id = DAY_CAST[Math.min(DAY_CAST.length - 1, Math.floor(p * DAY_CAST.length))]!;
-      const ant = hero.villagers.find(v => v.def.id === id)!.ant;
-      if (hero.subject !== ant) hero.snap();
-      hero.subject = ant;
-      hero.day = time;
+      const id = DAY_CAST[Math.min(DAY_CAST.length - 1, Math.floor(d.p * DAY_CAST.length))]!;
+      subject = hero.villagers.find(v => v.def.id === id)!.ant;
       hud.dial(hero.time, id);
-    } else {
-      hero.subject = null;
-      hero.day = 0;
+    }
+    if (subject && subject !== hero.subject) hero.snap();
+    hero.subject = subject;
+    if (current?.name === 'night') {
+      const open = n.p >= MIDNIGHT;
+      const lit = open ? Math.min(7, Math.floor((n.p - MIDNIGHT) / LANTERN_STEP) + 1) : 0;
+      // The bell and each lantern sound as the scroll comes to them, not as it goes back.
+      if (open && !shop.open) sound.play('bell_toll', 0.8);
+      if (lit > shop.lit && shop.lit > 0) sound.play('ting', 0.35, 0.9 + lit * 0.05);
+      if (open !== shop.open) hud.night(open);
+      Object.assign(shop, { open, lit });
+      hero.stage(lit, open);
+    }
+    land.at(n.top < innerHeight / 2 ? 'grove' : 'square');
+    const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(time + 0.5))}`;
+    if (want !== bed) {
+      bed = want;
+      beds();
     }
     return time;
   };
