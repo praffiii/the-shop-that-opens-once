@@ -1,11 +1,12 @@
 // The page's world: the Market Square, alive, with Satria for the visitor to walk and villagers to talk to; and the
-// Banyan Grove at night, where Marlow's shop opens at midnight, its door lit and its seven lanterns lighting one by one.
+// Banyan Grove at night, where Marlow's shop opens at midnight, its door lit and its seven lanterns lighting one by one;
+// and at the end everyone in Bellwood gathered in the square at midnight.
 import * as THREE from 'three';
 import { Ant } from './world/ant';
 import { build, type Built } from './world/bake';
 import { json, pixels, type Cast, type Grades } from './world/data';
 import { apply, gradeColor, looks } from './world/grade';
-import { MAX_LAMPS, shared } from './world/pixel';
+import { MAX_FEET, MAX_LAMPS, shared } from './world/pixel';
 import { Post } from './world/post';
 import { STRETCH } from './world/space';
 import { Sun } from './world/sun';
@@ -23,6 +24,21 @@ const LEAD = 26, FOLLOW = 0.35;
 const SHOP = { x: 300, y: 212 };
 /** Where Marlow stands in his door, and where Satria waits before it. */
 const MARLOW = { x: 300, y: 258 }, VISITOR = { x: 300, y: 276 };
+/**
+ * Everyone the visitor meets by the fifth night, gathered before the square's fountain as for a photo, back row to
+ * front (art px rows): the grown-ups behind, the children in front with Satria and Marlow among them. Satria's late
+ * parents, Marlow's own name and the flashbacks' young faces stay out; they are the ending's.
+ */
+const GATHERED = [
+  { row: 672, ids: ['bram', 'arlo', 'neighbour_a', 'shopper', 'florist', 'farmhand', 'herder', 'fisher', 'salter', 'porter', 'neighbour_b', 'valdo'] },
+  { row: 696, ids: ['breadboy', 'mia', 'helen', 'mender', 'nora', 'theo', 'leo', 'sam', 'baker', 'gardener'] },
+  { row: 720, ids: ['gigi', 'kiko', 'pip', 'courier', 'marlow', 'kid', 'lulu', 'grandkid'] },
+];
+/** Where the gathering stands round (art px), how far apart, and who cheers and who waves. */
+const GATHER = { x: 640, y: 700, gap: 22 };
+/** How wide the gathering stands (art px), its longest row and a margin. */
+const CROWD = 290;
+const CHEER = new Set(['breadboy', 'gigi', 'kiko', 'pip', 'kid', 'lulu', 'grandkid']), WAVE = new Set(['courier', 'marlow']);
 /** How near (art px) Satria must stand to talk to someone. */
 export const REACH = 30;
 /** How far over the feet a head is, in art px, for the bubble over it. */
@@ -43,6 +59,9 @@ export class Hero {
   private grades!: ReturnType<typeof looks>;
   player!: Player;
   villagers: Villager[] = [];
+  /** Everyone gathered in the square, shown in its place of the wandering villagers while `gathered`. */
+  private crowd: Ant[] = [];
+  gathered = false;
   /** The time of day, 0 morning .. 3 night, easing toward day. */
   time = 0;
   day = 0;
@@ -104,14 +123,44 @@ export class Hero {
     this.player = new Player(courier!, this.walk);
     this.villagers = rest.map((a, i) => new Villager(SQUARE_MORNING[i]!, a, this.walk, i * 3 + 1));
     this.cam = { ...courier!.feet };
+    void this.gather(cast, place);
     this.last = { ...courier!.feet };
     this.resize();
   }
 
+  // The gathering loads after the rest, being shown only at the page's end.
+  private async gather(cast: Cast, square: Built) {
+    const rows = await Promise.all(GATHERED.map(r => Promise.all(r.ids.map(id => Ant.make(id, cast, ART, square.relief)))));
+    rows.forEach((ants, r) => {
+      const { row, ids } = GATHERED[r]!;
+      ants.forEach((a, i) => {
+        a.place(GATHER.x + (i - (ids.length - 1) / 2) * GATHER.gap, row);
+        a.faceTo(GATHER.x);
+        const id = ids[i]!;
+        if (CHEER.has(id)) a.setPose('cheer');
+        else if (WAVE.has(id)) a.setPose('wave');
+        else a.turn('front');
+        // Each a little way into its pose, so they do not all move as one.
+        a.update(((i * 7 + r * 3) % 10) / 10);
+        a.mesh.visible = false;
+        square.group.add(a.mesh);
+        this.sun.add([[a.mesh, a.caster]]);
+      });
+    });
+    this.crowd = rows.flat();
+  }
+
   resize() {
-    this.view.zoom = Math.min(Math.max(this.view.canvas.clientHeight / 330, 2), 4);
+    this.fit();
     this.view.resize();
     this.post.resize(this.view.renderer);
+  }
+
+  // Each art pixel some CSS px across, by the window's height; the gathering is wider than a phone's window at that, so
+  // there the camera stands back, by whole pixels, to take everyone in.
+  private fit() {
+    const base = Math.min(Math.max(this.view.canvas.clientHeight / 330, 2), 4);
+    this.view.zoom = this.gathered ? Math.min(base, Math.max(1, Math.floor(this.view.canvas.clientWidth / CROWD))) : base;
   }
 
   /** The villager Satria is near enough to talk to, the nearest. */
@@ -212,7 +261,7 @@ export class Hero {
     const who = this.subject ?? this.player.ant;
     // In the grove the camera holds on the shop, low enough in a short window to keep Satria in it.
     const below = VISITOR.y + 30 - this.view.canvas.clientHeight / this.view.zoom / 2;
-    const f = this.where === 'grove' ? { x: SHOP.x, y: Math.max(SHOP.y, below) + 16 } : who.feet;
+    const f = this.where === 'grove' ? { x: SHOP.x, y: Math.max(SHOP.y, below) + 16 } : this.gathered ? GATHER : who.feet;
     if (who !== this.followed) (this.followed = who), (this.last = { ...f });
     const step = { x: f.x - this.last.x, y: f.y - this.last.y };
     this.last = { ...f };
@@ -253,7 +302,15 @@ export class Hero {
     for (const v of this.villagers) v.update(dt);
     this.marlow.update(dt);
     this.visitor.update(dt);
+    const crowd = this.gathered && this.crowd.length > 0;
+    for (const a of this.crowd) {
+      a.mesh.visible = crowd;
+      if (crowd) a.update(dt);
+    }
+    this.player.ant.mesh.visible = !crowd;
+    for (const v of this.villagers) v.ant.mesh.visible = !crowd;
     this.feet();
+    this.fit();
     this.follow(dt);
     this.time += (this.day - this.time) * Math.min(1, dt * 3);
     const dir = apply(this.grades, this.time);
@@ -272,7 +329,10 @@ export class Hero {
 
   // Each ant casts a small dark spot on what it stands on.
   private feet() {
-    const all = this.where === 'grove' ? [this.marlow, this.visitor].filter(a => a.mesh.visible) : [this.player.ant, ...this.villagers.map(v => v.ant)];
+    const all =
+      this.where === 'grove' ? [this.marlow, this.visitor].filter(a => a.mesh.visible)
+      : this.gathered && this.crowd.length ? this.crowd.slice(0, MAX_FEET)
+      : [this.player.ant, ...this.villagers.map(v => v.ant)];
     shared.uFeetCount.value = all.length;
     all.forEach((a, i) => {
       const h = this.place.relief.under(a.feet.x, a.feet.y);

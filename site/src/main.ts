@@ -236,9 +236,11 @@ async function start() {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
-    const where = current && ['night', 'bag', 'mend', 'door'].includes(current.name) ? 'grove' : 'square';
-    if (where !== hero.where) hero.snap();
-    hero.where = where;
+    // The door's window is the square at midnight with everyone gathered in it; the night's three, the grove.
+    const where = current && ['night', 'bag', 'mend'].includes(current.name) ? 'grove' : 'square';
+    const gathered = current?.name === 'door';
+    if (where !== hero.where || gathered !== hero.gathered) hero.snap();
+    Object.assign(hero, { where, gathered });
     hero.day = current?.name === 'hero' ? 0 : time;
     let subject = null;
     if (current?.name === 'day') {

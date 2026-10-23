@@ -10,6 +10,8 @@ import * as THREE from 'three';
 import { STRETCH } from './space';
 
 export const MAX_LAMPS = 32;
+/** How many ants cast the small dark spot under their feet. */
+export const MAX_FEET = 32;
 
 /** The uniforms every piece of art shares: one object, so setting a value sets it everywhere. */
 export const shared = {
@@ -30,7 +32,7 @@ export const shared = {
   uSunMatrix: { value: new THREE.Matrix4() },
   uSunOn: { value: 0 },
   // Where the ants stand (place space), each casting a small dark spot, and how many there are.
-  uFeet: { value: Array.from({ length: 16 }, () => new THREE.Vector4()) },
+  uFeet: { value: Array.from({ length: MAX_FEET }, () => new THREE.Vector4()) },
   uFeetCount: { value: 0 },
 };
 
@@ -70,7 +72,7 @@ const fragment = /* glsl */ `
   uniform sampler2D uSunMap;
   uniform mat4 uSunMatrix;
   uniform float uSunOn;
-  uniform vec4 uFeet[16];
+  uniform vec4 uFeet[${MAX_FEET}];
   uniform float uFeetCount;
   uniform vec3 uSunDir;
   uniform mat4 modelMatrix;
@@ -144,7 +146,7 @@ const fragment = /* glsl */ `
       float above = texture2D(map, (vUv - vec2(0.0, 1.0)) / atlas).a;
       s = mix(s, uRim.rgb, uRim.a * step(above, 0.5));
     } else {
-      for (int k = 0; k < 16; k++) {
+      for (int k = 0; k < ${MAX_FEET}; k++) {
         if (float(k) >= uFeetCount) break;
         vec3 d = (art - uFeet[k].xyz) * uStretch / uFeet[k].w;
         vec2 e = d.xz * vec2(1.0, 2.6);
