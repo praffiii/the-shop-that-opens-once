@@ -21,6 +21,8 @@ const DUSK = 2;
  * then the lanterns light one at each step after it.
  */
 const NIGHTFALL = 0.3, MIDNIGHT = 0.38, LANTERN_STEP = 0.05;
+/** How long the hero's Download takes to glide down to the shop's door (ms). */
+const GLIDE = 1800;
 /** The music and ambience for each time of day (as the game's), and for the shop in the grove. */
 const BEDS: Record<string, Record<string, number>> = {
   0: { music_dawn: 0.35, amb_morning: 0.5 },
@@ -204,6 +206,26 @@ async function start() {
     return { top: r.top, p: clamp01(-r.top / Math.max(1, r.height - innerHeight)) };
   };
   const shop = { open: false, lit: 0 };
+  // The hero's Download glides down the page to the shop's door, the day running by on the way to midnight; a wheel,
+  // a touch or a key takes the scroll back. With reduced motion it is the link's own jump.
+  let gliding = false;
+  $('.hero .go').addEventListener('click', e => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    e.preventDefault();
+    const from = scrollY, to = $('#download').getBoundingClientRect().top + scrollY, start = performance.now();
+    const stop = () => (gliding = false);
+    for (const type of ['wheel', 'touchstart', 'keydown'] as const) addEventListener(type, stop, { once: true, passive: true });
+    gliding = true;
+    const step = (ms: number) => {
+      if (!gliding) return;
+      const k = Math.min(1, (ms - start) / GLIDE), ease = k < 0.5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2;
+      scrollTo(0, from + (to - from) * ease);
+      if (k < 1) return requestAnimationFrame(step);
+      gliding = false;
+      $<HTMLAnchorElement>('.door .get').focus({ preventScroll: true });
+    };
+    requestAnimationFrame(step);
+  });
   const direct = () => {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
@@ -224,8 +246,9 @@ async function start() {
       const open = n.p >= MIDNIGHT;
       const lit = open ? Math.min(7, Math.floor((n.p - MIDNIGHT) / LANTERN_STEP) + 1) : 0;
       // The bell and each lantern sound as the scroll comes to them, not as it goes back.
-      if (open && !shop.open) sound.play('bell_toll', 0.8);
-      if (lit > shop.lit && shop.lit > 0) sound.play('ting', 0.35, 0.9 + lit * 0.05);
+      // (Not while gliding past on the way to the door, which would ring them all at once.)
+      if (open && !shop.open && !gliding) sound.play('bell_toll', 0.8);
+      if (lit > shop.lit && shop.lit > 0 && !gliding) sound.play('ting', 0.35, 0.9 + lit * 0.05);
       if (open !== shop.open) hud.night(open);
       Object.assign(shop, { open, lit });
       hero.stage(lit, open);

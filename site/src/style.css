@@ -289,7 +289,7 @@ main {
   }
 }
 
-/* Download: the visitor's computer as two tabs (boat.dev's install tabs), and the wooden sign. */
+/* Download: the visitor's computer as two tabs (boat.dev's install tabs), and the wooden signs. */
 .get-row {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -309,9 +309,9 @@ main {
   color: var(--ink);
 }
 
-.get-row .get {
-  grid-column: 1 / -1;
-  justify-self: start;
+/* The hero's Download leads to the shop's door, where the visitor picks macOS or Windows. */
+.hero .go {
+  width: fit-content;
 }
 
 .source {
@@ -325,6 +325,7 @@ main {
 }
 
 .get,
+.go,
 .play {
   position: relative;
   display: flex;
@@ -338,12 +339,15 @@ main {
 
 .get:hover,
 .get:focus-visible,
+.go:hover,
+.go:focus-visible,
 .play:hover,
 .play:focus-visible {
   transform: translateY(var(--u));
 }
 
 .get:active,
+.go:active,
 .play:active {
   transform: translateY(calc(2 * var(--u)));
 }
@@ -995,31 +999,6 @@ main {
   font: 400 0.9375rem / 1.4 var(--read);
   -webkit-font-smoothing: antialiased;
   opacity: 0.8;
-}
-
-/* The last screen: the shop's door and its Download, and under them the page's last words, clear of the land. */
-.door {
-  grid-template-rows: minmax(0, 1fr) auto;
-  padding-bottom: 10rem;
-}
-
-.foot {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem 2rem;
-  font: 400 0.875rem / 1.5 var(--read);
-  -webkit-font-smoothing: antialiased;
-}
-
-.foot p {
-  margin: 0;
-}
-
-.foot a {
-  color: inherit;
-  text-underline-offset: 0.2em;
 }
 
 /* Tall enough for the card and its lantern branch at the page's 2x. */
