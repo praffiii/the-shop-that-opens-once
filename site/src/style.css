@@ -472,7 +472,8 @@ main {
 
 /* A section's words and window hold still while the scroll runs through it. */
 .day,
-.night {
+.night,
+.nights {
   height: 300vh;
 }
 
@@ -968,6 +969,209 @@ main {
   translate: 0 var(--u);
 }
 
+/* Tall enough for the card and its lantern branch at the page's 2x. */
+[data-window='post'] {
+  aspect-ratio: 6 / 5;
+}
+
+/* The nights in the copy, the one on the desk marked as the HUD marks the phase. */
+.nights-list {
+  display: grid;
+  gap: 0.375rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font: 400 1rem / 1.4 var(--read);
+}
+
+.nights-list b {
+  display: inline-block;
+  min-width: 4.5rem;
+  font: 400 calc(11 * var(--u)) / 1 'Pixelify Sans', sans-serif;
+}
+
+.nights-list li {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.nights-list li[aria-current] {
+  opacity: 1;
+}
+
+.nights-list .sealed span {
+  font-style: italic;
+}
+
+/* The postcards on the game's cream under Marlow's lantern branch, at the window's own scale --k (the branch twice it). */
+.post {
+  --u: calc(var(--k, 2) * 1px);
+  --b: calc(var(--k, 2) * 2px);
+  position: absolute;
+  inset: calc(5px * var(--s));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  justify-items: center;
+  overflow: hidden;
+  background: #fff1d2;
+  color: var(--ink);
+  font: 400 calc(11 * var(--u)) / calc(14 * var(--u)) 'Pixelify Sans', sans-serif;
+  text-shadow: none;
+}
+
+.post-branch {
+  position: relative;
+  width: calc(72 * var(--b));
+  height: calc(16 * var(--b));
+  margin-top: calc(8 * var(--u));
+}
+
+.post-bough,
+.post-lantern,
+.post-smoke,
+.post-card,
+.post-stamp,
+.post-mark {
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.post-bough {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(10 * var(--b));
+  background-image: url('/art/ui/branch.png');
+  background-size: 100% 100%;
+}
+
+/* Each lantern hangs off the bough as on the HUD (Dial): lit, flickering, or out. */
+.post-lantern {
+  position: absolute;
+  left: calc((6 + var(--i) * 9) * var(--b));
+  top: calc(6 * var(--b));
+  width: calc(7 * var(--b));
+  height: calc(10 * var(--b));
+  background-image: url('/art/ui/hud_lantern.png');
+  background-position: calc(var(--f, 0) * -7 * var(--b)) 0;
+  background-size: calc(21 * var(--b)) 100%;
+  cursor: pointer;
+}
+
+.post-smoke {
+  position: absolute;
+  left: calc((5 + var(--i, 0) * 9) * var(--b));
+  top: calc(-3 * var(--b));
+  width: calc(9 * var(--b));
+  height: calc(12 * var(--b));
+  background-image: url('/art/ui/hud_smoke.png');
+  background-position: calc(var(--f, 0) * -9 * var(--b)) 0;
+  background-size: calc(36 * var(--b)) 100%;
+  pointer-events: none;
+}
+
+.post-burning {
+  margin: calc(4 * var(--u)) 0 0;
+  color: #7a452e;
+}
+
+.post-desk {
+  position: relative;
+  justify-self: stretch;
+}
+
+.post-card {
+  position: absolute;
+  left: calc(50% - 170 * var(--u));
+  top: calc(50% - 98 * var(--u) + var(--y, 0) * var(--u));
+  width: calc(339 * var(--u));
+  height: calc(195 * var(--u));
+  background-image: url('/art/ui/postcard.png');
+  background-size: 100% 100%;
+}
+
+/* The message side, left of the dotted line (Card: Left 22, Column 166). */
+.post-message {
+  position: absolute;
+  left: calc(22 * var(--u));
+  top: calc(26 * var(--u));
+  width: calc(166 * var(--u));
+  display: grid;
+  justify-items: start;
+}
+
+.post-kicker,
+.post-line {
+  color: #7a452e;
+}
+
+.post-title {
+  font-size: calc(22 * var(--u));
+  line-height: calc(26 * var(--u));
+}
+
+.post-rule {
+  width: calc(40 * var(--u));
+  height: var(--u);
+  margin-top: calc(6 * var(--u));
+  background: #7a452e;
+}
+
+.post-line {
+  margin-top: calc(9 * var(--u));
+}
+
+.post-to {
+  position: absolute;
+  left: calc(210 * var(--u));
+  top: calc(118 * var(--u));
+}
+
+.post-town {
+  left: calc(224 * var(--u));
+  top: calc(136 * var(--u));
+}
+
+.post-stamp {
+  position: absolute;
+  left: calc(275 * var(--u));
+  top: calc(22 * var(--u));
+  width: calc(41 * var(--u));
+  height: calc(49 * var(--u));
+  background-image: url('/art/ui/stamp.png');
+  background-size: 100% 100%;
+}
+
+.post-keepsake {
+  position: absolute;
+  left: calc(var(--x, 0) * var(--u));
+  top: calc(var(--y, 0) * var(--u));
+  width: calc(var(--w, 0) * var(--u));
+  height: calc(var(--h, 0) * var(--u));
+}
+
+.post-mark {
+  position: absolute;
+  left: calc(235 * var(--u));
+  top: calc(58 * var(--u));
+  width: calc(75 * var(--u));
+  height: calc(43 * var(--u));
+  background-image: url('/art/ui/postmark.png');
+  background-size: 100% 100%;
+}
+
+.post-mark[hidden] {
+  display: none;
+}
+
+.post-day {
+  position: absolute;
+  left: calc(21 * var(--u));
+  top: calc(18 * var(--u));
+  translate: -50% 0;
+  color: #5060b0;
+  white-space: nowrap;
+}
+
 /* The fail lines, said inside the window rather than along the foot of the screen. */
 .window > .talk {
   --s: var(--k, 2);
@@ -1103,6 +1307,17 @@ main {
 
   [data-window='mend'] {
     aspect-ratio: 1 / 1;
+  }
+
+  /* The postcard needs the phone's full width to stand at one pixel or more; the list is the card's to tell. */
+  .pin [data-window='post'] {
+    width: calc(100% + 2rem);
+    margin-inline: -1rem;
+    aspect-ratio: 5 / 4;
+  }
+
+  .nights-list {
+    display: none;
   }
 
   /* A narrower bench, its words wrapping under the play area, so it can stand at more than one device pixel. */

@@ -5,6 +5,7 @@ import { Bag } from './ui/bag';
 import { DOING, Hud } from './ui/hud';
 import { lang } from './ui/lang';
 import { Mend } from './ui/mend';
+import { Post } from './ui/post';
 import { sound } from './ui/sound';
 import { Talk } from './ui/talk';
 
@@ -64,7 +65,8 @@ function sky(t: number) {
 }
 
 async function start() {
-  const wins: Win[] = [...document.querySelectorAll<HTMLElement>('.window')].map(el => ({
+  // The windows the world shows in; the post's is the game's cream, with no world behind it.
+  const wins: Win[] = [...document.querySelectorAll<HTMLElement>('.window:has(.screen)')].map(el => ({
     name: el.dataset.window!,
     el,
     screen: $('.screen', el),
@@ -76,8 +78,10 @@ async function start() {
   const hero = new Hero(canvas, matchMedia('(max-width: 720px)').matches);
   const land = new Land(document.body);
   const mend = new Mend(wins.find(w => w.name === 'mend')!.el);
+  const postWin = $('[data-window=post]');
+  const post = new Post(postWin);
   await Promise.all([hero.load(), land.load(), lang.load(), mend.load()]);
-  const [day, night] = [$('.day'), $('.night')];
+  const [day, night, nights] = [$('.day'), $('.night'), $('.nights')];
   let scale = 2;
   const talk = new Talk(document.body, () => scale, () => ({ left: 0, width: innerWidth }));
   const hud = new Hud(hero, talk);
@@ -228,6 +232,9 @@ async function start() {
     }
     // After midnight the shop stays open behind what follows.
     if (current?.name === 'bag' || current?.name === 'mend') hero.stage(7, true);
+    // A postcard a night as the section scrolls by, the first as it comes in.
+    const v = through(nights);
+    post.show(v.top < innerHeight * 0.3 ? Math.min(6, Math.floor(v.p * 7)) : -1);
     land.at(n.top < innerHeight / 2 ? 'grove' : 'square');
     const want = hero.where === 'grove' ? 'shop' : `${Math.min(3, Math.floor(time + 0.5))}`;
     if (want !== bed) {
@@ -251,6 +258,8 @@ async function start() {
     hud.tick(dt);
     bag.tick(dt, current?.name === 'bag');
     mend.tick(dt, current?.name === 'mend');
+    const r = postWin.getBoundingClientRect();
+    post.tick(dt, r.bottom > 0 && r.top < innerHeight);
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
