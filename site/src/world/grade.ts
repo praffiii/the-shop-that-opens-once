@@ -53,7 +53,7 @@ export function looks(grades: Grades): Look[] {
 
 /** Sets the light to time t (0 morning .. 3 night). Returns the sun's direction. */
 export function apply(all: Look[], t: number) {
-  const i = Math.min(Math.floor(t), 2), k = Math.min(Math.max(t - i, 0), 1);
+  const i = Math.min(Math.max(Math.floor(t), 0), 2), k = Math.min(Math.max(t - i, 0), 1);
   const a = all[i]!, b = all[i + 1]!;
   const u = shared;
   u.uMul.value.lerpVectors(a.mul, b.mul, k);

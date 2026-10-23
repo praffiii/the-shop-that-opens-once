@@ -1,5 +1,6 @@
 import './style.css';
 import { Hero } from './hero';
+import { Land } from './land';
 import { DOING, Hud } from './ui/hud';
 import { lang } from './ui/lang';
 import { sound } from './ui/sound';
@@ -56,7 +57,8 @@ async function start() {
   const canvas = document.createElement('canvas');
   heroWin.screen.append(canvas);
   const hero = new Hero(canvas, matchMedia('(max-width: 720px)').matches);
-  await Promise.all([hero.load(), lang.load()]);
+  const land = new Land(document.body);
+  await Promise.all([hero.load(), land.load(), lang.load()]);
   const day = $('.day');
   let scale = 2;
   const talk = new Talk(document.body, () => scale, () => ({ left: 0, width: innerWidth }));
@@ -65,6 +67,7 @@ async function start() {
   let current: Win | null = heroWin;
   const resize = () => {
     hero.resize();
+    land.resize();
     scale = hud.scale();
   };
   resize();
@@ -179,15 +182,18 @@ async function start() {
       hero.subject = null;
       hero.day = 0;
     }
+    return time;
   };
 
   let last = performance.now();
   const loop = (ms: number) => {
-    const dt = Math.min((ms - last) / 1000, 0.1), t = ms / 1000;
+    // The first frame's stamp can come before the start, and a step back in time would ease the light past morning.
+    const dt = Math.min(Math.max((ms - last) / 1000, 0), 0.1), t = ms / 1000;
     last = ms;
     const want = choose();
     if (want !== current) move(want, t);
-    direct();
+    const time = direct();
+    if (!hud.playing) land.frame(t, time);
     if (current) hero.frame(dt, t);
     talk.tick(dt);
     hud.tick(dt);
@@ -196,7 +202,7 @@ async function start() {
   requestAnimationFrame(loop);
   hud.dial(0, DAY_CAST[0]!);
   document.body.classList.add('ready');
-  Object.assign(window, { hero });
+  Object.assign(window, { hero, land });
 }
 
 start();
