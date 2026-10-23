@@ -924,6 +924,9 @@ main {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
+  /* A drag across turns a wheel; up and down still scroll the page. */
+  touch-action: pan-y;
+  cursor: grab;
 }
 
 .mend-rate {

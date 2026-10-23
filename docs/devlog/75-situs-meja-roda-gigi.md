@@ -56,6 +56,12 @@ Port dari `Minigames/ClockworkAlign.cs` di atas papan permainannya (`UI/Board.cs
   menunggunya, jadi di saat lain spasi tetap menggulir halaman.
 - **Sentuh:** setiap tombol di baris petunjuk juga bisa diketuk. Tombol itu turun saat ditekan, dari keyboard maupun
   ketukan.
+- **Tetikus dan jari:**
+  - tekan sebuah roda untuk memegangnya;
+  - seret ke samping untuk memutarnya, satu langkah tiap 8 px seni;
+  - setelah ketiganya terpasang, ketuk sekali untuk menjalankan jam.
+
+  Seret ke atas atau ke bawah tetap menggulir halaman di ponsel.
 
 ### Skala piksel
 
@@ -91,7 +97,8 @@ Sekarang `.talk` punya ukuran hurufnya sendiri.
   - 1440x900:
     - gagal A dengan kalimat Mender;
     - memasang ketiga roda, lalu menangkap 3,0 Hz sampai berhasil;
-    - lebar papan tetap.
+    - lebar papan tetap;
+    - ketiga roda dipasang dengan menyeret tetikus.
   - 390x844 (1x dan 3x): gagal lewat ketukan tombol, dan kotak bicara muat di jendela.
   - Bahasa Indonesia: judul dan petunjuk berganti.
   - Console tanpa galat atau peringatan.

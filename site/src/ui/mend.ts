@@ -24,6 +24,8 @@ const AREA = { w: 200, h: 92 }, METER = 74, NOTCH = 3, GAUGE = 12, RIM = 2;
 const FRAMES: Record<string, number> = { gear_great: 12, gear_third: 12, gear_escape: 12, pendulum: 7, notch: 2, pip: 2 };
 const PIECES = [...Object.keys(FRAMES), 'baize', 'bracket', 'gauge', 'glow', 'needle'];
 const SHAKE = 0.3, SPARK = 0.35, PULSE = 5;
+/** How far a drag goes (art px) to turn a wheel one step. */
+const DRAG = 8;
 /** How far the title plate stands over the bench's top edge (Board); the bench's padding is the page's CSS. */
 const OVER = 9;
 
@@ -105,6 +107,7 @@ export class Mend {
     this.rate = el('span', 'mend-rate', area);
     this.rows = el('div', 'mend-rows', this.bench);
     this.talk = new Talk(win, () => this.unit, () => ({ left: 0, width: win.clientWidth }));
+    this.hands();
     win.style.setProperty('--k', `${this.unit}`);
     new ResizeObserver(() => this.fit()).observe(root);
     lang.listeners.add(() => this.paint());
@@ -114,6 +117,41 @@ export class Mend {
     const all = await Promise.all(PIECES.map(image));
     this.art = Object.fromEntries(PIECES.map((p, i) => [p, all[i]!]));
     this.reset();
+  }
+
+  // A mouse or a finger: press a wheel to take it in hand and drag across to turn it a step at a time; once all three
+  // are seated, a tap sets it going.
+  private hands() {
+    let drag: { x: number; wheel: number } | null = null;
+    const at = (e: PointerEvent) => {
+      const r = this.screen.getBoundingClientRect();
+      return { x: ((e.clientX - r.left) * AREA.w) / r.width, y: ((e.clientY - r.top) * AREA.h) / r.height };
+    };
+    this.screen.addEventListener('pointerdown', e => {
+      if (this.talk.open) return this.talk.press();
+      if (this.mode !== 'play') return;
+      if (this.seated) return this.press('go');
+      const p = at(e);
+      const wheel = WHEELS.findIndex(w => Math.hypot(p.x - w.x, p.y - w.y) <= w.reach + 4);
+      if (wheel < 0) return;
+      if (wheel !== this.picked) {
+        this.picked = wheel;
+        sound.play('pop');
+      }
+      drag = { x: p.x, wheel };
+      this.screen.setPointerCapture(e.pointerId);
+    });
+    this.screen.addEventListener('pointermove', e => {
+      const x = drag && at(e).x;
+      // A step for each length dragged, till the wheel seats or slips.
+      while (drag && x !== null && Math.abs(x - drag.x) >= DRAG) {
+        const right = x > drag.x;
+        drag.x += right ? DRAG : -DRAG;
+        this.press(right ? 'right' : 'left');
+        if (this.mode !== 'play' || this.turned[drag.wheel] === 0) drag = null;
+      }
+    });
+    for (const type of ['pointerup', 'pointercancel'] as const) this.screen.addEventListener(type, () => (drag = null));
   }
 
   /** A key while the bench is in view: true when the bench took it, so the page doesn't scroll. */
