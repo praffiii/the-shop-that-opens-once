@@ -969,6 +969,59 @@ main {
   translate: 0 var(--u);
 }
 
+/* The Download at the shop's door stands in the light from it, as the hero's Play stands in the square. */
+.door .get {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(16 * var(--u));
+  translate: -50% 0;
+}
+
+.facts {
+  margin-bottom: 2rem;
+}
+
+/* On a phone there is nothing to open yet: the note goes. */
+.first-open:empty {
+  display: none;
+}
+
+.first-open {
+  grid-column: 1 / -1;
+  max-width: 34rem;
+  min-height: 2.8em;
+  margin: 0.5rem 0 0;
+  font: 400 0.9375rem / 1.4 var(--read);
+  -webkit-font-smoothing: antialiased;
+  opacity: 0.8;
+}
+
+/* The last screen: the shop's door and its Download, and under them the page's last words, clear of the land. */
+.door {
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding-bottom: 10rem;
+}
+
+.foot {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  font: 400 0.875rem / 1.5 var(--read);
+  -webkit-font-smoothing: antialiased;
+}
+
+.foot p {
+  margin: 0;
+}
+
+.foot a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
 /* Tall enough for the card and its lantern branch at the page's 2x. */
 [data-window='post'] {
   aspect-ratio: 6 / 5;

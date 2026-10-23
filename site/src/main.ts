@@ -208,7 +208,7 @@ async function start() {
     const d = through(day), n = through(night);
     const time = n.top <= 0 ? DUSK + clamp01(n.p / NIGHTFALL) : d.top > 0 ? 0 : d.p * DUSK;
     sky(time);
-    const where = current && ['night', 'bag', 'mend'].includes(current.name) ? 'grove' : 'square';
+    const where = current && ['night', 'bag', 'mend', 'door'].includes(current.name) ? 'grove' : 'square';
     if (where !== hero.where) hero.snap();
     hero.where = where;
     hero.day = current?.name === 'hero' ? 0 : time;
@@ -231,7 +231,7 @@ async function start() {
       hero.stage(lit, open);
     }
     // After midnight the shop stays open behind what follows.
-    if (current?.name === 'bag' || current?.name === 'mend') hero.stage(7, true);
+    if (current && ['bag', 'mend', 'door'].includes(current.name)) hero.stage(7, true);
     // A postcard a night as the section scrolls by, the first as it comes in.
     const v = through(nights);
     post.show(v.top < innerHeight * 0.3 ? Math.min(6, Math.floor(v.p * 7)) : -1);

@@ -23,6 +23,15 @@ const SAY = {
   mac: { en: 'Download for macOS', id: 'Unduh untuk macOS' },
   win: { en: 'Download for Windows', id: 'Unduh untuk Windows' },
   any: { en: 'Download', id: 'Unduh' },
+  phone: { en: 'Play it on your Mac or PC', id: 'Mainkan di Mac atau PC-mu' },
+  firstMac: {
+    en: "The first time, right-click the app, choose Open, then Open again: it isn't signed by Apple.",
+    id: 'Pertama kali, klik kanan aplikasinya, pilih Open, lalu Open sekali lagi: aplikasinya belum ditandatangani Apple.',
+  },
+  firstWin: {
+    en: "If SmartScreen warns about it, choose More info, then Run anyway: it isn't signed.",
+    id: 'Kalau SmartScreen memperingatkan, pilih More info, lalu Run anyway: aplikasinya belum ditandatangani.',
+  },
   grove: { en: 'The Banyan Grove, night', id: 'Hutan Beringin, malam' },
   midnight: { en: 'The Banyan Grove, midnight', id: 'Hutan Beringin, tengah malam' },
 } satisfies Record<string, Words>;
@@ -43,10 +52,12 @@ export const DOING: Record<string, Words> = {
 
 const $ = <T extends HTMLElement>(q: string) => document.querySelector<T>(q)!;
 
+const PHONE = /iPhone|iPad|Android/i.test(navigator.userAgent);
+
 /** The visitor's computer, for the right download; a phone or anything else gets the releases page. */
 function guess(): Os | null {
   const ua = navigator.userAgent;
-  if (/iPhone|iPad|Android/i.test(ua)) return null;
+  if (PHONE) return null;
   if (/Mac/i.test(ua)) return 'mac';
   if (/Win/i.test(ua)) return 'win';
   return null;
@@ -56,9 +67,11 @@ export class Hud {
   private readonly hint = $('.hint');
   private readonly say = $('.hint-say');
   private readonly prompt = $('.prompt');
-  private readonly lantern = $('.lantern');
+  private readonly lanterns = [...document.querySelectorAll('.lantern')];
   private readonly mute = $<HTMLButtonElement>('.mute');
-  private readonly get = $<HTMLAnchorElement>('.get');
+  /** Every Download on the page (the hero's, and the one at the shop's door), and what to know the first time. */
+  private readonly gets = [...document.querySelectorAll<HTMLAnchorElement>('.get')];
+  private readonly first = $('.first-open');
   private readonly tabs = [...document.querySelectorAll<HTMLButtonElement>('.tab')];
   private readonly clock = $('.clock');
   private readonly phase = $('.phase');
@@ -92,7 +105,7 @@ export class Hud {
   private pick(os: Os | null) {
     this.os = os;
     for (const tab of this.tabs) tab.setAttribute('aria-selected', `${tab.dataset.os === os}`);
-    this.get.href = os ? `${RELEASES}/download/${ZIPS[os]}` : RELEASES;
+    for (const get of this.gets) get.href = os ? `${RELEASES}/download/${ZIPS[os]}` : RELEASES;
     this.words();
   }
 
@@ -148,8 +161,8 @@ export class Hud {
       this.hint.classList.toggle('near', !!near);
       this.words();
     }
-    // Marlow's lantern on the sign flickers now and then.
-    this.lantern.classList.toggle('flicker', Math.floor(this.age * 5) % 7 === 0);
+    // Marlow's lantern on each sign flickers now and then.
+    this.lanterns.forEach((l, i) => l.classList.toggle('flicker', Math.floor(this.age * 5 + i * 2.3) % 7 === 0));
   }
 
   private words() {
@@ -159,7 +172,9 @@ export class Hud {
     this.say.textContent = line[l].replace('{0}', name);
     this.mute.setAttribute('aria-pressed', `${sound.on}`);
     this.mute.setAttribute('aria-label', (sound.on ? SAY.soundOff : SAY.soundOn)[l]);
-    $('.get-label').textContent = (this.os ? SAY[this.os] : SAY.any)[l];
+    for (const label of document.querySelectorAll('.get-label'))
+      label.textContent = (this.os ? SAY[this.os] : PHONE ? SAY.phone : SAY.any)[l];
+    this.first.textContent = this.os ? SAY[this.os === 'mac' ? 'firstMac' : 'firstWin'][l] : '';
     const phase = PHASES[Number(this.phase.dataset.phase ?? 0)]!;
     this.phase.textContent = phase[l];
     this.plaque.textContent = l === 'id' ? `Alun-alun, ${phase.id.toLowerCase()}` : `The Market Square, ${phase.en.toLowerCase()}`;
