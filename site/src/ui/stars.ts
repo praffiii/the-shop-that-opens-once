@@ -1,5 +1,5 @@
-// Star on GitHub, as a piece of the game's kit: a small wooden sign with the GitHub mark in pixels, and a slot
-// holding a pixel star and the repository's stars. When it first comes into view the star fills gold with a pop and
+// Star on GitHub, as a piece of the game's kit: a small wooden sign with the GitHub mark in pixels, a pixel star and
+// the repository's stars. When it first comes into view the star fills gold with a pop and
 // a burst of sparks (the strike's sparks, from the game's Meter) and the count runs up to the stars it has; a hover
 // or a focus throws the sparks again. The count only shows once there is a star to count.
 import { sound } from './sound';
@@ -20,12 +20,13 @@ const STAR = [
   '.##.....##.',
 ];
 const INK = '#2a1b22', GOLD = '#ffc35a', SHINE = '#fff7c8';
-/** GitHub's mark (Octicons' mark-github, 16 px), drawn into the page at its own 16 px and kept to whole pixels. */
+/** GitHub's mark (Octicons' mark-github, drawn on 16 px), drawn into the page at 12 px and kept to whole pixels. */
 const MARK =
   'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z';
+const MARK_PX = 12;
 /** How long the count runs up, the sparks fly, and the least time between two bursts (s). */
 const COUNT = 0.9, SPARK = 0.6, AGAIN = 0.6;
-/** The sparks' throw and fall (art px per second), harder than the Meter's so they clear the cream slot. */
+/** The sparks' throw and fall (art px per second), harder than the Meter's so they clear the sign. */
 const THROW = { x: 60, up: 60, more: 50 }, FALL = 220;
 
 function star(filled: boolean) {
@@ -36,13 +37,14 @@ function star(filled: boolean) {
   return `<svg viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true">${rects.join('')}</svg>`;
 }
 
-// The mark at 16 px in the paper colour, each pixel either in or out, as the art is.
+// The mark at 12 px in the paper colour, each pixel either in or out, as the art is.
 function mark() {
-  const c = Object.assign(document.createElement('canvas'), { width: 16, height: 16 });
+  const c = Object.assign(document.createElement('canvas'), { width: MARK_PX, height: MARK_PX });
   const g = c.getContext('2d')!;
   g.fillStyle = '#fffaf0';
+  g.scale(MARK_PX / 16, MARK_PX / 16);
   g.fill(new Path2D(MARK));
-  const img = g.getImageData(0, 0, 16, 16);
+  const img = g.getImageData(0, 0, MARK_PX, MARK_PX);
   for (let i = 3; i < img.data.length; i += 4) img.data[i] = img.data[i]! >= 128 ? 255 : 0;
   g.putImageData(img, 0, 0);
   return c.toDataURL();

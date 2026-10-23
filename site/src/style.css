@@ -44,6 +44,12 @@
 
 html {
   background: var(--sky-bottom);
+  /* The game's pixel cursor, and its hand over what can be used (cursor.ts). */
+  cursor: var(--cursor, auto);
+}
+
+a {
+  cursor: var(--hand, pointer);
 }
 
 body {
@@ -77,7 +83,7 @@ button {
   background: none;
   border: 0;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--hand, pointer);
 }
 
 :focus-visible {
@@ -304,7 +310,7 @@ main {
 
 .tab {
   position: relative;
-  height: calc(14 * var(--u));
+  height: calc(16 * var(--u));
   padding: 0 calc(6 * var(--u)) var(--u);
   color: var(--ink);
 }
@@ -314,14 +320,16 @@ main {
   width: fit-content;
 }
 
-/* Star on GitHub, a small wooden sign: the mark, the words, and a slot with the star and its count (stars.ts). */
+/* Star on GitHub, a small wooden sign as tall as the tabs beside it: the mark, the words, the star and its count
+   (stars.ts). */
 .stars {
   position: relative;
   justify-self: end;
   display: flex;
   align-items: center;
-  gap: calc(5 * var(--u));
-  padding: calc(4 * var(--u)) calc(4 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u));
+  gap: calc(4 * var(--u));
+  height: calc(16 * var(--u));
+  padding: 0 calc(6 * var(--u)) var(--u) calc(5 * var(--u));
   color: var(--paper);
   text-decoration: none;
   white-space: nowrap;
@@ -337,18 +345,8 @@ main {
 }
 
 .stars-mark {
-  width: calc(16 * var(--u));
-  height: calc(16 * var(--u));
-}
-
-.stars-slot {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: calc(2 * var(--u));
-  height: calc(17 * var(--u));
-  padding: 0 calc(4 * var(--u)) var(--u);
-  color: var(--ink);
+  width: calc(12 * var(--u));
+  height: calc(12 * var(--u));
 }
 
 .stars-star {
@@ -458,10 +456,12 @@ main {
   display: block;
   width: 100%;
   height: 100%;
+  image-rendering: pixelated;
 }
 
 .still {
   display: none;
+  image-rendering: pixelated;
 }
 
 .window.away .still {
@@ -684,7 +684,7 @@ main {
   --k: calc(var(--s) + 1);
   height: calc(48px * var(--k));
   width: auto;
-  cursor: pointer;
+  cursor: var(--hand, pointer);
   image-rendering: pixelated;
 }
 
@@ -992,7 +992,7 @@ main {
   image-rendering: pixelated;
   /* A drag across turns a wheel; up and down still scroll the page. */
   touch-action: pan-y;
-  cursor: grab;
+  cursor: var(--hand, grab);
 }
 
 .mend-rate {
@@ -1147,7 +1147,7 @@ main {
   background-image: url('/art/ui/hud_lantern.png');
   background-position: calc(var(--f, 0) * -7 * var(--b)) 0;
   background-size: calc(21 * var(--b)) 100%;
-  cursor: pointer;
+  cursor: var(--hand, pointer);
 }
 
 .post-smoke {

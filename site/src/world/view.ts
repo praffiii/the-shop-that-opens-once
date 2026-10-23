@@ -23,7 +23,9 @@ export class View {
 
   resize() {
     const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    // Each art pixel already spans whole CSS pixels, so a whole-number screen draws the world at CSS size and scales
+    // it up by nearest pixel: a quarter of the work on a 2x screen, the same picture. A fractional one draws at its own.
+    this.renderer.setPixelRatio(Number.isInteger(devicePixelRatio) ? 1 : Math.min(devicePixelRatio, 2));
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();

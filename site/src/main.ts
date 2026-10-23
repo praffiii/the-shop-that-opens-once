@@ -7,6 +7,7 @@ import { lang } from './ui/lang';
 import { Mend } from './ui/mend';
 import { Post } from './ui/post';
 import { Stars } from './ui/stars';
+import { cursors } from './ui/cursor';
 import { sound } from './ui/sound';
 import { Talk } from './ui/talk';
 
@@ -24,6 +25,8 @@ const DUSK = 2;
 const NIGHTFALL = 0.3, MIDNIGHT = 0.38, LANTERN_STEP = 0.05;
 /** How long the hero's Download takes to glide down to the shop's door (ms). */
 const GLIDE = 1800;
+/** The least time between two frames of the page (ms): every frame at 60 Hz, every other at 120. */
+const MIN_FRAME = 12;
 /** The music and ambience for each time of day (as the game's), and for the shop in the grove. */
 const BEDS: Record<string, Record<string, number>> = {
   0: { music_dawn: 0.35, amb_morning: 0.5 },
@@ -84,6 +87,7 @@ async function start() {
   const postWin = $('[data-window=post]');
   const post = new Post(postWin);
   new Stars($<HTMLAnchorElement>('.stars'));
+  void cursors();
   await Promise.all([hero.load(), land.load(), lang.load(), mend.load()]);
   const [day, night, nights] = [$('.day'), $('.night'), $('.nights')];
   let scale = 2;
@@ -271,6 +275,9 @@ async function start() {
 
   let last = performance.now();
   const loop = (ms: number) => {
+    requestAnimationFrame(loop);
+    // At most about 60 frames a second, as the game runs: a 120 Hz screen would draw the world twice as often.
+    if (ms - last < MIN_FRAME) return;
     // The first frame's stamp can come before the start, and a step back in time would ease the light past morning.
     const dt = Math.min(Math.max((ms - last) / 1000, 0), 0.1), t = ms / 1000;
     last = ms;
@@ -285,7 +292,6 @@ async function start() {
     mend.tick(dt, current?.name === 'mend');
     const r = postWin.getBoundingClientRect();
     post.tick(dt, r.bottom > 0 && r.top < innerHeight);
-    requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
   hud.dial(0, DAY_CAST[0]!);
