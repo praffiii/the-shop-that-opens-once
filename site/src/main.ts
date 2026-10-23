@@ -6,6 +6,7 @@ import { DOING, Hud } from './ui/hud';
 import { lang } from './ui/lang';
 import { Mend } from './ui/mend';
 import { Post } from './ui/post';
+import { Stars } from './ui/stars';
 import { sound } from './ui/sound';
 import { Talk } from './ui/talk';
 
@@ -82,6 +83,7 @@ async function start() {
   const mend = new Mend(wins.find(w => w.name === 'mend')!.el);
   const postWin = $('[data-window=post]');
   const post = new Post(postWin);
+  new Stars($<HTMLAnchorElement>('.stars'));
   await Promise.all([hero.load(), land.load(), lang.load(), mend.load()]);
   const [day, night, nights] = [$('.day'), $('.night'), $('.nights')];
   let scale = 2;

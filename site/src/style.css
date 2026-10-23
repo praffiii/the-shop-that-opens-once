@@ -314,14 +314,75 @@ main {
   width: fit-content;
 }
 
-.source {
+/* Star on GitHub, a small wooden sign: the mark, the words, and a slot with the star and its count (stars.ts). */
+.stars {
+  position: relative;
   justify-self: end;
-  padding-bottom: var(--u);
-  color: inherit;
-  font: 500 1rem var(--read);
-  -webkit-font-smoothing: antialiased;
-  text-underline-offset: 0.2em;
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--u));
+  padding: calc(4 * var(--u)) calc(4 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u));
+  color: var(--paper);
+  text-decoration: none;
   white-space: nowrap;
+}
+
+.stars:hover,
+.stars:focus-visible {
+  transform: translateY(var(--u));
+}
+
+.stars:active {
+  transform: translateY(calc(2 * var(--u)));
+}
+
+.stars-mark {
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+}
+
+.stars-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--u));
+  height: calc(17 * var(--u));
+  padding: 0 calc(4 * var(--u)) var(--u);
+  color: var(--ink);
+}
+
+.stars-star {
+  position: relative;
+  width: calc(11 * var(--u));
+  height: calc(11 * var(--u));
+}
+
+.stars-star svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* It fills with a pop: up a size and back, in whole steps as the game's pieces pop. */
+.stars-star.pop svg {
+  animation: star-pop 0.3s steps(3) both;
+}
+
+@keyframes star-pop {
+  50% {
+    scale: 1.45;
+  }
+}
+
+.stars-spark {
+  position: absolute;
+  z-index: 1;
+  left: calc(4 * var(--u));
+  top: calc(4 * var(--u));
+  width: calc(3 * var(--u));
+  height: calc(3 * var(--u));
+  translate: calc(var(--x, 0) * var(--u)) calc(var(--y, 0) * var(--u));
+  pointer-events: none;
 }
 
 .get,
@@ -1411,8 +1472,8 @@ main {
     line-height: 14px;
   }
 
-  /* The source link under the sign, and the plaque centred so its name fits the narrow frame. */
-  .source {
+  /* Star on GitHub under the tabs, and the plaque centred so its name fits the narrow frame. */
+  .stars {
     grid-row: 3;
     grid-column: 1 / -1;
     justify-self: start;
